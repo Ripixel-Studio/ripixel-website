@@ -1,0 +1,1270 @@
+{
+  "schemaVersion": 1,
+  "slug": "evening-ride-to-the-reservoir-2026-10-15",
+  "exportedAt": "2026-10-19T00:06:40Z",
+  "category": "cardio-distance",
+  "activity": {
+    "showcaseId": "evening-ride-to-the-reservoir-2026-10-15",
+    "title": "Evening ride to the reservoir",
+    "description": "Out along the Trent, up the one proper hill, home in the dark.\n\n🌤️ Conditions:\nClear, 11°C, light SW wind.\n\nPosted via FitGlue 💪",
+    "activityType": "ACTIVITY_TYPE_RIDE",
+    "source": "SOURCE_STRAVA",
+    "startTime": "2026-10-15T17:31:00Z",
+    "activityData": {
+      "source": "SOURCE_STRAVA",
+      "externalId": "16031177204",
+      "userId": "",
+      "startTime": "2026-10-15T17:31:00Z",
+      "name": "Evening ride to the reservoir",
+      "type": "ACTIVITY_TYPE_RIDE",
+      "sessions": [
+        {
+          "startTime": "2026-10-15T17:31:00Z",
+          "totalElapsedTime": 4380,
+          "totalDistance": 32400,
+          "laps": [
+            {
+              "startTime": "2026-10-15T17:31:00Z",
+              "totalElapsedTime": 4380,
+              "totalDistance": 32400,
+              "exerciseName": "",
+              "intensity": "",
+              "isTelemetryContainerOnly": false,
+              "records": []
+            }
+          ],
+          "strengthSets": [],
+          "totalCalories": 812,
+          "avgHeartRate": 142,
+          "maxHeartRate": 168,
+          "minHeartRate": 88
+        }
+      ],
+      "description": "",
+      "tags": [],
+      "notes": "",
+      "timeMarkers": [],
+      "id": "act_01JA6R8D4HT2",
+      "pipelineRunStatus": ""
+    },
+    "appliedEnrichments": [
+      "ENRICHER_PROVIDER_FIT_FILE_HEART_RATE",
+      "ENRICHER_PROVIDER_HEART_RATE_SUMMARY",
+      "ENRICHER_PROVIDER_HEART_RATE_ZONES",
+      "ENRICHER_PROVIDER_SPEED_SUMMARY",
+      "ENRICHER_PROVIDER_CADENCE_SUMMARY",
+      "ENRICHER_PROVIDER_POWER_SUMMARY",
+      "ENRICHER_PROVIDER_ELEVATION_SUMMARY",
+      "ENRICHER_PROVIDER_EFFORT_SCORE",
+      "ENRICHER_PROVIDER_CALORIES_BURNED",
+      "ENRICHER_PROVIDER_TRAINING_LOAD",
+      "ENRICHER_PROVIDER_RECOVERY_ADVISOR",
+      "ENRICHER_PROVIDER_TEMPERATURE_SUMMARY",
+      "ENRICHER_PROVIDER_DISTANCE_MILESTONES",
+      "ENRICHER_PROVIDER_LOCATION_NAMING",
+      "ENRICHER_PROVIDER_WEATHER",
+      "ENRICHER_PROVIDER_ROUTE_THUMBNAIL",
+      "ENRICHER_PROVIDER_AI_BANNER",
+      "ENRICHER_PROVIDER_AI_COMPANION",
+      "ENRICHER_PROVIDER_SOURCE_LINK"
+    ],
+    "tags": [
+      "sunset",
+      "trent-valley"
+    ],
+    "createdAt": "2026-10-15T19:02:48Z",
+    "expiresAt": null,
+    "ownerDisplayName": "James",
+    "ownerProfilePictureUrl": "https://storage.googleapis.com/fitglue-server-prod-showcase-assets/showcase_pictures/kQ2v9bX1ZtNcR4mL8pW6yHdE3aF7/profile.jpg",
+    "ownerProfileSlug": "james",
+    "photoUrls": [],
+    "enrichments": {
+      "heartRate": {
+        "minBpm": 88,
+        "avgBpm": 142,
+        "maxBpm": 168,
+        "driftBpm": 2,
+        "driftWarning": false
+      },
+      "heartRateZones": {
+        "zones": [
+          {
+            "zoneIndex": 0,
+            "name": "Zone 0 (Rest)",
+            "minutes": 0,
+            "percentage": 0.0
+          },
+          {
+            "zoneIndex": 1,
+            "name": "Zone 1 (Recovery)",
+            "minutes": 8,
+            "percentage": 11.0
+          },
+          {
+            "zoneIndex": 2,
+            "name": "Zone 2 (Aerobic)",
+            "minutes": 31,
+            "percentage": 42.5
+          },
+          {
+            "zoneIndex": 3,
+            "name": "Zone 3 (Tempo)",
+            "minutes": 24,
+            "percentage": 32.9
+          },
+          {
+            "zoneIndex": 4,
+            "name": "Zone 4 (Threshold)",
+            "minutes": 10,
+            "percentage": 13.7
+          },
+          {
+            "zoneIndex": 5,
+            "name": "Zone 5 (Max)",
+            "minutes": 0,
+            "percentage": 0.0
+          }
+        ],
+        "totalMinutes": 73
+      },
+      "effort": {
+        "score": 64,
+        "band": "Moderate",
+        "factors": [
+          {
+            "label": "HR",
+            "ratioVsBaseline": 0.98
+          },
+          {
+            "label": "Duration",
+            "ratioVsBaseline": 1.31
+          },
+          {
+            "label": "Elevation",
+            "ratioVsBaseline": 1.42
+          }
+        ]
+      },
+      "calories": {
+        "kcal": 812,
+        "comparisonText": "≈ 2.9 slices of pizza"
+      },
+      "trainingLoad": {
+        "trimp": 92,
+        "bucket": "Moderate",
+        "hint": "Solid aerobic volume"
+      },
+      "recovery": {
+        "sessionLoad": 92,
+        "acuteChronicRatio": 1.12,
+        "hoursToRecover": 22,
+        "alert": false,
+        "alertText": "",
+        "sevenDayLoad": 318,
+        "twentyEightDayAvgLoad": 41
+      },
+      "aiSummary": {
+        "html": "<p>An unhurried 32 km out along the Trent with one real climb in the middle — the <b>540 W</b> spike on the reservoir road says it was taken seriously. Average 26.6 km/h with the wind helping home.</p>",
+        "model": "gemini-2.5-flash",
+        "generatedAt": "2026-10-15T19:02:30Z"
+      },
+      "aiBanner": {
+        "imageUrl": "https://assets.fitglue.tech/act_01JA6R8D4HT2/banner.png",
+        "promptHash": "7c1f0a9e",
+        "generatorVersion": "v3"
+      },
+      "cadence": {
+        "avgRpm": 84,
+        "maxRpm": 112
+      },
+      "power": {
+        "avgWatts": 186,
+        "normalizedPower": 201,
+        "intensityFactor": 0.77,
+        "kilojoules": 814,
+        "maxWatts": 540
+      },
+      "elevation": {
+        "totalGainM": 310,
+        "totalLossM": 305,
+        "maxAltitudeM": 142
+      },
+      "speed": {
+        "avgSpeedKmh": 26.6,
+        "maxSpeedKmh": 51.2
+      },
+      "weather": {
+        "tempC": 11,
+        "weatherDescription": "Clear",
+        "windSpeedKph": 14,
+        "windDirection": "SW",
+        "weatherCode": 0
+      },
+      "location": {
+        "locationName": "Hoveringham, Nottinghamshire",
+        "country": "United Kingdom",
+        "latitude": 53.0101,
+        "longitude": -0.9542
+      },
+      "distanceMilestone": {
+        "milestoneKm": 0,
+        "lifetimeDistanceKm": 4812.3,
+        "nextMilestoneKm": 5000,
+        "activityTypeLabel": "cycling"
+      },
+      "temperature": {
+        "minC": 10,
+        "avgC": 11,
+        "maxC": 12
+      }
+    }
+  },
+  "entry": {
+    "showcaseId": "evening-ride-to-the-reservoir-2026-10-15",
+    "title": "Evening ride to the reservoir",
+    "activityType": "ACTIVITY_TYPE_RIDE",
+    "source": "SOURCE_STRAVA",
+    "startTime": "2026-10-15T17:31:00Z",
+    "routeThumbnailUrl": "https://assets.fitglue.tech/act_01JA6R8D4HT2/route-thumbnail.svg",
+    "distanceMeters": 32400,
+    "durationSeconds": 4380,
+    "totalSets": 0,
+    "totalReps": 0,
+    "totalWeightKg": 0,
+    "boosterCount": 19,
+    "destinationCount": 3,
+    "sparkline": {
+      "metric": "heart_rate",
+      "values": [
+        128.5,
+        130.7,
+        132.5,
+        133.7,
+        134.0,
+        133.7,
+        133.0,
+        134.0,
+        138.5,
+        146.7,
+        152.5,
+        150.3,
+        141.0,
+        131.7,
+        126.5,
+        126.0,
+        127.5,
+        129.7,
+        131.5,
+        133.3,
+        134.0,
+        134.0,
+        133.0,
+        131.0
+      ]
+    },
+    "avgHeartRate": 142,
+    "caloriesKcal": 812,
+    "hrZoneMinutes": [
+      0,
+      8,
+      31,
+      24,
+      10,
+      0
+    ],
+    "photoUrls": [],
+    "createdAt": "2026-10-15T19:02:48Z",
+    "elevationGainM": 310,
+    "locationName": "Hoveringham, Nottinghamshire",
+    "country": "United Kingdom",
+    "tempC": 11,
+    "weatherDescription": "Clear",
+    "bestEfforts": [],
+    "primaryMuscles": []
+  },
+  "series": {
+    "n": 60,
+    "elapsedS": [
+      0,
+      74,
+      148,
+      223,
+      297,
+      371,
+      445,
+      520,
+      594,
+      668,
+      742,
+      817,
+      891,
+      965,
+      1039,
+      1114,
+      1188,
+      1262,
+      1336,
+      1411,
+      1485,
+      1559,
+      1633,
+      1707,
+      1782,
+      1856,
+      1930,
+      2004,
+      2079,
+      2153,
+      2227,
+      2301,
+      2376,
+      2450,
+      2524,
+      2598,
+      2673,
+      2747,
+      2821,
+      2895,
+      2969,
+      3044,
+      3118,
+      3192,
+      3266,
+      3341,
+      3415,
+      3489,
+      3563,
+      3638,
+      3712,
+      3786,
+      3860,
+      3935,
+      4009,
+      4083,
+      4157,
+      4232,
+      4306,
+      4380
+    ],
+    "distanceM": [
+      0,
+      549,
+      1098,
+      1647,
+      2197,
+      2746,
+      3295,
+      3844,
+      4393,
+      4942,
+      5492,
+      6041,
+      6590,
+      7139,
+      7688,
+      8237,
+      8786,
+      9336,
+      9885,
+      10434,
+      10983,
+      11532,
+      12081,
+      12631,
+      13180,
+      13729,
+      14278,
+      14827,
+      15376,
+      15925,
+      16475,
+      17024,
+      17573,
+      18122,
+      18671,
+      19220,
+      19769,
+      20319,
+      20868,
+      21417,
+      21966,
+      22515,
+      23064,
+      23614,
+      24163,
+      24712,
+      25261,
+      25810,
+      26359,
+      26908,
+      27458,
+      28007,
+      28556,
+      29105,
+      29654,
+      30203,
+      30753,
+      31302,
+      31851,
+      32400
+    ],
+    "heartRate": [
+      128,
+      129,
+      130,
+      131,
+      131,
+      132,
+      133,
+      133,
+      134,
+      134,
+      134,
+      134,
+      134,
+      134,
+      133,
+      133,
+      133,
+      133,
+      134,
+      135,
+      137,
+      140,
+      143,
+      147,
+      150,
+      152,
+      153,
+      153,
+      151,
+      147,
+      143,
+      139,
+      135,
+      131,
+      129,
+      127,
+      126,
+      126,
+      126,
+      126,
+      127,
+      128,
+      129,
+      130,
+      130,
+      131,
+      132,
+      133,
+      133,
+      134,
+      134,
+      134,
+      134,
+      134,
+      134,
+      133,
+      133,
+      132,
+      131,
+      130
+    ],
+    "speedMs": [
+      7.6,
+      7.74,
+      7.88,
+      8.02,
+      8.15,
+      8.27,
+      8.38,
+      8.49,
+      8.58,
+      8.65,
+      8.71,
+      8.75,
+      8.78,
+      8.78,
+      8.76,
+      8.7,
+      8.59,
+      8.43,
+      8.19,
+      7.85,
+      7.41,
+      6.88,
+      6.28,
+      5.64,
+      5.04,
+      4.54,
+      4.2,
+      4.05,
+      4.09,
+      4.3,
+      4.63,
+      5.01,
+      5.38,
+      5.7,
+      5.96,
+      6.13,
+      6.25,
+      6.31,
+      6.34,
+      6.36,
+      6.38,
+      6.41,
+      6.44,
+      6.49,
+      6.55,
+      6.63,
+      6.72,
+      6.82,
+      6.93,
+      7.06,
+      7.19,
+      7.32,
+      7.46,
+      7.61,
+      7.75,
+      7.89,
+      8.02,
+      8.15,
+      8.28,
+      8.39
+    ],
+    "altitudeM": [
+      40.0,
+      40.5,
+      41.1,
+      41.6,
+      42.1,
+      42.7,
+      43.2,
+      43.7,
+      44.1,
+      44.6,
+      45.1,
+      45.5,
+      46.0,
+      46.7,
+      47.6,
+      49.0,
+      51.2,
+      54.6,
+      59.8,
+      67.1,
+      77.0,
+      89.2,
+      103.1,
+      117.6,
+      130.9,
+      141.3,
+      147.0,
+      147.2,
+      141.7,
+      131.5,
+      118.2,
+      103.5,
+      89.2,
+      76.6,
+      66.2,
+      58.4,
+      52.8,
+      49.1,
+      46.6,
+      45.0,
+      43.9,
+      43.1,
+      42.4,
+      41.8,
+      41.3,
+      40.7,
+      40.2,
+      39.6,
+      39.1,
+      38.6,
+      38.0,
+      37.5,
+      37.0,
+      36.5,
+      36.0,
+      35.6,
+      35.1,
+      34.7,
+      34.3,
+      33.9
+    ],
+    "cadenceRpm": [
+      84,
+      85,
+      86,
+      86,
+      87,
+      88,
+      88,
+      89,
+      89,
+      90,
+      90,
+      90,
+      90,
+      90,
+      90,
+      89,
+      89,
+      88,
+      87,
+      85,
+      84,
+      82,
+      79,
+      77,
+      75,
+      73,
+      72,
+      71,
+      71,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      77,
+      78,
+      78,
+      79,
+      79,
+      80,
+      81,
+      81,
+      82,
+      83,
+      84,
+      85,
+      85,
+      86,
+      87,
+      88,
+      88,
+      89,
+      89,
+      90,
+      90,
+      90,
+      90,
+      90
+    ],
+    "powerW": [
+      175,
+      179,
+      182,
+      186,
+      189,
+      191,
+      193,
+      194,
+      195,
+      195,
+      194,
+      193,
+      191,
+      189,
+      187,
+      185,
+      184,
+      185,
+      188,
+      194,
+      205,
+      219,
+      236,
+      254,
+      272,
+      286,
+      294,
+      295,
+      289,
+      277,
+      262,
+      245,
+      228,
+      215,
+      205,
+      198,
+      194,
+      193,
+      193,
+      193,
+      194,
+      195,
+      195,
+      195,
+      194,
+      192,
+      190,
+      187,
+      184,
+      181,
+      177,
+      173,
+      170,
+      166,
+      163,
+      160,
+      158,
+      156,
+      155,
+      155
+    ],
+    "temperatureC": [
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10
+    ]
+  },
+  "routePoints": [
+    [
+      53.0101,
+      -0.8942
+    ],
+    [
+      53.0118,
+      -0.89428
+    ],
+    [
+      53.01348,
+      -0.89453
+    ],
+    [
+      53.01516,
+      -0.89494
+    ],
+    [
+      53.01681,
+      -0.89551
+    ],
+    [
+      53.01843,
+      -0.89624
+    ],
+    [
+      53.02002,
+      -0.89714
+    ],
+    [
+      53.02156,
+      -0.89819
+    ],
+    [
+      53.02306,
+      -0.89939
+    ],
+    [
+      53.02451,
+      -0.90074
+    ],
+    [
+      53.0259,
+      -0.90224
+    ],
+    [
+      53.02723,
+      -0.90388
+    ],
+    [
+      53.02849,
+      -0.90566
+    ],
+    [
+      53.02969,
+      -0.90757
+    ],
+    [
+      53.03082,
+      -0.90961
+    ],
+    [
+      53.03188,
+      -0.91177
+    ],
+    [
+      53.03286,
+      -0.91405
+    ],
+    [
+      53.03378,
+      -0.91644
+    ],
+    [
+      53.03462,
+      -0.91893
+    ],
+    [
+      53.03539,
+      -0.92152
+    ],
+    [
+      53.03608,
+      -0.9242
+    ],
+    [
+      53.03671,
+      -0.92696
+    ],
+    [
+      53.03726,
+      -0.9298
+    ],
+    [
+      53.03774,
+      -0.9327
+    ],
+    [
+      53.03816,
+      -0.93566
+    ],
+    [
+      53.03851,
+      -0.93867
+    ],
+    [
+      53.0388,
+      -0.94173
+    ],
+    [
+      53.03902,
+      -0.94481
+    ],
+    [
+      53.03917,
+      -0.94793
+    ],
+    [
+      53.03927,
+      -0.95106
+    ],
+    [
+      53.0393,
+      -0.9542
+    ],
+    [
+      53.03927,
+      -0.95734
+    ],
+    [
+      53.03917,
+      -0.96047
+    ],
+    [
+      53.03902,
+      -0.96359
+    ],
+    [
+      53.0388,
+      -0.96667
+    ],
+    [
+      53.03851,
+      -0.96973
+    ],
+    [
+      53.03816,
+      -0.97274
+    ],
+    [
+      53.03774,
+      -0.9757
+    ],
+    [
+      53.03726,
+      -0.9786
+    ],
+    [
+      53.03671,
+      -0.98144
+    ],
+    [
+      53.03608,
+      -0.9842
+    ],
+    [
+      53.03539,
+      -0.98688
+    ],
+    [
+      53.03462,
+      -0.98947
+    ],
+    [
+      53.03378,
+      -0.99196
+    ],
+    [
+      53.03286,
+      -0.99435
+    ],
+    [
+      53.03188,
+      -0.99663
+    ],
+    [
+      53.03082,
+      -0.99879
+    ],
+    [
+      53.02969,
+      -1.00083
+    ],
+    [
+      53.02849,
+      -1.00274
+    ],
+    [
+      53.02723,
+      -1.00452
+    ],
+    [
+      53.0259,
+      -1.00616
+    ],
+    [
+      53.02451,
+      -1.00766
+    ],
+    [
+      53.02306,
+      -1.00901
+    ],
+    [
+      53.02156,
+      -1.01021
+    ],
+    [
+      53.02002,
+      -1.01126
+    ],
+    [
+      53.01843,
+      -1.01216
+    ],
+    [
+      53.01681,
+      -1.01289
+    ],
+    [
+      53.01516,
+      -1.01346
+    ],
+    [
+      53.01348,
+      -1.01387
+    ],
+    [
+      53.0118,
+      -1.01412
+    ],
+    [
+      53.0101,
+      -1.0142
+    ],
+    [
+      53.0084,
+      -1.01412
+    ],
+    [
+      53.00672,
+      -1.01387
+    ],
+    [
+      53.00504,
+      -1.01346
+    ],
+    [
+      53.00339,
+      -1.01289
+    ],
+    [
+      53.00177,
+      -1.01216
+    ],
+    [
+      53.00018,
+      -1.01126
+    ],
+    [
+      52.99864,
+      -1.01021
+    ],
+    [
+      52.99714,
+      -1.00901
+    ],
+    [
+      52.99569,
+      -1.00766
+    ],
+    [
+      52.9943,
+      -1.00616
+    ],
+    [
+      52.99297,
+      -1.00452
+    ],
+    [
+      52.99171,
+      -1.00274
+    ],
+    [
+      52.99051,
+      -1.00083
+    ],
+    [
+      52.98938,
+      -0.99879
+    ],
+    [
+      52.98832,
+      -0.99663
+    ],
+    [
+      52.98734,
+      -0.99435
+    ],
+    [
+      52.98642,
+      -0.99196
+    ],
+    [
+      52.98558,
+      -0.98947
+    ],
+    [
+      52.98481,
+      -0.98688
+    ],
+    [
+      52.98412,
+      -0.9842
+    ],
+    [
+      52.98349,
+      -0.98144
+    ],
+    [
+      52.98294,
+      -0.9786
+    ],
+    [
+      52.98246,
+      -0.9757
+    ],
+    [
+      52.98204,
+      -0.97274
+    ],
+    [
+      52.98169,
+      -0.96973
+    ],
+    [
+      52.9814,
+      -0.96667
+    ],
+    [
+      52.98118,
+      -0.96359
+    ],
+    [
+      52.98103,
+      -0.96047
+    ],
+    [
+      52.98093,
+      -0.95734
+    ],
+    [
+      52.9809,
+      -0.9542
+    ],
+    [
+      52.98093,
+      -0.95106
+    ],
+    [
+      52.98103,
+      -0.94793
+    ],
+    [
+      52.98118,
+      -0.94481
+    ],
+    [
+      52.9814,
+      -0.94173
+    ],
+    [
+      52.98169,
+      -0.93867
+    ],
+    [
+      52.98204,
+      -0.93566
+    ],
+    [
+      52.98246,
+      -0.9327
+    ],
+    [
+      52.98294,
+      -0.9298
+    ],
+    [
+      52.98349,
+      -0.92696
+    ],
+    [
+      52.98412,
+      -0.9242
+    ],
+    [
+      52.98481,
+      -0.92152
+    ],
+    [
+      52.98558,
+      -0.91893
+    ],
+    [
+      52.98642,
+      -0.91644
+    ],
+    [
+      52.98734,
+      -0.91405
+    ],
+    [
+      52.98832,
+      -0.91177
+    ],
+    [
+      52.98938,
+      -0.90961
+    ],
+    [
+      52.99051,
+      -0.90757
+    ],
+    [
+      52.99171,
+      -0.90566
+    ],
+    [
+      52.99297,
+      -0.90388
+    ],
+    [
+      52.9943,
+      -0.90224
+    ],
+    [
+      52.99569,
+      -0.90074
+    ],
+    [
+      52.99714,
+      -0.89939
+    ],
+    [
+      52.99864,
+      -0.89819
+    ],
+    [
+      53.00018,
+      -0.89714
+    ],
+    [
+      53.00177,
+      -0.89624
+    ],
+    [
+      53.00339,
+      -0.89551
+    ],
+    [
+      53.00504,
+      -0.89494
+    ],
+    [
+      53.00672,
+      -0.89453
+    ],
+    [
+      53.0084,
+      -0.89428
+    ],
+    [
+      53.0101,
+      -0.8942
+    ]
+  ]
+}

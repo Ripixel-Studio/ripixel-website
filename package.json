@@ -10,6 +10,8 @@
         "build:corporate": "SKIER_SITE=corporate skier",
         "build:personal": "SKIER_SITE=personal skier",
         "build:dev": "SKIER_SITE=personal skier --debug",
+        "test": "node --test 'tasks/**/*.test.mjs'",
+        "fitness:refresh": "rm -rf .cache/fitness && FITNESS_DATA_SOURCE=live SKIER_SITE=personal skier --only fetch-fitness",
         "serve": "serve public/",
         "serve:personal": "serve public/personal/",
         "serve:corporate": "serve public/corporate/",

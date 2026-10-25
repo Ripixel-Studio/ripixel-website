@@ -72,3 +72,6 @@ reports/
 
 # Claude Design
 claude-design/
+
+# Fitness data cache (built by tasks/fitness-fetch.mjs)
+.cache/

@@ -15,6 +15,7 @@ import {
     generatePaginatedItemsTask,
     generateSitemapTask
 } from 'skier';
+import { fetchFitnessTask } from './tasks/fitness-fetch.mjs';
 
 /** Estimate read time in minutes from raw text (200 wpm)
  * @param {string} text */
@@ -200,6 +201,11 @@ export const tasks = [
 
     // Load right-now panel data (optional — create right-now.json to enable)
     loadRightNowTask(),
+
+    // Fetch the FitGlue showcase export (live → .cache/fitness → fixtures/fitness → empty).
+    // Sets fitnessIndex, fitnessActivities, fitnessRoundups, fitnessUnavailable, fitnessSource.
+    // Env: FITNESS_DATA_BASE (URL), FITNESS_DATA_SOURCE=live|cache|fixtures. See README "Fitness data".
+    fetchFitnessTask(),
 
     // Generate individual thought article pages (adds readTime to each item)
     generateItemsTask({

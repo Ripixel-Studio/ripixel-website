@@ -13,6 +13,11 @@
     <div style="font-family:var(--f-mono);font-size:13px;color:var(--ink);opacity:.7;margin-bottom:20px">
       running, riding &amp; generally trying to stay alive.
     </div>
+    {{#if fitnessUnavailable}}
+    <div style="padding:14px 18px;margin-bottom:20px;background:#fff;border:2px dashed var(--ink);font-family:var(--f-mono);font-size:13px;line-height:1.65">
+      ⚠ fitness data unavailable — this build could not reach the showcase export, so the activity feed is empty. check back later.
+    </div>
+    {{/if}}
     <div style="padding:14px 18px;background:#fff;border:2px solid var(--ink);font-family:var(--f-mono);font-size:13px;line-height:1.65">
       All my fitness activity is tracked and showcased on FitGlue — my own fitness automation platform.
       It pulls together Strava data, parkrun results, workout history, and more in one place.

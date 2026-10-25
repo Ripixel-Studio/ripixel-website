@@ -1,0 +1,400 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-19T00:06:40Z",
+  "siteSlug": "james",
+  "profile": {
+    "slug": "james",
+    "displayName": "James",
+    "totalActivities": 614,
+    "totalDistanceMeters": 4812300,
+    "totalDurationSeconds": 1942800,
+    "latestActivityAt": "2026-10-17T08:00:00Z",
+    "totalSets": 9842,
+    "totalReps": 94310,
+    "totalWeightKg": 2431500,
+    "createdAt": "2025-04-12T10:21:00Z",
+    "updatedAt": "2026-10-19T00:05:12Z",
+    "subtitle": "Runner · lifter · occasional cyclist",
+    "bio": "Nottingham. Chasing a sub-19 5K and a 2×bodyweight deadlift, not necessarily in that order.",
+    "profilePictureUrl": "https://storage.googleapis.com/fitglue-server-prod-showcase-assets/showcase_pictures/kQ2v9bX1ZtNcR4mL8pW6yHdE3aF7/profile.jpg",
+    "visible": true,
+    "theme": {
+      "themeId": "aurora",
+      "customAccentColor": "",
+      "animationId": "",
+      "cardStyle": ""
+    },
+    "defaultDestination": true,
+    "showPhotoGallery": true,
+    "links": [
+      {
+        "label": "Strava",
+        "url": "https://www.strava.com/athletes/james"
+      },
+      {
+        "label": "GitHub",
+        "url": "https://github.com/ripixel"
+      }
+    ],
+    "callouts": [
+      {
+        "text": "614 showcased sessions since April 2025"
+      },
+      {
+        "text": "87 parkruns"
+      }
+    ],
+    "zoneSplit": {
+      "zones": [
+        {
+          "zoneIndex": 0,
+          "name": "Zone 0 (Rest)",
+          "minutes": 1210,
+          "percentage": 4.1
+        },
+        {
+          "zoneIndex": 1,
+          "name": "Zone 1 (Recovery)",
+          "minutes": 6980,
+          "percentage": 23.6
+        },
+        {
+          "zoneIndex": 2,
+          "name": "Zone 2 (Aerobic)",
+          "minutes": 11840,
+          "percentage": 40.1
+        },
+        {
+          "zoneIndex": 3,
+          "name": "Zone 3 (Tempo)",
+          "minutes": 5620,
+          "percentage": 19.0
+        },
+        {
+          "zoneIndex": 4,
+          "name": "Zone 4 (Threshold)",
+          "minutes": 2890,
+          "percentage": 9.8
+        },
+        {
+          "zoneIndex": 5,
+          "name": "Zone 5 (Max)",
+          "minutes": 1000,
+          "percentage": 3.4
+        }
+      ],
+      "computedAt": "2026-10-19T03:00:00Z",
+      "label": "Pyramidal"
+    },
+    "streakHistory": {
+      "weeksTracked": 26,
+      "missedWeeks": 2,
+      "weeklyActive": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "topPrs": [
+      {
+        "recordType": "Deadlift (Barbell)_1rm",
+        "value": 180,
+        "unit": "kg",
+        "achievedAt": "2026-09-02T18:30:00Z",
+        "previousValue": 175
+      },
+      {
+        "recordType": "Bench Press (Barbell)_1rm",
+        "value": 100,
+        "unit": "kg",
+        "achievedAt": "2026-10-13T18:41:00Z",
+        "previousValue": 97.5
+      },
+      {
+        "recordType": "Squat (Barbell)_1rm",
+        "value": 140,
+        "unit": "kg",
+        "achievedAt": "2026-08-20T18:12:00Z",
+        "previousValue": 140
+      },
+      {
+        "recordType": "5k",
+        "value": 1192,
+        "unit": "seconds",
+        "achievedAt": "2026-10-17T08:19:52Z",
+        "previousValue": 1206
+      },
+      {
+        "recordType": "10k",
+        "value": 2561,
+        "unit": "seconds",
+        "achievedAt": "2026-06-14T08:44:21Z",
+        "previousValue": 2598
+      }
+    ],
+    "roundupSettings": {
+      "enabledWeekly": true,
+      "enabledMonthly": true,
+      "enabledYearly": true
+    }
+  },
+  "streaks": {
+    "currentWeeks": 9,
+    "longestWeeks": 9
+  },
+  "activities": [
+    {
+      "slug": "colwick-parkrun-2026-10-17",
+      "showcaseId": "colwick-parkrun-2026-10-17",
+      "title": "Colwick parkrun #87",
+      "activityType": "ACTIVITY_TYPE_RUN",
+      "source": "SOURCE_STRAVA",
+      "startTime": "2026-10-17T08:00:00Z",
+      "routeThumbnailUrl": "https://assets.fitglue.tech/act_01JA9W3K2QX7/route-thumbnail.svg",
+      "distanceMeters": 5010,
+      "durationSeconds": 1192,
+      "totalSets": 0,
+      "totalReps": 0,
+      "totalWeightKg": 0,
+      "boosterCount": 19,
+      "destinationCount": 3,
+      "sparkline": {
+        "metric": "heart_rate",
+        "values": [
+          141.5,
+          148.3,
+          154.0,
+          159.0,
+          163.5,
+          167.0,
+          169.5,
+          172.0,
+          174.5,
+          176.3,
+          178.0,
+          179.3,
+          180.0,
+          181.0,
+          182.0,
+          182.7,
+          183.0,
+          183.7,
+          184.0,
+          184.0,
+          184.5,
+          186.0,
+          188.0,
+          188.0
+        ]
+      },
+      "avgHeartRate": 171,
+      "caloriesKcal": 342,
+      "prLabel": "★ 5K 19:52 · −14s",
+      "hrZoneMinutes": [
+        0,
+        0,
+        2,
+        5,
+        9,
+        4
+      ],
+      "photoUrls": [
+        "https://storage.googleapis.com/fitglue-server-prod-showcase-assets/activity_photos/kQ2v9bX1ZtNcR4mL8pW6yHdE3aF7/act_01JA9W3K2QX7/finish-funnel_p.jpg"
+      ],
+      "createdAt": "2026-10-17T09:14:03Z",
+      "elevationGainM": 24,
+      "locationName": "Colwick Park, Nottingham",
+      "country": "United Kingdom",
+      "tempC": 9,
+      "weatherDescription": "Partly Cloudy",
+      "bestEfforts": [
+        {
+          "distanceKey": "1k",
+          "display": "1K",
+          "distanceM": 1000,
+          "timeSeconds": 234
+        },
+        {
+          "distanceKey": "1_mile",
+          "display": "1 Mile",
+          "distanceM": 1609,
+          "timeSeconds": 379
+        },
+        {
+          "distanceKey": "5k",
+          "display": "5K",
+          "distanceM": 5000,
+          "timeSeconds": 1190
+        }
+      ],
+      "primaryMuscles": []
+    },
+    {
+      "slug": "evening-ride-to-the-reservoir-2026-10-15",
+      "showcaseId": "evening-ride-to-the-reservoir-2026-10-15",
+      "title": "Evening ride to the reservoir",
+      "activityType": "ACTIVITY_TYPE_RIDE",
+      "source": "SOURCE_STRAVA",
+      "startTime": "2026-10-15T17:31:00Z",
+      "routeThumbnailUrl": "https://assets.fitglue.tech/act_01JA6R8D4HT2/route-thumbnail.svg",
+      "distanceMeters": 32400,
+      "durationSeconds": 4380,
+      "totalSets": 0,
+      "totalReps": 0,
+      "totalWeightKg": 0,
+      "boosterCount": 19,
+      "destinationCount": 3,
+      "sparkline": {
+        "metric": "heart_rate",
+        "values": [
+          128.5,
+          130.7,
+          132.5,
+          133.7,
+          134.0,
+          133.7,
+          133.0,
+          134.0,
+          138.5,
+          146.7,
+          152.5,
+          150.3,
+          141.0,
+          131.7,
+          126.5,
+          126.0,
+          127.5,
+          129.7,
+          131.5,
+          133.3,
+          134.0,
+          134.0,
+          133.0,
+          131.0
+        ]
+      },
+      "avgHeartRate": 142,
+      "caloriesKcal": 812,
+      "hrZoneMinutes": [
+        0,
+        8,
+        31,
+        24,
+        10,
+        0
+      ],
+      "photoUrls": [],
+      "createdAt": "2026-10-15T19:02:48Z",
+      "elevationGainM": 310,
+      "locationName": "Hoveringham, Nottinghamshire",
+      "country": "United Kingdom",
+      "tempC": 11,
+      "weatherDescription": "Clear",
+      "bestEfforts": [],
+      "primaryMuscles": []
+    },
+    {
+      "slug": "push-day-2026-10-13",
+      "showcaseId": "push-day-2026-10-13",
+      "title": "Push Day",
+      "activityType": "ACTIVITY_TYPE_WEIGHT_TRAINING",
+      "source": "SOURCE_HEVY",
+      "startTime": "2026-10-13T18:05:00Z",
+      "routeThumbnailUrl": "",
+      "distanceMeters": 0,
+      "durationSeconds": 3420,
+      "totalSets": 18,
+      "totalReps": 219,
+      "totalWeightKg": 6286.0,
+      "boosterCount": 11,
+      "destinationCount": 2,
+      "sparkline": {
+        "metric": "heart_rate",
+        "values": [
+          107.0,
+          121.3,
+          130.5,
+          130.3,
+          121.5,
+          109.0,
+          119.0,
+          130.7,
+          134.0,
+          126.3,
+          111.5,
+          115.0,
+          130.5,
+          136.3,
+          132.0,
+          117.0,
+          110.0,
+          128.3,
+          138.5,
+          136.3,
+          123.5,
+          109.7,
+          125.0,
+          138.7
+        ]
+      },
+      "avgHeartRate": 118,
+      "caloriesKcal": 410,
+      "prLabel": "★ BENCH PRESS (BARBELL) 1RM 100KG · +2KG",
+      "hrZoneMinutes": [
+        12,
+        30,
+        15,
+        0,
+        0,
+        0
+      ],
+      "photoUrls": [],
+      "createdAt": "2026-10-13T19:11:20Z",
+      "bestEfforts": [],
+      "primaryMuscles": [
+        "chest",
+        "shoulders",
+        "triceps"
+      ]
+    }
+  ],
+  "roundups": [
+    {
+      "key": "week-42-2026",
+      "periodType": "ROUNDUP_PERIOD_TYPE_WEEK",
+      "periodStart": "2026-10-12T00:00:00Z",
+      "periodEnd": "2026-10-19T00:00:00Z",
+      "generatedAt": "2026-10-19T00:05:12Z",
+      "totalActivities": 3,
+      "totalDurationSeconds": 8992,
+      "totalDistanceMeters": 37410,
+      "totalWeightKg": 6286.0,
+      "hasStrength": true,
+      "prCount": 3,
+      "hasAiSummary": true
+    }
+  ]
+}
