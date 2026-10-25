@@ -1,0 +1,619 @@
+{
+  "schemaVersion": 1,
+  "slug": "push-day-2026-10-13",
+  "exportedAt": "2026-10-19T00:06:40Z",
+  "category": "strength",
+  "activity": {
+    "showcaseId": "push-day-2026-10-13",
+    "title": "Push Day",
+    "description": "Bench finally moved. 100 kg single on the bar after the working sets.",
+    "activityType": "ACTIVITY_TYPE_WEIGHT_TRAINING",
+    "source": "SOURCE_HEVY",
+    "startTime": "2026-10-13T18:05:00Z",
+    "activityData": {
+      "source": "SOURCE_HEVY",
+      "externalId": "hevy_wk_a81f3c",
+      "userId": "",
+      "startTime": "2026-10-13T18:05:00Z",
+      "name": "Push Day",
+      "type": "ACTIVITY_TYPE_WEIGHT_TRAINING",
+      "sessions": [
+        {
+          "startTime": "2026-10-13T18:05:00Z",
+          "totalElapsedTime": 3420,
+          "totalDistance": 0,
+          "laps": [],
+          "strengthSets": [
+            {
+              "exerciseName": "Bench Press (Barbell)",
+              "reps": 8,
+              "weightKg": 80,
+              "startTime": "2026-10-13T18:05:00Z",
+              "durationSeconds": 0,
+              "notes": "",
+              "supersetId": "",
+              "primaryMuscleGroup": "MUSCLE_GROUP_CHEST",
+              "secondaryMuscleGroups": [
+                "MUSCLE_GROUP_TRICEPS",
+                "MUSCLE_GROUP_SHOULDERS"
+              ],
+              "distanceMeters": 0,
+              "setType": "normal"
+            },
+            {
+              "exerciseName": "Bench Press (Barbell)",
+              "reps": 8,
+              "weightKg": 80,
+              "startTime": "2026-10-13T18:08:00Z",
+              "durationSeconds": 0,
+              "notes": "",
+              "supersetId": "",
+              "primaryMuscleGroup": "MUSCLE_GROUP_CHEST",
+              "secondaryMuscleGroups": [
+                "MUSCLE_GROUP_TRICEPS",
+                "MUSCLE_GROUP_SHOULDERS"
+              ],
+              "distanceMeters": 0,
+              "setType": "normal"
+            },
+            {
+              "exerciseName": "Bench Press (Barbell)",
+              "reps": 8,
+              "weightKg": 80,
+              "startTime": "2026-10-13T18:11:00Z",
+              "durationSeconds": 0,
+              "notes": "",
+              "supersetId": "",
+              "primaryMuscleGroup": "MUSCLE_GROUP_CHEST",
+              "secondaryMuscleGroups": [
+                "MUSCLE_GROUP_TRICEPS",
+                "MUSCLE_GROUP_SHOULDERS"
+              ],
+              "distanceMeters": 0,
+              "setType": "normal"
+            },
+            {
+              "exerciseName": "Bench Press (Barbell)",
+              "reps": 8,
+              "weightKg": 80,
+              "startTime": "2026-10-13T18:14:00Z",
+              "durationSeconds": 0,
+              "notes": "",
+              "supersetId": "",
+              "primaryMuscleGroup": "MUSCLE_GROUP_CHEST",
+              "secondaryMuscleGroups": [
+                "MUSCLE_GROUP_TRICEPS",
+                "MUSCLE_GROUP_SHOULDERS"
+              ],
+              "distanceMeters": 0,
+              "setType": "normal"
+            },
+            {
+              "exerciseName": "Overhead Press (Barbell)",
+              "reps": 10,
+              "weightKg": 45,
+              "startTime": "2026-10-13T18:17:00Z",
+              "durationSeconds": 0,
+              "notes": "",
+              "supersetId": "",
+              "primaryMuscleGroup": "MUSCLE_GROUP_SHOULDERS",
+              "secondaryMuscleGroups": [
+                "MUSCLE_GROUP_TRICEPS"
+              ],
+              "distanceMeters": 0,
+              "setType": "normal"
+            },
+            {
+              "exerciseName": "Overhead Press (Barbell)",
+              "reps": 10,
+              "weightKg": 45,
+              "startTime": "2026-10-13T18:20:00Z",
+              "durationSeconds": 0,
+              "notes": "",
+              "supersetId": "",
+              "primaryMuscleGroup": "MUSCLE_GROUP_SHOULDERS",
+              "secondaryMuscleGroups": [
+                "MUSCLE_GROUP_TRICEPS"
+              ],
+              "distanceMeters": 0,
+              "setType": "normal"
+            },
+            {
+              "exerciseName": "Overhead Press (Barbell)",
+              "reps": 10,
+              "weightKg": 45,
+              "startTime": "2026-10-13T18:23:00Z",
+              "durationSeconds": 0,
+              "notes": "",
+              "supersetId": "",
+              "primaryMuscleGroup": "MUSCLE_GROUP_SHOULDERS",
+              "secondaryMuscleGroups": [
+                "MUSCLE_GROUP_TRICEPS"
+              ],
+              "distanceMeters": 0,
+              "setType": "normal"
+            },
+            {
+              "exerciseName": "Incline Bench Press (Dumbbell)",
+              "reps": 12,
+              "weightKg": 26,
+              "startTime": "2026-10-13T18:26:00Z",
+              "durationSeconds": 0,
+              "notes": "",
+              "supersetId": "",
+              "primaryMuscleGroup": "MUSCLE_GROUP_CHEST",
+              "secondaryMuscleGroups": [
+                "MUSCLE_GROUP_SHOULDERS"
+              ],
+              "distanceMeters": 0,
+              "setType": "normal"
+            },
+            {
+              "exerciseName": "Incline Bench Press (Dumbbell)",
+              "reps": 12,
+              "weightKg": 26,
+              "startTime": "2026-10-13T18:29:00Z",
+              "durationSeconds": 0,
+              "notes": "",
+              "supersetId": "",
+              "primaryMuscleGroup": "MUSCLE_GROUP_CHEST",
+              "secondaryMuscleGroups": [
+                "MUSCLE_GROUP_SHOULDERS"
+              ],
+              "distanceMeters": 0,
+              "setType": "normal"
+            },
+            {
+              "exerciseName": "Incline Bench Press (Dumbbell)",
+              "reps": 12,
+              "weightKg": 26,
+              "startTime": "2026-10-13T18:32:00Z",
+              "durationSeconds": 0,
+              "notes": "",
+              "supersetId": "",
+              "primaryMuscleGroup": "MUSCLE_GROUP_CHEST",
+              "secondaryMuscleGroups": [
+                "MUSCLE_GROUP_SHOULDERS"
+              ],
+              "distanceMeters": 0,
+              "setType": "normal"
+            },
+            {
+              "exerciseName": "Lateral Raise (Dumbbell)",
+              "reps": 15,
+              "weightKg": 10,
+              "startTime": "2026-10-13T18:35:00Z",
+              "durationSeconds": 0,
+              "notes": "",
+              "supersetId": "ss1",
+              "primaryMuscleGroup": "MUSCLE_GROUP_SHOULDERS",
+              "secondaryMuscleGroups": [],
+              "distanceMeters": 0,
+              "setType": "normal"
+            },
+            {
+              "exerciseName": "Lateral Raise (Dumbbell)",
+              "reps": 15,
+              "weightKg": 10,
+              "startTime": "2026-10-13T18:38:00Z",
+              "durationSeconds": 0,
+              "notes": "",
+              "supersetId": "ss1",
+              "primaryMuscleGroup": "MUSCLE_GROUP_SHOULDERS",
+              "secondaryMuscleGroups": [],
+              "distanceMeters": 0,
+              "setType": "normal"
+            },
+            {
+              "exerciseName": "Lateral Raise (Dumbbell)",
+              "reps": 15,
+              "weightKg": 10,
+              "startTime": "2026-10-13T18:41:00Z",
+              "durationSeconds": 0,
+              "notes": "",
+              "supersetId": "ss1",
+              "primaryMuscleGroup": "MUSCLE_GROUP_SHOULDERS",
+              "secondaryMuscleGroups": [],
+              "distanceMeters": 0,
+              "setType": "normal"
+            },
+            {
+              "exerciseName": "Triceps Pushdown (Cable)",
+              "reps": 12,
+              "weightKg": 27.5,
+              "startTime": "2026-10-13T18:44:00Z",
+              "durationSeconds": 0,
+              "notes": "",
+              "supersetId": "ss1",
+              "primaryMuscleGroup": "MUSCLE_GROUP_TRICEPS",
+              "secondaryMuscleGroups": [],
+              "distanceMeters": 0,
+              "setType": "normal"
+            },
+            {
+              "exerciseName": "Triceps Pushdown (Cable)",
+              "reps": 12,
+              "weightKg": 27.5,
+              "startTime": "2026-10-13T18:47:00Z",
+              "durationSeconds": 0,
+              "notes": "",
+              "supersetId": "ss1",
+              "primaryMuscleGroup": "MUSCLE_GROUP_TRICEPS",
+              "secondaryMuscleGroups": [],
+              "distanceMeters": 0,
+              "setType": "normal"
+            },
+            {
+              "exerciseName": "Triceps Pushdown (Cable)",
+              "reps": 12,
+              "weightKg": 27.5,
+              "startTime": "2026-10-13T18:50:00Z",
+              "durationSeconds": 0,
+              "notes": "",
+              "supersetId": "ss1",
+              "primaryMuscleGroup": "MUSCLE_GROUP_TRICEPS",
+              "secondaryMuscleGroups": [],
+              "distanceMeters": 0,
+              "setType": "normal"
+            },
+            {
+              "exerciseName": "Push Up",
+              "reps": 20,
+              "weightKg": 0,
+              "startTime": "2026-10-13T18:53:00Z",
+              "durationSeconds": 0,
+              "notes": "",
+              "supersetId": "",
+              "primaryMuscleGroup": "MUSCLE_GROUP_CHEST",
+              "secondaryMuscleGroups": [
+                "MUSCLE_GROUP_ABDOMINALS"
+              ],
+              "distanceMeters": 0,
+              "setType": "normal"
+            },
+            {
+              "exerciseName": "Push Up",
+              "reps": 20,
+              "weightKg": 0,
+              "startTime": "2026-10-13T18:56:00Z",
+              "durationSeconds": 0,
+              "notes": "",
+              "supersetId": "",
+              "primaryMuscleGroup": "MUSCLE_GROUP_CHEST",
+              "secondaryMuscleGroups": [
+                "MUSCLE_GROUP_ABDOMINALS"
+              ],
+              "distanceMeters": 0,
+              "setType": "normal"
+            }
+          ],
+          "totalCalories": 410,
+          "avgHeartRate": 118,
+          "maxHeartRate": 152,
+          "minHeartRate": 76
+        }
+      ],
+      "description": "",
+      "tags": [],
+      "notes": "",
+      "timeMarkers": [],
+      "id": "act_01JA2K7P9VQ5",
+      "pipelineRunStatus": ""
+    },
+    "appliedEnrichments": [
+      "ENRICHER_PROVIDER_FITBIT_HEART_RATE",
+      "ENRICHER_PROVIDER_HEART_RATE_SUMMARY",
+      "ENRICHER_PROVIDER_HEART_RATE_ZONES",
+      "ENRICHER_PROVIDER_EFFORT_SCORE",
+      "ENRICHER_PROVIDER_CALORIES_BURNED",
+      "ENRICHER_PROVIDER_TRAINING_LOAD",
+      "ENRICHER_PROVIDER_MUSCLE_HEATMAP",
+      "ENRICHER_PROVIDER_MUSCLE_HEATMAP_IMAGE",
+      "ENRICHER_PROVIDER_PERSONAL_RECORDS",
+      "ENRICHER_PROVIDER_WORKOUT_SUMMARY",
+      "ENRICHER_PROVIDER_SOURCE_LINK"
+    ],
+    "tags": [],
+    "createdAt": "2026-10-13T19:11:20Z",
+    "expiresAt": null,
+    "ownerDisplayName": "James",
+    "ownerProfilePictureUrl": "https://storage.googleapis.com/fitglue-server-prod-showcase-assets/showcase_pictures/kQ2v9bX1ZtNcR4mL8pW6yHdE3aF7/profile.jpg",
+    "ownerProfileSlug": "james",
+    "photoUrls": [],
+    "enrichments": {
+      "heartRate": {
+        "minBpm": 76,
+        "avgBpm": 118,
+        "maxBpm": 152,
+        "driftBpm": 0,
+        "driftWarning": false
+      },
+      "heartRateZones": {
+        "zones": [
+          {
+            "zoneIndex": 0,
+            "name": "Zone 0 (Rest)",
+            "minutes": 12,
+            "percentage": 21.1
+          },
+          {
+            "zoneIndex": 1,
+            "name": "Zone 1 (Recovery)",
+            "minutes": 30,
+            "percentage": 52.6
+          },
+          {
+            "zoneIndex": 2,
+            "name": "Zone 2 (Aerobic)",
+            "minutes": 15,
+            "percentage": 26.3
+          },
+          {
+            "zoneIndex": 3,
+            "name": "Zone 3 (Tempo)",
+            "minutes": 0,
+            "percentage": 0.0
+          },
+          {
+            "zoneIndex": 4,
+            "name": "Zone 4 (Threshold)",
+            "minutes": 0,
+            "percentage": 0.0
+          },
+          {
+            "zoneIndex": 5,
+            "name": "Zone 5 (Max)",
+            "minutes": 0,
+            "percentage": 0.0
+          }
+        ],
+        "totalMinutes": 57
+      },
+      "effort": {
+        "score": 58,
+        "band": "Moderate",
+        "factors": [
+          {
+            "label": "Intensity",
+            "ratioVsBaseline": 1.08
+          },
+          {
+            "label": "Duration",
+            "ratioVsBaseline": 1.02
+          }
+        ]
+      },
+      "calories": {
+        "kcal": 410,
+        "comparisonText": "≈ 1.5 slices of pizza"
+      },
+      "trainingLoad": {
+        "trimp": 41,
+        "bucket": "Easy",
+        "hint": "Strength work — low cardio load"
+      },
+      "personalRecords": {
+        "records": [
+          {
+            "recordType": "Bench Press (Barbell)_1rm",
+            "newValue": 100,
+            "unit": "kg",
+            "previousValue": 97.5,
+            "improvement": 2.6,
+            "displayMessage": "Bench Press (Barbell) 1RM: 100 kg (+2.5 kg)"
+          },
+          {
+            "recordType": "Bench Press (Barbell)_set_volume",
+            "newValue": 640,
+            "unit": "kg",
+            "previousValue": 600,
+            "improvement": 6.7,
+            "displayMessage": "Bench Press (Barbell) best set volume: 640 kg (+40 kg)"
+          }
+        ]
+      },
+      "muscleHeatmap": {
+        "primary": [
+          "chest",
+          "shoulders",
+          "triceps"
+        ],
+        "secondary": [
+          "abdominals"
+        ],
+        "imageUrl": "https://assets.fitglue.tech/act_01JA2K7P9VQ5/muscle-heatmap.svg"
+      }
+    }
+  },
+  "entry": {
+    "showcaseId": "push-day-2026-10-13",
+    "title": "Push Day",
+    "activityType": "ACTIVITY_TYPE_WEIGHT_TRAINING",
+    "source": "SOURCE_HEVY",
+    "startTime": "2026-10-13T18:05:00Z",
+    "routeThumbnailUrl": "",
+    "distanceMeters": 0,
+    "durationSeconds": 3420,
+    "totalSets": 18,
+    "totalReps": 219,
+    "totalWeightKg": 6286.0,
+    "boosterCount": 11,
+    "destinationCount": 2,
+    "sparkline": {
+      "metric": "heart_rate",
+      "values": [
+        107.0,
+        121.3,
+        130.5,
+        130.3,
+        121.5,
+        109.0,
+        119.0,
+        130.7,
+        134.0,
+        126.3,
+        111.5,
+        115.0,
+        130.5,
+        136.3,
+        132.0,
+        117.0,
+        110.0,
+        128.3,
+        138.5,
+        136.3,
+        123.5,
+        109.7,
+        125.0,
+        138.7
+      ]
+    },
+    "avgHeartRate": 118,
+    "caloriesKcal": 410,
+    "prLabel": "★ BENCH PRESS (BARBELL) 1RM 100KG · +2KG",
+    "hrZoneMinutes": [
+      12,
+      30,
+      15,
+      0,
+      0,
+      0
+    ],
+    "photoUrls": [],
+    "createdAt": "2026-10-13T19:11:20Z",
+    "bestEfforts": [],
+    "primaryMuscles": [
+      "chest",
+      "shoulders",
+      "triceps"
+    ]
+  },
+  "series": {
+    "n": 60,
+    "elapsedS": [
+      0,
+      58,
+      116,
+      174,
+      232,
+      290,
+      348,
+      406,
+      464,
+      522,
+      580,
+      638,
+      696,
+      754,
+      812,
+      869,
+      927,
+      985,
+      1043,
+      1101,
+      1159,
+      1217,
+      1275,
+      1333,
+      1391,
+      1449,
+      1507,
+      1565,
+      1623,
+      1681,
+      1739,
+      1797,
+      1855,
+      1913,
+      1971,
+      2029,
+      2087,
+      2145,
+      2203,
+      2261,
+      2319,
+      2377,
+      2435,
+      2493,
+      2551,
+      2608,
+      2666,
+      2724,
+      2782,
+      2840,
+      2898,
+      2956,
+      3014,
+      3072,
+      3130,
+      3188,
+      3246,
+      3304,
+      3362,
+      3420
+    ],
+    "heartRate": [
+      104,
+      110,
+      116,
+      122,
+      126,
+      130,
+      131,
+      132,
+      131,
+      128,
+      124,
+      119,
+      112,
+      106,
+      109,
+      116,
+      122,
+      127,
+      131,
+      134,
+      134,
+      134,
+      131,
+      127,
+      121,
+      115,
+      108,
+      108,
+      115,
+      122,
+      128,
+      133,
+      136,
+      137,
+      136,
+      134,
+      130,
+      124,
+      117,
+      110,
+      106,
+      114,
+      122,
+      129,
+      134,
+      138,
+      139,
+      139,
+      137,
+      133,
+      127,
+      120,
+      112,
+      104,
+      113,
+      121,
+      129,
+      135,
+      139,
+      142
+    ]
+  },
+  "routePoints": []
+}

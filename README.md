@@ -42,6 +42,41 @@ But then Skier came along—minimal, modular, and just as allergic to bloat as I
 
 ---
 
+## Fitness data
+
+The `/life` fitness section is built from the FitGlue showcase export: a set of
+JSON files on a public bucket (`index.json`, `activity/<slug>.json`,
+`roundup/<key>.json` — the contract is in `jarvis-memory/specs/ripixel-website/fitness-zine.md`).
+`tasks/fitness-fetch.mjs` runs early in the personal pipeline and exposes:
+
+| global | shape |
+|---|---|
+| `fitnessIndex` | the `index.json` object (`profile`, `streaks`, `activities[]`, `roundups[]`); an empty skeleton when unavailable |
+| `fitnessActivities` | full `activity/*.json` objects, newest first, each with its index entry attached as `indexEntry` |
+| `fitnessRoundups` | full `roundup/*.json` objects, newest first |
+| `fitnessUnavailable` | `true` when no source could be read |
+| `fitnessSource` | `live` \| `cache` \| `fixtures` \| `none` |
+
+Sources are tried in order **live → `.cache/fitness/` → `fixtures/fitness/` → empty**.
+The build never fails because of fitness data; the task logs one line saying
+which source it used. The live fetch writes everything it downloads into
+`.cache/fitness/` (gitignored) and sends `If-None-Match` on later runs, so an
+unchanged file costs a 304.
+
+| env var | effect |
+|---|---|
+| `FITNESS_DATA_SOURCE=live\|cache\|fixtures` | force one source and skip the fallback chain (a forced source that fails means `fitnessUnavailable=true`). CI and preview builds should set `fixtures`. |
+| `FITNESS_DATA_BASE` | base URL of the export; default `https://storage.googleapis.com/fitglue-server-prod-showcase-assets/site/james`. `FITNESS_DATA_BASE_URL` is accepted as an alias. |
+
+- Refresh the cache from the bucket: `npm run fitness:refresh` (or just build; a normal `npm run build:personal` refreshes it too).
+- Build offline from the committed sample: `FITNESS_DATA_SOURCE=fixtures npm run build:personal`.
+- `fixtures/fitness/` is a copy of the S0 reference fixtures (three activities, one roundup); keep it in sync with the contract, not with the bucket.
+- Tests: `npm test` (`node --test`, no extra dependencies).
+
+Downstream tasks can page over the globals directly (`generatePaginatedItemsTask({ dataVar: '${fitnessActivities}', ... })`); no JSON needs writing to disk.
+
+---
+
 ## Why Skier?
 
 Because life’s too short to debug your own static site generator.

@@ -1,0 +1,1158 @@
+{
+  "schemaVersion": 1,
+  "slug": "colwick-parkrun-2026-10-17",
+  "exportedAt": "2026-10-19T00:06:40Z",
+  "category": "cardio-distance",
+  "activity": {
+    "showcaseId": "colwick-parkrun-2026-10-17",
+    "title": "Colwick parkrun #87",
+    "description": "Went out hard on the first lap and somehow held it. New 5K best.\n\nPosted via FitGlue 💪",
+    "activityType": "ACTIVITY_TYPE_RUN",
+    "source": "SOURCE_STRAVA",
+    "startTime": "2026-10-17T08:00:00Z",
+    "activityData": {
+      "source": "SOURCE_STRAVA",
+      "externalId": "16049382771",
+      "userId": "",
+      "startTime": "2026-10-17T08:00:00Z",
+      "name": "Colwick parkrun #87",
+      "type": "ACTIVITY_TYPE_RUN",
+      "sessions": [
+        {
+          "startTime": "2026-10-17T08:00:00Z",
+          "totalElapsedTime": 1192,
+          "totalDistance": 5010,
+          "laps": [
+            {
+              "startTime": "2026-10-17T08:00:00Z",
+              "totalElapsedTime": 238,
+              "totalDistance": 1000,
+              "exerciseName": "",
+              "intensity": "",
+              "isTelemetryContainerOnly": false,
+              "records": []
+            },
+            {
+              "startTime": "2026-10-17T08:03:58Z",
+              "totalElapsedTime": 241,
+              "totalDistance": 1000,
+              "exerciseName": "",
+              "intensity": "",
+              "isTelemetryContainerOnly": false,
+              "records": []
+            },
+            {
+              "startTime": "2026-10-17T08:07:59Z",
+              "totalElapsedTime": 240,
+              "totalDistance": 1000,
+              "exerciseName": "",
+              "intensity": "",
+              "isTelemetryContainerOnly": false,
+              "records": []
+            },
+            {
+              "startTime": "2026-10-17T08:11:59Z",
+              "totalElapsedTime": 239,
+              "totalDistance": 1000,
+              "exerciseName": "",
+              "intensity": "",
+              "isTelemetryContainerOnly": false,
+              "records": []
+            },
+            {
+              "startTime": "2026-10-17T08:15:58Z",
+              "totalElapsedTime": 234,
+              "totalDistance": 1010,
+              "exerciseName": "",
+              "intensity": "",
+              "isTelemetryContainerOnly": false,
+              "records": []
+            }
+          ],
+          "strengthSets": [],
+          "totalCalories": 342,
+          "avgHeartRate": 171,
+          "maxHeartRate": 186,
+          "minHeartRate": 98
+        }
+      ],
+      "description": "",
+      "tags": [],
+      "notes": "",
+      "timeMarkers": [],
+      "id": "act_01JA9W3K2QX7",
+      "pipelineRunStatus": ""
+    },
+    "appliedEnrichments": [
+      "ENRICHER_PROVIDER_FIT_FILE_HEART_RATE",
+      "ENRICHER_PROVIDER_HEART_RATE_SUMMARY",
+      "ENRICHER_PROVIDER_HEART_RATE_ZONES",
+      "ENRICHER_PROVIDER_PACE_SUMMARY",
+      "ENRICHER_PROVIDER_CADENCE_SUMMARY",
+      "ENRICHER_PROVIDER_ELEVATION_SUMMARY",
+      "ENRICHER_PROVIDER_EFFORT_SCORE",
+      "ENRICHER_PROVIDER_CALORIES_BURNED",
+      "ENRICHER_PROVIDER_TRAINING_LOAD",
+      "ENRICHER_PROVIDER_BEST_EFFORTS",
+      "ENRICHER_PROVIDER_PERSONAL_RECORDS",
+      "ENRICHER_PROVIDER_STREAK_TRACKER",
+      "ENRICHER_PROVIDER_LOCATION_NAMING",
+      "ENRICHER_PROVIDER_WEATHER",
+      "ENRICHER_PROVIDER_PARKRUN",
+      "ENRICHER_PROVIDER_ROUTE_THUMBNAIL",
+      "ENRICHER_PROVIDER_AI_COMPANION",
+      "ENRICHER_PROVIDER_PHOTO_UPLOAD",
+      "ENRICHER_PROVIDER_SOURCE_LINK"
+    ],
+    "tags": [
+      "parkrun",
+      "5k"
+    ],
+    "createdAt": "2026-10-17T09:14:03Z",
+    "expiresAt": null,
+    "ownerDisplayName": "James",
+    "ownerProfilePictureUrl": "https://storage.googleapis.com/fitglue-server-prod-showcase-assets/showcase_pictures/kQ2v9bX1ZtNcR4mL8pW6yHdE3aF7/profile.jpg",
+    "ownerProfileSlug": "james",
+    "photoUrls": [
+      "https://storage.googleapis.com/fitglue-server-prod-showcase-assets/activity_photos/kQ2v9bX1ZtNcR4mL8pW6yHdE3aF7/act_01JA9W3K2QX7/finish-funnel_p.jpg"
+    ],
+    "enrichments": {
+      "heartRate": {
+        "minBpm": 98,
+        "avgBpm": 171,
+        "maxBpm": 186,
+        "driftBpm": 9,
+        "driftWarning": false
+      },
+      "heartRateZones": {
+        "zones": [
+          {
+            "zoneIndex": 0,
+            "name": "Zone 0 (Rest)",
+            "minutes": 0,
+            "percentage": 0.0
+          },
+          {
+            "zoneIndex": 1,
+            "name": "Zone 1 (Recovery)",
+            "minutes": 0,
+            "percentage": 0.0
+          },
+          {
+            "zoneIndex": 2,
+            "name": "Zone 2 (Aerobic)",
+            "minutes": 2,
+            "percentage": 10.0
+          },
+          {
+            "zoneIndex": 3,
+            "name": "Zone 3 (Tempo)",
+            "minutes": 5,
+            "percentage": 25.0
+          },
+          {
+            "zoneIndex": 4,
+            "name": "Zone 4 (Threshold)",
+            "minutes": 9,
+            "percentage": 45.0
+          },
+          {
+            "zoneIndex": 5,
+            "name": "Zone 5 (Max)",
+            "minutes": 4,
+            "percentage": 20.0
+          }
+        ],
+        "totalMinutes": 20
+      },
+      "effort": {
+        "score": 82,
+        "band": "Hard",
+        "factors": [
+          {
+            "label": "HR",
+            "ratioVsBaseline": 1.18
+          },
+          {
+            "label": "Pace",
+            "ratioVsBaseline": 1.09
+          },
+          {
+            "label": "Duration",
+            "ratioVsBaseline": 0.46
+          }
+        ]
+      },
+      "calories": {
+        "kcal": 342,
+        "comparisonText": "≈ 1.2 slices of pizza"
+      },
+      "trainingLoad": {
+        "trimp": 68,
+        "bucket": "Hard",
+        "hint": "Short and sharp — recovery run tomorrow"
+      },
+      "streak": {
+        "currentDays": 12,
+        "longestDays": 31,
+        "calendar": [
+          {
+            "date": "2026-09-20",
+            "state": "STREAK_DAY_STATE_OFF"
+          },
+          {
+            "date": "2026-09-21",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-09-22",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-09-23",
+            "state": "STREAK_DAY_STATE_OFF"
+          },
+          {
+            "date": "2026-09-24",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-09-25",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-09-26",
+            "state": "STREAK_DAY_STATE_OFF"
+          },
+          {
+            "date": "2026-09-27",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-09-28",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-09-29",
+            "state": "STREAK_DAY_STATE_OFF"
+          },
+          {
+            "date": "2026-09-30",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-10-01",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-10-02",
+            "state": "STREAK_DAY_STATE_OFF"
+          },
+          {
+            "date": "2026-10-03",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-10-04",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-10-05",
+            "state": "STREAK_DAY_STATE_OFF"
+          },
+          {
+            "date": "2026-10-06",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-10-07",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-10-08",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-10-09",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-10-10",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-10-11",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-10-12",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-10-13",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-10-14",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-10-15",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-10-16",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          },
+          {
+            "date": "2026-10-17",
+            "state": "STREAK_DAY_STATE_ACTIVE"
+          }
+        ]
+      },
+      "aiSummary": {
+        "html": "<p>A <b>5K personal best</b> at Colwick: 19:52, fourteen seconds under the old mark. The first kilometre was the fastest and the last was the second fastest, which is the right way round for once.</p>",
+        "model": "gemini-2.5-flash",
+        "generatedAt": "2026-10-17T09:13:40Z"
+      },
+      "pace": {
+        "avgPaceSecondsPerKm": 237.9,
+        "bestSplitSecondsPerKm": 231.7,
+        "splits": [
+          {
+            "km": 1,
+            "seconds": 238
+          },
+          {
+            "km": 2,
+            "seconds": 241
+          },
+          {
+            "km": 3,
+            "seconds": 240
+          },
+          {
+            "km": 4,
+            "seconds": 239
+          },
+          {
+            "km": 5,
+            "seconds": 234
+          }
+        ],
+        "paceDropPercent": 0
+      },
+      "cadence": {
+        "avgRpm": 178,
+        "maxRpm": 192
+      },
+      "elevation": {
+        "totalGainM": 24,
+        "totalLossM": 24,
+        "maxAltitudeM": 34
+      },
+      "parkrun": {
+        "eventName": "Colwick parkrun",
+        "position": 23,
+        "finishTime": "19:52",
+        "ageGrade": "68.4%",
+        "totalParkruns": 87,
+        "isTimePb": true,
+        "isAgeGradePb": true
+      },
+      "weather": {
+        "tempC": 9,
+        "weatherDescription": "Partly Cloudy",
+        "windSpeedKph": 11,
+        "windDirection": "W",
+        "weatherCode": 2
+      },
+      "location": {
+        "locationName": "Colwick Park, Nottingham",
+        "country": "United Kingdom",
+        "latitude": 52.9456,
+        "longitude": -1.0994
+      },
+      "personalRecords": {
+        "records": [
+          {
+            "recordType": "5k",
+            "newValue": 1192,
+            "unit": "seconds",
+            "previousValue": 1206,
+            "improvement": 1.2,
+            "displayMessage": "New 5K record: 19:52 (−14s)"
+          }
+        ]
+      },
+      "bestEfforts": {
+        "efforts": [
+          {
+            "distanceKey": "1k",
+            "display": "1K",
+            "distanceM": 1000,
+            "timeSeconds": 234
+          },
+          {
+            "distanceKey": "1_mile",
+            "display": "1 Mile",
+            "distanceM": 1609,
+            "timeSeconds": 379
+          },
+          {
+            "distanceKey": "5k",
+            "display": "5K",
+            "distanceM": 5000,
+            "timeSeconds": 1190
+          }
+        ]
+      }
+    }
+  },
+  "entry": {
+    "showcaseId": "colwick-parkrun-2026-10-17",
+    "title": "Colwick parkrun #87",
+    "activityType": "ACTIVITY_TYPE_RUN",
+    "source": "SOURCE_STRAVA",
+    "startTime": "2026-10-17T08:00:00Z",
+    "routeThumbnailUrl": "https://assets.fitglue.tech/act_01JA9W3K2QX7/route-thumbnail.svg",
+    "distanceMeters": 5010,
+    "durationSeconds": 1192,
+    "totalSets": 0,
+    "totalReps": 0,
+    "totalWeightKg": 0,
+    "boosterCount": 19,
+    "destinationCount": 3,
+    "sparkline": {
+      "metric": "heart_rate",
+      "values": [
+        141.5,
+        148.3,
+        154.0,
+        159.0,
+        163.5,
+        167.0,
+        169.5,
+        172.0,
+        174.5,
+        176.3,
+        178.0,
+        179.3,
+        180.0,
+        181.0,
+        182.0,
+        182.7,
+        183.0,
+        183.7,
+        184.0,
+        184.0,
+        184.5,
+        186.0,
+        188.0,
+        188.0
+      ]
+    },
+    "avgHeartRate": 171,
+    "caloriesKcal": 342,
+    "prLabel": "★ 5K 19:52 · −14s",
+    "hrZoneMinutes": [
+      0,
+      0,
+      2,
+      5,
+      9,
+      4
+    ],
+    "photoUrls": [
+      "https://storage.googleapis.com/fitglue-server-prod-showcase-assets/activity_photos/kQ2v9bX1ZtNcR4mL8pW6yHdE3aF7/act_01JA9W3K2QX7/finish-funnel_p.jpg"
+    ],
+    "createdAt": "2026-10-17T09:14:03Z",
+    "elevationGainM": 24,
+    "locationName": "Colwick Park, Nottingham",
+    "country": "United Kingdom",
+    "tempC": 9,
+    "weatherDescription": "Partly Cloudy",
+    "bestEfforts": [
+      {
+        "distanceKey": "1k",
+        "display": "1K",
+        "distanceM": 1000,
+        "timeSeconds": 234
+      },
+      {
+        "distanceKey": "1_mile",
+        "display": "1 Mile",
+        "distanceM": 1609,
+        "timeSeconds": 379
+      },
+      {
+        "distanceKey": "5k",
+        "display": "5K",
+        "distanceM": 5000,
+        "timeSeconds": 1190
+      }
+    ],
+    "primaryMuscles": []
+  },
+  "series": {
+    "n": 60,
+    "elapsedS": [
+      0,
+      20,
+      40,
+      61,
+      81,
+      101,
+      121,
+      141,
+      162,
+      182,
+      202,
+      222,
+      242,
+      263,
+      283,
+      303,
+      323,
+      343,
+      364,
+      384,
+      404,
+      424,
+      444,
+      465,
+      485,
+      505,
+      525,
+      545,
+      566,
+      586,
+      606,
+      626,
+      647,
+      667,
+      687,
+      707,
+      727,
+      748,
+      768,
+      788,
+      808,
+      828,
+      849,
+      869,
+      889,
+      909,
+      929,
+      950,
+      970,
+      990,
+      1010,
+      1030,
+      1051,
+      1071,
+      1091,
+      1111,
+      1131,
+      1152,
+      1172,
+      1192
+    ],
+    "distanceM": [
+      0,
+      85,
+      170,
+      255,
+      340,
+      425,
+      509,
+      594,
+      679,
+      764,
+      849,
+      934,
+      1019,
+      1104,
+      1189,
+      1274,
+      1359,
+      1444,
+      1528,
+      1613,
+      1698,
+      1783,
+      1868,
+      1953,
+      2038,
+      2123,
+      2208,
+      2293,
+      2378,
+      2463,
+      2547,
+      2632,
+      2717,
+      2802,
+      2887,
+      2972,
+      3057,
+      3142,
+      3227,
+      3312,
+      3397,
+      3482,
+      3566,
+      3651,
+      3736,
+      3821,
+      3906,
+      3991,
+      4076,
+      4161,
+      4246,
+      4331,
+      4416,
+      4501,
+      4585,
+      4670,
+      4755,
+      4840,
+      4925,
+      5010
+    ],
+    "heartRate": [
+      140,
+      143,
+      146,
+      148,
+      151,
+      153,
+      155,
+      157,
+      159,
+      161,
+      163,
+      164,
+      166,
+      167,
+      168,
+      169,
+      170,
+      171,
+      172,
+      173,
+      174,
+      175,
+      176,
+      176,
+      177,
+      178,
+      178,
+      179,
+      179,
+      180,
+      180,
+      180,
+      181,
+      181,
+      181,
+      182,
+      182,
+      182,
+      183,
+      183,
+      183,
+      183,
+      183,
+      184,
+      184,
+      184,
+      184,
+      184,
+      184,
+      184,
+      184,
+      185,
+      185,
+      185,
+      188,
+      188,
+      188,
+      188,
+      188,
+      188
+    ],
+    "speedMs": [
+      4.05,
+      4.08,
+      4.1,
+      4.13,
+      4.15,
+      4.17,
+      4.19,
+      4.21,
+      4.23,
+      4.25,
+      4.26,
+      4.27,
+      4.28,
+      4.29,
+      4.3,
+      4.3,
+      4.3,
+      4.3,
+      4.29,
+      4.28,
+      4.27,
+      4.26,
+      4.25,
+      4.23,
+      4.21,
+      4.19,
+      4.17,
+      4.15,
+      4.12,
+      4.1,
+      4.07,
+      4.05,
+      4.02,
+      4.0,
+      3.97,
+      3.95,
+      3.93,
+      3.9,
+      3.88,
+      3.87,
+      3.85,
+      3.84,
+      3.82,
+      3.81,
+      3.81,
+      3.8,
+      3.8,
+      3.8,
+      3.8,
+      3.81,
+      3.82,
+      3.83,
+      3.84,
+      3.86,
+      3.87,
+      4.39,
+      4.41,
+      4.43,
+      4.46,
+      4.48
+    ],
+    "altitudeM": [
+      28.0,
+      28.3,
+      28.6,
+      28.9,
+      29.3,
+      29.6,
+      29.9,
+      30.2,
+      30.4,
+      30.7,
+      31.0,
+      31.3,
+      31.5,
+      31.8,
+      32.0,
+      32.3,
+      32.5,
+      32.7,
+      32.9,
+      33.0,
+      33.2,
+      33.4,
+      33.5,
+      33.6,
+      33.7,
+      33.8,
+      33.9,
+      33.9,
+      34.0,
+      34.0,
+      34.0,
+      34.0,
+      34.0,
+      33.9,
+      33.9,
+      33.8,
+      33.7,
+      33.6,
+      33.5,
+      33.3,
+      33.2,
+      33.0,
+      32.8,
+      32.6,
+      32.4,
+      32.2,
+      32.0,
+      31.7,
+      31.5,
+      31.2,
+      31.0,
+      30.7,
+      30.4,
+      30.1,
+      29.8,
+      29.5,
+      29.2,
+      28.9,
+      28.6,
+      28.2
+    ],
+    "cadenceRpm": [
+      176,
+      176,
+      177,
+      177,
+      177,
+      178,
+      178,
+      178,
+      179,
+      179,
+      179,
+      179,
+      179,
+      180,
+      180,
+      180,
+      180,
+      180,
+      180,
+      180,
+      180,
+      180,
+      180,
+      180,
+      180,
+      179,
+      179,
+      179,
+      179,
+      179,
+      178,
+      178,
+      178,
+      177,
+      177,
+      177,
+      176,
+      176,
+      176,
+      175,
+      175,
+      175,
+      174,
+      174,
+      174,
+      174,
+      173,
+      173,
+      173,
+      173,
+      172,
+      172,
+      172,
+      172,
+      172,
+      172,
+      172,
+      172,
+      172,
+      172
+    ]
+  },
+  "routePoints": [
+    [
+      52.9456,
+      -1.0904
+    ],
+    [
+      52.94617,
+      -1.09044
+    ],
+    [
+      52.94672,
+      -1.09054
+    ],
+    [
+      52.94724,
+      -1.09072
+    ],
+    [
+      52.94771,
+      -1.09097
+    ],
+    [
+      52.94812,
+      -1.09129
+    ],
+    [
+      52.94845,
+      -1.09167
+    ],
+    [
+      52.94871,
+      -1.09212
+    ],
+    [
+      52.9489,
+      -1.09262
+    ],
+    [
+      52.94902,
+      -1.09318
+    ],
+    [
+      52.94907,
+      -1.09379
+    ],
+    [
+      52.94908,
+      -1.09444
+    ],
+    [
+      52.94905,
+      -1.09514
+    ],
+    [
+      52.949,
+      -1.09586
+    ],
+    [
+      52.94893,
+      -1.09662
+    ],
+    [
+      52.94887,
+      -1.0974
+    ],
+    [
+      52.94883,
+      -1.09819
+    ],
+    [
+      52.9488,
+      -1.099
+    ],
+    [
+      52.9488,
+      -1.0998
+    ],
+    [
+      52.94883,
+      -1.10061
+    ],
+    [
+      52.94887,
+      -1.1014
+    ],
+    [
+      52.94893,
+      -1.10218
+    ],
+    [
+      52.949,
+      -1.10294
+    ],
+    [
+      52.94905,
+      -1.10366
+    ],
+    [
+      52.94908,
+      -1.10436
+    ],
+    [
+      52.94907,
+      -1.10501
+    ],
+    [
+      52.94902,
+      -1.10562
+    ],
+    [
+      52.9489,
+      -1.10618
+    ],
+    [
+      52.94871,
+      -1.10668
+    ],
+    [
+      52.94845,
+      -1.10713
+    ],
+    [
+      52.94812,
+      -1.10751
+    ],
+    [
+      52.94771,
+      -1.10783
+    ],
+    [
+      52.94724,
+      -1.10808
+    ],
+    [
+      52.94672,
+      -1.10826
+    ],
+    [
+      52.94617,
+      -1.10836
+    ],
+    [
+      52.9456,
+      -1.1084
+    ],
+    [
+      52.94503,
+      -1.10836
+    ],
+    [
+      52.94448,
+      -1.10826
+    ],
+    [
+      52.94396,
+      -1.10808
+    ],
+    [
+      52.94349,
+      -1.10783
+    ],
+    [
+      52.94308,
+      -1.10751
+    ],
+    [
+      52.94275,
+      -1.10713
+    ],
+    [
+      52.94249,
+      -1.10668
+    ],
+    [
+      52.9423,
+      -1.10618
+    ],
+    [
+      52.94218,
+      -1.10562
+    ],
+    [
+      52.94213,
+      -1.10501
+    ],
+    [
+      52.94212,
+      -1.10436
+    ],
+    [
+      52.94215,
+      -1.10366
+    ],
+    [
+      52.9422,
+      -1.10294
+    ],
+    [
+      52.94227,
+      -1.10218
+    ],
+    [
+      52.94233,
+      -1.1014
+    ],
+    [
+      52.94237,
+      -1.10061
+    ],
+    [
+      52.9424,
+      -1.0998
+    ],
+    [
+      52.9424,
+      -1.099
+    ],
+    [
+      52.94237,
+      -1.09819
+    ],
+    [
+      52.94233,
+      -1.0974
+    ],
+    [
+      52.94227,
+      -1.09662
+    ],
+    [
+      52.9422,
+      -1.09586
+    ],
+    [
+      52.94215,
+      -1.09514
+    ],
+    [
+      52.94212,
+      -1.09444
+    ],
+    [
+      52.94213,
+      -1.09379
+    ],
+    [
+      52.94218,
+      -1.09318
+    ],
+    [
+      52.9423,
+      -1.09262
+    ],
+    [
+      52.94249,
+      -1.09212
+    ],
+    [
+      52.94275,
+      -1.09167
+    ],
+    [
+      52.94308,
+      -1.09129
+    ],
+    [
+      52.94349,
+      -1.09097
+    ],
+    [
+      52.94396,
+      -1.09072
+    ],
+    [
+      52.94448,
+      -1.09054
+    ],
+    [
+      52.94503,
+      -1.09044
+    ],
+    [
+      52.9456,
+      -1.0904
+    ]
+  ]
+}

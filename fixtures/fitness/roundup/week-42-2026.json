@@ -1,0 +1,223 @@
+{
+  "schemaVersion": 1,
+  "key": "week-42-2026",
+  "exportedAt": "2026-10-19T00:06:40Z",
+  "previousKey": "week-41-2026",
+  "roundup": {
+    "roundupId": "james-week-42-2026",
+    "slug": "james",
+    "periodType": "ROUNDUP_PERIOD_TYPE_WEEK",
+    "periodKey": "week-42-2026",
+    "periodStart": "2026-10-12T00:00:00Z",
+    "periodEnd": "2026-10-19T00:00:00Z",
+    "generatedAt": "2026-10-19T00:05:12Z",
+    "totalActivities": 3,
+    "totalDurationSeconds": 8992,
+    "totalDistanceMeters": 37410,
+    "totalElevationGainMeters": 334,
+    "totalCaloriesKcal": 1564,
+    "activityTypeBreakdowns": [
+      {
+        "activityType": "ACTIVITY_TYPE_RUN",
+        "activityCount": 1,
+        "totalDistanceMeters": 5010,
+        "totalDurationSeconds": 1192,
+        "totalWeightKg": 0,
+        "totalSets": 0,
+        "totalReps": 0
+      },
+      {
+        "activityType": "ACTIVITY_TYPE_RIDE",
+        "activityCount": 1,
+        "totalDistanceMeters": 32400,
+        "totalDurationSeconds": 4380,
+        "totalWeightKg": 0,
+        "totalSets": 0,
+        "totalReps": 0
+      },
+      {
+        "activityType": "ACTIVITY_TYPE_WEIGHT_TRAINING",
+        "activityCount": 1,
+        "totalDistanceMeters": 0,
+        "totalDurationSeconds": 3420,
+        "totalWeightKg": 6286.0,
+        "totalSets": 18,
+        "totalReps": 219
+      }
+    ],
+    "hrZoneMinutes": [
+      12,
+      38,
+      48,
+      29,
+      19,
+      4
+    ],
+    "prsAchieved": [
+      {
+        "recordType": "Bench Press (Barbell)_1rm",
+        "value": 100,
+        "unit": "kg",
+        "achievedAt": "2026-10-13T18:41:00Z",
+        "previousValue": 97.5
+      },
+      {
+        "recordType": "Bench Press (Barbell)_set_volume",
+        "value": 640,
+        "unit": "kg",
+        "achievedAt": "2026-10-13T18:14:00Z",
+        "previousValue": 600
+      },
+      {
+        "recordType": "5k",
+        "value": 1192,
+        "unit": "seconds",
+        "achievedAt": "2026-10-17T08:19:52Z",
+        "previousValue": 1206
+      }
+    ],
+    "sources": [
+      "SOURCE_STRAVA",
+      "SOURCE_HEVY"
+    ],
+    "effortEasyCount": 0,
+    "effortModerateCount": 0,
+    "effortHardCount": 0,
+    "ownerDisplayName": "James",
+    "ownerProfilePictureUrl": "https://storage.googleapis.com/fitglue-server-prod-showcase-assets/showcase_pictures/kQ2v9bX1ZtNcR4mL8pW6yHdE3aF7/profile.jpg",
+    "ownerProfileSlug": "james",
+    "longestActivityDurationSeconds": 4380,
+    "highestSingleLiftKg": 0,
+    "highestCaloriesPerHourKcal": 1032.9,
+    "highestAvgBpmActivityTitle": "Colwick parkrun #87",
+    "highestAvgBpm": 171,
+    "aiSummary": "Three sessions, three different shapes: a push day that finally put 100 kg on the bench, a 32 km evening loop out to the reservoir with one honest climb, and a parkrun that came in at 19:52 — a 5K best by fourteen seconds. Light on volume, heavy on milestones.",
+    "calloutActivities": [
+      {
+        "kind": "BIGGEST SESSION",
+        "title": "Evening ride to the reservoir",
+        "statValue": "1:13",
+        "statUnit": "H:MM · 32 KM",
+        "sub": "",
+        "date": "15 Oct",
+        "activityType": "ACTIVITY_TYPE_RIDE",
+        "showcaseId": "evening-ride-to-the-reservoir-2026-10-15"
+      },
+      {
+        "kind": "PERSONAL RECORDS",
+        "title": "Records Broken",
+        "statValue": "2",
+        "statUnit": "RECORDS IN ONE SESSION",
+        "sub": "3 total PRs this period",
+        "date": "13 Oct",
+        "activityType": "ACTIVITY_TYPE_UNSPECIFIED",
+        "showcaseId": "push-day-2026-10-13"
+      }
+    ],
+    "dayEntries": [
+      {
+        "date": "2026-10-13",
+        "effortLevel": 1,
+        "activityCount": 1
+      },
+      {
+        "date": "2026-10-15",
+        "effortLevel": 2,
+        "activityCount": 1
+      },
+      {
+        "date": "2026-10-17",
+        "effortLevel": 4,
+        "activityCount": 1
+      }
+    ],
+    "photos": [
+      {
+        "url": "https://storage.googleapis.com/fitglue-server-prod-showcase-assets/activity_photos/kQ2v9bX1ZtNcR4mL8pW6yHdE3aF7/act_01JA9W3K2QX7/finish-funnel_p.jpg",
+        "activityTitle": "Colwick parkrun #87",
+        "date": "17 Oct",
+        "activityType": "ACTIVITY_TYPE_RUN",
+        "showcaseId": "colwick-parkrun-2026-10-17"
+      }
+    ],
+    "routes": [
+      {
+        "thumbnailUrl": "https://assets.fitglue.tech/act_01JA9W3K2QX7/route-thumbnail.svg",
+        "activityTitle": "Colwick parkrun #87",
+        "date": "17 Oct",
+        "distanceMeters": 5010,
+        "activityType": "ACTIVITY_TYPE_RUN",
+        "showcaseId": "colwick-parkrun-2026-10-17"
+      },
+      {
+        "thumbnailUrl": "https://assets.fitglue.tech/act_01JA6R8D4HT2/route-thumbnail.svg",
+        "activityTitle": "Evening ride to the reservoir",
+        "date": "15 Oct",
+        "distanceMeters": 32400,
+        "activityType": "ACTIVITY_TYPE_RIDE",
+        "showcaseId": "evening-ride-to-the-reservoir-2026-10-15"
+      }
+    ],
+    "places": [
+      {
+        "name": "Colwick Park",
+        "country": "United Kingdom",
+        "activityCount": 1
+      },
+      {
+        "name": "Hoveringham",
+        "country": "United Kingdom",
+        "activityCount": 1
+      }
+    ],
+    "weather": {
+      "sessionCount": 2,
+      "rainCount": 0,
+      "coldestTempC": 9,
+      "hottestTempC": 11
+    },
+    "bestEfforts": [
+      {
+        "distanceKey": "1k",
+        "display": "1K",
+        "distanceM": 1000,
+        "timeSeconds": 234
+      },
+      {
+        "distanceKey": "1_mile",
+        "display": "1 Mile",
+        "distanceM": 1609,
+        "timeSeconds": 379
+      },
+      {
+        "distanceKey": "5k",
+        "display": "5K",
+        "distanceM": 5000,
+        "timeSeconds": 1190
+      }
+    ],
+    "muscles": [
+      {
+        "name": "chest",
+        "count": 1
+      },
+      {
+        "name": "shoulders",
+        "count": 1
+      },
+      {
+        "name": "triceps",
+        "count": 1
+      }
+    ],
+    "furthestActivityMeters": 32400,
+    "mostCaloriesSingleKcal": 812,
+    "biggestSessionVolumeKg": 6286.0,
+    "longestSessionShowcaseId": "evening-ride-to-the-reservoir-2026-10-15",
+    "highestBurnRateShowcaseId": "colwick-parkrun-2026-10-17",
+    "highestAvgBpmShowcaseId": "colwick-parkrun-2026-10-17",
+    "furthestShowcaseId": "evening-ride-to-the-reservoir-2026-10-15",
+    "mostCaloriesShowcaseId": "evening-ride-to-the-reservoir-2026-10-15",
+    "biggestVolumeShowcaseId": "push-day-2026-10-13"
+  }
+}
