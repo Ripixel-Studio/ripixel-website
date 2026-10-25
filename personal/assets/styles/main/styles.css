@@ -243,7 +243,7 @@ body.page-projects .masthead__nav .nav-projects { opacity: 1; }
 body.page-thoughts .masthead__nav .nav-thoughts { opacity: 1; }
 body.page-profile  .masthead__nav .nav-profile  { opacity: 1; }
 body.page-life     .masthead__nav .nav-life,
-body.page-fitness  .masthead__nav .nav-fitness  { opacity: 1; }
+body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
 
 /* ─── 7. Zine Components ───────────────── */
 
@@ -2203,7 +2203,7 @@ body.page-projects .tab-bar__item--projects { opacity: 1; }
 body.page-thoughts .tab-bar__item--thoughts { opacity: 1; }
 body.page-profile  .tab-bar__item--profile  { opacity: 1; }
 body.page-life     .tab-bar__item--life,
-body.page-fitness  .tab-bar__item--fitness  { opacity: 1; }
+body.page-life     .tab-bar__item--fitness  { opacity: 1; }
 
 /* ─── 17. Responsive ─────────────────────── */
 

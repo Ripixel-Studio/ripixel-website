@@ -28,6 +28,8 @@ export const DEFAULT_TEMPLATE = 'personal/templates/activity.html';
 export const DEFAULT_PARTIALS_DIR = 'personal/partials';
 export const DEFAULT_OUT_DIR = 'public/personal';
 export const ACTIVITY_BASE_PATH = '/life/activity';
+/** Where tasks/fitness-feed.mjs writes the Atom feed (kept as a literal: that module imports this one). */
+export const FITNESS_FEED_PATH = '/life/feed.xml';
 
 /** Same shape the fetch task accepts; slugs become file names. */
 const SAFE_SLUG = /^[A-Za-z0-9][A-Za-z0-9._-]{0,200}$/;
@@ -1004,7 +1006,8 @@ export function anchorStats({ category, distanceM, durationS, avgBpm, maxBpm, ca
  * Build the template context for one activity file.
  * @param {any} file     an element of `fitnessActivities` (activity file + indexEntry)
  * @param {any} index    `fitnessIndex`
- * @param {{ siteUrl?: string }} [opts]
+ * @param {{ siteUrl?: string, ogCard?: string }} [opts]  `ogCard` is the rendered OG card URL from
+ *   tasks/fitness-og-images.mjs; when set it is the og:image, else banner → first photo → section card.
  */
 export function buildActivityView(file, index, opts = {}) {
   const activity = file?.activity ?? {};
@@ -1145,17 +1148,25 @@ export function buildActivityView(file, index, opts = {}) {
   if (destinationCount > 0) extraStats.push({ value: destinationCount, unit: '', label: `destination${destinationCount === 1 ? '' : 's'}`, subtext: 'pushed to' });
 
   const ogDescription = truncate(description || stripTags(aiSummaryHtml) || `${typeLabel(activityType).toLowerCase()} · ${fmtDateShort(activity.startTime ?? entry.startTime)}`, 200);
-  const ogImage = bannerUrl || photos[0] || '';
+  const ogImage = (opts.ogCard && /^https?:\/\//.test(opts.ogCard) ? opts.ogCard : '') || bannerUrl || photos[0] || '';
+  const canonical = siteUrl ? `${siteUrl}${activityUrl(slug)}` : '';
 
   return {
     page: 'life',
     subpage: `| ${title}`,
     description: ogDescription,
     currentPage: `life/activity/${slug}`,
+    // head.html overrides (shared partial): title, article OG, canonical, the fitness feed.
+    headTitle: `${title} — James King`,
+    ogType: 'article',
+    ogImage,
+    canonical,
+    publishedTime: activity.startTime ?? entry.startTime ?? '',
+    atomFeed: FITNESS_FEED_PATH,
     act: {
       slug,
       url: activityUrl(slug),
-      canonical: siteUrl ? `${siteUrl}${activityUrl(slug)}` : '',
+      canonical,
       title,
       icon,
       typeLabel: typeLabel(activityType),
@@ -1251,7 +1262,8 @@ export function generateActivityPagesTask(config = {}) {
           ctx.logger.warn(e instanceof Error ? e.message : String(e));
           continue;
         }
-        const view = buildActivityView(file, ctx.globals.fitnessIndex, { siteUrl: ctx.globals.siteUrl });
+        const ogCard = ctx.globals.fitnessOgImages?.activity?.[String(slug)];
+        const view = buildActivityView(file, ctx.globals.fitnessIndex, { siteUrl: ctx.globals.siteUrl, ogCard });
         const html = render({ ...ctx.globals, ...view });
         await fs.mkdir(path.dirname(outPath), { recursive: true });
         await fs.writeFile(outPath, html);

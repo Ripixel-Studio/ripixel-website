@@ -321,7 +321,10 @@ test('fitnessRoundupPagesTask writes one page per roundup plus the index', async
     const result = await task.run(task.config, {
       logger,
       debug: false,
-      globals: { cacheHash: 'test', year: 2026, fitnessIndex: index, fitnessRoundups: [file], fitnessUnavailable: false, fitnessSource: 'fixtures' },
+      globals: {
+        cacheHash: 'test', year: 2026, siteUrl: 'https://james.ripixel.co.uk', fitnessIndex: index, fitnessRoundups: [file], fitnessUnavailable: false, fitnessSource: 'fixtures',
+        fitnessOgImages: { activity: {}, roundup: { 'week-42-2026': 'https://james.ripixel.co.uk/life/og/roundup/week-42-2026.png' } },
+      },
     });
     assert.equal(result.fitnessRoundupPages.length, 1);
     assert.equal(result.fitnessRoundupPages[0].url, '/life/roundup/week-42-2026');
@@ -332,15 +335,21 @@ test('fitnessRoundupPagesTask writes one page per roundup plus the index', async
     assert.match(page, /class="roundup-effort roundup-effort--bars"/);
     assert.match(page, /href="\/life\/activity\/push-day-2026-10-13"/);
     assert.match(page, /Three sessions, three different shapes/);
-    // The shared masthead/tab-bar still carry the old fitglue.tech nav link (S2.2 replaces
-    // them); the roundup content itself must never link there.
-    const body = page.slice(page.indexOf('thought-breadcrumb'), page.indexOf('roundup-foot'));
-    assert.doesNotMatch(body, /https?:\/\/(?!assets\.)[a-z.]*fitglue\.tech/i, 'roundup content never references fitglue.tech except the assets host');
+    // Nothing on the page links to fitglue.tech (the nav points at /life since S2.5); the assets host is the one exception.
+    assert.doesNotMatch(page, /https?:\/\/(?!assets\.)[a-z.]*fitglue\.tech/i, 'page never references fitglue.tech except the assets host');
+    // S2.5 head overrides: OG card, canonical, article type, feed link.
+    assert.match(page, /<meta property="og:image" content="https:\/\/james\.ripixel\.co\.uk\/life\/og\/roundup\/week-42-2026\.png"/);
+    assert.match(page, /<link rel="canonical" href="https:\/\/james\.ripixel\.co\.uk\/life\/roundup\/week-42-2026"/);
+    assert.match(page, /<meta property="og:type" content="article"/);
+    assert.match(page, /<meta property="article:published_time" content="2026-10-19T00:05:12Z"/);
+    assert.match(page, /<link rel="alternate" type="application\/atom\+xml" href="\/life\/feed\.xml"/);
     assert.doesNotMatch(page, /<p>Three/, 'summary is text, not markup');
     assert.match(page, /styles\.min\.test\.css/);
 
     const idx = await fs.readFile(path.join(outDir, 'life', 'roundups.html'), 'utf8');
     assert.match(idx, /href="\/life\/roundup\/week-42-2026"/);
+    assert.match(idx, /<meta property="og:image" content="https:\/\/james\.ripixel\.co\.uk\/card_life\.png"/, 'index keeps the section card');
+    assert.match(idx, /application\/atom\+xml" href="\/life\/feed\.xml"/);
     assert.match(idx, /1 issue</);
   } finally {
     await fs.rm(outDir, { recursive: true, force: true });

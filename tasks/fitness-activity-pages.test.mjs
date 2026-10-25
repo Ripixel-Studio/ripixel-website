@@ -303,6 +303,20 @@ describe('view model from the fixtures', () => {
     assert.deepEqual(a.footerChips, ['↗ Linked to Strava']);
     assert.equal(a.ogImage, a.photos[0]);
     assert.equal(v.description, a.description);
+    // head.html overrides
+    assert.equal(v.headTitle, 'Colwick parkrun #87 — James King');
+    assert.equal(v.ogType, 'article');
+    assert.equal(v.ogImage, a.photos[0]);
+    assert.equal(v.canonical, a.canonical);
+    assert.equal(v.publishedTime, '2026-10-17T08:00:00Z');
+    assert.equal(v.atomFeed, '/life/feed.xml');
+  });
+  test('a rendered OG card (S2.5) beats banner and photo for og:image; a non-URL is ignored', async () => {
+    const index = await fixtureIndex();
+    const ride = await fixture('evening-ride-to-the-reservoir-2026-10-15');
+    const card = 'https://james.ripixel.co.uk/life/og/activity/evening-ride-to-the-reservoir-2026-10-15.png';
+    assert.equal(buildActivityView(ride, index, { ogCard: card }).ogImage, card);
+    assert.match(buildActivityView(ride, index, { ogCard: 'life/og/x.png' }).ogImage, /banner\.png$/);
   });
   test('photos are gated by profile.showPhotoGallery', async () => {
     const index = await fixtureIndex();
@@ -364,7 +378,10 @@ describe('task', () => {
       const warnings = [];
       const ctx = {
         debug: false,
-        globals: { fitnessIndex: data.index, fitnessActivities: [...data.activities, { slug: '../escape', activity: {}, entry: {} }], year: 2026, cacheHash: 'x', siteUrl: 'https://james.ripixel.co.uk' },
+        globals: {
+          fitnessIndex: data.index, fitnessActivities: [...data.activities, { slug: '../escape', activity: {}, entry: {} }], year: 2026, cacheHash: 'x', siteUrl: 'https://james.ripixel.co.uk',
+          fitnessOgImages: { activity: { 'colwick-parkrun-2026-10-17': 'https://james.ripixel.co.uk/life/og/activity/colwick-parkrun-2026-10-17.png' }, roundup: {} },
+        },
         logger: { info() {}, warn(m) { warnings.push(m); }, error() {}, debug() {} },
       };
       const task = generateActivityPagesTask({ outDir: tmp, template: path.join(REPO, 'personal/templates/activity.html'), partialsDir: path.join(REPO, 'personal/partials') });
@@ -374,18 +391,24 @@ describe('task', () => {
       assert.match(warnings[0], /unusable activity slug/);
       const html = await fs.readFile(path.join(tmp, 'life', 'activity', 'colwick-parkrun-2026-10-17', 'index.html'), 'utf8');
       assert.match(html, /<title>Colwick parkrun #87 — James King<\/title>/);
-      assert.match(html, /<meta property="og:image" content="https:\/\/storage\.googleapis\.com\//);
+      assert.match(html, /<meta property="og:image" content="https:\/\/james\.ripixel\.co\.uk\/life\/og\/activity\/colwick-parkrun-2026-10-17\.png"/);
+      assert.match(html, /<meta property="og:type" content="article"/);
+      assert.match(html, /<link rel="canonical" href="https:\/\/james\.ripixel\.co\.uk\/life\/activity\/colwick-parkrun-2026-10-17\/"/);
+      assert.match(html, /<link rel="alternate" type="application\/atom\+xml" href="\/life\/feed\.xml"/);
+      assert.doesNotMatch(html, /activity-head/);
       assert.match(html, /class="act-zones__bar"/);
       assert.match(html, /class="act-sparkline__line"/);
       assert.match(html, /class="act-map__svg"/);
       assert.match(html, /act-band--parkrun/);
       assert.match(html, /href="\/life"/);
       assert.match(html, /<link rel="stylesheet" href="\/styles\.min\.x\.css"/);
-      // No fitglue.tech page links in the page body (the shared masthead/tab-bar nav is S2.2's to retarget).
-      const body = html.slice(html.indexOf('class="zine-content"'), html.indexOf('class="page-footer"'));
-      assert.doesNotMatch(body, /fitglue\.tech\/@/);
-      assert.doesNotMatch(body, /href="https?:\/\/[^"]*fitglue\.tech/);
+      // No fitglue.tech page links anywhere — the masthead/tab-bar "fitness" item points at /life since S2.5.
+      assert.doesNotMatch(html, /fitglue\.tech\/@/);
+      assert.doesNotMatch(html, /href="https?:\/\/[^"]*fitglue\.tech/);
+      assert.match(html, /class="nav-fitness" href="\/life"/);
       assert.doesNotMatch(html, /<script src="http/);
+      const ride = await fs.readFile(path.join(tmp, 'life', 'activity', 'evening-ride-to-the-reservoir-2026-10-15', 'index.html'), 'utf8');
+      assert.match(ride, /<meta property="og:image" content="https:\/\/[^"]*\/banner\.png"/, 'no card for this slug → the AI banner');
       const strength = await fs.readFile(path.join(tmp, 'life', 'activity', 'push-day-2026-10-13', 'index.html'), 'utf8');
       assert.match(strength, /class="exercise-item exercise-strength"/);
       assert.match(strength, /4×8 × 80kg/);

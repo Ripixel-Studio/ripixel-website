@@ -27,6 +27,8 @@ export const DEFAULT_OUT_DIR = 'public/personal';
 export const ROUNDUP_URL_BASE = '/life/roundup';
 export const ROUNDUPS_INDEX_URL = '/life/roundups';
 export const ACTIVITY_URL_BASE = '/life/activity';
+/** Where tasks/fitness-feed.mjs writes the Atom feed (a literal here: that module imports this one). */
+export const FITNESS_FEED_PATH = '/life/feed.xml';
 
 /** Period keys as `periodKey()` in roundup_generator.go mints them (contract §0). */
 export const PERIOD_KEY = /^(?:week-(\d{2})-(\d{4})|month-(\d{2})-(\d{4})|year-(\d{4}))$/;
@@ -696,13 +698,20 @@ export function fitnessRoundupPagesTask(config = {}) {
         activitySlugs,
         showPhotoGallery: Boolean(index.profile?.showPhotoGallery),
       };
-      const common = { page: 'life', fitnessIndex: index };
+      const siteUrl = String(g.siteUrl || '').replace(/\/+$/, '');
+      const common = { page: 'life', fitnessIndex: index, atomFeed: FITNESS_FEED_PATH };
+      const ogCards = g.fitnessOgImages?.roundup || {};
 
       const pages = [];
       for (const file of files) {
         try {
           const view = buildRoundupView(file, viewCtx);
-          const html = renderPage({ ...g, ...common, subpage: `| ${view.subpage} roundup`, description: view.description, roundup: view });
+          const ogImage = typeof ogCards[file.key] === 'string' && /^https?:\/\//.test(ogCards[file.key]) ? ogCards[file.key] : '';
+          const html = renderPage({
+            ...g, ...common,
+            subpage: `| ${view.subpage} roundup`, description: view.description, roundup: view,
+            ogType: 'article', ogImage, canonical: siteUrl ? `${siteUrl}${view.url}` : '', publishedTime: view.generatedAt,
+          });
           const outPath = keyToPath(file.key, outDir);
           await fs.mkdir(path.dirname(outPath), { recursive: true });
           await fs.writeFile(outPath, html);
