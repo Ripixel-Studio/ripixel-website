@@ -73,6 +73,13 @@ unchanged file costs a 304.
 - `fixtures/fitness/` is a copy of the S0 reference fixtures (three activities, one roundup); keep it in sync with the contract, not with the bucket.
 - Tests: `npm test` (`node --test`, no extra dependencies).
 
+`tasks/fitness-life.mjs` runs straight after the fetch and turns those globals (plus the
+hand-written `events` in `personal/items/life/fitness.json`) into one pre-formatted
+`fitnessLife` global for `personal/pages/life.html` — the week strip, the latest six
+activity cards, the roundup teaser, the totals/streaks/PB block and the events list. Skier's
+Handlebars has no custom helpers, so all formatting lives in that task; the `fitness-*`
+partials only loop and test.
+
 Downstream tasks can page over the globals directly (`generatePaginatedItemsTask({ dataVar: '${fitnessActivities}', ... })`); no JSON needs writing to disk.
 
 ---

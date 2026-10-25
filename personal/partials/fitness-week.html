@@ -1,0 +1,35 @@
+<!-- Context: fitnessLife.week — the latest weekly roundup (or last-7-days fallback) -->
+<section class="fit-week" aria-labelledby="fit-week-title">
+  <div class="fit-week__head">
+    <span class="fit-week__kicker">{{kicker}}</span>
+    <h2 class="fit-week__title" id="fit-week-title">{{title}}<span>.</span></h2>
+    <span class="fit-week__range">{{range}}</span>
+  </div>
+  <div class="fit-week__body">
+    <figure class="fit-strip">
+      <svg class="fit-strip__svg" viewBox="0 0 280 72" role="img"
+           aria-label="Effort by day, {{range}}: {{activeDays}} of 7 days active">
+        <desc>{{#each days}}{{label}}: {{sessions}}, effort {{level}} of 4{{#unless @last}}; {{/unless}}{{/each}}</desc>
+        <line class="fit-strip__base" x1="0" y1="56.5" x2="280" y2="56.5"/>
+        {{#each days}}
+        <rect class="fit-strip__bar {{levelClass}}" x="{{x}}" y="{{y}}" width="28" height="{{h}}" rx="2">
+          <title>{{label}} · {{sessions}} · effort {{level}}/4</title>
+        </rect>
+        <text class="fit-strip__day" x="{{textX}}" y="69" text-anchor="middle">{{letter}}</text>
+        {{/each}}
+      </svg>
+      <figcaption class="fit-strip__caption">effort by day · {{activeDays}} of 7 active</figcaption>
+    </figure>
+    <dl class="fit-week__stats">
+      {{#each stats}}
+      <div class="fit-week__stat">
+        <dt class="fit-week__label">{{label}}</dt>
+        <dd class="fit-week__num">{{value}}{{#if unit}}<small>{{unit}}</small>{{/if}}</dd>
+      </div>
+      {{/each}}
+    </dl>
+  </div>
+  {{#if href}}
+  <a class="fit-week__link" href="{{href}}">read the week's roundup →</a>
+  {{/if}}
+</section>

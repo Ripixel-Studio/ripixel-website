@@ -16,6 +16,7 @@ import {
     generateSitemapTask
 } from 'skier';
 import { fetchFitnessTask } from './tasks/fitness-fetch.mjs';
+import { fitnessLifeTask } from './tasks/fitness-life.mjs';
 
 /** Estimate read time in minutes from raw text (200 wpm)
  * @param {string} text */
@@ -206,6 +207,7 @@ export const tasks = [
     // Sets fitnessIndex, fitnessActivities, fitnessRoundups, fitnessUnavailable, fitnessSource.
     // Env: FITNESS_DATA_BASE (URL), FITNESS_DATA_SOURCE=live|cache|fixtures. See README "Fitness data".
     fetchFitnessTask(),
+    fitnessLifeTask(), // S2.2 life page — builds `fitnessLife` from the fitness globals; must precede generate-pages
 
     // Generate individual thought article pages (adds readTime to each item)
     generateItemsTask({
