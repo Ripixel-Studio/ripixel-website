@@ -1,0 +1,30 @@
+{{!-- Activity-type breakdown: share bar + one row per sport. Context: roundup view. --}}
+<div class="zine-card">
+  <div class="zine-card__inner">
+    <div class="roundup-card__label">SESSION SHARE</div>
+    <div class="roundup-stack" role="img" aria-label="Share of sessions by sport">
+      {{#each breakdown}}
+      <span class="roundup-stack__seg roundup-ink-{{ink}}" style="width:{{share}}%" title="{{label}} · {{count}}"></span>
+      {{/each}}
+    </div>
+    <ul class="roundup-sports">
+      {{#each breakdown}}
+      <li class="roundup-sports__row">
+        <span class="roundup-sports__swatch roundup-ink-{{ink}}" aria-hidden="true"></span>
+        <span class="roundup-sports__glyph" aria-hidden="true">{{glyph}}</span>
+        <span class="roundup-sports__label">{{label}}</span>
+        <span class="roundup-sports__count"><b>{{count}}</b> · {{pct}}%</span>
+        {{#if stats}}<span class="roundup-sports__stats">{{stats}}</span>{{/if}}
+      </li>
+      {{/each}}
+    </ul>
+    {{#if hasDistanceStack}}
+    <div class="roundup-card__label roundup-card__label--gap">DISTANCE SHARE</div>
+    <div class="roundup-stack" role="img" aria-label="Share of distance by sport">
+      {{#each distanceStack}}
+      <span class="roundup-stack__seg roundup-ink-{{ink}}" style="width:{{distShare}}%" title="{{label}}"></span>
+      {{/each}}
+    </div>
+    {{/if}}
+  </div>
+</div>

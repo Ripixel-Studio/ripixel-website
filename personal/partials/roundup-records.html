@@ -1,0 +1,33 @@
+{{!-- Records wall: PRs achieved in the period, grouped per exercise. Context: roundup view. --}}
+<section class="roundup-section">
+  <div class="roundup-section__head">
+    <h2 class="roundup-section__title">RECORDS<span>.</span></h2>
+    <span class="roundup-section__note">{{#if prCount}}{{prCount}} new{{else}}none this {{word}}{{/if}}</span>
+  </div>
+  {{#if records.length}}
+  <div class="roundup-grid roundup-grid--3">
+    {{#each records}}
+    <div class="zine-card roundup-record">
+      <div class="zine-card__inner">
+        <div class="roundup-record__top">
+          <span class="roundup-record__glyph" aria-hidden="true">{{glyph}}</span>
+          {{#if date}}<span class="roundup-record__date">{{date}}</span>{{/if}}
+        </div>
+        <div class="roundup-record__label">{{label}}</div>
+        <ul class="roundup-record__metrics">
+          {{#each metrics}}
+          <li class="roundup-record__metric">
+            {{#if metric}}<span class="roundup-record__type">{{metric}}</span>{{/if}}
+            <span class="roundup-record__value">{{value}}{{#if unit}}<small>{{unit}}</small>{{/if}}</span>
+            <span class="roundup-record__delta">{{delta}}</span>
+          </li>
+          {{/each}}
+        </ul>
+      </div>
+    </div>
+    {{/each}}
+  </div>
+  {{else}}
+  <div class="zine-card"><div class="zine-card__inner"><p class="roundup-empty">no records fell this {{word}}. the bar stays where it is.</p></div></div>
+  {{/if}}
+</section>

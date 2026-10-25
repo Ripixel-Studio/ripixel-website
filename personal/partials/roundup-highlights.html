@@ -1,0 +1,40 @@
+{{!-- Best efforts (fastest per distance) and the single-session peaks. Context: roundup view. --}}
+{{#if bestEfforts.length}}
+<section class="roundup-section">
+  <div class="roundup-section__head">
+    <h2 class="roundup-section__title">BEST EFFORTS<span>.</span></h2>
+    <span class="roundup-section__note">fastest over each distance</span>
+  </div>
+  <div class="roundup-cells roundup-cells--efforts">
+    {{#each bestEfforts}}
+    <div class="zine-card roundup-cell roundup-cell--card">
+      <div class="zine-card__inner">
+        <div class="roundup-cell__num">{{time}}</div>
+        <div class="roundup-cell__label">{{display}}</div>
+      </div>
+    </div>
+    {{/each}}
+  </div>
+</section>
+{{/if}}
+
+{{#if highlights.length}}
+<section class="roundup-section">
+  <div class="roundup-section__head">
+    <h2 class="roundup-section__title">THE CEILING, RAISED<span>.</span></h2>
+    <span class="roundup-section__note">single-session peaks</span>
+  </div>
+  <div class="roundup-grid roundup-grid--3">
+    {{#each highlights}}
+    {{#if href}}<a class="zine-card roundup-peak" href="{{href}}">{{else}}<div class="zine-card roundup-peak">{{/if}}
+      <div class="zine-card__inner">
+        <div class="roundup-peak__value">{{value}}{{#if unit}}<small>{{unit}}</small>{{/if}}</div>
+        <div class="roundup-peak__label">{{label}}</div>
+        {{#if sub}}<div class="roundup-peak__sub">{{sub}}</div>{{/if}}
+        {{#if href}}<div class="roundup-callout__link">see the session →</div>{{/if}}
+      </div>
+    {{#if href}}</a>{{else}}</div>{{/if}}
+    {{/each}}
+  </div>
+</section>
+{{/if}}

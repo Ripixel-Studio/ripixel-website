@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+{{> head}}
+
+<body class="page-life page-roundup" data-page="life">
+  <div class="paper-wash" aria-hidden="true"></div>
+  <div class="paper-dot" aria-hidden="true"></div>
+
+  {{> masthead}}
+
+  <div class="zine-content">
+
+    <svg class="reg-mark" style="position:absolute;top:4px;left:6px" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+      <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <line x1="0" y1="9" x2="18" y2="9" stroke="currentColor" stroke-width="1.2"/>
+      <line x1="9" y1="0" x2="18" y2="18" stroke="currentColor" stroke-width="1.2"/>
+    </svg>
+
+    <nav class="thought-breadcrumb" aria-label="Breadcrumb">
+      <a href="/life">life</a> / <a href="{{roundup.indexUrl}}">roundups</a> / {{roundup.short}}
+    </nav>
+
+    <!-- 1 · Period header -->
+    <header class="roundup-hero">
+      <div class="roundup-hero__main">
+        <div class="page-hero__section-label">· {{roundup.kicker}} ·</div>
+        <h1 class="roundup-hero__title">{{roundup.title}}<span>.</span></h1>
+        {{#if roundup.dateRange}}<div class="roundup-hero__range">{{roundup.dateRange}}</div>{{/if}}
+        <div class="roundup-hero__byline">{{roundup.byline}}{{#if fitnessIndex.profile.displayName}} · by {{fitnessIndex.profile.displayName}}{{/if}}</div>
+      </div>
+      <aside class="roundup-hero__aside">
+        <span class="stamp">{{roundup.word}} · {{roundup.year}}</span>
+        {{#if roundup.hasNav}}
+        <div class="roundup-hero__jump">
+          {{#if roundup.prevNav}}<a href="{{roundup.prevNav.href}}" rel="prev">← {{roundup.prevNav.label}}</a>{{/if}}
+          {{#if roundup.nextNav}}<a href="{{roundup.nextNav.href}}" rel="next">{{roundup.nextNav.label}} →</a>{{/if}}
+        </div>
+        {{/if}}
+      </aside>
+    </header>
+
+    <!-- 2 · Totals strip -->
+    <div class="stat-strip roundup-totals">
+      {{#each roundup.totals}}
+      <div class="stat-strip__item">
+        <div class="stat-strip__num">{{value}}{{#if unit}}<small>{{unit}}</small>{{/if}}</div>
+        <div class="stat-strip__label">{{label}}</div>
+      </div>
+      {{/each}}
+    </div>
+
+    <!-- 3 · Versus the previous period (only when that roundup exists) -->
+    {{#if roundup.comparison}}
+    <div class="roundup-ticker">
+      <a class="roundup-ticker__vs" href="{{roundup.comparison.href}}">vs {{roundup.comparison.label}} →</a>
+      {{#each roundup.comparison.deltas}}
+      <span class="roundup-ticker__item roundup-ticker__item--{{dir}}"><b>{{value}}</b> {{label}}</span>
+      {{else}}
+      <span class="roundup-ticker__item">level with last time</span>
+      {{/each}}
+    </div>
+    {{/if}}
+
+    <!-- 4 · Effort: day strip + heart-rate zones -->
+    <section class="roundup-section">
+      <div class="roundup-section__head">
+        <h2 class="roundup-section__title">EFFORT<span>.</span></h2>
+        <span class="roundup-section__note">{{roundup.activeDays}} of {{roundup.dayCount}} days active</span>
+      </div>
+      <div class="roundup-grid roundup-grid--effort">
+        <div class="zine-card">
+          <div class="zine-card__inner">
+            <div class="roundup-card__label">{{#if roundup.isWeek}}THE SEVEN DAYS{{else}}{{#if roundup.isMonth}}DAY BY DAY{{else}}THE WHOLE YEAR{{/if}}{{/if}}</div>
+            {{#if roundup.effortStrip}}
+            {{> roundup-effort-strip roundup.effortStrip}}
+            {{else}}
+            <p class="roundup-empty">no day-by-day data for this period.</p>
+            {{/if}}
+            <div class="roundup-legend" aria-hidden="true">
+              <span><i class="roundup-legend__swatch roundup-effort__cell--l0"></i>rest</span>
+              <span><i class="roundup-legend__swatch roundup-effort__cell--l1"></i>easy</span>
+              <span><i class="roundup-legend__swatch roundup-effort__cell--l2"></i>moderate</span>
+              <span><i class="roundup-legend__swatch roundup-effort__cell--l3"></i>hard</span>
+              <span><i class="roundup-legend__swatch roundup-effort__cell--l4"></i>very hard</span>
+            </div>
+          </div>
+        </div>
+        {{> roundup-zones roundup}}
+      </div>
+    </section>
+
+    <!-- 5 · Spotlight callouts -->
+    {{#if roundup.callouts.length}}
+    <section class="roundup-section">
+      <div class="roundup-section__head">
+        <h2 class="roundup-section__title">SPOTLIGHT<span>.</span></h2>
+        <span class="roundup-section__note">worth a second look</span>
+      </div>
+      {{> roundup-callouts roundup}}
+    </section>
+    {{/if}}
+
+    <!-- 6 · Sport breakdown -->
+    {{#if roundup.breakdown.length}}
+    <section class="roundup-section">
+      <div class="roundup-section__head">
+        <h2 class="roundup-section__title">BY SPORT<span>.</span></h2>
+        <span class="roundup-section__note">{{roundup.breakdown.length}} kinds of moving</span>
+      </div>
+      {{> roundup-breakdown roundup}}
+    </section>
+    {{/if}}
+
+    <!-- 7 · Places + weather -->
+    {{#if roundup.places.length}}
+    <section class="roundup-section">
+      <div class="roundup-section__head">
+        <h2 class="roundup-section__title">OUT THERE<span>.</span></h2>
+        {{#if roundup.placesNote}}<span class="roundup-section__note">{{roundup.placesNote}}</span>{{/if}}
+      </div>
+      <div class="roundup-grid roundup-grid--2">
+        <div class="zine-card">
+          <div class="zine-card__inner">
+            <div class="roundup-card__label">PLACES</div>
+            <ul class="roundup-places">
+              {{#each roundup.places}}
+              <li class="roundup-places__row">
+                <span class="roundup-places__name">{{name}}</span>
+                {{#if country}}<span class="roundup-places__country">{{country}}</span>{{/if}}
+                <span class="roundup-places__count">×{{count}}</span>
+              </li>
+              {{/each}}
+            </ul>
+          </div>
+        </div>
+        {{#if roundup.weather}}
+        <div class="zine-card">
+          <div class="zine-card__inner">
+            <div class="roundup-card__label">WEATHER GRIT</div>
+            <div class="roundup-cells">
+              {{#each roundup.weather.cells}}
+              <div class="roundup-cell">
+                <div class="roundup-cell__num">{{value}}</div>
+                <div class="roundup-cell__label">{{label}}</div>
+              </div>
+              {{/each}}
+            </div>
+          </div>
+        </div>
+        {{/if}}
+      </div>
+    </section>
+    {{else}}
+    {{#if roundup.weather}}
+    <section class="roundup-section">
+      <div class="roundup-section__head">
+        <h2 class="roundup-section__title">WEATHER GRIT<span>.</span></h2>
+      </div>
+      <div class="zine-card">
+        <div class="zine-card__inner">
+          <div class="roundup-cells">
+            {{#each roundup.weather.cells}}
+            <div class="roundup-cell">
+              <div class="roundup-cell__num">{{value}}</div>
+              <div class="roundup-cell__label">{{label}}</div>
+            </div>
+            {{/each}}
+          </div>
+        </div>
+      </div>
+    </section>
+    {{/if}}
+    {{/if}}
+
+    <!-- 8 · Muscles under load -->
+    {{#if roundup.muscles.length}}
+    <section class="roundup-section">
+      <div class="roundup-section__head">
+        <h2 class="roundup-section__title">UNDER LOAD<span>.</span></h2>
+        <span class="roundup-section__note">primary movers by session</span>
+      </div>
+      <div class="zine-card">
+        <div class="zine-card__inner">
+          <ul class="roundup-bars">
+            {{#each roundup.muscles}}
+            <li class="roundup-bars__row">
+              <span class="roundup-bars__label">{{name}}</span>
+              <span class="roundup-bars__track"><span class="roundup-bars__fill" style="width:{{width}}%"></span></span>
+              <span class="roundup-bars__value">{{count}}</span>
+            </li>
+            {{/each}}
+          </ul>
+        </div>
+      </div>
+    </section>
+    {{/if}}
+
+    <!-- 9 · Media: photos + routes -->
+    {{> roundup-media roundup}}
+
+    <!-- 10 · Best efforts + highlights -->
+    {{> roundup-highlights roundup}}
+
+    <!-- 11 · Records wall -->
+    {{> roundup-records roundup}}
+
+    <!-- 12 · The summary (plain text from the export, never HTML) -->
+    {{#if roundup.aiSummary}}
+    <section class="roundup-section">
+      <div class="roundup-section__head">
+        <h2 class="roundup-section__title">THE WRITE-UP<span>.</span></h2>
+        <span class="roundup-section__note">✨ machine-written, human-checked</span>
+      </div>
+      <blockquote class="roundup-summary">{{roundup.aiSummary}}</blockquote>
+    </section>
+    {{/if}}
+
+    <!-- 13 · Footer: sources, back link, previous / next -->
+    <footer class="roundup-foot">
+      <div class="roundup-foot__meta">
+        {{#if roundup.sources}}<span>data from {{roundup.sources}}</span>{{/if}}
+        <a class="roundup-foot__back" href="/life">← back to life</a>
+        <a class="roundup-foot__back" href="{{roundup.indexUrl}}">all roundups →</a>
+      </div>
+      {{> roundup-prevnext roundup}}
+    </footer>
+
+  </div>
+
+  {{> footer}}
+
+  <div class="paper-grain" aria-hidden="true"></div>
+</body>
+</html>

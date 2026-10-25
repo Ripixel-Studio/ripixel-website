@@ -1,0 +1,560 @@
+/* =========================================
+   FITNESS ROUNDUP PAGES — /life/roundup/<key> and /life/roundups
+   Bundled with the rest of personal/assets/styles/main by bundleCssTask.
+   Zine voice: mono labels, ink borders, paper wash. Section ink is purple
+   (body.page-life). Everything here is prefixed .roundup- so it cannot
+   collide with the base sheet regardless of concatenation order.
+   ========================================= */
+
+/* ─── Hero ─────────────────────────────── */
+.roundup-hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: end;
+  margin: 10px 0 22px;
+}
+
+.roundup-hero__title {
+  font-family: var(--f-disp);
+  font-size: clamp(64px, 10vw, 112px);
+  line-height: 0.88;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 4px 0 8px;
+}
+
+.roundup-hero__title span { color: var(--ink-section); }
+
+.roundup-hero__range {
+  font-family: var(--f-mono);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--ink-section);
+}
+
+.roundup-hero__byline {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--ink);
+  opacity: 0.7;
+  margin-top: 4px;
+}
+
+.roundup-hero__aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  padding-bottom: 6px;
+}
+
+.roundup-hero__aside .stamp {
+  color: var(--ink-section);
+  transform: rotate(-4deg);
+  text-transform: lowercase;
+}
+
+.roundup-hero__jump {
+  display: flex;
+  gap: 14px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+.roundup-hero__jump a { color: var(--ink-section); border-bottom: 1px dashed var(--ink-section); }
+
+/* ─── Totals strip (extends .stat-strip) ─ */
+.roundup-totals .stat-strip__num { font-size: 48px; }
+.roundup-totals .stat-strip__num small {
+  font-family: var(--f-mono);
+  font-size: 14px;
+  margin-left: 4px;
+  color: var(--ink-section);
+  letter-spacing: 0.05em;
+}
+
+/* ─── Comparison ticker ────────────────── */
+.roundup-ticker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  align-items: center;
+  margin: -8px 0 22px;
+  padding: 10px 16px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--f-mono);
+  font-size: 12px;
+}
+
+.roundup-ticker__vs { color: var(--ink-yellow); letter-spacing: 0.12em; text-transform: uppercase; }
+.roundup-ticker__item b { font-weight: 700; }
+.roundup-ticker__item--up b { color: #9BE564; }
+.roundup-ticker__item--down b { color: #FF8A80; }
+.roundup-ticker__item--flat b { opacity: 0.7; }
+
+/* ─── Sections ─────────────────────────── */
+.roundup-section { margin-top: 30px; }
+
+.roundup-section__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 4px;
+  margin-bottom: 14px;
+}
+
+.roundup-section__title {
+  font-family: var(--f-disp);
+  font-size: 36px;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.roundup-section__title span { color: var(--ink-section); }
+
+.roundup-section__note {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: 0.7;
+  text-align: right;
+}
+
+.roundup-card__label {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-section);
+  margin-bottom: 10px;
+}
+
+.roundup-card__label--gap { margin-top: 16px; }
+
+.roundup-empty {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ink);
+  opacity: 0.75;
+}
+
+/* ─── Grids ────────────────────────────── */
+.roundup-grid { display: grid; gap: 16px; }
+.roundup-grid--2      { grid-template-columns: 1fr 1fr; }
+.roundup-grid--3      { grid-template-columns: repeat(3, 1fr); }
+.roundup-grid--effort { grid-template-columns: 1.3fr 1fr; }
+.roundup-grid--routes { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+.roundup-grid--tiles  { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+
+/* a .zine-card that is a link keeps the ink colour and lifts on hover */
+a.zine-card { color: inherit; display: block; transition: transform 120ms ease, box-shadow 120ms ease; }
+a.zine-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink-section); }
+
+/* ─── Effort strip (inline SVG) ────────── */
+.roundup-effort {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  overflow: visible;
+}
+
+.roundup-effort--grid { max-width: 100%; }
+
+.roundup-effort__cell { stroke: var(--ink); stroke-width: 1.2; }
+.roundup-effort__cell--l0 { fill: var(--paper-2); }
+.roundup-effort__cell--l1 { fill: var(--ink-section); fill-opacity: 0.28; }
+.roundup-effort__cell--l2 { fill: var(--ink-section); fill-opacity: 0.52; }
+.roundup-effort__cell--l3 { fill: var(--ink-section); fill-opacity: 0.78; }
+.roundup-effort__cell--l4 { fill: var(--ink-section); fill-opacity: 1; }
+
+.roundup-effort__text {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  fill: var(--ink);
+  letter-spacing: 0.08em;
+}
+
+.roundup-effort__text--day { fill: var(--ink-section); font-weight: 700; }
+
+.roundup-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 12px;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  opacity: 0.8;
+}
+
+.roundup-legend span { display: inline-flex; align-items: center; gap: 5px; }
+
+.roundup-legend__swatch {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border: 1.2px solid var(--ink);
+}
+
+.roundup-legend__swatch.roundup-effort__cell--l0 { background: var(--paper-2); }
+.roundup-legend__swatch.roundup-effort__cell--l1 { background: color-mix(in srgb, var(--ink-section) 28%, #fff); }
+.roundup-legend__swatch.roundup-effort__cell--l2 { background: color-mix(in srgb, var(--ink-section) 52%, #fff); }
+.roundup-legend__swatch.roundup-effort__cell--l3 { background: color-mix(in srgb, var(--ink-section) 78%, #fff); }
+.roundup-legend__swatch.roundup-effort__cell--l4 { background: var(--ink-section); }
+
+/* ─── Horizontal bars (zones, muscles) ─── */
+.roundup-bars { display: grid; gap: 8px; }
+
+.roundup-bars__row {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--ink);
+}
+
+.roundup-bars__label b { color: var(--ink-section); margin-right: 4px; }
+
+.roundup-bars__track {
+  display: block;
+  height: 14px;
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+}
+
+.roundup-bars__fill {
+  display: block;
+  height: 100%;
+  background: var(--ink-section);
+  min-width: 2px;
+}
+
+.roundup-bars__fill--Z1 { opacity: 0.35; }
+.roundup-bars__fill--Z2 { opacity: 0.55; }
+.roundup-bars__fill--Z3 { opacity: 0.72; }
+.roundup-bars__fill--Z4 { opacity: 0.88; }
+.roundup-bars__fill--Z5 { opacity: 1; }
+
+.roundup-bars__value { text-align: right; white-space: nowrap; min-width: 54px; }
+.roundup-bars__value small { opacity: 0.6; margin-left: 2px; }
+
+/* ─── Stat cells (weather, best efforts) ─ */
+.roundup-cells {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 12px;
+}
+
+.roundup-cells--efforts { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+
+.roundup-cell__num {
+  font-family: var(--f-disp);
+  font-size: 34px;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.roundup-cell__label {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-section);
+  margin-top: 4px;
+}
+
+/* ─── Spotlight callouts / peaks ───────── */
+.roundup-callout__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.roundup-callout__date { font-family: var(--f-mono); font-size: 11px; opacity: 0.7; }
+.roundup-callout__glyph { font-size: 30px; line-height: 1; margin: 12px 0 6px; }
+
+.roundup-callout__title {
+  font-family: var(--f-sans);
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.roundup-callout__stat {
+  font-family: var(--f-disp);
+  font-size: 40px;
+  line-height: 1;
+  margin-top: 8px;
+  color: var(--ink);
+}
+
+.roundup-callout__stat small,
+.roundup-peak__value small {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  margin-left: 6px;
+  color: var(--ink-section);
+}
+
+.roundup-callout__sub,
+.roundup-peak__sub { font-family: var(--f-mono); font-size: 11px; opacity: 0.7; margin-top: 6px; }
+
+.roundup-callout__link {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--ink-section);
+  margin-top: 10px;
+}
+
+.roundup-peak__value { font-family: var(--f-disp); font-size: 38px; line-height: 1; color: var(--ink); }
+.roundup-peak__label {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-section);
+  margin-top: 6px;
+}
+
+/* ─── Sport breakdown ──────────────────── */
+.roundup-stack {
+  display: flex;
+  height: 18px;
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+  overflow: hidden;
+}
+
+.roundup-stack__seg { display: block; height: 100%; border-right: 1.5px solid var(--ink); }
+.roundup-stack__seg:last-child { border-right: none; }
+
+.roundup-ink-0 { background: var(--ink-section); }
+.roundup-ink-1 { background: var(--ink-magenta); }
+.roundup-ink-2 { background: var(--ink-green); }
+.roundup-ink-3 { background: var(--ink-blue); }
+.roundup-ink-4 { background: var(--ink-orange); }
+.roundup-ink-5 { background: var(--ink-yellow); }
+
+.roundup-sports { display: grid; gap: 8px; margin-top: 12px; }
+
+.roundup-sports__row {
+  display: grid;
+  grid-template-columns: 12px 22px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--ink);
+  padding-bottom: 8px;
+  border-bottom: 1px dashed rgba(23,19,17,0.25);
+}
+
+.roundup-sports__row:last-child { border-bottom: none; padding-bottom: 0; }
+.roundup-sports__swatch { width: 12px; height: 12px; border: 1.2px solid var(--ink); }
+.roundup-sports__label { font-family: var(--f-sans); font-weight: 700; font-size: 14px; }
+.roundup-sports__count { white-space: nowrap; }
+.roundup-sports__count b { color: var(--ink-section); font-size: 15px; }
+.roundup-sports__stats { grid-column: 3 / -1; font-size: 11px; opacity: 0.7; }
+
+/* ─── Places ───────────────────────────── */
+.roundup-places { display: grid; gap: 6px; }
+
+.roundup-places__row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  align-items: baseline;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  border-bottom: 1px dashed rgba(23,19,17,0.25);
+  padding-bottom: 6px;
+}
+
+.roundup-places__row:last-child { border-bottom: none; }
+.roundup-places__name { font-family: var(--f-sans); font-weight: 700; font-size: 15px; }
+.roundup-places__country { opacity: 0.65; font-size: 11px; }
+.roundup-places__count { color: var(--ink-section); font-weight: 700; }
+
+/* ─── Photos + routes ──────────────────── */
+.roundup-photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 18px;
+}
+
+.roundup-photos--featured { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+
+.roundup-photo { margin: 0; transform: rotate(-0.6deg); }
+.roundup-photo:nth-child(even) { transform: rotate(0.7deg); }
+.roundup-photo--featured { grid-column: span 2; grid-row: span 2; }
+.roundup-photo img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--paper-2); }
+.roundup-photo--featured img { aspect-ratio: 16 / 10; }
+
+.roundup-photo__caption {
+  font-family: var(--f-scrib);
+  font-size: 18px;
+  line-height: 1.1;
+  color: var(--ink);
+  padding: 8px 4px 2px;
+}
+
+.roundup-route__thumb {
+  aspect-ratio: 1 / 1;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+.roundup-route__thumb img { width: 100%; height: 100%; object-fit: contain; }
+.roundup-route__title { font-family: var(--f-sans); font-weight: 700; font-size: 14px; line-height: 1.2; }
+.roundup-route__meta { font-family: var(--f-mono); font-size: 11px; opacity: 0.7; margin-top: 4px; }
+
+/* ─── Records wall ─────────────────────── */
+.roundup-record__top { display: flex; justify-content: space-between; align-items: center; }
+.roundup-record__glyph { font-size: 22px; line-height: 1; }
+.roundup-record__date { font-family: var(--f-mono); font-size: 11px; opacity: 0.7; }
+
+.roundup-record__label {
+  font-family: var(--f-sans);
+  font-weight: 800;
+  font-size: 17px;
+  line-height: 1.15;
+  margin: 10px 0 8px;
+  color: var(--ink);
+}
+
+.roundup-record__metrics { display: grid; gap: 6px; }
+
+.roundup-record__metric {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: baseline;
+  font-family: var(--f-mono);
+  font-size: 12px;
+}
+
+.roundup-record__type { font-size: 10px; letter-spacing: 0.15em; color: var(--ink-section); }
+.roundup-record__value { font-family: var(--f-disp); font-size: 26px; line-height: 1; color: var(--ink); }
+.roundup-record__value small { font-family: var(--f-mono); font-size: 11px; margin-left: 3px; }
+.roundup-record__delta {
+  padding: 1px 6px;
+  background: var(--ink-yellow);
+  color: var(--ink);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+
+/* ─── The write-up (plain text) ────────── */
+.roundup-summary {
+  margin: 0;
+  padding: 18px 24px 18px 30px;
+  border-left: 5px solid var(--ink-section);
+  background: #fff;
+  border-top: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  border-right: 2px solid var(--ink);
+  font-family: var(--f-sans);
+  font-size: 19px;
+  line-height: 1.5;
+  color: var(--ink);
+  white-space: pre-line;
+}
+
+/* ─── Footer ───────────────────────────── */
+.roundup-foot { margin-top: 34px; }
+
+.roundup-foot__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--ink);
+  opacity: 0.85;
+  padding-top: 12px;
+  border-top: 2px solid var(--ink);
+}
+
+.roundup-foot__back { color: var(--ink-section); border-bottom: 1px solid var(--ink-section); }
+
+.roundup-unavailable {
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  background: #fff;
+  border: 2px dashed var(--ink);
+  font-family: var(--f-mono);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+/* ─── Index tiles ──────────────────────── */
+.roundup-tile__kicker {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--ink-section);
+}
+
+.roundup-tile__title { font-family: var(--f-disp); font-size: 44px; line-height: 0.95; color: var(--ink); margin-top: 4px; }
+.roundup-tile__title span { color: var(--ink-section); }
+.roundup-tile__range { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.1em; opacity: 0.7; margin-top: 4px; }
+
+.roundup-tile__stats {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 12px;
+  font-family: var(--f-mono);
+  font-size: 12px;
+}
+
+.roundup-tile__num { font-family: var(--f-disp); font-size: 32px; line-height: 1; color: var(--ink); }
+.roundup-tile__unit { opacity: 0.7; }
+.roundup-tile__secondary { margin-left: auto; color: var(--ink-section); font-weight: 700; }
+
+.roundup-tile__foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+}
+
+.roundup-tile__ai { opacity: 0.7; }
+.roundup-tile__read { margin-left: auto; color: var(--ink-section); }
+
+/* ─── Responsive ───────────────────────── */
+@media (max-width: 880px) {
+  .roundup-grid--3, .roundup-grid--effort { grid-template-columns: 1fr 1fr; }
+  .roundup-hero { grid-template-columns: 1fr; }
+  .roundup-hero__aside { align-items: flex-start; }
+  .roundup-totals .stat-strip__num { font-size: 40px; }
+}
+
+@media (max-width: 600px) {
+  .roundup-grid--2, .roundup-grid--3, .roundup-grid--effort { grid-template-columns: 1fr; }
+  .roundup-bars__row { grid-template-columns: 90px 1fr auto; }
+  .roundup-section__head { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .roundup-section__note { text-align: left; }
+  .roundup-photo--featured { grid-column: span 1; grid-row: span 1; }
+  .roundup-summary { font-size: 16px; padding: 14px 16px 14px 20px; }
+}

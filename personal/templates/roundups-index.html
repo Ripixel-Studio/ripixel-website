@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+{{> head}}
+
+<body class="page-life page-roundups" data-page="life">
+  <div class="paper-wash" aria-hidden="true"></div>
+  <div class="paper-dot" aria-hidden="true"></div>
+
+  {{> masthead}}
+
+  <div class="zine-content">
+
+    <svg class="reg-mark" style="position:absolute;top:4px;left:6px" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+      <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <line x1="0" y1="9" x2="18" y2="9" stroke="currentColor" stroke-width="1.2"/>
+      <line x1="9" y1="0" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/>
+    </svg>
+
+    <nav class="thought-breadcrumb" aria-label="Breadcrumb">
+      <a href="/life">life</a> / roundups
+    </nav>
+
+    <header class="roundup-hero">
+      <div class="roundup-hero__main">
+        <div class="page-hero__section-label">· THE BACK ISSUES ·</div>
+        <h1 class="roundup-hero__title">ROUNDUPS<span>.</span></h1>
+        <div class="roundup-hero__byline">every week, month and year, summed up.</div>
+      </div>
+      <aside class="roundup-hero__aside">
+        <span class="stamp">{{roundupCountLabel}}</span>
+      </aside>
+    </header>
+
+    {{#if fitnessUnavailable}}
+    <div class="roundup-unavailable">
+      ⚠ fitness data unavailable — this build could not reach the showcase export, so there are no roundups to show. check back later.
+    </div>
+    {{/if}}
+
+    {{#each roundupGroups}}
+    <section class="roundup-section">
+      <div class="roundup-section__head">
+        <h2 class="roundup-section__title">{{heading}}<span>.</span></h2>
+        <span class="roundup-section__note">{{blurb}}</span>
+      </div>
+      <div class="roundup-grid roundup-grid--tiles">
+        {{#each tiles}}
+        {{> roundup-tile this}}
+        {{/each}}
+      </div>
+    </section>
+    {{else}}
+    {{#unless fitnessUnavailable}}
+    <p class="roundup-empty">no roundups yet — the first one lands at the end of the week.</p>
+    {{/unless}}
+    {{/each}}
+
+    <footer class="roundup-foot">
+      <div class="roundup-foot__meta">
+        <a class="roundup-foot__back" href="/life">← back to life</a>
+      </div>
+    </footer>
+
+  </div>
+
+  {{> footer}}
+
+  <div class="paper-grain" aria-hidden="true"></div>
+</body>
+</html>
