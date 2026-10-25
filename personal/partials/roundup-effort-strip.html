@@ -1,0 +1,14 @@
+{{!-- Inline SVG effort strip. Context: the `effortStrip` view model from tasks/fitness-roundup-pages.mjs
+     (kind 'bars' for a week, 'grid' for a month/year; every rect is precomputed). --}}
+<svg class="roundup-effort roundup-effort--{{kind}}" viewBox="{{vx}} 0 {{vw}} {{height}}" preserveAspectRatio="xMinYMin meet" role="img" aria-label="Effort per day, from rest to very hard">
+  {{#each labels}}
+  <text class="roundup-effort__text" x="{{x}}" y="{{y}}"{{#if anchor}} text-anchor="{{anchor}}"{{/if}}>{{text}}</text>
+  {{/each}}
+  {{#each cells}}
+  <rect class="roundup-effort__cell roundup-effort__cell--l{{level}}" x="{{x}}" y="{{y}}" width="{{w}}" height="{{h}}"><title>{{title}}</title></rect>
+  {{#if label}}
+  <text class="roundup-effort__text roundup-effort__text--dow" x="{{lx}}" y="{{ly}}" text-anchor="middle">{{label}}</text>
+  <text class="roundup-effort__text roundup-effort__text--day" x="{{lx}}" y="{{sy}}" text-anchor="middle">{{sub}}</text>
+  {{/if}}
+  {{/each}}
+</svg>

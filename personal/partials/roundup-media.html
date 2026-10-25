@@ -1,0 +1,45 @@
+{{!-- Photo mosaic (already gated by profile.showPhotoGallery in the task) and route wall. Context: roundup view. --}}
+{{#if photos.length}}
+<section class="roundup-section">
+  <div class="roundup-section__head">
+    <h2 class="roundup-section__title">ON FILM<span>.</span></h2>
+    <span class="roundup-section__note">{{photos.length}} frame{{#if photos.[1]}}s{{/if}}</span>
+  </div>
+  <div class="roundup-photos{{#if featuredPhoto}} roundup-photos--featured{{/if}}">
+    {{#if featuredPhoto}}
+    {{#with featuredPhoto}}
+    <figure class="photo-block roundup-photo roundup-photo--featured">
+      {{#if href}}<a href="{{href}}">{{/if}}<img src="{{url}}" alt="{{title}}" loading="lazy" decoding="async">{{#if href}}</a>{{/if}}
+      <figcaption class="roundup-photo__caption">{{glyph}} {{title}}{{#if date}} · {{date}}{{/if}}</figcaption>
+    </figure>
+    {{/with}}
+    {{/if}}
+    {{#each gridPhotos}}
+    <figure class="photo-block roundup-photo">
+      {{#if href}}<a href="{{href}}">{{/if}}<img src="{{url}}" alt="{{title}}" loading="lazy" decoding="async">{{#if href}}</a>{{/if}}
+      <figcaption class="roundup-photo__caption">{{glyph}} {{title}}{{#if date}} · {{date}}{{/if}}</figcaption>
+    </figure>
+    {{/each}}
+  </div>
+</section>
+{{/if}}
+
+{{#if routes.length}}
+<section class="roundup-section">
+  <div class="roundup-section__head">
+    <h2 class="roundup-section__title">THE ROUTES<span>.</span></h2>
+    <span class="roundup-section__note">{{routes.length}} line{{#if routes.[1]}}s{{/if}} on the map</span>
+  </div>
+  <div class="roundup-grid roundup-grid--routes">
+    {{#each routes}}
+    {{#if href}}<a class="zine-card roundup-route" href="{{href}}">{{else}}<div class="zine-card roundup-route">{{/if}}
+      <div class="zine-card__inner">
+        <div class="roundup-route__thumb"><img src="{{url}}" alt="Route of {{title}}" loading="lazy" decoding="async"></div>
+        <div class="roundup-route__title">{{glyph}} {{title}}</div>
+        <div class="roundup-route__meta">{{#if date}}{{date}}{{/if}}{{#if km}} · {{km}}{{/if}}</div>
+      </div>
+    {{#if href}}</a>{{else}}</div>{{/if}}
+    {{/each}}
+  </div>
+</section>
+{{/if}}

@@ -1,0 +1,18 @@
+{{!-- One roundup tile on /life/roundups. Context: a tile from buildIndexView. --}}
+<a class="zine-card roundup-tile" href="{{href}}">
+  <div class="zine-card__inner">
+    <div class="roundup-tile__kicker">{{kicker}}</div>
+    <div class="roundup-tile__title">{{title}}<span>.</span></div>
+    {{#if dateRange}}<div class="roundup-tile__range">{{dateRange}}</div>{{/if}}
+    <div class="roundup-tile__stats">
+      <span class="roundup-tile__num">{{sessions}}</span>
+      <span class="roundup-tile__unit">{{sessionsLabel}}</span>
+      <span class="roundup-tile__secondary">{{secondary}}</span>
+    </div>
+    <div class="roundup-tile__foot">
+      {{#if prs}}<span class="stat-label">{{prs}}</span>{{/if}}
+      {{#if hasAiSummary}}<span class="roundup-tile__ai">✨ write-up</span>{{/if}}
+      <span class="roundup-tile__read">read →</span>
+    </div>
+  </div>
+</a>

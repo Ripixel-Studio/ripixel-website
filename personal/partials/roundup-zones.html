@@ -1,0 +1,19 @@
+{{!-- Heart-rate zones Z1–Z5 (hrZoneMinutes indices 1–5). Context: roundup view. --}}
+<div class="zine-card">
+  <div class="zine-card__inner">
+    <div class="roundup-card__label">HEART-RATE ZONES{{#if zones}} · {{hrTracked}} MIN TRACKED{{/if}}</div>
+    {{#if zones}}
+    <ul class="roundup-bars roundup-bars--zones">
+      {{#each zones}}
+      <li class="roundup-bars__row">
+        <span class="roundup-bars__label"><b>{{z}}</b> {{name}}</span>
+        <span class="roundup-bars__track"><span class="roundup-bars__fill roundup-bars__fill--{{z}}" style="width:{{width}}%"></span></span>
+        <span class="roundup-bars__value">{{minutes}}m <small>{{pct}}%</small></span>
+      </li>
+      {{/each}}
+    </ul>
+    {{else}}
+    <p class="roundup-empty">not enough heart-rate data this {{word}} — under 30 minutes tracked.</p>
+    {{/if}}
+  </div>
+</div>

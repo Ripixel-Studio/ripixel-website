@@ -1,0 +1,20 @@
+{{!-- Spotlight callout cards. Context: roundup view (uses `callouts`). --}}
+<div class="roundup-grid roundup-grid--3">
+  {{#each callouts}}
+  {{#if href}}<a class="zine-card roundup-callout" href="{{href}}">{{else}}<div class="zine-card roundup-callout">{{/if}}
+    <div class="zine-card__inner">
+      <div class="roundup-callout__top">
+        <span class="stat-label">{{kind}}</span>
+        {{#if date}}<span class="roundup-callout__date">{{date}}</span>{{/if}}
+      </div>
+      <div class="roundup-callout__glyph" aria-hidden="true">{{glyph}}</div>
+      <div class="roundup-callout__title">{{title}}</div>
+      {{#if statValue}}
+      <div class="roundup-callout__stat">{{statValue}}{{#if statUnit}}<small>{{statUnit}}</small>{{/if}}</div>
+      {{/if}}
+      {{#if sub}}<div class="roundup-callout__sub">{{sub}}</div>{{/if}}
+      {{#if href}}<div class="roundup-callout__link">see the session →</div>{{/if}}
+    </div>
+  {{#if href}}</a>{{else}}</div>{{/if}}
+  {{/each}}
+</div>

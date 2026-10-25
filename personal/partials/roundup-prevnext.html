@@ -1,0 +1,19 @@
+{{!-- Previous / next roundup of the same period type. Context: roundup view. --}}
+{{#if hasNav}}
+<nav class="thought-prevnext" aria-label="Neighbouring roundups">
+  {{#if prevNav}}
+  <a class="thought-prevnext__item" href="{{prevNav.href}}" rel="prev">
+    <div class="thought-prevnext__dir">← previous {{word}}</div>
+    <div class="thought-prevnext__title">{{prevNav.label}}</div>
+  </a>
+  {{else}}
+  <span></span>
+  {{/if}}
+  {{#if nextNav}}
+  <a class="thought-prevnext__item thought-prevnext__item--next" href="{{nextNav.href}}" rel="next">
+    <div class="thought-prevnext__dir">next {{word}} →</div>
+    <div class="thought-prevnext__title">{{nextNav.label}}</div>
+  </a>
+  {{/if}}
+</nav>
+{{/if}}
