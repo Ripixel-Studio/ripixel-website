@@ -18,6 +18,8 @@ import {
 import { fetchFitnessTask } from './tasks/fitness-fetch.mjs';
 import { fitnessLifeTask } from './tasks/fitness-life.mjs';
 import { fitnessRoundupPagesTask } from './tasks/fitness-roundup-pages.mjs';
+import { fitnessOgImagesTask } from './tasks/fitness-og-images.mjs';
+import { fitnessFeedTask, FEED_PATH as FITNESS_FEED_PATH } from './tasks/fitness-feed.mjs';
 
 /** Estimate read time in minutes from raw text (200 wpm)
  * @param {string} text */
@@ -209,9 +211,13 @@ export const tasks = [
     // Env: FITNESS_DATA_BASE (URL), FITNESS_DATA_SOURCE=live|cache|fixtures. See README "Fitness data".
     fetchFitnessTask(),
     fitnessLifeTask(), // S2.2 life page — builds `fitnessLife` from the fitness globals; must precede generate-pages
+    // S2.5 OG cards — /life/og/{activity,roundup}/<id>.png via sharp, cached in .cache/og. Runs BEFORE the page
+    // tasks because they read `fitnessOgImages` to point og:image at the rendered card.
+    fitnessOgImagesTask(),
     fitnessRoundupPagesTask(), // S2.4 roundup pages: /life/roundup/<key> + /life/roundups from fitnessRoundups
     // S2.3 activity pages — /life/activity/<slug>/ from fitnessActivities (needs fetch-fitness above; before the sitemap scan)
     (await import('./tasks/fitness-activity-pages.mjs')).generateActivityPagesTask(),
+    fitnessFeedTask(), // S2.5 Atom feed at /life/feed.xml — activities + fitnessRoundupPages, newest first, 50 entries
 
     // Generate individual thought article pages (adds readTime to each item)
     generateItemsTask({
@@ -309,6 +315,7 @@ export const tasks = [
                     }
                 })(),
                 rightNow: rightNow || null,
+                atomFeed: page === 'life' ? FITNESS_FEED_PATH : undefined,
             };
         },
     }),

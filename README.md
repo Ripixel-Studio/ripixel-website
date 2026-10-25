@@ -96,6 +96,37 @@ partials only loop and test.
 
 Downstream tasks can page over the globals directly (`generatePaginatedItemsTask({ dataVar: '${fitnessActivities}', ... })`); no JSON needs writing to disk.
 
+### Pages, feed and OG images built from it
+
+| task | output |
+|---|---|
+| `tasks/fitness-og-images.mjs` | `/life/og/activity/<slug>.png`, `/life/og/roundup/<key>.png` — one 1200×630 OG card per page |
+| `tasks/fitness-roundup-pages.mjs` | `/life/roundup/<key>`, `/life/roundups` |
+| `tasks/fitness-activity-pages.mjs` | `/life/activity/<slug>/` |
+| `tasks/fitness-feed.mjs` | **`/life/feed.xml`** — Atom, activities and roundups interleaved newest first, 50 entries |
+
+**Feed.** `https://james.ripixel.co.uk/life/feed.xml`. Each entry is the page title, its
+link, a plain-text summary (headline numbers for an activity, the totals line plus the AI
+summary for a roundup), `published` (activity start / roundup generation time) and
+`updated`. `/life`, the activity pages and the roundup pages advertise it with
+`<link rel="alternate" type="application/atom+xml">`. The thoughts feeds (`/rss.xml`,
+`/atom.xml`, `/json.json`) are unchanged and separate.
+
+**OG images.** `scripts/generate-og-images.mjs` draws every card — the committed section
+cards (`personal/assets/images/card_*.png`) and, at build time, one per activity and
+roundup page with the page title and its headline numbers in the same frame. Rasterising
+is done in-process with [`sharp`](https://sharp.pixelplumbing.com/) (a devDependency); the
+Anton / JetBrains Mono faces come from the `@fontsource` packages already installed and are
+unpacked to `.cache/fonts/` for fontconfig on first use, so nothing needs installing in
+`~/.fonts`. Rendered cards are cached in `.cache/og/` (keyed by the card's SVG) so a
+rebuild only rasterises what changed, and copied into `public/personal/life/og/`. The
+activity and roundup page tasks read the `fitnessOgImages` URL map the OG task returns to
+set `og:image`; a page without a card (sharp unavailable, a render error) falls back to its
+AI banner → first photo → `card_life.png`, and the build carries on.
+
+- Re-render the section cards: `node scripts/generate-og-images.mjs`
+- Preview the fitness cards without a full build: `node scripts/generate-og-images.mjs --fitness [outDir]`
+
 ---
 
 ## Why Skier?

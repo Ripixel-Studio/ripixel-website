@@ -38,6 +38,7 @@
         "@fontsource/jetbrains-mono": "^5.2.8",
         "firebase-tools": "^15.0.0",
         "nodemon": "^3.0.0",
+        "sharp": "^0.35.5",
         "skier": "^3.0.1",
         "standard-version": "^9.0.0"
     }
