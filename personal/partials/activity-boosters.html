@@ -1,0 +1,18 @@
+{{!-- Booster timeline aside. Context: `act` (uses boosters). --}}
+{{#if boosters}}
+<div class="sidebar-card act-boosters">
+  <div class="sidebar-card__inner">
+    <div class="sidebar-card__title">⚡ booster sequence</div>
+    <div class="act-boosters__count">{{boosters.count}} ran</div>
+    <ol class="act-boosters__list">
+      {{#each boosters.items}}
+      <li class="act-booster{{#unless typed}} act-booster--silent{{/unless}}">
+        <span class="act-booster__dot" aria-hidden="true"></span>
+        <span class="act-booster__name">{{icon}} {{name}}</span>
+        <span class="act-booster__sub">{{sub}}</span>
+      </li>
+      {{/each}}
+    </ol>
+  </div>
+</div>
+{{/if}}

@@ -1,0 +1,84 @@
+{{!-- Pre-grid rows in §4 order: hybrid race → description → AI summary → milestone → tags → photos → map. Context: `act`. --}}
+{{#if hybridRace}}
+<section class="act-card act-hybrid" aria-label="Race breakdown">
+  <div class="act-card__inner">
+    <div class="act-card__head">
+      <span class="act-card__title">· 🏁 race breakdown ·</span>
+      <span class="act-card__right">{{hybridRace.total}} total</span>
+    </div>
+    <div class="act-hybrid__segs">
+      {{#each hybridRace.segments}}
+      <div class="act-hybrid__seg{{#if isRun}} act-hybrid__seg--run{{/if}}">
+        <span class="act-hybrid__icon">{{icon}}</span>
+        <span class="act-hybrid__label">{{label}}</span>
+        <span class="act-hybrid__dur">{{duration}}</span>
+      </div>
+      {{/each}}
+    </div>
+  </div>
+</section>
+{{/if}}
+
+{{#if description}}
+<section class="act-desc" aria-label="From the athlete">
+  <div class="act-desc__label">from the athlete</div>
+  <p class="act-desc__body">{{description}}</p>
+</section>
+{{/if}}
+
+{{#if aiSummaryHtml}}
+<section class="pull-quote act-ai" aria-label="AI summary">
+  <div class="act-ai__label">✨ AI summary</div>
+  <div class="act-ai__body">{{{aiSummaryHtml}}}</div>
+</section>
+{{/if}}
+
+{{#if milestone}}
+<section class="act-milestone" aria-label="Lifetime distance">
+  <span class="act-milestone__label">📊 lifetime {{milestone.typeLabel}}</span>
+  <span class="act-milestone__value">{{milestone.lifetimeKm}} km</span>
+  {{#if milestone.nextKm}}<span class="act-milestone__next">next: {{milestone.nextKm}} km · {{milestone.toGoKm}} km to go</span>{{/if}}
+  {{#if milestone.crossedKm}}<span class="act-milestone__hit">🎉 {{milestone.crossedKm}} km reached</span>{{/if}}
+</section>
+{{/if}}
+
+{{#if tags.length}}
+<div class="act-tags">
+  {{#each tags}}<span class="tag-chip">#{{this}}</span>{{/each}}
+</div>
+{{/if}}
+
+{{#if photos.length}}
+<section class="act-photos" aria-label="Photos">
+  {{#each photos}}
+  <a class="photo-block act-photo" href="{{this}}" rel="noopener">
+    <img src="{{this}}" alt="Activity photo" loading="lazy" decoding="async" />
+  </a>
+  {{/each}}
+</section>
+{{/if}}
+
+{{#if route}}
+<section class="act-card act-map" aria-label="Route">
+  <div class="act-card__inner">
+    <div class="act-card__head">
+      <span class="act-card__title">· route ·</span>
+      <span class="act-card__right">gps track</span>
+    </div>
+    <svg class="act-map__svg" viewBox="0 0 {{route.w}} {{route.h}}" role="img" aria-label="Route map drawn from the GPS track">
+      <path d="{{route.d}}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+      <circle cx="{{route.start.x}}" cy="{{route.start.y}}" r="5" class="act-map__start" />
+      <circle cx="{{route.end.x}}" cy="{{route.end.y}}" r="5" class="act-map__end" />
+    </svg>
+  </div>
+</section>
+{{else}}{{#if routeThumbnailUrl}}
+<section class="act-card act-map" aria-label="Route">
+  <div class="act-card__inner">
+    <div class="act-card__head">
+      <span class="act-card__title">· route ·</span>
+    </div>
+    <img class="act-map__thumb" src="{{routeThumbnailUrl}}" alt="Route thumbnail" loading="lazy" decoding="async" />
+  </div>
+</section>
+{{/if}}{{/if}}
