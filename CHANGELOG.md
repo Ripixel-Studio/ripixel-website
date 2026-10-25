@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [8.7.0](https://github.com/ripixel/ripixel-website/compare/v8.6.0...v8.7.0) (2026-10-25)
+
+
+### Features
+
+* **life:** roundup pages at /life/roundup/<key> and /life/roundups (S2.4) ([7c76c7b](https://github.com/ripixel/ripixel-website/commit/7c76c7b31b12cf0842065b42ec08d5aaeedfaa12))
+
 ## [8.6.0](https://github.com/ripixel/ripixel-website/compare/v8.5.0...v8.6.0) (2026-10-25)
 
 
