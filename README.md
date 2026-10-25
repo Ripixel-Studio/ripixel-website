@@ -34,11 +34,25 @@ But then Skier came along—minimal, modular, and just as allergic to bloat as I
 ## Building & Deploying
 
 - **Build:**
-  `npm run build` (calls Skier, not a homegrown script)
+  `npm run build` builds both sites (via Skier); `npm run build:corporate` / `npm run build:personal` build one.
 - **Preview locally:**
-  Use your favorite static server, e.g. `npx serve public`
+  Use your favorite static server, e.g. `npx serve public` (or `npm run serve:personal`).
 - **Deploy:**
-  Hosted on Firebase. Run `firebase deploy` (CI uses `firebase deploy --token $FIREBASE_TOKEN`).
+  Hosted on Firebase Hosting, two targets (`corporate` → www.ripixel.co.uk, `personal` → james.ripixel.co.uk; see `.firebaserc`).
+  There is no CI: nothing deploys on merge. The box (Jarvis) deploys with
+  `~/jarvis/scripts/deploy_site.sh ripixel-website [corporate|personal|all]`, which pulls `master`,
+  runs `npm ci` and the build (`FITNESS_DATA_SOURCE=live` for `personal`), runs
+  `firebase deploy --only hosting:<target>`, and checks the site answers 200. Releases are atomic,
+  so a failed build or deploy leaves the site as it was. Docs: `jarvis/docs/deploys.md`.
+- **Preview channels:**
+  `deploy_site.sh ripixel-website <target> --preview` deploys the current `master` to the Firebase
+  preview channel `box` (`--preview=<name>` for a named one; both expire after 7 days) and prints the URL.
+  From a laptop: `npx firebase hosting:channel:deploy <name> --only <target>`.
+- **Releases:**
+  Versions are no longer tagged by CI. When a bump is wanted, run `npm run release`
+  (`standard-version`: bumps `package.json`, writes `CHANGELOG.md`, commits and tags) and push the
+  commit and tag like any other change. The `/changelog` page and its "vX.Y.Z" are rendered from
+  `CHANGELOG.md` at build time, so between releases the site simply shows the last release.
 
 ---
 
