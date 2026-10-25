@@ -1,0 +1,55 @@
+<!-- Context: fitnessLife.stats — lifetime totals, streaks, consistency, PBs -->
+<div class="stat-strip {{stripClass}} fit-stats__strip">
+  {{#each strip}}
+  <div class="stat-strip__item">
+    <div class="stat-strip__num">{{value}}{{#if unit}}<small class="fit-stats__unit">{{unit}}</small>{{/if}}</div>
+    <div class="stat-strip__label">{{label}}</div>
+    {{#if sub}}<div class="fit-stats__sub">{{sub}}</div>{{/if}}
+  </div>
+  {{/each}}
+</div>
+
+<div class="fit-stats__lower">
+  <div class="fit-stats__side">
+    {{#if consistency.hasWeeks}}
+    <div class="fit-consistency">
+      <div class="fit-consistency__label">CONSISTENCY · {{consistency.label}}</div>
+      <ol class="fit-consistency__weeks" aria-label="Weekly activity, oldest to newest">
+        {{#each consistency.weeks}}
+        <li class="fit-consistency__week{{#if active}} fit-consistency__week--on{{/if}}" title="{{label}}"></li>
+        {{/each}}
+      </ol>
+    </div>
+    {{/if}}
+    <div class="fit-stats__notes">
+      {{#if zone.has}}
+      <div class="fit-stats__note"><b>EFFORT</b> {{#if zone.label}}{{zone.label}}{{/if}}{{#if zone.effortShare}} · {{zone.effortShare}} of time at zone 2+{{/if}}</div>
+      {{/if}}
+      {{#if strength.has}}
+      <div class="fit-stats__note"><b>IRON</b> {{strength.sets}} sets · {{strength.reps}} reps · {{strength.moved}} moved</div>
+      {{/if}}
+      {{#if since}}
+      <div class="fit-stats__note"><b>SINCE</b> {{since}}{{#if lastActive}} · last out {{lastActive}}{{/if}}</div>
+      {{/if}}
+    </div>
+  </div>
+
+  {{#if hasPrs}}
+  <div class="fit-prs">
+    <div class="fit-prs__label">· PERSONAL BESTS ·</div>
+    <ul class="fit-prs__wall">
+      {{#each prs}}
+      <li class="fit-pr">
+        <span class="fit-pr__name">{{name}}</span>
+        <span class="fit-pr__metric">{{metric}}</span>
+        <span class="fit-pr__value">{{display}}</span>
+        <span class="fit-pr__meta">
+          {{#if delta}}<span class="fit-pr__delta{{#if improved}} fit-pr__delta--up{{/if}}">{{delta}}</span>{{/if}}
+          {{#if date}}<span class="fit-pr__date">{{date}}</span>{{/if}}
+        </span>
+      </li>
+      {{/each}}
+    </ul>
+  </div>
+  {{/if}}
+</div>

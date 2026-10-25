@@ -1,0 +1,33 @@
+<!-- Context: fitnessLife.roundup — the newest roundup of any period type -->
+<section class="fit-roundup" aria-labelledby="fit-roundup-title">
+  <div class="fit-roundup__inner">
+    <div class="fit-roundup__period">
+      <span class="fit-roundup__kind">{{kindLabel}}</span>
+      <h2 class="fit-roundup__title" id="fit-roundup-title">{{periodLabel}}</h2>
+      {{#if range}}<span class="fit-roundup__range">{{range}}</span>{{/if}}
+    </div>
+    <dl class="fit-roundup__stats">
+      <div class="fit-roundup__stat">
+        <dt class="fit-roundup__label">{{sessionsLabel}}</dt>
+        <dd class="fit-roundup__num">{{sessions}}</dd>
+      </div>
+      <div class="fit-roundup__stat">
+        <dt class="fit-roundup__label">{{secondary.label}}</dt>
+        <dd class="fit-roundup__num">{{secondary.value}}{{#if secondary.unit}}<small>{{secondary.unit}}</small>{{/if}}</dd>
+      </div>
+      {{#if prs}}
+      <div class="fit-roundup__stat">
+        <dt class="fit-roundup__label">set this period</dt>
+        <dd class="fit-roundup__num fit-roundup__num--pr">{{prs}}</dd>
+      </div>
+      {{/if}}
+    </dl>
+    {{#if hasSummary}}
+    <blockquote class="fit-roundup__summary">{{summary}}</blockquote>
+    {{/if}}
+    <div class="fit-roundup__links">
+      <a class="fit-roundup__link" href="{{href}}">read the full roundup →</a>
+      <a class="fit-roundup__all" href="{{roundupsHref}}">all roundups →</a>
+    </div>
+  </div>
+</section>

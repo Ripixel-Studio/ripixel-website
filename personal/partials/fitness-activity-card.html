@@ -1,0 +1,32 @@
+<!-- Context: one of fitnessLife.activities -->
+<a class="fit-card fit-card--{{family}}" href="{{href}}">
+  <div class="fit-card__inner">
+    <div class="fit-card__top">
+      <span class="fit-card__type"><span aria-hidden="true">{{glyph}}</span> {{typeLabel}}</span>
+      <time class="fit-card__date" datetime="{{dateTime}}">{{date}}</time>
+    </div>
+    <div class="fit-card__main">
+      <div class="fit-card__text">
+        <h3 class="fit-card__title">{{title}}</h3>
+        {{#if location}}<div class="fit-card__where">🌍 {{location}}</div>{{/if}}
+      </div>
+      {{#if hasThumb}}
+      <div class="fit-card__thumb">
+        <img src="{{thumb}}" alt="" loading="lazy" decoding="async" width="72" height="72">
+      </div>
+      {{/if}}
+    </div>
+    <dl class="fit-card__stats">
+      {{#each stats}}
+      <div class="fit-card__stat">
+        <dt class="fit-card__label">{{label}}</dt>
+        <dd class="fit-card__num">{{value}}{{#if unit}}<small>{{unit}}</small>{{/if}}</dd>
+      </div>
+      {{/each}}
+    </dl>
+    <div class="fit-card__foot">
+      {{#if prLabel}}<span class="fit-card__pr">{{prLabel}}</span>{{else}}<span class="fit-card__via">via {{source}}</span>{{/if}}
+      <span class="fit-card__more">read →</span>
+    </div>
+  </div>
+</a>
