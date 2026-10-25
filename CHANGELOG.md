@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [8.5.0](https://github.com/ripixel/ripixel-website/compare/v8.4.56...v8.5.0) (2026-10-25)
+
+
+### Features
+
+* **life:** fetch the FitGlue showcase export as fitness globals (S2.1) ([d809fdd](https://github.com/ripixel/ripixel-website/commit/d809fdd02f184ce5f347bc823e8f60c5b30c0111))
+
 ### [8.4.56](https://github.com/ripixel/ripixel-website/compare/v8.4.55...v8.4.56) (2026-10-22)
 
 ### [8.4.55](https://github.com/ripixel/ripixel-website/compare/v8.4.54...v8.4.55) (2026-10-21)
