@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [8.8.0](https://github.com/ripixel/ripixel-website/compare/v8.7.0...v8.8.0) (2026-10-25)
+
+
+### Features
+
+* **life:** activity pages — /life/activity/<slug> from the showcase export (S2.3) ([19ace70](https://github.com/ripixel/ripixel-website/commit/19ace704f31ff24ad00041bc778f7e931e76bb86))
+
 ## [8.7.0](https://github.com/ripixel/ripixel-website/compare/v8.6.0...v8.7.0) (2026-10-25)
 
 
