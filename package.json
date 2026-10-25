@@ -17,8 +17,7 @@
         "serve:corporate": "serve public/corporate/",
         "start:personal": "npm run build:personal && npm run serve:personal",
         "start:corporate": "npm run build:corporate && npm run serve:corporate",
-        "release": "standard-version -m 'chore(release): %s [skip ci]'",
-        "release:ci": "npm run release && git push --follow-tags origin master --no-verify"
+        "release": "standard-version"
     },
     "type": "module",
     "repository": {
