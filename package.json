@@ -1,6 +1,6 @@
 {
     "name": "ripixel",
-    "version": "8.5.0",
+    "version": "8.6.0",
     "description": "I'm James King, and I make things for the web",
     "scripts": {
         "dev": "npm run dev:personal",

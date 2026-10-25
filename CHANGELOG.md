@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [8.6.0](https://github.com/ripixel/ripixel-website/compare/v8.5.0...v8.6.0) (2026-10-25)
+
+
+### Features
+
+* **life:** fitness front page from the showcase export (S2.2) ([4c8dc98](https://github.com/ripixel/ripixel-website/commit/4c8dc98c9f553abd332833028438522501eeaf45))
+
 ## [8.5.0](https://github.com/ripixel/ripixel-website/compare/v8.4.56...v8.5.0) (2026-10-25)
 
 
