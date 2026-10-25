@@ -210,6 +210,8 @@ export const tasks = [
     fetchFitnessTask(),
     fitnessLifeTask(), // S2.2 life page — builds `fitnessLife` from the fitness globals; must precede generate-pages
     fitnessRoundupPagesTask(), // S2.4 roundup pages: /life/roundup/<key> + /life/roundups from fitnessRoundups
+    // S2.3 activity pages — /life/activity/<slug>/ from fitnessActivities (needs fetch-fitness above; before the sitemap scan)
+    (await import('./tasks/fitness-activity-pages.mjs')).generateActivityPagesTask(),
 
     // Generate individual thought article pages (adds readTime to each item)
     generateItemsTask({

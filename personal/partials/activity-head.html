@@ -1,0 +1,60 @@
+<head>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MNE4SWQ0L0"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-MNE4SWQ0L0');
+  </script>
+
+  <!-- Metadata (activity pages: title/OG from the activity, image = AI banner → first photo → section card) -->
+  <title>{{act.title}} — James King</title>
+  <meta charset="utf-8" />
+  <meta name="description" content="{{act.ogDescription}}" />
+  <meta name="author" content="James King" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  {{#if act.canonical}}<link rel="canonical" href="{{act.canonical}}" />{{/if}}
+
+  <!-- Social sharing -->
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="{{act.title}} — James King" />
+  <meta property="og:site_name" content="jamesking.dev" />
+  <meta property="og:description" content="{{act.ogDescription}}" />
+  {{#if act.canonical}}<meta property="og:url" content="{{act.canonical}}" />{{/if}}
+  {{#if act.ogImage}}
+  <meta property="og:image" content="{{act.ogImage}}" />
+  {{else}}
+  <meta property="og:image" content="https://james.ripixel.co.uk/card_life.png" />
+  {{/if}}
+  {{#if act.dateIso}}<meta property="article:published_time" content="{{act.dateIso}}" />{{/if}}
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Theme colour (cream) -->
+  <meta name="theme-color" content="#F5EFDF" />
+
+  <!-- Favicons -->
+  {{> meta}}
+
+  <!-- Indieweb -->
+  <link rel="webmention" href="https://webmention.io/james.ripixel.co.uk/webmention" />
+  <link rel="pingback" href="https://webmention.io/james.ripixel.co.uk/xmlrpc" />
+  <link rel="alternate" type="application/rss+xml" href="/rss.xml" title="James King" />
+
+  <!-- Zine Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style"
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@500;700&family=Special+Elite&family=Familjen+Grotesk:wght@500;700&family=Anton&family=Space+Grotesk:wght@400;500;600;700&display=swap" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@500;700&family=Special+Elite&family=Familjen+Grotesk:wght@500;700&family=Anton&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet" media="print" onload="this.media='all'" />
+  <noscript>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@500;700&family=Special+Elite&family=Familjen+Grotesk:wght@500;700&family=Anton&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet" />
+  </noscript>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/styles.min.{{cacheHash}}.css" />
+</head>

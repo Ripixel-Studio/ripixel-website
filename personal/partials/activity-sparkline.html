@@ -1,0 +1,7 @@
+{{!-- Inline SVG sparkline. Context: { d, area } from sparklinePath() (600×120 box); hash: caption, tall. --}}
+<svg class="act-sparkline{{#if tall}} act-sparkline--tall{{/if}}" viewBox="0 0 600 120" preserveAspectRatio="none" role="img" aria-label="{{#if caption}}{{caption}}{{else}}sparkline{{/if}}">
+  <line x1="6" y1="114" x2="594" y2="114" class="act-sparkline__base" vector-effect="non-scaling-stroke" />
+  <path d="{{area}}" class="act-sparkline__area" />
+  <path d="{{d}}" class="act-sparkline__line" fill="none" vector-effect="non-scaling-stroke" />
+</svg>
+{{#if caption}}<div class="act-sparkline__caption">{{caption}}</div>{{/if}}

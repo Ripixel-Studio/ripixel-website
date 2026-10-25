@@ -1,0 +1,93 @@
+{{!-- One grid module card. Context: a module view model from buildModule(). --}}
+<section class="act-card act-module act-module--{{key}}{{#if wide}} act-module--wide{{/if}}" aria-label="{{title}}">
+  <div class="act-card__inner">
+    <div class="act-card__head">
+      <span class="act-card__title">· {{title}} ·</span>
+      {{#if right}}<span class="act-card__right">{{right}}</span>{{/if}}
+    </div>
+
+    {{#if cells.length}}
+    <div class="act-cells">
+      {{#each cells}}
+      <div class="act-cell{{#if lead}} act-cell--lead{{/if}}{{#if warn}} act-cell--warn{{/if}}">
+        <div class="act-cell__v">{{value}}{{#if unit}}<span>{{unit}}</span>{{/if}}</div>
+        <div class="act-cell__l">{{label}}</div>
+      </div>
+      {{/each}}
+    </div>
+    {{/if}}
+
+    {{#if zones}}{{> activity-hr-zones zones}}{{/if}}
+
+    {{#if sparkline}}{{> activity-sparkline sparkline caption=sparkCaption}}{{/if}}
+
+    {{#if bars}}
+    <div class="act-bars-list" role="list">
+      {{#each bars.rows}}
+      <div class="act-bar" role="listitem">
+        <span class="act-bar__label">{{label}}</span>
+        <svg class="act-bar__svg" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="1" width="{{pct}}" height="8" class="act-bar__fill" /></svg>
+        <span class="act-bar__value">{{value}}</span>
+      </div>
+      {{/each}}
+    </div>
+    {{/if}}
+
+    {{#if dots.length}}
+    <div class="act-dots" aria-label="Last 28 days">
+      {{#each dots}}<span class="act-dot act-dot--{{state}}" title="{{date}}"></span>{{/each}}
+    </div>
+    <div class="act-dots__legend"><span class="act-dot act-dot--active"></span> active <span class="act-dot act-dot--rest"></span> rest <span class="act-dot act-dot--off"></span> off</div>
+    {{/if}}
+
+    {{#if goals.length}}
+    <div class="act-goals">
+      {{#each goals}}
+      <div class="act-goal">
+        <div class="act-goal__head"><span>{{label}}</span><span>{{value}}</span></div>
+        <svg class="act-bar__svg" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="1" width="{{pct}}" height="8" class="act-bar__fill" /></svg>
+        <div class="act-goal__foot"><span>{{days}}</span><span class="{{#if onPace}}act-goal__on{{else}}act-goal__off{{/if}}">{{status}}</span></div>
+      </div>
+      {{/each}}
+    </div>
+    {{/if}}
+
+    {{#if image}}
+    <div class="act-module__image"><img src="{{image.src}}" alt="{{image.alt}}" loading="lazy" decoding="async" /></div>
+    {{/if}}
+
+    {{#if chips.length}}
+    <div class="act-chips">
+      {{#each chips}}<span class="act-chip act-chip--{{tone}}">{{text}}</span>{{/each}}
+    </div>
+    {{#if chipsLegend}}<div class="act-note act-note--quiet">{{chipsLegend}}</div>{{/if}}
+    {{/if}}
+
+    {{#if table}}
+    <table class="act-table">
+      <thead><tr>{{#each table.head}}<th scope="col">{{this}}</th>{{/each}}</tr></thead>
+      <tbody>
+        {{#each table.rows}}
+        <tr class="act-table__row act-table__row--{{tone}}">{{#each cells}}<td>{{this}}</td>{{/each}}</tr>
+        {{/each}}
+      </tbody>
+    </table>
+    {{/if}}
+
+    {{#if list.length}}
+    <ol class="act-list">
+      {{#each list}}
+      <li class="act-list__item">
+        <span class="act-list__primary">{{primary}}</span>
+        {{#if secondary}}<span class="act-list__secondary">{{secondary}}</span>{{/if}}
+        {{#if tertiary}}<span class="act-list__tertiary">{{tertiary}}</span>{{/if}}
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+
+    {{#if setList}}{{> activity-set-list setList}}{{/if}}
+
+    {{#if note}}<div class="act-note{{#if noteWarn}} act-note--warn{{/if}}">{{note}}</div>{{/if}}
+  </div>
+</section>

@@ -1,0 +1,29 @@
+{{!-- Activity hero: stamps, banner/photo, title, credit line. Context: `act`. --}}
+<header class="act-hero{{#if bannerUrl}} act-hero--banner{{/if}}{{#if bgPhotoUrl}} act-hero--photo{{/if}}">
+  {{#if bannerUrl}}
+  <div class="act-hero__art">
+    <img src="{{bannerUrl}}" alt="" loading="lazy" decoding="async" />
+    <span class="stamp act-hero__art-stamp">🎨 AI banner</span>
+  </div>
+  {{else}}{{#if bgPhotoUrl}}
+  <div class="act-hero__art act-hero__art--photo">
+    <img src="{{bgPhotoUrl}}" alt="" loading="lazy" decoding="async" />
+  </div>
+  {{/if}}{{/if}}
+
+  <div class="act-hero__body">
+    <div class="act-hero__stamps">
+      <span class="stamp act-stamp act-stamp--type">{{icon}} {{typeLabel}}</span>
+      {{#if source}}<span class="stamp act-stamp act-stamp--source">via {{source}}</span>{{/if}}
+      {{#if dateStamp}}<span class="stamp act-stamp act-stamp--date">{{dateStamp}}</span>{{/if}}
+      {{#if prCount}}<span class="stamp act-stamp act-stamp--pr">+{{prCount}} PR</span>{{/if}}
+      {{#if destinationCount}}<span class="stamp act-stamp act-stamp--dest">→ {{destinationCount}} {{destinationWord}}</span>{{/if}}
+    </div>
+
+    <h1 class="act-hero__title">{{title}}<span class="act-hero__dot">.</span></h1>
+
+    <div class="act-hero__credit">
+      by <b>{{owner}}</b>{{#if boosterCount}} · enriched by {{boosterCount}} {{boosterWord}}{{/if}}{{#if locationName}} · 🌍 {{locationName}}{{/if}}
+    </div>
+  </div>
+</header>

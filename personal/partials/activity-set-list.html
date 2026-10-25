@@ -1,0 +1,18 @@
+{{!-- Strength set list. Context: groupStrengthSets() output. Each exercise row reuses the site's exercise-item partial for its header. --}}
+<div class="act-sets">
+  {{#each exercises}}
+  <div class="act-ex{{#if isPR}} act-ex--pr{{/if}}">
+    {{> exercise-item type="strength" title=name date=summary}}
+    <div class="act-ex__sets">
+      {{#if isPR}}<span class="stamp act-stamp act-stamp--pr">★ PR</span>{{/if}}
+      {{#each chips}}<span class="act-chip act-chip--set">{{this}}</span>{{/each}}
+      {{#if volumeLabel}}<span class="act-ex__vol">{{volumeLabel}}</span>{{/if}}
+    </div>
+  </div>
+  {{/each}}
+  <div class="act-sets__foot">
+    {{#if totalReps}}<span class="act-sets__stat">{{totalReps}} <small>reps</small></span>{{/if}}
+    {{#if totalDurationLabel}}<span class="act-sets__stat">{{totalDurationLabel}} <small>total time</small></span>{{/if}}
+    {{#if totalVolume}}<span class="act-sets__stat act-sets__stat--ink">{{totalVolumeLabel}} <small>kg moved</small></span>{{/if}}
+  </div>
+</div>

@@ -1,0 +1,38 @@
+{{!-- Page-level bands: parkrun, milestone crossed, personal-records callout. Context: `act`. --}}
+{{#if parkrun}}
+<section class="act-band act-band--parkrun" aria-label="parkrun result">
+  <div class="act-band__kicker">
+    🎽 {{parkrun.eventName}}
+    {{#if parkrun.isTimePb}}<span class="stamp act-stamp act-stamp--pb">time PB</span>{{/if}}
+    {{#if parkrun.isAgeGradePb}}<span class="stamp act-stamp act-stamp--pb">AG PB</span>{{/if}}
+  </div>
+  <div class="act-band__cells">
+    <div class="act-band__cell"><div class="act-band__n">{{parkrun.finishTime}}</div><div class="act-band__l">finish time</div></div>
+    <div class="act-band__cell"><div class="act-band__n">{{parkrun.position}}</div><div class="act-band__l">position</div></div>
+    <div class="act-band__cell"><div class="act-band__n">{{parkrun.ageGrade}}</div><div class="act-band__l">age grade</div></div>
+    {{#if parkrun.totalParkruns}}<div class="act-band__cell"><div class="act-band__n">{{parkrun.totalParkruns}}</div><div class="act-band__l">total parkruns</div></div>{{/if}}
+  </div>
+</section>
+{{/if}}
+
+{{#if milestone.crossedKm}}
+<section class="act-band act-band--milestone" aria-label="Distance milestone">
+  <span class="act-band__icon">🏅</span>
+  <div>
+    <div class="act-band__title">{{milestone.crossedKm}} km lifetime</div>
+    <div class="act-band__sub">total {{milestone.lifetimeKm}} km {{milestone.typeLabel}} · crossed on this one</div>
+  </div>
+</section>
+{{/if}}
+
+{{#if prBand}}
+<section class="act-band act-band--pr" aria-label="Personal record">
+  <span class="act-band__icon">🏆</span>
+  <div class="act-band__text">
+    <div class="act-band__title">{{prBand.label}}</div>
+    <div class="act-band__sub">{{prBand.sub}}</div>
+  </div>
+  <div class="act-band__n act-band__n--pr">{{prBand.value}}{{#if prBand.unit}}<span>{{prBand.unit}}</span>{{/if}}</div>
+  {{#if prBand.delta}}<span class="act-band__delta">{{prBand.delta}}</span>{{/if}}
+</section>
+{{/if}}

@@ -1,0 +1,11 @@
+{{!-- HR zone bars as inline SVG. Context: hrZoneBars() output { w, h, total, bars[] }. --}}
+<svg class="act-zones" viewBox="0 0 {{w}} {{h}}" role="img" aria-label="Minutes per heart-rate zone, Z1 to Z5">
+  {{#each bars}}
+  <text x="0" y="{{textY}}" class="act-zones__label">{{label}}</text>
+  <rect x="{{x}}" y="{{y}}" width="{{w}}" height="{{h}}" class="act-zones__bar" style="opacity:{{opacity}}" />
+  <text x="{{labelX}}" y="{{textY}}" class="act-zones__value">{{minutes}} min · {{pct}}%</text>
+  {{/each}}
+</svg>
+<ul class="act-zones__legend">
+  {{#each bars}}<li><b>{{label}}</b> {{name}}</li>{{/each}}
+</ul>
