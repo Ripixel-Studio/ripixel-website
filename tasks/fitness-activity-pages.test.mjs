@@ -55,10 +55,10 @@ async function fixtureIndex() {
 }
 
 describe('slug → path', () => {
-  test('maps a showcase id to public/personal/life/activity/<slug>/index.html (served at /life/activity/<slug>/)', () => {
+  test('maps a showcase id to public/personal/life/activity/<slug>/index.html (served at /life/activity/<slug>)', () => {
     assert.equal(slugToOutPath('colwick-parkrun-2026-10-17'), path.join('public/personal', 'life', 'activity', 'colwick-parkrun-2026-10-17', 'index.html'));
     assert.equal(slugToOutPath('x', '/tmp/out'), '/tmp/out/life/activity/x/index.html');
-    assert.equal(activityUrl('colwick-parkrun-2026-10-17'), '/life/activity/colwick-parkrun-2026-10-17/');
+    assert.equal(activityUrl('colwick-parkrun-2026-10-17'), '/life/activity/colwick-parkrun-2026-10-17');
   });
   test('rejects anything that could escape the directory', () => {
     for (const bad of ['', '../etc', 'a/b', 'a\\b', '.hidden', 'a..b', 42, null, undefined, 'x'.repeat(202)]) {
@@ -279,8 +279,8 @@ describe('view model from the fixtures', () => {
     const index = await fixtureIndex();
     const v = buildActivityView(await fixture('colwick-parkrun-2026-10-17'), index, { siteUrl: 'https://james.ripixel.co.uk/' });
     const a = v.act;
-    assert.equal(a.url, '/life/activity/colwick-parkrun-2026-10-17/');
-    assert.equal(a.canonical, 'https://james.ripixel.co.uk/life/activity/colwick-parkrun-2026-10-17/');
+    assert.equal(a.url, '/life/activity/colwick-parkrun-2026-10-17');
+    assert.equal(a.canonical, 'https://james.ripixel.co.uk/life/activity/colwick-parkrun-2026-10-17');
     assert.equal(a.typeLabel, 'RUN');
     assert.equal(a.source, 'Strava');
     assert.equal(a.dateStamp, 'SAT 17 OCT 2026');
@@ -393,7 +393,7 @@ describe('task', () => {
       assert.match(html, /<title>Colwick parkrun #87 — James King<\/title>/);
       assert.match(html, /<meta property="og:image" content="https:\/\/james\.ripixel\.co\.uk\/life\/og\/activity\/colwick-parkrun-2026-10-17\.png"/);
       assert.match(html, /<meta property="og:type" content="article"/);
-      assert.match(html, /<link rel="canonical" href="https:\/\/james\.ripixel\.co\.uk\/life\/activity\/colwick-parkrun-2026-10-17\/"/);
+      assert.match(html, /<link rel="canonical" href="https:\/\/james\.ripixel\.co\.uk\/life\/activity\/colwick-parkrun-2026-10-17"/);
       assert.match(html, /<link rel="alternate" type="application\/atom\+xml" href="\/life\/feed\.xml"/);
       assert.doesNotMatch(html, /activity-head/);
       assert.match(html, /class="act-zones__bar"/);

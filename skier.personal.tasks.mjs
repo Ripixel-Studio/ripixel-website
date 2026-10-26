@@ -20,6 +20,7 @@ import { fitnessLifeTask } from './tasks/fitness-life.mjs';
 import { fitnessRoundupPagesTask } from './tasks/fitness-roundup-pages.mjs';
 import { fitnessOgImagesTask } from './tasks/fitness-og-images.mjs';
 import { fitnessFeedTask, FEED_PATH as FITNESS_FEED_PATH } from './tasks/fitness-feed.mjs';
+import { sitemapSlashlessTask } from './tasks/sitemap-slashless.mjs';
 
 /** Estimate read time in minutes from raw text (200 wpm)
  * @param {string} text */
@@ -326,6 +327,9 @@ export const tasks = [
         scanDir: './public/personal',
         siteUrl: 'https://james.ripixel.co.uk',
     }),
+
+    // Skier writes `foo/index.html` as `/foo/`; the site is slash-less (firebase.json trailingSlash: false)
+    sitemapSlashlessTask({ outDir: './public/personal' }),
 
     {
         name: 'Copy robots.txt',

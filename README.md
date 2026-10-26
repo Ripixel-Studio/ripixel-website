@@ -102,7 +102,7 @@ Downstream tasks can page over the globals directly (`generatePaginatedItemsTask
 |---|---|
 | `tasks/fitness-og-images.mjs` | `/life/og/activity/<slug>.png`, `/life/og/roundup/<key>.png` — one 1200×630 OG card per page |
 | `tasks/fitness-roundup-pages.mjs` | `/life/roundup/<key>`, `/life/roundups` |
-| `tasks/fitness-activity-pages.mjs` | `/life/activity/<slug>/` |
+| `tasks/fitness-activity-pages.mjs` | `/life/activity/<slug>` |
 | `tasks/fitness-feed.mjs` | **`/life/feed.xml`** — Atom, activities and roundups interleaved newest first, 50 entries |
 
 **Feed.** `https://james.ripixel.co.uk/life/feed.xml`. Each entry is the page title, its

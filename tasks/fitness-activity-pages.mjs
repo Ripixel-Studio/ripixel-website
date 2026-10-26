@@ -8,9 +8,9 @@
  *
  *   personal/templates/activity.html  →  public/personal/life/activity/<slug>/index.html
  *
- * The directory form is the contract's URL shape (/life/activity/<slug>/, which
- * the /life cards link to) and Firebase also serves it without the trailing
- * slash; a bare <slug>.html under cleanUrls would only answer /life/activity/<slug>. Skier has
+ * The page is linked and canonicalised slash-less (/life/activity/<slug>; firebase.json has
+ * trailingSlash: false, so the directory form 301s to it). The directory output is kept
+ * because Firebase serves <slug>/index.html at /life/activity/<slug> under cleanUrls. Skier has
  * no "page per object in a global" builtin, so this compiles the template
  * itself with Handlebars (the same library Skier uses), registering the site's
  * partials from personal/partials/.
@@ -53,7 +53,7 @@ export function slugToOutPath(slug, outDir = DEFAULT_OUT_DIR) {
 
 /** @param {string} slug */
 export function activityUrl(slug) {
-  return `${ACTIVITY_BASE_PATH}/${slug}/`;
+  return `${ACTIVITY_BASE_PATH}/${slug}`;
 }
 
 // ---------------------------------------------------------------------------
