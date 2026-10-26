@@ -46,7 +46,8 @@
             }
           ]
         }
-      ]
+      ],
+      "trailingSlash": false
     },
     {
       "target": "personal",
@@ -94,7 +95,8 @@
             }
           ]
         }
-      ]
+      ],
+      "trailingSlash": false
     }
   ]
 }
