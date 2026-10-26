@@ -177,7 +177,7 @@ export function buildAtom(items, opts = {}) {
     .join('\n');
   return `<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <id>${xmlEsc(home)}/</id>
+  <id>${xmlEsc(home)}</id>
   <title>${xmlEsc(opts.title || FEED_TITLE)}</title>
   <subtitle>${xmlEsc(opts.subtitle || FEED_SUBTITLE)}</subtitle>
   <link rel="self" type="application/atom+xml" href="${xmlEsc(self)}"/>

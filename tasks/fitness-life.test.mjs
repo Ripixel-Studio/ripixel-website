@@ -63,7 +63,7 @@ describe('the week', () => {
     assert.equal(w.mode, 'roundup');
     assert.equal(w.title, 'WEEK 42');
     assert.equal(w.kicker, 'LATEST WEEK');
-    assert.equal(w.href, '/life/roundup/week-42-2026/');
+    assert.equal(w.href, '/life/roundup/week-42-2026');
     assert.equal(w.days.length, 7);
     assert.deepEqual(w.days.map((x) => x.key), [
       '2026-10-12', '2026-10-13', '2026-10-14', '2026-10-15', '2026-10-16', '2026-10-17', '2026-10-18',
@@ -119,7 +119,7 @@ describe('activity cards', () => {
   test('distance family: km / time / avg hr, PR label verbatim, thumbnail kept', async () => {
     const d = await fixtures();
     const c = buildCard(d.index.activities[0]);
-    assert.equal(c.href, '/life/activity/colwick-parkrun-2026-10-17/');
+    assert.equal(c.href, '/life/activity/colwick-parkrun-2026-10-17');
     assert.equal(c.date, 'SAT 17 OCT');
     assert.equal(c.typeLabel, 'RUN');
     assert.equal(c.glyph, '🏃');
@@ -159,7 +159,7 @@ describe('roundup teaser', () => {
     const d = await fixtures();
     const t = buildRoundupTeaser(d.index.roundups[0], d.roundups[0]);
     assert.ok(t);
-    assert.equal(t.href, '/life/roundup/week-42-2026/');
+    assert.equal(t.href, '/life/roundup/week-42-2026');
     assert.equal(t.kindLabel, 'WEEKLY ROUNDUP');
     assert.equal(t.periodLabel, 'Week 42 · 2026');
     assert.equal(t.range, '12 – 18 OCT 2026');

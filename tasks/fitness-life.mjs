@@ -15,9 +15,9 @@
 import fs from 'node:fs/promises';
 
 export const DEFAULT_EVENTS_FILE = 'personal/items/life/fitness.json';
-export const ACTIVITY_HREF = '/life/activity/';
-export const ROUNDUP_HREF = '/life/roundup/';
-export const ROUNDUPS_HREF = '/life/roundups/';
+export const ACTIVITY_HREF = '/life/activity';
+export const ROUNDUP_HREF = '/life/roundup';
+export const ROUNDUPS_HREF = '/life/roundups';
 export const CARD_COUNT = 6;
 export const TZ = 'Europe/London';
 
@@ -254,7 +254,7 @@ export function buildWeek(index, roundupFiles, now) {
         kicker: isCurrent ? 'THIS WEEK' : 'LATEST WEEK',
         title: weekNo ? `WEEK ${Number(weekNo)}` : 'THE WEEK',
         range: rangeLabel(start, end),
-        href: `${ROUNDUP_HREF}${encodeURIComponent(r.periodKey || weekly.key)}/`,
+        href: `${ROUNDUP_HREF}/${encodeURIComponent(r.periodKey || weekly.key)}`,
         days,
         activeDays: days.filter((d) => d.count > 0).length,
         stats: weekStats({
@@ -344,7 +344,7 @@ export function buildCard(e) {
     ? e.routeThumbnailUrl : '';
   return {
     slug: e.slug,
-    href: `${ACTIVITY_HREF}${encodeURIComponent(e.slug)}/`,
+    href: `${ACTIVITY_HREF}/${encodeURIComponent(e.slug)}`,
     title: e.title || 'Untitled activity',
     date: start ? dayStamp(start) : '',
     dateTime: start ? start.toISOString() : '',
@@ -399,7 +399,7 @@ export function buildRoundupTeaser(summary, file) {
   }
   return {
     key: summary.key,
-    href: `${ROUNDUP_HREF}${encodeURIComponent(summary.key)}/`,
+    href: `${ROUNDUP_HREF}/${encodeURIComponent(summary.key)}`,
     kindLabel,
     periodLabel,
     range: start && end ? rangeLabel(start, end) : '',

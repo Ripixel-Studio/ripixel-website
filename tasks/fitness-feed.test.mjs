@@ -72,7 +72,7 @@ describe('item mapping', () => {
     assert.equal(it.kind, 'activity');
     assert.equal(it.id, 'colwick-parkrun-2026-10-17');
     assert.equal(it.title, 'Colwick parkrun #87');
-    assert.equal(it.link, `${SITE}/life/activity/colwick-parkrun-2026-10-17/`);
+    assert.equal(it.link, `${SITE}/life/activity/colwick-parkrun-2026-10-17`);
     assert.match(it.summary, /^Run · 5\.01 km · 19:52 · 3:58 \/km · 171 bpm · 1 PR · Colwick Park, Nottingham\. Went out hard/);
     assert.equal(it.published, '2026-10-17T08:00:00Z');
     assert.equal(it.updated, rfc3339(activities[0].entry.createdAt));

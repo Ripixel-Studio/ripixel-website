@@ -2,12 +2,12 @@
 <header class="act-hero{{#if bannerUrl}} act-hero--banner{{/if}}{{#if bgPhotoUrl}} act-hero--photo{{/if}}">
   {{#if bannerUrl}}
   <div class="act-hero__art">
-    <img src="{{bannerUrl}}" alt="" loading="lazy" decoding="async" />
+    <img src="{{bannerUrl}}" alt="" loading="eager" fetchpriority="high" decoding="async" />
     <span class="stamp act-hero__art-stamp">🎨 AI banner</span>
   </div>
   {{else}}{{#if bgPhotoUrl}}
   <div class="act-hero__art act-hero__art--photo">
-    <img src="{{bgPhotoUrl}}" alt="" loading="lazy" decoding="async" />
+    <img src="{{bgPhotoUrl}}" alt="" loading="eager" fetchpriority="high" decoding="async" />
   </div>
   {{/if}}{{/if}}
 
