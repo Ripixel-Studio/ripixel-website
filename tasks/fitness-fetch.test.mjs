@@ -70,13 +70,39 @@ describe('loadFitnessData', () => {
     assert.equal(r.roundups[0].key, 'week-42-2026');
     assert.equal(r.index.siteSlug, 'james');
 
-    // index + 3 activities + 1 roundup
-    assert.equal(calls.length, 5);
+    // index + 3 activities + 1 roundup + events.json
+    assert.equal(calls.length, 6);
+    assert.equal(r.events.events.length, 15);
+    assert.equal(r.events.events[2].title, "Hyrox Birmingham - Open Men's Doubles");
     assert.equal(calls[0].url, `${BASE}/index.json`);
     const cached = await fs.readdir(cacheDir);
     assert.ok(cached.includes('index.json'));
     assert.ok(cached.includes('.meta.json'));
     assert.ok((await fs.readdir(path.join(cacheDir, 'activity'))).includes('push-day-2026-10-13.json'));
+    assert.ok(cached.includes('events.json'));
+  });
+
+  test('a missing or malformed events.json is not fatal: fitnessEvents is null', async () => {
+    const dir = path.join(tmp, 'src');
+    await fs.cp(FIXTURES, dir, { recursive: true });
+    await fs.rm(path.join(dir, 'events.json'));
+    const { impl } = fakeFetch({ dir });
+    const r = await loadFitnessData({ env, baseUrl: BASE, cacheDir, fixturesDir: path.join(tmp, 'nope'), fetchImpl: impl });
+    assert.equal(r.source, 'live');
+    assert.equal(r.events, null);
+    assert.equal(r.activities.length, 3);
+
+    await fs.writeFile(path.join(dir, 'events.json'), '{"generatedAt":"x"}');
+    const r2 = await loadFitnessData({ env, baseUrl: BASE, cacheDir, fixturesDir: path.join(tmp, 'nope'), fetchImpl: fakeFetch({ dir }).impl });
+    assert.equal(r2.events, null);
+  });
+
+  test('a live failure on events.json alone re-uses the cached copy', async () => {
+    await loadFitnessData({ env, baseUrl: BASE, cacheDir, fixturesDir: path.join(tmp, 'nope'), fetchImpl: fakeFetch().impl });
+    const { impl } = fakeFetch({ fail: ['events.json'] });
+    const r = await loadFitnessData({ env, baseUrl: BASE, cacheDir, fixturesDir: path.join(tmp, 'nope'), fetchImpl: impl });
+    assert.equal(r.source, 'live');
+    assert.equal(r.events.events.length, 15);
   });
 
   test('second live run sends If-None-Match and reuses the cache on 304', async () => {
@@ -87,7 +113,7 @@ describe('loadFitnessData', () => {
     assert.equal(r.source, 'live');
     assert.equal(r.activities.length, 3);
     const conditional = second.calls.filter((c) => c.headers['if-none-match'] === '"v1"');
-    assert.equal(conditional.length, 4); // every file except index.json
+    assert.equal(conditional.length, 5); // every file except index.json
   });
 
   test('live failure falls back to the cache', async () => {
@@ -157,15 +183,16 @@ describe('loadFitnessData', () => {
 });
 
 describe('fetchFitnessTask', () => {
-  test('returns exactly the five globals and logs the source', async () => {
+  test('returns exactly the six globals and logs the source', async () => {
     const task = fetchFitnessTask({ env: { FITNESS_DATA_SOURCE: 'fixtures' }, fixturesDir: FIXTURES, cacheDir });
     /** @type {string[]} */
     const infos = [];
     const ctx = { debug: false, globals: {}, logger: { info: (m) => infos.push(m), warn() {}, error() {}, debug() {} } };
     const out = await task.run(task.config, ctx);
     assert.deepEqual(Object.keys(out).sort(), [
-      'fitnessActivities', 'fitnessIndex', 'fitnessRoundups', 'fitnessSource', 'fitnessUnavailable',
+      'fitnessActivities', 'fitnessEvents', 'fitnessIndex', 'fitnessRoundups', 'fitnessSource', 'fitnessUnavailable',
     ]);
+    assert.equal(out.fitnessEvents.events.length, 15);
     assert.equal(out.fitnessSource, 'fixtures');
     assert.equal(out.fitnessUnavailable, false);
     assert.equal(out.fitnessActivities.length, 3);

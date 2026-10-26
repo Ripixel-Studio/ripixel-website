@@ -6,8 +6,10 @@
  * `#unless`), so everything the page shows is pre-formatted here into one
  * global, `fitnessLife`, and the templates only loop and test. All inputs are
  * the S2.1 globals (`fitnessIndex`, `fitnessActivities`, `fitnessRoundups`,
- * `fitnessUnavailable`) plus the hand-written events list in
- * `personal/items/life/fitness.json`.
+ * `fitnessUnavailable`), the calendar export `fitnessEvents` (S2.6: the Fitness
+ * Events / Fitness Regular Google calendars, exported by the box as
+ * `events.json`) and, only when that export is unavailable, the hand-written
+ * events list in `personal/items/life/fitness.json`.
  *
  * Field meanings follow jarvis-memory specs/ripixel-website/fitness-zine.md
  * "Data contract (S0)" §2, §6 and §8.
@@ -19,6 +21,8 @@ export const ACTIVITY_HREF = '/life/activity';
 export const ROUNDUP_HREF = '/life/roundup';
 export const ROUNDUPS_HREF = '/life/roundups';
 export const CARD_COUNT = 6;
+export const NEXT_UP_COUNT = 5;
+export const WEEK_DAYS = 7;
 export const TZ = 'Europe/London';
 
 // ---------------------------------------------------------------------------
@@ -526,39 +530,177 @@ export function buildStats(index) {
 }
 
 // ---------------------------------------------------------------------------
-// Hand-written events (personal/items/life/fitness.json)
+// On the calendar (S2.6)
+//
+// `events.json` from the bucket is the Fitness Events (races, one-offs; 120 days)
+// and Fitness Regular (recurring sessions; 21 days) calendars, one sorted list
+// with `calendar: 'events'|'regular'` and `kind: race|other|class|session`.
+// The hand-written list in fitness.json is only the fallback when that export
+// is unavailable. Past entries are never shown; with nothing upcoming the
+// section renders nothing at all.
 
-/** @param {any[]} events @param {Date} now */
-export function buildEvents(events, now) {
-  const today = ymd(now);
-  const list = (Array.isArray(events) ? events : [])
-    .filter((e) => e && typeof e.title === 'string')
-    .map((e) => {
-      const date = typeof e.date === 'string' ? e.date : '';
-      const d = date ? parse(`${date}T12:00:00Z`) : null;
-      return {
-        date,
-        emoji: typeof e.emoji === 'string' ? e.emoji : '🏁',
-        day: e.day != null ? String(e.day) : (d ? fmt(d, { day: 'numeric' }) : ''),
-        month: typeof e.month === 'string' ? e.month : (d ? fmt(d, { month: 'short', year: 'numeric' }) : ''),
+/** `12:10` in the site timezone (h23 so midnight is 00:00, never 24:00). @param {Date} d */
+function hm(d) {
+  return fmt(d, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+}
+
+/** Whole days since the epoch of the site-local date of `d`. @param {Date} d */
+function dayIndex(d) {
+  const [y, m, day] = ymd(d).split('-').map(Number);
+  return Math.round(Date.UTC(y, m - 1, day) / 86_400_000);
+}
+
+/** The site-local noon of the day `offset` days after `now`'s day. @param {Date} now @param {number} offset */
+function localDay(now, offset) {
+  const [y, m, d] = ymd(now).split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d + offset, 12));
+}
+
+/**
+ * `today 12:10`, `tomorrow`, `in 3 days`, `happening now`.
+ * @param {Date} start @param {Date} end @param {boolean} allDay @param {Date} now
+ */
+export function countdown(start, end, allDay, now) {
+  if (start <= now && end > now) return allDay ? 'today' : 'happening now';
+  const diff = dayIndex(start) - dayIndex(now);
+  const at = allDay ? '' : ` ${hm(start)}`;
+  if (diff <= 0) return `today${at}`;
+  if (diff === 1) return `tomorrow${at}`;
+  return `in ${diff} days`;
+}
+
+/** A calendar export entry → parsed dates, or null when the start is unusable. @param {any} e */
+function parseEntry(e) {
+  if (!e || typeof e.title !== 'string') return null;
+  const start = parse(e.start);
+  if (!start) return null;
+  const end = parse(e.end) || start;
+  return { start, end: end > start ? end : start, allDay: Boolean(e.allDay) };
+}
+
+/** @param {any} e export entry @param {{start: Date, end: Date, allDay: boolean}} t @param {Date} now */
+function nextUpEntry(e, t, now) {
+  const race = e.kind === 'race';
+  return {
+    id: typeof e.id === 'string' ? e.id : '',
+    title: e.title,
+    kind: race ? 'race' : 'event',
+    stamp: race ? 'RACE' : 'EVENT',
+    stampClass: race ? 'fit-event__stamp--race' : 'fit-event__stamp--event',
+    emoji: race ? '🏁' : '📍',
+    day: fmt(t.start, { day: 'numeric' }),
+    month: fmt(t.start, { month: 'short', year: 'numeric' }),
+    date: dayStamp(t.start),
+    time: t.allDay ? '' : hm(t.start),
+    when: countdown(t.start, t.end, t.allDay, now),
+    location: typeof e.location === 'string' ? e.location : '',
+    description: typeof e.description === 'string' ? e.description : '',
+    dateTime: t.start.toISOString(),
+    allDay: t.allDay,
+  };
+}
+
+/**
+ * Seven day columns from today: the regular sessions in each.
+ * @param {{ e: any, t: {start: Date, end: Date, allDay: boolean} }[]} regular  upcoming only
+ * @param {Date} now
+ */
+export function weekStrip(regular, now) {
+  const days = [];
+  for (let i = 0; i < WEEK_DAYS; i++) {
+    const d = localDay(now, i);
+    const key = ymd(d);
+    const sessions = regular
+      .filter(({ t }) => ymd(t.start) === key)
+      .sort((a, b) => a.t.start.getTime() - b.t.start.getTime())
+      .map(({ e, t }) => ({
         title: e.title,
-        tag: typeof e.tag === 'string' ? e.tag : '',
-        description: typeof e.description === 'string' ? e.description : '',
-        past: Boolean(date) && date < today,
-      };
+        time: t.allDay ? '' : hm(t.start),
+        kind: e.kind === 'class' ? 'class' : 'session',
+        kindClass: e.kind === 'class' ? 'fit-week-strip__session--class' : 'fit-week-strip__session--session',
+        location: typeof e.location === 'string' ? e.location : '',
+      }));
+    days.push({
+      key,
+      dow: fmt(d, { weekday: 'short' }).toUpperCase(),
+      num: fmt(d, { day: 'numeric' }),
+      label: fmt(d, { weekday: 'long', day: 'numeric', month: 'short' }).replace(',', ''),
+      isToday: i === 0,
+      sessions,
+      hasSessions: sessions.length > 0,
+      count: sessions.length,
     });
-  const upcoming = list.filter((e) => !e.past).sort((a, b) => a.date.localeCompare(b.date));
-  const past = list.filter((e) => e.past).sort((a, b) => b.date.localeCompare(a.date));
-  return { upcoming, past, all: [...upcoming, ...past], hasUpcoming: upcoming.length > 0, hasPast: past.length > 0 };
+  }
+  return days;
+}
+
+/**
+ * The "on the calendar" block from the export (preferred) or the hand-written list.
+ * @param {any} exported   events.json object or null
+ * @param {any[]} handwritten  fitness.json events
+ * @param {Date} now
+ */
+export function buildCalendar(exported, handwritten, now) {
+  const none = { source: 'none', meta: '', nextUp: [], hasNextUp: false, week: [], hasWeek: false, hasAny: false };
+  if (exported && Array.isArray(exported.events)) {
+    const upcoming = exported.events
+      .map((e) => ({ e, t: parseEntry(e) }))
+      .filter((x) => x.t && x.t.end > now)
+      .sort((a, b) => a.t.start.getTime() - b.t.start.getTime());
+    const nextUp = upcoming
+      .filter(({ e }) => e.calendar === 'events')
+      .slice(0, NEXT_UP_COUNT)
+      .map(({ e, t }) => nextUpEntry(e, t, now));
+    const week = weekStrip(upcoming.filter(({ e }) => e.calendar === 'regular'), now);
+    const hasWeek = week.some((d) => d.hasSessions);
+    return {
+      source: 'calendar',
+      meta: 'races, one-offs & the regular sessions, straight off the calendar',
+      nextUp,
+      hasNextUp: nextUp.length > 0,
+      week: hasWeek ? week : [],
+      hasWeek,
+      hasAny: nextUp.length > 0 || hasWeek,
+    };
+  }
+
+  const today = ymd(now);
+  const nextUp = (Array.isArray(handwritten) ? handwritten : [])
+    .filter((e) => e && typeof e.title === 'string' && typeof e.date === 'string' && e.date >= today)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, NEXT_UP_COUNT)
+    .map((e) => {
+      const start = parse(`${e.date}T00:00:00Z`) || now;
+      const end = new Date(start.getTime() + 86_400_000);
+      const race = /\brace\b/i.test(String(e.tag || ''));
+      return nextUpEntry({
+        id: '',
+        title: e.title,
+        kind: race ? 'race' : 'other',
+        location: '',
+        description: [e.tag, e.description].filter((x) => typeof x === 'string' && x).join(' — '),
+      }, { start, end, allDay: true }, now);
+    });
+  if (!nextUp.length) return none;
+  return {
+    source: 'handwritten',
+    meta: 'races & events, hand-written for now',
+    nextUp,
+    hasNextUp: true,
+    week: [],
+    hasWeek: false,
+    hasAny: true,
+  };
 }
 
 // ---------------------------------------------------------------------------
 // Assembly
 
 /**
- * @param {{ index: any, roundups?: any[], events?: any[], unavailable?: boolean, now?: Date }} input
+ * @param {{ index: any, roundups?: any[], events?: any[], calendar?: any, unavailable?: boolean, now?: Date }} input
+ *   `events` is the hand-written list (fallback only); `calendar` the events.json object or null.
  */
-export function buildLifeModel({ index, roundups = [], events = [], unavailable = false, now = new Date() }) {
+export function buildLifeModel({ index, roundups = [], events = [], calendar = null, unavailable = false, now = new Date() }) {
   const idx = index || { activities: [], roundups: [], profile: null, streaks: { currentWeeks: 0, longestWeeks: 0 } };
   const entries = Array.isArray(idx.activities) ? idx.activities.filter((e) => e && typeof e.slug === 'string') : [];
   const sorted = [...entries].sort(
@@ -582,7 +724,7 @@ export function buildLifeModel({ index, roundups = [], events = [], unavailable 
     roundupCount: summaries.length,
     hasRoundups: summaries.length > 0,
     stats: available ? buildStats(idx) : null,
-    events: buildEvents(events, now),
+    calendar: buildCalendar(calendar, events, now),
   };
 }
 
@@ -613,12 +755,15 @@ export function fitnessLifeTask(config = {}) {
         index: g.fitnessIndex,
         roundups: Array.isArray(g.fitnessRoundups) ? g.fitnessRoundups : [],
         events,
+        calendar: g.fitnessEvents || null,
         unavailable: Boolean(g.fitnessUnavailable),
         now: cfg.now instanceof Date ? cfg.now : new Date(),
       });
       ctx.logger.info(
         `Life page: ${fitnessLife.activities.length} cards, week=${fitnessLife.week?.mode || 'none'}, ` +
-        `roundup=${fitnessLife.roundup?.key || 'none'}, ${events.length} events`,
+        `roundup=${fitnessLife.roundup?.key || 'none'}, calendar=${fitnessLife.calendar.source} ` +
+        `(${fitnessLife.calendar.nextUp.length} next up, ` +
+        `${fitnessLife.calendar.week.reduce((a, d) => a + d.count, 0)} sessions this week)`,
       );
       return { fitnessLife };
     },

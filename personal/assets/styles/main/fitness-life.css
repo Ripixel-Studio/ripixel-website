@@ -583,8 +583,6 @@
   list-style: none;
 }
 
-.fit-events__scribble { margin: -4px 0 10px; color: var(--ink-section); }
-
 .fit-event {
   display: grid;
   grid-template-columns: 64px 1fr;
@@ -592,8 +590,6 @@
   padding: 14px 0;
   border-bottom: 1px dashed rgba(23,19,17,0.47);
 }
-
-.fit-event--past { opacity: 0.6; }
 
 .fit-event__date {
   text-align: center;
@@ -636,7 +632,16 @@
   margin-bottom: 6px;
 }
 
-.fit-event__stamp { font-size: 9px; padding: 1px 6px; color: var(--ink-red); }
+.fit-event__stamp { font-size: 9px; padding: 1px 6px; }
+.fit-event__stamp--race { color: var(--ink-red); }
+.fit-event__stamp--event { color: var(--ink); }
+
+.fit-event__when,
+.fit-event__where {
+  font-family: var(--f-mono);
+  font-size: 12px;
+}
+.fit-event__where { opacity: 0.72; }
 
 .fit-event__desc {
   font-family: var(--f-mono);
@@ -683,4 +688,70 @@
   .fit-consistency__weeks { grid-template-columns: repeat(13, minmax(0, 1fr)); }
   .fit-prs__wall { grid-template-columns: 1fr 1fr; }
   .fit-event { grid-template-columns: 56px 1fr; gap: 12px; }
+}
+
+/* ─── On the calendar (S2.6): kickers + the week strip ──── */
+.fit-cal__kicker {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-section);
+  margin: 18px 0 6px;
+}
+
+.fit-week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+  border: 2px solid var(--ink);
+  background: #fff;
+}
+
+.fit-week-strip__day {
+  padding: 8px 8px 10px;
+  border-right: 1px dashed rgba(23,19,17,0.47);
+  min-height: 84px;
+  min-width: 0;
+}
+.fit-week-strip__day:last-child { border-right: 0; }
+.fit-week-strip__day--today { background: rgba(183,38,31,0.06); }
+
+.fit-week-strip__head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.fit-week-strip__dow {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.fit-week-strip__num {
+  font-family: var(--f-disp);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.fit-week-strip__list { list-style: none; margin: 0; padding: 0; }
+.fit-week-strip__session {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  line-height: 1.35;
+  margin: 0 0 4px;
+  overflow-wrap: anywhere;
+}
+.fit-week-strip__session--class::before { content: '▪ '; color: var(--ink-red); }
+.fit-week-strip__session--session::before { content: '▫ '; }
+.fit-week-strip__time { opacity: 0.6; }
+.fit-week-strip__rest { font-family: var(--f-mono); font-size: 11px; opacity: 0.4; }
+
+@media (max-width: 720px) {
+  .fit-week-strip { grid-template-columns: 1fr; }
+  .fit-week-strip__day { border-right: 0; border-bottom: 1px dashed rgba(23,19,17,0.47); min-height: 0; }
+  .fit-week-strip__day:last-child { border-bottom: 0; }
 }

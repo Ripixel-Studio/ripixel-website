@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 import { loadFitnessData } from './fitness-fetch.mjs';
 import {
-  buildLifeModel, buildWeek, buildCard, buildPr, buildRoundupTeaser, buildEvents,
+  buildLifeModel, buildWeek, buildCard, buildPr, buildRoundupTeaser, buildCalendar, countdown,
   effortLevelOf, fitnessLifeTask, km, clock, duration, rangeLabel, stripDays,
 } from './fitness-life.mjs';
 
@@ -236,32 +236,140 @@ describe('stats and PBs', () => {
   });
 });
 
-describe('events', () => {
-  test('upcoming first (soonest), then past (newest), flagged', () => {
-    const e = buildEvents([
-      { date: '2026-04-15', day: '15', month: 'Apr 2026', title: 'Marathon', tag: 'Race', description: 'x' },
-      { date: '2027-01-10', day: '10', month: 'Jan 2027', title: 'Later', emoji: '🚴' },
-      { date: '2026-11-01', day: '1', month: 'Nov 2026', title: 'Sooner' },
+describe('on the calendar', () => {
+  // NOW is Sunday 25 Oct 2026 10:00Z (11:00 BST ends that morning → 10:00 GMT).
+  const ex = (events) => ({ generatedAt: '2026-10-25T06:00:00+00:00', events });
+
+  test('countdown wording', () => {
+    const d = (s) => new Date(s);
+    assert.equal(countdown(d('2026-10-25T18:00:00Z'), d('2026-10-25T19:00:00Z'), false, NOW), 'today 18:00');
+    assert.equal(countdown(d('2026-10-25T09:00:00Z'), d('2026-10-25T11:00:00Z'), false, NOW), 'happening now');
+    assert.equal(countdown(d('2026-10-25T00:00:00Z'), d('2026-10-26T00:00:00Z'), true, NOW), 'today');
+    assert.equal(countdown(d('2026-10-26T00:00:00Z'), d('2026-10-26T01:00:00Z'), false, NOW), 'tomorrow 00:00');
+    assert.equal(countdown(d('2026-10-27T12:10:00Z'), d('2026-10-27T13:40:00Z'), false, NOW), 'in 2 days');
+    assert.equal(countdown(d('2027-01-30T00:00:00Z'), d('2027-01-31T00:00:00Z'), true, NOW), 'in 97 days');
+  });
+
+  test('fixtures: next five from the events calendar, stamped, past never shown', async () => {
+    const d = await fixtures();
+    const c = buildCalendar(d.events, [{ date: '2027-01-01', title: 'ignored: export present' }], NOW);
+    assert.equal(c.source, 'calendar');
+    assert.equal(c.hasAny, true);
+    assert.deepEqual(c.nextUp.map((e) => e.title), [
+      "Hyrox Birmingham - Open Men's Doubles", "Hyrox Birmingham - Open Men's Solo",
+      'Gym induction', 'Rutland Night 10k', 'Hyrox London ExCEL - Singles',
+    ]);
+    assert.deepEqual(c.nextUp.map((e) => e.stamp), ['RACE', 'RACE', 'EVENT', 'RACE', 'RACE']);
+    assert.equal(c.nextUp[0].when, 'in 2 days');
+    assert.equal(c.nextUp[0].time, '12:10');
+    assert.equal(c.nextUp[0].day, '27');
+    assert.equal(c.nextUp[0].month, 'Oct 2026');
+    assert.equal(c.nextUp[0].location, 'NEC, Birmingham');
+    assert.equal(c.nextUp[0].dateTime, '2026-10-27T12:10:00.000Z');
+    assert.equal(c.nextUp[4].allDay, true);
+    assert.equal(c.nextUp[4].time, '');
+    assert.equal(c.nextUp[1].description, 'Second day. Solo this time; the doubles were the warm-up.');
+  });
+
+  test('fixtures: this week is seven days from today with the regular sessions, classes marked', async () => {
+    const d = await fixtures();
+    const c = buildCalendar(d.events, [], NOW);
+    assert.equal(c.hasWeek, true);
+    assert.equal(c.week.length, 7);
+    assert.deepEqual(c.week.map((x) => x.dow), ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']);
+    assert.deepEqual(c.week.map((x) => x.num), ['25', '26', '27', '28', '29', '30', '31']);
+    assert.equal(c.week[0].isToday, true);
+    // Sunday's club run ended at 11:00Z, NOW is 10:00Z → still upcoming (in progress).
+    assert.deepEqual(c.week[0].sessions.map((s) => s.title), ['Bingham Sunday Running Club']);
+    assert.deepEqual(c.week[1].sessions.map((s) => `${s.time} ${s.title} ${s.kind}`), ['08:00 Tower Pilates class']);
+    assert.deepEqual(c.week[2].sessions.map((s) => s.title), ['Hyrox Class']); // the Hyrox race is not a session
+    assert.deepEqual(c.week[4].sessions.map((s) => s.kind), ['class', 'class']);
+    assert.equal(c.week[5].hasSessions, false);
+    assert.deepEqual(c.week[6].sessions.map((s) => s.title), ['Newark Parkrun']);
+    // 1 Nov is day 8: outside the strip.
+    assert.ok(!c.week.some((x) => x.sessions.some((s) => /Halloween/.test(s.title))));
+  });
+
+  test('an ended session has dropped off; a day with none says so', async () => {
+    const d = await fixtures();
+    const c = buildCalendar(d.events, [], new Date('2026-10-25T12:00:00Z'));
+    assert.deepEqual(c.week[0].sessions, []);
+    assert.equal(c.week[0].hasSessions, false);
+  });
+
+  test('export present but nothing upcoming → nothing rendered, no hand-written fallback', () => {
+    const c = buildCalendar(ex([
+      { id: 'p', calendar: 'events', title: 'Old race', start: '2026-10-01T09:00:00+01:00', end: '2026-10-01T11:00:00+01:00', allDay: false, kind: 'race' },
+      { id: 'q', calendar: 'regular', title: 'Old class', start: '2026-10-24T18:00:00+01:00', end: '2026-10-24T19:00:00+01:00', allDay: false, kind: 'class' },
+    ]), [{ date: '2027-01-01', title: 'hand-written' }], NOW);
+    assert.equal(c.source, 'calendar');
+    assert.equal(c.hasAny, false);
+    assert.equal(c.hasNextUp, false);
+    assert.equal(c.hasWeek, false);
+    assert.deepEqual(c.week, []);
+  });
+
+  test('only regular sessions → this week without next up, and vice versa', () => {
+    const only = buildCalendar(ex([
+      { id: 'r', calendar: 'regular', title: 'Spin', start: '2026-10-28T18:00:00Z', end: '2026-10-28T19:00:00Z', allDay: false, kind: 'class' },
+    ]), [], NOW);
+    assert.equal(only.hasAny, true);
+    assert.equal(only.hasNextUp, false);
+    assert.equal(only.hasWeek, true);
+    const races = buildCalendar(ex([
+      { id: 'e', calendar: 'events', title: 'Parkrun', start: '2026-11-07T09:00:00Z', end: '2026-11-07T10:00:00Z', allDay: false, kind: 'race' },
+    ]), [], NOW);
+    assert.equal(races.hasNextUp, true);
+    assert.equal(races.hasWeek, false);
+  });
+
+  test('entries without a usable start or title are skipped', () => {
+    const c = buildCalendar(ex([
+      null, { calendar: 'events', title: 'no start', kind: 'race' },
+      { calendar: 'events', start: '2026-11-01T09:00:00Z', end: '2026-11-01T10:00:00Z', kind: 'race' },
+      { calendar: 'events', title: 'ok', start: '2026-11-01T09:00:00Z', end: 'junk', kind: 'other' },
+    ]), [], NOW);
+    assert.deepEqual(c.nextUp.map((e) => e.title), ['ok']);
+    assert.equal(c.nextUp[0].stamp, 'EVENT');
+    assert.equal(c.nextUp[0].when, 'in 7 days');
+  });
+
+  test('no export: the hand-written list, upcoming only, soonest first, race by tag', () => {
+    const c = buildCalendar(null, [
+      { date: '2026-04-15', day: '15', month: 'Apr 2026', title: 'Marathon', tag: 'Race • 42.2km', description: 'gone' },
+      { date: '2027-01-10', title: 'Later', emoji: '🚴' },
+      { date: '2026-11-01', title: 'Sooner', tag: 'Race • 5km', description: 'PB attempt' },
+      { date: '2026-12-01', title: 'A thing', tag: 'Social' },
       { title: 'no date' },
       null,
     ], NOW);
-    assert.deepEqual(e.all.map((x) => x.title), ['no date', 'Sooner', 'Later', 'Marathon']);
-    assert.deepEqual(e.all.map((x) => x.past), [false, false, false, true]);
-    assert.equal(e.hasUpcoming, true);
-    assert.equal(e.all[2].emoji, '🚴');
-    assert.equal(e.all[3].emoji, '🏁');
+    assert.equal(c.source, 'handwritten');
+    assert.deepEqual(c.nextUp.map((x) => x.title), ['Sooner', 'A thing', 'Later']);
+    assert.deepEqual(c.nextUp.map((x) => x.stamp), ['RACE', 'EVENT', 'EVENT']);
+    assert.equal(c.nextUp[0].when, 'in 7 days');
+    assert.equal(c.nextUp[0].description, 'Race • 5km — PB attempt');
+    assert.equal(c.nextUp[0].allDay, true);
+    assert.equal(c.hasWeek, false);
+    assert.equal(c.hasAny, true);
+  });
+
+  test('no export and nothing hand-written upcoming → nothing', () => {
+    const c = buildCalendar(undefined, [{ date: '2026-01-01', title: 'past' }], NOW);
+    assert.equal(c.source, 'none');
+    assert.equal(c.hasAny, false);
   });
 });
 
 describe('model + task', () => {
-  test('unavailable: no week/roundup/stats, events still render', () => {
+  test('unavailable: no week/roundup/stats, the hand-written calendar still renders', () => {
     const m = buildLifeModel({ index: null, unavailable: true, events: [{ date: '2027-01-01', title: 'x' }], now: NOW });
     assert.equal(m.available, false);
     assert.equal(m.week, null);
     assert.equal(m.roundup, null);
     assert.equal(m.stats, null);
     assert.deepEqual(m.activities, []);
-    assert.equal(m.events.all.length, 1);
+    assert.equal(m.calendar.source, 'handwritten');
+    assert.equal(m.calendar.nextUp.length, 1);
   });
 
   test('caps cards at six, newest first, and counts the rest', () => {
@@ -278,15 +386,22 @@ describe('model + task', () => {
     const d = await fixtures();
     const logs = [];
     const ctx = {
-      globals: { fitnessIndex: d.index, fitnessActivities: d.activities, fitnessRoundups: d.roundups, fitnessUnavailable: false },
+      globals: {
+        fitnessIndex: d.index, fitnessActivities: d.activities, fitnessRoundups: d.roundups,
+        fitnessEvents: d.events, fitnessUnavailable: false,
+      },
       logger: { info: (m) => logs.push(m), warn: (m) => logs.push(m), error: (m) => logs.push(m), debug() {} },
     };
     const task = fitnessLifeTask({ eventsFile: path.join(REPO, 'personal', 'items', 'life', 'fitness.json'), now: NOW });
     const out = await task.run(task.config, ctx);
     assert.equal(out.fitnessLife.available, true);
     assert.equal(out.fitnessLife.activities.length, 3);
-    assert.equal(out.fitnessLife.events.all.length, 2);
-    assert.match(logs.join('\n'), /Life page: 3 cards, week=roundup, roundup=week-42-2026, 2 events/);
+    assert.equal(out.fitnessLife.calendar.source, 'calendar');
+    assert.equal(out.fitnessLife.calendar.nextUp.length, 5);
+    assert.match(
+      logs.join('\n'),
+      /Life page: 3 cards, week=roundup, roundup=week-42-2026, calendar=calendar \(5 next up, 7 sessions this week\)/,
+    );
   });
 
   test('a missing events file is a warning, not a failure', async () => {
@@ -297,7 +412,8 @@ describe('model + task', () => {
       logger: { info() {}, warn: (m) => logs.push(m), error() {}, debug() {} },
     });
     assert.equal(out.fitnessLife.available, false);
-    assert.equal(out.fitnessLife.events.all.length, 0);
+    assert.equal(out.fitnessLife.calendar.source, 'none');
+    assert.equal(out.fitnessLife.calendar.hasAny, false);
     assert.match(logs.join('\n'), /nope\.json/);
   });
 });

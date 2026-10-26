@@ -1,0 +1,20 @@
+{
+  "generatedAt": "2026-10-25T06:00:00+00:00",
+  "events": [
+    {"id": "fx-club-oct25", "calendar": "regular", "title": "Bingham Sunday Running Club", "start": "2026-10-25T09:00:00+00:00", "end": "2026-10-25T11:00:00+00:00", "allDay": false, "location": "Gilt - Bingham, 18A Market St, Bingham", "description": "", "kind": "session"},
+    {"id": "fx-pilates-oct26", "calendar": "regular", "title": "Tower Pilates", "start": "2026-10-26T08:00:00+00:00", "end": "2026-10-26T09:00:00+00:00", "allDay": false, "location": "Fernwood", "description": "", "kind": "class"},
+    {"id": "fx-hyrox-doubles", "calendar": "events", "title": "Hyrox Birmingham - Open Men's Doubles", "start": "2026-10-27T12:10:00+00:00", "end": "2026-10-27T13:40:00+00:00", "allDay": false, "location": "NEC, Birmingham", "description": "", "kind": "race"},
+    {"id": "fx-hyrox-class-oct27", "calendar": "regular", "title": "Hyrox Class", "start": "2026-10-27T18:00:00+00:00", "end": "2026-10-27T19:00:00+00:00", "allDay": false, "location": "", "description": "", "kind": "class"},
+    {"id": "fx-hyrox-solo", "calendar": "events", "title": "Hyrox Birmingham - Open Men's Solo", "start": "2026-10-28T08:20:00+00:00", "end": "2026-10-28T09:50:00+00:00", "allDay": false, "location": "NEC, Birmingham", "description": "Second day. Solo this time; the doubles were the warm-up.", "kind": "race"},
+    {"id": "fx-intervals-oct28", "calendar": "regular", "title": "Long Intervals PT", "start": "2026-10-28T11:00:00+00:00", "end": "2026-10-28T12:00:00+00:00", "allDay": false, "location": "", "description": "", "kind": "session"},
+    {"id": "fx-hyrox-class-oct29", "calendar": "regular", "title": "Hyrox Class", "start": "2026-10-29T18:00:00+00:00", "end": "2026-10-29T18:45:00+00:00", "allDay": false, "location": "", "description": "", "kind": "class"},
+    {"id": "fx-hybrid-oct29", "calendar": "regular", "title": "Hybrid Class", "start": "2026-10-29T19:00:00+00:00", "end": "2026-10-29T19:45:00+00:00", "allDay": false, "location": "", "description": "", "kind": "class"},
+    {"id": "fx-parkrun-oct31", "calendar": "regular", "title": "Newark Parkrun", "start": "2026-10-31T09:00:00+00:00", "end": "2026-10-31T09:45:00+00:00", "allDay": false, "location": "Sconce and Devon Park, Newark", "description": "", "kind": "session"},
+    {"id": "fx-club-nov1", "calendar": "regular", "title": "Bingham Sunday Running Club - Halloween Edition", "start": "2026-11-01T09:00:00+00:00", "end": "2026-11-01T11:00:00+00:00", "allDay": false, "location": "Gilt - Bingham, 18A Market St, Bingham", "description": "", "kind": "session"},
+    {"id": "fx-gym-induction", "calendar": "events", "title": "Gym induction", "start": "2026-11-03T10:00:00+00:00", "end": "2026-11-03T11:00:00+00:00", "allDay": false, "location": "", "description": "", "kind": "other"},
+    {"id": "fx-rutland-10k", "calendar": "events", "title": "Rutland Night 10k", "start": "2026-11-07T17:30:00+00:00", "end": "2026-11-07T18:30:00+00:00", "allDay": false, "location": "Normanton Church, Rutland Water", "description": "Head torch required.", "kind": "race"},
+    {"id": "fx-hyrox-london", "calendar": "events", "title": "Hyrox London ExCEL - Singles", "start": "2026-12-03T00:00:00+00:00", "end": "2026-12-04T00:00:00+00:00", "allDay": true, "location": "", "description": "", "kind": "race"},
+    {"id": "fx-hyrox-manchester", "calendar": "events", "title": "Hyrox Manchester - Open Men's Singles", "start": "2027-01-30T00:00:00+00:00", "end": "2027-01-31T00:00:00+00:00", "allDay": true, "location": "", "description": "", "kind": "race"},
+    {"id": "fx-spring-half", "calendar": "events", "title": "Robin Hood Half", "start": "2027-02-14T09:30:00+00:00", "end": "2027-02-14T12:00:00+00:00", "allDay": false, "location": "Nottingham", "description": "", "kind": "race"}
+  ]
+}
