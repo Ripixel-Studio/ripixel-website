@@ -74,22 +74,45 @@
 
     {{/if}}
 
-    <!-- 5. Hand-written events -->
+    <!-- 5. On the calendar: the Fitness Events / Fitness Regular calendars (events.json),
+         else the hand-written list. Nothing upcoming → nothing rendered, not even the header. -->
+    {{#if fitnessLife.calendar.hasAny}}
     <div class="fit-header-row">
       <h2 class="fit-header">on the <span>calendar</span>.</h2>
-      <span class="fit-header-row__meta">races &amp; events, hand-written</span>
+      <span class="fit-header-row__meta">{{fitnessLife.calendar.meta}}</span>
     </div>
-    {{#if fitnessLife.events.all.length}}
-    {{#unless fitnessLife.events.hasUpcoming}}
-    <div class="scribble fit-events__scribble">(nothing booked — yet.)</div>
-    {{/unless}}
+
+    {{#if fitnessLife.calendar.hasNextUp}}
+    <h3 class="fit-cal__kicker">next up</h3>
     <ul class="fit-events">
-      {{#each fitnessLife.events.all}}
+      {{#each fitnessLife.calendar.nextUp}}
       {{> fitness-event}}
       {{/each}}
     </ul>
-    {{else}}
-    <div class="scribble fit-events__scribble">(nothing on the calendar — yet.)</div>
+    {{/if}}
+
+    {{#if fitnessLife.calendar.hasWeek}}
+    <h3 class="fit-cal__kicker">this week</h3>
+    <ol class="fit-week-strip">
+      {{#each fitnessLife.calendar.week}}
+      <li class="fit-week-strip__day{{#if isToday}} fit-week-strip__day--today{{/if}}" title="{{label}}">
+        <div class="fit-week-strip__head">
+          <span class="fit-week-strip__dow">{{dow}}</span>
+          <span class="fit-week-strip__num">{{num}}</span>
+        </div>
+        {{#if hasSessions}}
+        <ul class="fit-week-strip__list">
+          {{#each sessions}}
+          <li class="fit-week-strip__session {{kindClass}}">{{#if time}}<span class="fit-week-strip__time">{{time}}</span> {{/if}}{{title}}</li>
+          {{/each}}
+        </ul>
+        {{else}}
+        <span class="fit-week-strip__rest">rest</span>
+        {{/if}}
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
     {{/if}}
 
   </div>

@@ -60,7 +60,7 @@ But then Skier came along—minimal, modular, and just as allergic to bloat as I
 
 The `/life` fitness section is built from the FitGlue showcase export: a set of
 JSON files on a public bucket (`index.json`, `activity/<slug>.json`,
-`roundup/<key>.json` — the contract is in `jarvis-memory/specs/ripixel-website/fitness-zine.md`).
+`roundup/<key>.json`, `events.json` — the contract is in `jarvis-memory/specs/ripixel-website/fitness-zine.md`).
 `tasks/fitness-fetch.mjs` runs early in the personal pipeline and exposes:
 
 | global | shape |
@@ -68,6 +68,7 @@ JSON files on a public bucket (`index.json`, `activity/<slug>.json`,
 | `fitnessIndex` | the `index.json` object (`profile`, `streaks`, `activities[]`, `roundups[]`); an empty skeleton when unavailable |
 | `fitnessActivities` | full `activity/*.json` objects, newest first, each with its index entry attached as `indexEntry` |
 | `fitnessRoundups` | full `roundup/*.json` objects, newest first |
+| `fitnessEvents` | the `events.json` object (the Fitness calendars, see below), or `null` when the source has none |
 | `fitnessUnavailable` | `true` when no source could be read |
 | `fitnessSource` | `live` \| `cache` \| `fixtures` \| `none` |
 
@@ -87,12 +88,23 @@ unchanged file costs a 304.
 - `fixtures/fitness/` is a copy of the S0 reference fixtures (three activities, one roundup); keep it in sync with the contract, not with the bucket.
 - Tests: `npm test` (`node --test`, no extra dependencies).
 
-`tasks/fitness-life.mjs` runs straight after the fetch and turns those globals (plus the
-hand-written `events` in `personal/items/life/fitness.json`) into one pre-formatted
-`fitnessLife` global for `personal/pages/life.html` — the week strip, the latest six
-activity cards, the roundup teaser, the totals/streaks/PB block and the events list. Skier's
-Handlebars has no custom helpers, so all formatting lives in that task; the `fitness-*`
-partials only loop and test.
+`tasks/fitness-life.mjs` runs straight after the fetch and turns those globals into one
+pre-formatted `fitnessLife` global for `personal/pages/life.html` — the week strip, the
+latest six activity cards, the roundup teaser, the totals/streaks/PB block and the "on the
+calendar" block. Skier's Handlebars has no custom helpers, so all formatting lives in that
+task; the `fitness-*` partials only loop and test.
+
+**On the calendar.** `events.json` in the same bucket is James's *Fitness Events* (races and
+one-offs, next 120 days) and *Fitness Regular* (recurring sessions, next 21 days) Google
+calendars, exported by the box (`jarvis/scripts/fitness_calendar_export.py`, every 30 min
+with the site rebuild). The fetch exposes it as `fitnessEvents` (`{generatedAt, events[]}`,
+each entry `calendar: events|regular`, `kind: race|other|class|session`, ISO `start`/`end`,
+`allDay`, `location`, `description`); `fixtures/fitness/events.json` is the sample. The life
+page shows **next up** (the next five from the events calendar, with a countdown and a
+RACE/EVENT stamp) and **this week** (the regular sessions, day by day for seven days). Past
+entries are never shown; with nothing upcoming the section is omitted. The hand-written
+`events` in `personal/items/life/fitness.json` are used only when `events.json` is
+unavailable.
 
 Downstream tasks can page over the globals directly (`generatePaginatedItemsTask({ dataVar: '${fitnessActivities}', ... })`); no JSON needs writing to disk.
 

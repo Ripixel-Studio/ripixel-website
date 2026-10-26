@@ -9,6 +9,7 @@
  *   <base>/index.json
  *   <base>/activity/<showcaseId>.json
  *   <base>/roundup/<periodKey>.json
+ *   <base>/events.json          (S2.6: the Fitness calendars, written by the box)
  *
  * Source order is live → cache → fixtures → empty, unless FITNESS_DATA_SOURCE
  * forces one. The build never fails because of fitness data: the worst case is
@@ -18,6 +19,9 @@
  *   fitnessIndex        the index.json object (an empty skeleton when unavailable)
  *   fitnessActivities   full activity files, newest first, each + `indexEntry`
  *   fitnessRoundups     full roundup files, newest first
+ *   fitnessEvents       the events.json object ({generatedAt, events[]}) or null when
+ *                       the source has none — the life page then falls back to the
+ *                       hand-written list
  *   fitnessUnavailable  boolean
  *   fitnessSource       'live' | 'cache' | 'fixtures' | 'none'
  */
@@ -55,6 +59,7 @@ const SAFE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,200}$/;
  * @property {any} index
  * @property {any[]} activities
  * @property {any[]} roundups
+ * @property {any|null} events
  * @property {Source|'none'} source
  * @property {boolean} unavailable
  * @property {string[]} notes   one line per source tried and why it was passed over
@@ -130,6 +135,11 @@ function validateIndex(index) {
   return index;
 }
 
+/** events.json is optional: anything that is not `{events: []}` counts as absent. @param {any} doc */
+export function validateEvents(doc) {
+  return doc && typeof doc === 'object' && Array.isArray(doc.events) ? doc : null;
+}
+
 /**
  * Ids listed in the index, filtered to ones that are safe to use as paths.
  * @param {any[]} list
@@ -186,7 +196,7 @@ async function pool(items, limit, fn) {
 // Readers. Each returns { index, activityFiles, roundupFiles } or throws when
 // the source is unusable (no index). Missing individual files are skipped.
 
-/** @typedef {{ index: any, activityFiles: Map<string, any>, roundupFiles: Map<string, any> }} RawSet */
+/** @typedef {{ index: any, activityFiles: Map<string, any>, roundupFiles: Map<string, any>, events: any|null }} RawSet */
 
 /**
  * @param {string} dir
@@ -211,7 +221,13 @@ export async function readFromDir(dir, logger = silentLogger) {
       logger.warn(`roundup/${id}.json unreadable in ${dir}: ${errMsg(e)}`);
     }
   }
-  return { index, activityFiles, roundupFiles };
+  let events = null;
+  try {
+    events = validateEvents(await readJson(path.join(dir, 'events.json')));
+  } catch (e) {
+    logger.debug(`events.json unreadable in ${dir}: ${errMsg(e)}; no calendar`);
+  }
+  return { index, activityFiles, roundupFiles, events };
 }
 
 /**
@@ -330,6 +346,9 @@ export async function readLive(opts) {
     data: await getFileLenient(`${job.kind}/${job.id}.json`),
   }));
 
+  // The calendar export is not listed in the index; same lenient path (cache on 304 or failure).
+  const events = validateEvents(await getFileLenient('events.json'));
+
   const activityFiles = new Map();
   const roundupFiles = new Map();
   for (const r of results) {
@@ -343,7 +362,7 @@ export async function readLive(opts) {
   logger.debug(
     `live: ${stats.fetched} fetched, ${stats.reused} reused from cache, ${stats.failed} failed`,
   );
-  return { index, activityFiles, roundupFiles, ...stats };
+  return { index, activityFiles, roundupFiles, events, ...stats };
 }
 
 // ---------------------------------------------------------------------------
@@ -361,7 +380,7 @@ function ts(iso) {
  * @param {RawSet} raw
  */
 export function assemble(raw) {
-  const { index, activityFiles, roundupFiles } = raw;
+  const { index, activityFiles, roundupFiles, events = null } = raw;
   const activities = [];
   for (const entry of index.activities) {
     const file = entry && activityFiles.get(entry.slug);
@@ -385,7 +404,7 @@ export function assemble(raw) {
       ts(b.roundup?.periodStart) - ts(a.roundup?.periodStart),
   );
 
-  return { index, activities, roundups };
+  return { index, activities, roundups, events };
 }
 
 /** @param {unknown} e */
@@ -412,8 +431,8 @@ export async function loadFitnessData(options = {}) {
       if (source === 'live') raw = await readLive(opts);
       else if (source === 'cache') raw = await readFromDir(opts.cacheDir, logger);
       else raw = await readFromDir(opts.fixturesDir, logger);
-      const { index, activities, roundups } = assemble(raw);
-      return { index, activities, roundups, source, unavailable: false, notes };
+      const { index, activities, roundups, events } = assemble(raw);
+      return { index, activities, roundups, events, source, unavailable: false, notes };
     } catch (e) {
       const where =
         source === 'live' ? opts.baseUrl : source === 'cache' ? opts.cacheDir : opts.fixturesDir;
@@ -426,6 +445,7 @@ export async function loadFitnessData(options = {}) {
     index: emptyIndex(),
     activities: [],
     roundups: [],
+    events: null,
     source: 'none',
     unavailable: true,
     notes,
@@ -454,12 +474,14 @@ export function fetchFitnessTask(config = {}) {
           index: emptyIndex(),
           activities: [],
           roundups: [],
+          events: null,
           source: 'none',
           unavailable: true,
           notes: [errMsg(e)],
         };
       }
-      const summary = `${data.activities.length} activities, ${data.roundups.length} roundups`;
+      const summary = `${data.activities.length} activities, ${data.roundups.length} roundups, ` +
+        (data.events ? `${data.events.events.length} calendar entries` : 'no calendar');
       if (data.unavailable) {
         ctx.logger.warn(`Fitness data: UNAVAILABLE, building without it (${data.notes.join('; ')})`);
       } else {
@@ -470,6 +492,7 @@ export function fetchFitnessTask(config = {}) {
         fitnessIndex: data.index,
         fitnessActivities: data.activities,
         fitnessRoundups: data.roundups,
+        fitnessEvents: data.events,
         fitnessUnavailable: data.unavailable,
         fitnessSource: data.source,
       };

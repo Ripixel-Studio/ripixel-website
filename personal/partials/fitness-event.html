@@ -1,5 +1,6 @@
-<!-- Context: one of fitnessLife.events.all (hand-written in personal/items/life/fitness.json) -->
-<li class="fit-event{{#if past}} fit-event--past{{/if}}">
+<!-- Context: one of fitnessLife.calendar.nextUp (events.json from the Fitness Events calendar,
+     or the hand-written fallback in personal/items/life/fitness.json). Never a past entry. -->
+<li class="fit-event fit-event--{{kind}}">
   <div class="fit-event__date">
     <span class="fit-event__day">{{day}}</span>
     <span class="fit-event__month">{{month}}</span>
@@ -7,8 +8,9 @@
   <div class="fit-event__body">
     <h3 class="fit-event__title"><span aria-hidden="true">{{emoji}}</span> {{title}}</h3>
     <div class="fit-event__meta">
-      {{#if tag}}<span class="tag-chip">{{tag}}</span>{{/if}}
-      {{#if past}}<span class="stamp fit-event__stamp">done</span>{{/if}}
+      <span class="stamp fit-event__stamp {{stampClass}}">{{stamp}}</span>
+      <time class="fit-event__when" datetime="{{dateTime}}">{{when}}</time>
+      {{#if location}}<span class="fit-event__where">· {{location}}</span>{{/if}}
     </div>
     {{#if description}}<p class="fit-event__desc">{{description}}</p>{{/if}}
   </div>
