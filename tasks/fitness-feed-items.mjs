@@ -1,35 +1,23 @@
 // @ts-check
 /**
- * Fitness Atom feed task (S2.5): /life/feed.xml.
+ * Fitness feed items (S2.5) — data only; Skier's generateFeedTask writes the
+ * Atom feed at /life/feed.xml from them (see skier.personal.tasks.mjs).
  *
- * Activities (from `fitnessActivities`) and roundups (from the pages S2.4
- * actually wrote, `fitnessRoundupPages`, with the AI summary pulled from
+ * Activities (from `fitnessActivities`) and roundups (from the roundup pages
+ * that are built, `fitnessRoundupPages`, with the AI summary pulled from
  * `fitnessRoundups`) interleaved newest first, capped at 50 entries. Each
  * entry carries the page title, its link, a plain-text summary — headline
  * numbers for an activity, the totals line plus the AI summary for a roundup
  * — and `published` / `updated`.
- *
- * Skier's generateFeedTask writes fixed filenames (rss.xml / atom.xml /
- * json.json) next to the thoughts feed, so this writes Atom directly; it is
- * forty lines of escaping and the feed stays one file where the spec put it.
  */
-import fs from 'node:fs/promises';
-import path from 'node:path';
-
-import { buildActivityView } from './fitness-activity-pages.mjs';
-import { periodLabels, parsePeriodKey, fmtKm, fmtDuration } from './fitness-roundup-pages.mjs';
+import { buildActivityView } from './fitness-activity-views.mjs';
+import { periodLabels, parsePeriodKey, fmtKm, fmtDuration } from './fitness-roundup-views.mjs';
 
 export const FEED_PATH = '/life/feed.xml';
 export const FEED_LIMIT = 50;
-export const DEFAULT_OUT_DIR = 'public/personal';
 export const DEFAULT_SITE_URL = 'https://james.ripixel.co.uk';
 export const FEED_TITLE = 'James King — fitness';
 export const FEED_SUBTITLE = 'Every showcased session and roundup from /life.';
-
-/** @param {unknown} s */
-export function xmlEsc(s) {
-  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
 
 /** RFC 3339 UTC or '' for anything unparseable. @param {unknown} iso */
 export function rfc3339(iso) {
@@ -89,7 +77,8 @@ export function activityItem(file, index, siteUrl) {
 /**
  * One feed item per roundup page: "Week 42 · 2026 — 3 sessions, 2h 29m,
  * 37.4 km, 2 PRs." followed by the AI summary text when there is one.
- * @param {{ key: string, url: string, title?: string, generatedAt?: string, periodEnd?: string }} page  an element of `fitnessRoundupPages`
+ * @param {{ key: string, url: string, generatedAt?: string, periodEnd?: string }} page  a roundup page's
+ *   key/url/dates (see `roundupPageMeta`)
  * @param {any} file  the matching element of `fitnessRoundups` (may be undefined)
  * @param {string} siteUrl
  * @returns {FeedItem | null}
@@ -119,6 +108,16 @@ export function roundupItem(page, file, siteUrl) {
     updated: generated,
     sortKey: Date.parse(generated),
   };
+}
+
+/**
+ * The feed's view of an element of `fitnessRoundupPages` (the page variables
+ * tasks/fitness-roundup-views.mjs builds).
+ * @param {any} page
+ */
+export function roundupPageMeta(page) {
+  const r = page?.roundup ?? {};
+  return { key: r.key, url: r.url, generatedAt: r.generatedAt || '' };
 }
 
 /**
@@ -154,73 +153,67 @@ export function feedItems(opts = {}) {
 }
 
 /**
- * Serialise an Atom 1.0 feed.
- * @param {FeedItem[]} items
- * @param {{ siteUrl?: string, title?: string, subtitle?: string, now?: Date }} [opts]
+ * Plain text → HTML text: the feed library declares <title> and <summary> as
+ * `type="html"`, so `&` and `<` in a title or summary must arrive escaped.
+ * @param {unknown} s
  */
-export function buildAtom(items, opts = {}) {
-  const siteUrl = (opts.siteUrl || DEFAULT_SITE_URL).replace(/\/+$/, '');
-  const self = `${siteUrl}${FEED_PATH}`;
-  const home = `${siteUrl}/life`;
-  const latest = items.reduce((m, i) => Math.max(m, Date.parse(i.updated) || 0), 0);
-  const updated = rfc3339(latest ? new Date(latest) : (opts.now || new Date()));
-  const entries = items
-    .map((i) => `  <entry>
-    <id>${xmlEsc(i.link)}</id>
-    <title>${xmlEsc(i.title)}</title>
-    <link rel="alternate" type="text/html" href="${xmlEsc(i.link)}"/>
-    <published>${xmlEsc(i.published)}</published>
-    <updated>${xmlEsc(i.updated)}</updated>
-    <category term="${i.kind}" label="${i.kind === 'activity' ? 'Activity' : 'Roundup'}"/>
-    <summary type="text">${xmlEsc(i.summary)}</summary>
-  </entry>`)
-    .join('\n');
-  return `<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-  <id>${xmlEsc(home)}</id>
-  <title>${xmlEsc(opts.title || FEED_TITLE)}</title>
-  <subtitle>${xmlEsc(opts.subtitle || FEED_SUBTITLE)}</subtitle>
-  <link rel="self" type="application/atom+xml" href="${xmlEsc(self)}"/>
-  <link rel="alternate" type="text/html" href="${xmlEsc(home)}"/>
-  <updated>${updated}</updated>
-  <author>
-    <name>James King</name>
-    <uri>${xmlEsc(siteUrl)}/</uri>
-  </author>
-  <generator uri="https://github.com/Ripixel-Studio/ripixel-website">ripixel-website</generator>
-${entries}
-</feed>
-`;
+export function htmlEsc(s) {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 /**
- * The Skier task. Runs after the activity and roundup page tasks.
- * @param {{ outDir?: string, limit?: number }} [config]
+ * Feed items as Skier's generateFeedTask takes them (`FeedArticle`): the
+ * summary is the excerpt (no body, so no <content>), `dateObj` is <updated>,
+ * `publishedObj` is <published> and the sort key, the kind is the category.
+ * Title and summary are HTML-escaped plain text (see `htmlEsc`).
+ * @param {FeedItem[]} items
  */
-export function fitnessFeedTask(config = {}) {
+export function toFeedArticles(items) {
+  return items.map((i) => ({
+    title: htmlEsc(i.title),
+    id: i.link,
+    link: i.link,
+    excerpt: htmlEsc(i.summary),
+    dateObj: new Date(i.updated),
+    publishedObj: new Date(i.published),
+    categories: [{ term: i.kind, name: i.kind === 'activity' ? 'Activity' : 'Roundup' }],
+  }));
+}
+
+/**
+ * The feed's <updated>: the latest entry's, or `now` for an empty feed.
+ * @param {FeedItem[]} items
+ * @param {Date} [now]
+ */
+export function feedUpdated(items, now = new Date()) {
+  const latest = items.reduce((m, i) => Math.max(m, Date.parse(i.updated) || 0), 0);
+  return latest ? new Date(latest) : now;
+}
+
+/**
+ * The Skier task. Runs after fitness-activity-views and fitness-roundup-views;
+ * sets `fitnessFeedItems` and `fitnessFeedUpdated` for generateFeedTask.
+ * @param {{ limit?: number }} [config]
+ */
+export function fitnessFeedItemsTask(config = {}) {
   return {
-    name: 'fitness-feed',
-    title: `Generate the fitness Atom feed (${FEED_PATH})`,
+    name: 'fitness-feed-items',
+    title: `Build the fitness feed entries (${FEED_PATH})`,
     config,
     run: async (/** @type {any} */ cfg, /** @type {any} */ ctx) => {
       const g = ctx.globals;
-      const outDir = cfg.outDir || DEFAULT_OUT_DIR;
-      const siteUrl = g.siteUrl || DEFAULT_SITE_URL;
       const items = feedItems({
         activities: g.fitnessActivities,
-        roundupPages: g.fitnessRoundupPages,
+        roundupPages: (Array.isArray(g.fitnessRoundupPages) ? g.fitnessRoundupPages : []).map(roundupPageMeta),
         roundups: g.fitnessRoundups,
         index: g.fitnessIndex,
-        siteUrl,
+        siteUrl: g.siteUrl || DEFAULT_SITE_URL,
         limit: cfg.limit,
         logger: ctx.logger,
       });
-      const outPath = path.join(outDir, ...FEED_PATH.split('/').filter(Boolean));
-      await fs.mkdir(path.dirname(outPath), { recursive: true });
-      await fs.writeFile(outPath, buildAtom(items, { siteUrl }));
       const kinds = items.reduce((m, i) => ({ ...m, [i.kind]: (m[i.kind] || 0) + 1 }), /** @type {Record<string, number>} */ ({}));
-      ctx.logger.info(`Fitness feed: ${items.length} entries (${kinds.activity || 0} activities, ${kinds.roundup || 0} roundups) → ${outPath}`);
-      return { fitnessFeedPath: FEED_PATH, fitnessFeedCount: items.length };
+      ctx.logger.info(`Fitness feed: ${items.length} entries (${kinds.activity || 0} activities, ${kinds.roundup || 0} roundups)`);
+      return { fitnessFeedItems: toFeedArticles(items), fitnessFeedUpdated: feedUpdated(items) };
     },
   };
 }

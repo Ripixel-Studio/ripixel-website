@@ -17,11 +17,13 @@ import {
   buildDeltas,
   buildRoundupView,
   buildIndexView,
-  fitnessRoundupPagesTask,
+  fitnessRoundupViewsTask,
   fmtKm,
   fmtDuration,
   fmtWeight,
-} from './fitness-roundup-pages.mjs';
+} from './fitness-roundup-views.mjs';
+import { lifePageTasks } from './life-pages.mjs';
+import { runSkierTasks } from './skier-test-runner.mjs';
 
 const FIXTURES = path.resolve('fixtures/fitness');
 
@@ -64,8 +66,8 @@ test('parsePeriodKey accepts the three contract shapes and rejects the rest', ()
 });
 
 test('keyToPath and keyToUrl map a key onto /life/roundup/<key>', () => {
-  assert.equal(keyToPath('week-42-2026', 'public/personal'), path.join('public/personal', 'life', 'roundup', 'week-42-2026.html'));
-  assert.equal(keyToPath('year-2026'), path.join('life', 'roundup', 'year-2026.html'));
+  assert.equal(keyToPath('week-42-2026'), 'life/roundup/week-42-2026.html');
+  assert.equal(keyToPath('year-2026'), 'life/roundup/year-2026.html');
   assert.equal(keyToUrl('month-10-2026'), '/life/roundup/month-10-2026');
   assert.throws(() => keyToPath('nope'), /not a period key/);
 });
@@ -311,24 +313,47 @@ test('buildIndexView groups newest-first by period type with the secondary stat 
 // ---------------------------------------------------------------------------
 // the task end to end, against the fixtures and the real templates
 
-test('fitnessRoundupPagesTask writes one page per roundup plus the index', async () => {
+/** The roundup view task followed by the Skier tasks that render /life/roundup/<key> and /life/roundups. */
+async function renderRoundups(outDir, globals) {
+  const [, roundupPages, roundupsIndex] = lifePageTasks({ outDir, siteUrl: 'https://james.ripixel.co.uk' });
+  const logs = [];
+  await runSkierTasks([fitnessRoundupViewsTask(), roundupPages, roundupsIndex], globals, logs);
+  assert.ok(!logs.some((l) => l.startsWith('ERROR')), logs.join('\n'));
+  return globals;
+}
+
+test('fitnessRoundupViewsTask builds page and index view models', async () => {
+  const { index, file } = await fixtureCtx();
+  const logs = [];
+  const task = fitnessRoundupViewsTask();
+  const result = await task.run(task.config, {
+    logger: { info: (m) => logs.push(m), warn: (m) => logs.push(m), error: (m) => logs.push(`ERROR ${m}`), debug() {} },
+    debug: false,
+    globals: {
+      siteUrl: 'https://james.ripixel.co.uk', fitnessIndex: index, fitnessRoundups: [file, { key: '../nope' }], fitnessUnavailable: false,
+      fitnessOgImages: { activity: {}, roundup: { 'week-42-2026': 'https://james.ripixel.co.uk/life/og/roundup/week-42-2026.png' } },
+    },
+  });
+  assert.equal(result.fitnessRoundupPages.length, 1);
+  const page = result.fitnessRoundupPages[0];
+  assert.equal(page.roundup.url, '/life/roundup/week-42-2026');
+  assert.equal(page.canonical, 'https://james.ripixel.co.uk/life/roundup/week-42-2026');
+  assert.equal(page.ogImage, 'https://james.ripixel.co.uk/life/og/roundup/week-42-2026.png');
+  assert.equal(page.subpage, '| week 42 2026 roundup');
+  assert.equal(result.fitnessRoundupsIndex.roundupCountLabel, '1 issue');
+  assert.equal(result.fitnessRoundupsIndex.roundupGroups[0].tiles[0].href, '/life/roundup/week-42-2026');
+  assert.ok(logs.some((l) => /unusable key/.test(l)));
+  assert.ok(!logs.some((l) => l.startsWith('ERROR')), logs.join('\n'));
+});
+
+test('Skier renders one page per roundup plus the index from the views', async () => {
   const { index, file } = await fixtureCtx();
   const outDir = await fs.mkdtemp(path.join(os.tmpdir(), 'roundup-pages-'));
-  const logs = [];
-  const logger = { info: (m) => logs.push(m), warn: (m) => logs.push(m), error: (m) => logs.push(`ERROR ${m}`), debug() {} };
   try {
-    const task = fitnessRoundupPagesTask({ outDir });
-    const result = await task.run(task.config, {
-      logger,
-      debug: false,
-      globals: {
-        cacheHash: 'test', year: 2026, siteUrl: 'https://james.ripixel.co.uk', fitnessIndex: index, fitnessRoundups: [file], fitnessUnavailable: false, fitnessSource: 'fixtures',
-        fitnessOgImages: { activity: {}, roundup: { 'week-42-2026': 'https://james.ripixel.co.uk/life/og/roundup/week-42-2026.png' } },
-      },
+    await renderRoundups(outDir, {
+      cacheHash: 'test', year: 2026, siteUrl: 'https://james.ripixel.co.uk', fitnessIndex: index, fitnessRoundups: [file], fitnessUnavailable: false, fitnessSource: 'fixtures',
+      fitnessOgImages: { activity: {}, roundup: { 'week-42-2026': 'https://james.ripixel.co.uk/life/og/roundup/week-42-2026.png' } },
     });
-    assert.equal(result.fitnessRoundupPages.length, 1);
-    assert.equal(result.fitnessRoundupPages[0].url, '/life/roundup/week-42-2026');
-    assert.ok(!logs.some((l) => l.startsWith('ERROR')), logs.join('\n'));
 
     const page = await fs.readFile(path.join(outDir, 'life', 'roundup', 'week-42-2026.html'), 'utf8');
     assert.match(page, /<title>James King \| life \| week 42 2026 roundup<\/title>/);
@@ -356,16 +381,11 @@ test('fitnessRoundupPagesTask writes one page per roundup plus the index', async
   }
 });
 
-test('fitnessRoundupPagesTask with no data writes just the index and the unavailable notice', async () => {
+test('with no data Skier writes just the index and the unavailable notice', async () => {
   const outDir = await fs.mkdtemp(path.join(os.tmpdir(), 'roundup-pages-'));
   try {
-    const task = fitnessRoundupPagesTask({ outDir });
-    const result = await task.run(task.config, {
-      logger: { info() {}, warn() {}, error() {}, debug() {} },
-      debug: false,
-      globals: { cacheHash: 'x', year: 2026, fitnessIndex: { activities: [], roundups: [], profile: null }, fitnessRoundups: [], fitnessUnavailable: true },
-    });
-    assert.deepEqual(result.fitnessRoundupPages, []);
+    const globals = await renderRoundups(outDir, { cacheHash: 'x', year: 2026, fitnessIndex: { activities: [], roundups: [], profile: null }, fitnessRoundups: [], fitnessUnavailable: true });
+    assert.deepEqual(globals.fitnessRoundupPages, []);
     const idx = await fs.readFile(path.join(outDir, 'life', 'roundups.html'), 'utf8');
     assert.match(idx, /fitness data unavailable/);
     await assert.rejects(fs.access(path.join(outDir, 'life', 'roundup')));

@@ -39,7 +39,7 @@
         "firebase-tools": "^15.0.0",
         "nodemon": "^3.0.0",
         "sharp": "^0.35.5",
-        "skier": "^3.0.1",
+        "skier": "github:Ripixel-Studio/skier#rethink/S5.1-life-on-skier",
         "standard-version": "^9.0.0"
     }
 }
