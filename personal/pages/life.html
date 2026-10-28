@@ -52,13 +52,14 @@
     <!-- 2. Latest sessions -->
     <div class="fit-header-row">
       <h2 class="fit-header">latest <span>sessions</span>.</h2>
-      <span class="fit-header-row__meta">{{fitnessLife.activityCount}} on the record · newest first</span>
+      <a class="fit-header-row__meta fit-header-row__link" href="{{fitnessLife.sessionsHref}}">all {{fitnessLife.activityCount}} sessions →</a>
     </div>
     <div class="fit-cards">
       {{#each fitnessLife.activities}}
       {{> fitness-activity-card}}
       {{/each}}
     </div>
+    <a class="fit-more" href="{{fitnessLife.sessionsHref}}">every session on the record, filterable by type →</a>
 
     <!-- 3. Latest roundup -->
     {{#if fitnessLife.roundup}}
@@ -92,26 +93,29 @@
     {{/if}}
 
     {{#if fitnessLife.calendar.hasWeek}}
-    <h3 class="fit-cal__kicker">this week</h3>
+    <h3 class="fit-cal__kicker">this week <span>· {{fitnessLife.calendar.weekRange}} · {{fitnessLife.calendar.activeDays}} active</span></h3>
     <ol class="fit-week-strip">
       {{#each fitnessLife.calendar.week}}
-      <li class="fit-week-strip__day{{#if isToday}} fit-week-strip__day--today{{/if}}" title="{{label}}">
+      <li class="fit-week-strip__day {{stateClass}}{{#if isToday}} fit-week-strip__day--today{{/if}}" title="{{label}}">
         <div class="fit-week-strip__head">
           <span class="fit-week-strip__dow">{{dow}}</span>
           <span class="fit-week-strip__num">{{num}}</span>
+          {{#if isToday}}<span class="fit-week-strip__today">today</span>{{/if}}
         </div>
-        {{#if hasSessions}}
         <ul class="fit-week-strip__list">
-          {{#each sessions}}
-          <li class="fit-week-strip__session {{kindClass}}">{{#if time}}<span class="fit-week-strip__time">{{time}}</span> {{/if}}{{title}}</li>
+          {{#each done}}
+          <li class="fit-week-strip__session fit-week-strip__session--done {{typeClass}}"><a href="{{href}}"><span class="fit-week-strip__time">{{time}}</span> {{title}}</a></li>
+          {{/each}}
+          {{#each planned}}
+          <li class="fit-week-strip__session fit-week-strip__session--planned fit-week-strip__session--{{kind}} {{typeClass}}">{{#if time}}<span class="fit-week-strip__time">{{time}}</span> {{/if}}{{title}}</li>
           {{/each}}
         </ul>
-        {{else}}
-        <span class="fit-week-strip__rest">rest</span>
-        {{/if}}
+        {{#if isRest}}<span class="fit-week-strip__rest">rest</span>{{/if}}
+        {{#if isOpen}}<span class="fit-week-strip__rest">—</span>{{/if}}
       </li>
       {{/each}}
     </ol>
+    <p class="fit-week-strip__key"><span class="fit-week-strip__key-done">done</span> logged on the record · <span class="fit-week-strip__key-planned">planned</span> on the calendar · 🏁 race</p>
     {{/if}}
     {{/if}}
 

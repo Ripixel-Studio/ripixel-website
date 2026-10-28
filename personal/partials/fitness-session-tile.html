@@ -1,0 +1,15 @@
+<!-- Context: one card in fitnessSessions.months[].items (buildCard) -->
+<li class="fit-tile {{typeClass}}" data-type="{{typeKey}}">
+  <a class="fit-tile__link" href="{{href}}">
+    {{> fitness-picture}}
+    <div class="fit-tile__body">
+      <div class="fit-tile__top">
+        <span class="fit-chip"><span aria-hidden="true">{{glyph}}</span> {{typeLabel}}</span>
+        <time class="fit-tile__date" datetime="{{dateTime}}">{{date}}</time>
+      </div>
+      <h3 class="fit-tile__title">{{title}}</h3>
+      {{#if keyStat}}<div class="fit-tile__stat">{{keyStat.value}}{{#if keyStat.unit}}<small>{{keyStat.unit}}</small>{{/if}} <span>{{keyStat.label}}</span></div>{{/if}}
+      {{#if prLabel}}<div class="fit-tile__pr">{{prLabel}}</div>{{/if}}
+    </div>
+  </a>
+</li>

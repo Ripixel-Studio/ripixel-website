@@ -94,6 +94,14 @@ latest six activity cards, the roundup teaser, the totals/streaks/PB block and t
 calendar" block. Skier's Handlebars has no custom helpers, so all formatting lives in that
 task; the `fitness-*` partials only loop and test.
 
+**Shared by the /life pages.** `tasks/fitness-theme.mjs` maps a FitGlue activity type to its
+family (`run`, `ride`, `crossfit`, `strength`, `yoga`, …: FitGlue's showcase family map) and
+`personal/assets/styles/main/fitness-types.css` gives each family an ink as
+`.fit-type--<family>` → `var(--type)` / `var(--type-on)`; colour anything about a session with
+those rather than the page's section ink. `tasks/fitness-records.mjs` turns FitGlue's raw PR
+keys (`fastest_5k`, `leg_press_heaviest_weight`, `hybrid_race_hyrox_wall_balls`) into display
+names and merges PR lists into the current record per key.
+
 **On the calendar.** `events.json` in the same bucket is James's *Fitness Events* (races and
 one-offs, next 120 days) and *Fitness Regular* (recurring sessions, next 21 days) Google
 calendars, exported by the box (`jarvis/scripts/fitness_calendar_export.py`, every 30 min
@@ -101,8 +109,11 @@ with the site rebuild). The fetch exposes it as `fitnessEvents` (`{generatedAt, 
 each entry `calendar: events|regular`, `kind: race|other|class|session`, ISO `start`/`end`,
 `allDay`, `location`, `description`); `fixtures/fitness/events.json` is the sample. The life
 page shows **next up** (the next five from the events calendar, with a countdown and a
-RACE/EVENT stamp) and **this week** (the regular sessions, day by day for seven days). Past
-entries are never shown; with nothing upcoming the section is omitted. The hand-written
+RACE/EVENT stamp — the Events calendar only, the big things) and **this week** (Monday to
+Sunday: a day is *active* when an activity was actually logged on it, whatever was planned;
+still-to-come entries from both calendars show as *planned*; a past day with neither is a
+rest day). Past calendar entries are never shown; with nothing upcoming or logged this week
+the section is omitted. The hand-written
 `events` in `personal/items/life/fitness.json` are used only when `events.json` is
 unavailable.
 
@@ -115,6 +126,7 @@ Downstream tasks can page over the globals directly (`generatePaginatedItemsTask
 | `tasks/fitness-og-images.mjs` | `/life/og/activity/<slug>.png`, `/life/og/roundup/<key>.png` — one 1200×630 OG card per page |
 | `tasks/fitness-roundup-pages.mjs` | `/life/roundup/<key>`, `/life/roundups` |
 | `tasks/fitness-activity-pages.mjs` | `/life/activity/<slug>` |
+| `tasks/fitness-sessions.mjs` | `/life/sessions` — every session newest first, by month, filterable by type (JS reveals 48 at a time) |
 | `tasks/fitness-feed.mjs` | **`/life/feed.xml`** — Atom, activities and roundups interleaved newest first, 50 entries |
 
 **Feed.** `https://james.ripixel.co.uk/life/feed.xml`. Each entry is the page title, its
