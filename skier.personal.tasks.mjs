@@ -19,6 +19,7 @@ import { fetchFitnessTask } from './tasks/fitness-fetch.mjs';
 import { fitnessLifeTask } from './tasks/fitness-life.mjs';
 import { fitnessRoundupPagesTask } from './tasks/fitness-roundup-pages.mjs';
 import { fitnessOgImagesTask } from './tasks/fitness-og-images.mjs';
+import { fitnessSessionsPageTask } from './tasks/fitness-sessions.mjs';
 import { fitnessFeedTask, FEED_PATH as FITNESS_FEED_PATH } from './tasks/fitness-feed.mjs';
 import { sitemapSlashlessTask } from './tasks/sitemap-slashless.mjs';
 
@@ -218,6 +219,7 @@ export const tasks = [
     fitnessRoundupPagesTask(), // S2.4 roundup pages: /life/roundup/<key> + /life/roundups from fitnessRoundups
     // S2.3 activity pages — /life/activity/<slug>/ from fitnessActivities (needs fetch-fitness above; before the sitemap scan)
     (await import('./tasks/fitness-activity-pages.mjs')).generateActivityPagesTask(),
+    fitnessSessionsPageTask(), // F5.3 /life/sessions — every session, filterable by type (before the sitemap scan)
     fitnessFeedTask(), // S2.5 Atom feed at /life/feed.xml — activities + fitnessRoundupPages, newest first, 50 entries
 
     // Generate individual thought article pages (adds readTime to each item)
