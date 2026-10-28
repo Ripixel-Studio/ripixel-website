@@ -277,13 +277,12 @@ describe('stats and PBs', () => {
       { recordType: 'leg_press_volume', value: 9000, unit: 'kg', achievedAt: '2025-07-27T19:35:54Z' },
     ];
     const g = buildPbBoard(prs);
-    assert.deepEqual(g.map((x) => x.key), ['run', 'ride', 'hyrox', 'iron']);
+    assert.deepEqual(g.map((x) => x.key), ['run', 'ride', 'iron'], 'division-less hybrid records mixed doubles with solo: not on the wall');
     assert.deepEqual(g[0].tiles.map((t) => t.name), ['5K', 'LONGEST RUN']); // 400 m is not a front-page distance
     assert.equal(g[0].tiles[1].metrics[0].display, '43.2 km');
     assert.deepEqual(g[1].tiles.map((t) => t.name), ['20K']);
-    assert.deepEqual(g[2].tiles.map((t) => t.name), ['BURPEE BROAD JUMPS', 'WALL BALLS']); // race order
-    assert.deepEqual(g[3].tiles.map((t) => t.name), ['Leg Press', 'Leg Press Horizontal (Machine)', 'Seated Cable Row – Bar Grip']);
-    assert.deepEqual(g[3].tiles[0].metrics.map((m) => m.metric), ['HEAVIEST LIFT', 'EST. 1RM']);
+    assert.deepEqual(g[2].tiles.map((t) => t.name), ['Leg Press', 'Leg Press Horizontal (Machine)', 'Seated Cable Row – Bar Grip']);
+    assert.deepEqual(g[2].tiles[0].metrics.map((m) => m.metric), ['HEAVIEST LIFT', 'EST. 1RM']);
     assert.ok(!JSON.stringify(g).includes('_'), 'no raw keys reach the page');
   });
 
@@ -298,11 +297,17 @@ describe('stats and PBs', () => {
   test('recordLabel names every FitGlue key shape', () => {
     assert.deepEqual(
       ['fastest_half_marathon', 'fastest_1_mile', 'fastest_ride_10k', 'deadlift_1rm', 'bench_press_(barbell)_set_volume',
-        'pull_up_reps', 'hybrid_race_hyrox_sled_push', 'hybrid_race_athx_total_time', 'highest_elevation_gain', 'odd_thing']
+        'pull_up_reps', 'hybrid_race_hyrox_sled_push', 'hybrid_race_athx_total_time', 'highest_elevation_gain', 'odd_thing',
+        'hybrid_race_hyrox_men_open_total_time', 'hybrid_race_hyrox_men_doubles_run_3', 'hybrid_race_hyrox_mixed_doubles_wall_balls']
         .map((k) => { const l = recordLabel(k); return `${l.group}|${l.name}|${l.metric}`; }),
       ['run|HALF MARATHON|FASTEST', 'run|1 MILE|FASTEST', 'ride|10K|FASTEST', 'strength|Deadlift|EST. 1RM',
         'strength|Bench Press (Barbell)|BEST SET', 'strength|Pull Up|MOST REPS', 'hyrox|SLED PUSH|FASTEST',
-        'hyrox|TOTAL TIME|FASTEST', 'run|MOST CLIMBING|ELEVATION', 'other|ODD THING|BEST'],
+        'hyrox|TOTAL TIME|FASTEST', 'run|MOST CLIMBING|ELEVATION', 'other|ODD THING|BEST',
+        'hyrox|TOTAL TIME|FASTEST', 'hyrox|RUN 3|FASTEST', 'hyrox|WALL BALLS|FASTEST'],
+    );
+    assert.deepEqual(
+      ['hybrid_race_hyrox_men_open_total_time', 'hybrid_race_hyrox_men_doubles_run_3', 'hybrid_race_hyrox_men_pro_doubles_skierg'].map((k) => recordLabel(k).division),
+      ["Open Men's Solo", "Open Men's Doubles", "Pro Men's Doubles"],
     );
   });
 

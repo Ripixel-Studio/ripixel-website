@@ -5,7 +5,8 @@
  * When several of his races fall at the same event within EVENT_WINDOW_DAYS (doubles on
  * the Tuesday, solo on the Wednesday), they get one combined page linking every race:
  * each race's division, time, PB standing and his words, the splits side by side, a
- * shared gallery and the PB progression. Grouping lives in tasks/fitness-hyrox.mjs
+ * shared gallery and a PB chase per division raced. The header is a collage of each
+ * race's highlight photo (F5.5). Grouping lives in tasks/fitness-hyrox.mjs
  * (buildHyroxHistory → events) and works for any number of races and divisions.
  *
  *   personal/templates/event.html  →  public/personal/life/event/<slug>/index.html
@@ -14,7 +15,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { createActivityRenderer, buildActivityView, fmtDateShort, slugToOutPath } from './fitness-activity-pages.mjs';
-import { buildHyroxHistory, buildRaceView, progressionCharts, eventUrl, clock } from './fitness-hyrox.mjs';
+import { buildHyroxHistory, pbChase, eventUrl, clock } from './fitness-hyrox.mjs';
+import { activityTheme } from './fitness-theme.mjs';
 
 export const DEFAULT_TEMPLATE = 'personal/templates/event.html';
 export const DEFAULT_OUT_DIR = 'public/personal';
@@ -45,13 +47,13 @@ export function eventOutPath(slug, outDir = DEFAULT_OUT_DIR) {
  * @param {import('./fitness-hyrox.mjs').EventGroup} event
  * @param {import('./fitness-hyrox.mjs').HyroxHistory} history
  * @param {any} index  fitnessIndex
- * @param {{ siteUrl?: string, ogImages?: Record<string, string> }} [opts]
+ * @param {{ siteUrl?: string, ogImages?: Record<string, string>, photoDims?: Record<string, { w: number, h: number }> }} [opts]
  */
 export function buildEventView(event, history, index, opts = {}) {
   const siteUrl = (opts.siteUrl || '').replace(/\/+$/, '');
   const races = event.slugs.map((slug) => history.races.get(slug)).filter(Boolean);
   const cards = races.map((info) => {
-    const view = buildActivityView(info.file, index, { hyrox: history });
+    const view = buildActivityView(info.file, index, { hyrox: history, photoDims: opts.photoDims });
     const race = view.act.race;
     return {
       url: info.url,
@@ -64,6 +66,7 @@ export function buildEventView(event, history, index, opts = {}) {
       totalTone: race?.totalTone || '',
       totalPbTime: race?.totalPbTime || '',
       isFirst: !!race?.isFirst,
+      firstLabel: race?.firstLabel || '',
       ranks: race?.ranks || [],
       partner: race?.partner || '',
       words: view.act.description,
@@ -93,6 +96,8 @@ export function buildEventView(event, history, index, opts = {}) {
   const gallery = photos.map((src, i) => ({ src, id: `photo-${i + 1}`, n: i + 1, prev: `#photo-${i === 0 ? photos.length : i}`, next: `#photo-${i + 2 > photos.length ? 1 : i + 2}`, total: photos.length }));
   const divisions = [...new Set(races.map((r) => r.divisionKey).filter(Boolean))];
   const heroPhoto = cards.map((c) => c.photo).find(Boolean) || '';
+  // Header collage: each race's highlight photo (its hero), labelled with the race.
+  const collage = cards.filter((c) => c.photo).map((c) => ({ src: c.photo, url: c.url, division: c.division, total: c.total, date: c.date, isPB: c.isPB || c.isFirst }));
   const name = `Hyrox ${event.name}`;
   const range = dateRange(event.start, event.end);
   const canonical = siteUrl ? `${siteUrl}${eventUrl(event.slug)}` : '';
@@ -110,11 +115,14 @@ export function buildEventView(event, history, index, opts = {}) {
     canonical,
     publishedTime: event.start,
     ev: {
+      ...activityTheme(races[0]?.file?.activity?.activityType),
       slug: event.slug,
       name,
       range,
       venue: cards.map((c) => c.location).find(Boolean) || event.name.toUpperCase(),
       heroPhoto,
+      collage,
+      collageCols: collage.length,
       cards,
       compare,
       raceCount: races.length,
@@ -123,7 +131,9 @@ export function buildEventView(event, history, index, opts = {}) {
       pbCount,
       divisionCount: divisions.length,
       gallery,
-      progress: progressionCharts(history, { only: divisions }),
+      // One PB chase per division raced here: the event's races against the PBs they
+      // chased, history up to the event's last race in that division.
+      chases: divisions.map((key) => pbChase(history, key, races.filter((r) => r.divisionKey === key).map((r) => r.slug))).filter(Boolean),
       owner: String(index?.profile?.displayName ?? 'James').toUpperCase(),
     },
   };
@@ -157,7 +167,7 @@ export function generateEventPagesTask(config = {}) {
           ctx.logger.warn(e instanceof Error ? e.message : String(e));
           continue;
         }
-        const view = buildEventView(event, history, ctx.globals.fitnessIndex, { siteUrl: ctx.globals.siteUrl, ogImages: ctx.globals.fitnessOgImages?.activity });
+        const view = buildEventView(event, history, ctx.globals.fitnessIndex, { siteUrl: ctx.globals.siteUrl, ogImages: ctx.globals.fitnessOgImages?.activity, photoDims: ctx.globals.fitnessPhotoDims });
         await fs.mkdir(path.dirname(outPath), { recursive: true });
         await fs.writeFile(outPath, render({ ...ctx.globals, ...view }));
         slugs.push(event.slug);

@@ -2,7 +2,7 @@
      above, under the hero (activity-words). Context: `act`. --}}
 {{#if race}}
 {{> activity-race race}}
-{{> activity-progress progress}}
+{{#if chase}}{{> activity-chase chase}}{{/if}}
 {{else}}{{#if hybridRace}}
 <section class="act-card act-hybrid" aria-label="Race breakdown">
   <div class="act-card__inner">

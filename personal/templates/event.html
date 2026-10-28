@@ -2,7 +2,7 @@
 <html lang="en">
 {{> head}}
 
-<body class="page-life page-activity page-event" data-page="life">
+<body class="page-life page-activity page-event {{ev.typeClass}}" data-page="life">
   <div class="paper-wash" aria-hidden="true"></div>
   <div class="paper-dot" aria-hidden="true"></div>
 
@@ -16,11 +16,16 @@
     </nav>
 
     {{#with ev}}
-    <header class="act-hero{{#if heroPhoto}} act-hero--photo{{/if}}">
-      {{#if heroPhoto}}
-      <div class="act-hero__art act-hero__art--photo">
-        <img class="act-hero__fill" src="{{heroPhoto}}" alt="" aria-hidden="true" loading="eager" decoding="async" />
-        <img class="act-hero__img" src="{{heroPhoto}}" alt="Photo from {{name}}" loading="eager" fetchpriority="high" decoding="async" />
+    <header class="act-hero{{#if collage.length}} act-hero--collage{{/if}}">
+      {{#if collage.length}}
+      {{!-- One tile per race: its highlight photo, cropped to the tile (faces kept high), labelled. --}}
+      <div class="ev-collage" style="--cols: {{collageCols}}">
+        {{#each collage}}
+        <a class="ev-collage__tile" href="{{url}}">
+          <img src="{{src}}" alt="{{division}}, {{date}}" loading="eager" decoding="async" />
+          <span class="ev-collage__label"><b>{{total}}</b> {{division}}{{#if isPB}} · 🏆 PB{{/if}}<small>{{date}}</small></span>
+        </a>
+        {{/each}}
       </div>
       {{/if}}
       <div class="act-hero__body">
@@ -45,12 +50,13 @@
     <div class="ev-races">
       {{#each cards}}
       <a class="ev-race" href="{{url}}">
-        {{#if photo}}<div class="ev-race__art"><img class="act-hero__fill" src="{{photo}}" alt="" aria-hidden="true" loading="lazy" /><img class="act-hero__img" src="{{photo}}" alt="" loading="lazy" decoding="async" /></div>{{/if}}
+        {{!-- With the header collage the photo is already up top: the card is the race's numbers and words. --}}
+        {{#unless ../collage.length}}{{#if photo}}<div class="ev-race__art"><img class="act-hero__fill" src="{{photo}}" alt="" aria-hidden="true" loading="lazy" /><img class="act-hero__img" src="{{photo}}" alt="" loading="lazy" decoding="async" /></div>{{/if}}{{/unless}}
         <div class="ev-race__body">
           <div class="ev-race__kicker">{{date}} · {{division}}</div>
           <div class="ev-race__total">{{total}}{{#if isPB}} <span class="stamp act-stamp act-stamp--pb-big">🏆 PB</span>{{/if}}</div>
           <div class="ev-race__meta">
-            {{#if totalDelta}}<span class="act-race__delta act-race__delta--{{totalTone}}">{{totalDelta}} vs PB {{totalPbTime}}</span>{{else}}{{#if isFirst}}<span>first race in this division</span>{{/if}}{{/if}}
+            {{#if totalDelta}}<span class="act-race__delta act-race__delta--{{totalTone}}">{{totalDelta}} vs PB {{totalPbTime}}</span>{{else}}{{#if isFirst}}<span class="act-race__delta act-race__delta--gain">🏆 {{firstLabel}}</span>{{/if}}{{/if}}
             {{#each ranks}}<span>{{value}} {{label}}</span>{{/each}}
             {{#if avgHr}}<span>♥ {{avgHr}} avg</span>{{/if}}
             {{#if partner}}<span>🤝 with {{partner}}</span>{{/if}}
@@ -94,7 +100,7 @@
     </section>
     {{/if}}
 
-    {{> activity-progress progress}}
+    {{#each chases}}{{> activity-chase this}}{{/each}}
 
     {{> activity-gallery gallery}}
 

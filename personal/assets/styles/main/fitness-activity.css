@@ -10,6 +10,15 @@
 
 .page-activity .zine-content { max-width: 1120px; margin: 0 auto; }
 
+/* Type inks (F5.5): an activity or race-weekend page takes its activity type's colour
+   (fitness-types.css, the #501 map) as its section ink instead of the /life purple —
+   text and rules in the text-safe --type-text, the paper wash in the type ink itself.
+   The masthead keeps the site's /life purple. */
+body.page-activity[class*='fit-type--'] { --ink-section: var(--type-text); }
+body.page-activity[class*='fit-type--'] .paper-wash,
+body.page-activity[class*='fit-type--'] .paper-dot { --ink-section: var(--type); }
+body.page-activity .masthead { --ink-section: #7C3AED; }
+
 /* Breadcrumb */
 .act-crumb {
   display: flex; gap: 8px; align-items: center;
@@ -56,10 +65,25 @@
   background: var(--paper); color: var(--ink); transform: rotate(-3deg);
 }
 .act-hero__body { position: relative; padding: 20px 24px 22px; }
+
+/* Hero by picture shape (F5.5). The art box carries the picture's own aspect-ratio
+   inline, so it fills without a letterbox; the max-height only bites for a picture
+   taller than the screen, where the blurred copy fills the sides. */
+.act-hero--portrait .act-hero__art,
+.act-hero--landscape .act-hero__art,
+.act-hero--square .act-hero__art { max-height: 78vh; }
+@media (min-width: 721px) {
+  /* Portrait: the picture beside the title block, picture left. */
+  .act-hero--portrait { display: grid; grid-template-columns: minmax(280px, 40%) 1fr; align-items: start; }
+  .act-hero--portrait .act-hero__art { border-bottom: 0; border-right: 3px solid var(--ink); max-height: 82vh; }
+  .act-hero--portrait .act-hero__body { align-self: end; padding: 28px 30px 28px; }
+  .act-hero--portrait .act-hero__title { font-size: clamp(42px, 5.2vw, 76px); }
+}
 .act-hero__stamps { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
 
 .act-stamp { opacity: .92; letter-spacing: .12em; font-size: 10px; padding: 3px 8px; background: #fff; }
 .act-stamp--type   { color: var(--ink-section); transform: rotate(-1.5deg); }
+body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--type); color: var(--type-on); opacity: 1; }
 .act-stamp--source { color: var(--ink); }
 .act-stamp--date   { color: var(--ink); opacity: .7; }
 .act-stamp--pr     { color: var(--ink-orange); transform: rotate(1.2deg); }
@@ -401,18 +425,75 @@
 .act-bar__hr small { opacity: .6; }
 
 /* ─── PB progression ─── */
-.act-progress__grid { display: grid; grid-template-columns: 1fr; gap: 18px; max-width: 760px; }
-.act-progress__fig { margin: 0; }
-.act-progress__cap { font-family: var(--f-mono); font-size: 11px; margin-bottom: 4px; }
-.act-progress__svg { display: block; width: 100%; height: auto; overflow: visible; }
-.act-progress__grid-line { stroke: rgba(23,19,17,.15); stroke-width: 1; stroke-dasharray: 2 3; }
-.act-progress__tick, .act-progress__date { font-family: var(--f-mono); font-size: 12px; fill: var(--ink); opacity: .65; }
-.act-progress__val { font-family: var(--f-mono); font-size: 14px; font-weight: 700; fill: var(--ink); }
-.act-progress__best { stroke: var(--ink-green); stroke-width: 2; stroke-linejoin: round; }
-.act-progress__hit { fill: transparent; }
-.act-progress__dot { fill: #fff; stroke: var(--ink); stroke-width: 2; }
-.act-progress__dot--pb { fill: var(--ink-green); stroke: #fff; }
-.act-progress__dot--current { stroke: var(--ink-section); stroke-width: 3; }
+/* PB chase (F5.5): one time axis, faster to the left; this race against the PB it
+   chased (red slower, green PB), earlier races as context above it. */
+.act-chase__verdict {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin: 0 0 10px;
+  font-family: var(--f-mono); font-size: 13px; font-weight: 700;
+}
+.act-chase__verdict .act-chase__delta { font-family: var(--f-disp); font-size: 44px; line-height: .9; font-weight: 400; margin-right: 6px; }
+.act-chase__verdict--loss .act-chase__delta { color: var(--ink-red); }
+.act-chase__verdict--gain { color: var(--ink-green); }
+.act-chase__vs { font-weight: 400; font-size: 12px; }
+.act-chase__vs a { color: var(--ink); border-bottom: 1px solid currentColor; }
+.act-chase__plot { --gutter: 78px; margin: 18px 0 6px; }
+.act-chase__ends {
+  display: flex; justify-content: space-between; margin: 0 0 4px var(--gutter);
+  font-family: var(--f-mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; opacity: .65;
+}
+.act-chase__track { position: relative; margin-left: var(--gutter); border-bottom: 1.5px solid var(--ink); margin-bottom: 26px; }
+.act-chase__tick { position: absolute; top: 0; bottom: 0; border-left: 1px dashed rgba(23,19,17,.2); }
+.act-chase__tick i {
+  position: absolute; bottom: -20px; transform: translateX(-50%);
+  font: 10px var(--f-mono); font-style: normal; opacity: .65; white-space: nowrap;
+}
+.act-chase__lane { position: relative; height: 74px; }
+.act-chase__lane + .act-chase__lane { border-top: 1px dashed rgba(23,19,17,.15); }
+.act-chase__lane-l {
+  position: absolute; right: calc(100% + 10px); top: 50%; transform: translateY(-50%); width: calc(var(--gutter) - 14px);
+  font: 700 10px var(--f-mono); letter-spacing: .12em; text-transform: uppercase; text-align: right; opacity: .7;
+}
+.act-chase__dot {
+  position: absolute; left: 0; top: 50%; width: 12px; height: 12px; border-radius: 50%;
+  transform: translate(-50%, -50%); background: #fff; border: 2px solid var(--ink);
+}
+.act-chase__ctx { position: absolute; top: 0; bottom: 0; width: 0; color: var(--ink); text-decoration: none; }
+.act-chase__ctx--pb .act-chase__dot { background: var(--ink-green); }
+.act-chase__ctx-l {
+  position: absolute; top: calc(50% + 10px); left: 0; transform: translateX(-50%);
+  display: grid; justify-items: center; font: 10px var(--f-mono); white-space: nowrap; opacity: .85;
+}
+.act-chase__ctx--above .act-chase__ctx-l { top: auto; bottom: calc(50% + 10px); }
+.act-chase__ctx--start .act-chase__ctx-l { left: -8px; transform: none; justify-items: start; }
+.act-chase__ctx--end .act-chase__ctx-l { left: auto; right: -8px; transform: none; justify-items: end; }
+.act-chase__ctx-l b { font-size: 12px; }
+.act-chase__ctx:hover .act-chase__ctx-l { opacity: 1; text-decoration: underline; }
+.act-chase__pb { position: absolute; top: 8px; bottom: 8px; width: 0; border-left: 3px solid var(--ink-green); transform: translateX(-1.5px); }
+.act-chase__pb::before {
+  content: 'PB to beat'; position: absolute; top: -8px; left: 6px; white-space: nowrap;
+  font: 700 9px var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-green);
+}
+.act-chase__gap { position: absolute; top: calc(50% - 4px); height: 8px; }
+.act-chase__lane--loss .act-chase__gap { background: var(--ink-red); }
+.act-chase__lane--gain .act-chase__gap { background: var(--ink-green); }
+.act-chase__this { position: absolute; top: 0; bottom: 0; width: 0; }
+.act-chase__this .act-chase__dot { width: 20px; height: 20px; border-width: 3px; }
+.act-chase__lane--loss .act-chase__this .act-chase__dot { background: var(--ink-red); }
+.act-chase__lane--gain .act-chase__this .act-chase__dot { background: var(--ink-green); }
+.act-chase__this > b, .act-chase__this > .act-chase__delta {
+  position: absolute; top: calc(50% + 14px); white-space: nowrap; font-family: var(--f-mono);
+}
+.act-chase__this > b { font-size: 14px; }
+.act-chase__this > .act-chase__delta { top: auto; bottom: calc(50% + 14px); font-size: 12px; font-weight: 700; }
+.act-chase__lane--loss .act-chase__this > .act-chase__delta { color: var(--ink-red); }
+.act-chase__lane--gain .act-chase__this > .act-chase__delta { color: var(--ink-green); }
+.act-chase__this--start > b, .act-chase__this--start > .act-chase__delta { left: -10px; }
+.act-chase__this--end > b, .act-chase__this--end > .act-chase__delta { right: -10px; }
+@media (max-width: 640px) {
+  .act-chase__plot { --gutter: 54px; }
+  .act-chase__verdict .act-chase__delta { font-size: 34px; }
+  .act-chase__ctx-l { font-size: 9px; }
+}
 
 /* ─── Lightbox (CSS :target) ─── */
 .act-lightbox {
@@ -442,6 +523,33 @@
 }
 
 /* ─── Race-weekend event page ─── */
+/* Header collage (F5.5): each race's highlight photo, one tile per race, labelled. */
+.ev-collage {
+  display: grid; grid-template-columns: repeat(var(--cols, 1), minmax(0, 1fr)); gap: 3px;
+  aspect-ratio: 16 / 9; max-height: 74vh; width: 100%;
+  background: var(--ink); border-bottom: 3px solid var(--ink);
+}
+.ev-collage__tile { position: relative; display: block; overflow: hidden; color: var(--ink); text-decoration: none; }
+.ev-collage__tile img {
+  display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 24%;
+  filter: saturate(.92) contrast(1.04); transition: transform .3s ease;
+}
+.ev-collage__tile:hover img { transform: scale(1.02); }
+.ev-collage__label {
+  /* Top corner: race photos carry their own finish-time board low in the frame. */
+  position: absolute; left: 12px; top: 12px; max-width: calc(100% - 24px);
+  display: grid; gap: 2px; padding: 6px 10px 7px; background: var(--paper); border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--type, var(--ink)); font-family: var(--f-mono); font-size: 10px;
+  letter-spacing: .12em; text-transform: uppercase; transform: rotate(-1.5deg);
+}
+.ev-collage__label b { font-family: var(--f-disp); font-size: 30px; line-height: .95; letter-spacing: 0; font-weight: 400; }
+.ev-collage__label small { font-size: 9px; opacity: .7; }
+@media (max-width: 640px) {
+  .ev-collage { aspect-ratio: 4 / 3; }
+  .ev-collage__label { left: 6px; top: 6px; max-width: calc(100% - 12px); padding: 4px 6px; font-size: 8px; }
+  .ev-collage__label b { font-size: 20px; }
+}
+
 .ev-races { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 18px; }
 .ev-race {
   display: flex; flex-direction: column; background: #fff; border: 2px solid var(--ink); color: var(--ink);

@@ -1,0 +1,15 @@
+{{!-- Fallback when the build did not know the hero picture's size: lay the hero out from
+     the loaded image (same thresholds as tasks/fitness-photo-dims.mjs orientationOf). --}}
+<script>
+(function (h) {
+  var i = h && h.querySelector('.act-hero__img');
+  if (!i) return;
+  function shape() {
+    if (!i.naturalWidth) return;
+    var r = i.naturalHeight / i.naturalWidth;
+    h.classList.add(r >= 1.1 ? 'act-hero--portrait' : r <= 1 / 1.1 ? 'act-hero--landscape' : 'act-hero--square');
+    h.querySelector('.act-hero__art').style.aspectRatio = i.naturalWidth + ' / ' + i.naturalHeight;
+  }
+  if (i.complete) shape(); else i.addEventListener('load', shape);
+})(document.currentScript && document.currentScript.parentElement);
+</script>

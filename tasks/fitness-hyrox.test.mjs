@@ -7,7 +7,8 @@ import os from 'node:os';
 import path from 'node:path';
 
 import { athleteWords } from './fitness-words.mjs';
-import { buildHyroxHistory, buildRaceView, groupEvents, partnerName, progressionCharts, deltaClock, clock } from './fitness-hyrox.mjs';
+import { buildHyroxHistory, buildRaceView, groupEvents, partnerName, pbChase, hyroxWall, deltaClock, clock } from './fitness-hyrox.mjs';
+import { buildPbBoard } from './fitness-life.mjs';
 import { buildActivityView, createActivityRenderer } from './fitness-activity-pages.mjs';
 import { buildEventView, dateRange, generateEventPagesTask } from './fitness-event-pages.mjs';
 import { activityCard } from './fitness-og-images.mjs';
@@ -123,7 +124,7 @@ describe('race weekends', () => {
     ]);
     assert.deepEqual(ev.map((e) => e.slugs), [['e', 'f'], ['a', 'b', 'c']]);
   });
-  test('event view: cards, splits side by side, progression of the divisions raced', async () => {
+  test('event view: cards, splits side by side, a PB chase per division raced, a photo collage', async () => {
     const h = buildHyroxHistory(all);
     const v = buildEventView(h.events[0], h, { profile: { displayName: 'James King', showPhotoGallery: true } }, { siteUrl: 'https://example.test' });
     assert.equal(v.ev.name, 'Hyrox Birmingham');
@@ -131,7 +132,8 @@ describe('race weekends', () => {
     assert.equal(v.ev.cards.length, 2);
     assert.equal(v.ev.compare.length, 16);
     assert.equal(v.ev.compare[0].cells.length, 2);
-    assert.deepEqual(v.ev.progress.map((p) => p.key).sort(), ['men_doubles', 'men_open']);
+    assert.deepEqual(v.ev.chases.map((p) => p.key).sort(), ['men_doubles', 'men_open'], 'every division raced at the event');
+    assert.deepEqual(v.ev.collage, [], 'no photos, no collage');
     assert.equal(v.canonical, 'https://example.test/life/event/hyrox-birmingham-2026-10-27');
     assert.equal(v.ev.cards[0].partner, 'Stephen');
   });
@@ -150,6 +152,16 @@ describe('race weekends', () => {
     assert.match(html, /href="\/life\/activity\/bham-solo"/);
     assert.match(html, /splits side by side/);
   });
+  test("the header is a collage of each race's photo, and the cards then carry none", async () => {
+    const withPhotos = all.map((f) => (f.slug.startsWith('bham') ? { ...f, activity: { ...f.activity, photoUrls: [`https://x.test/${f.slug}.jpg`] } } : f));
+    const out = await fs.mkdtemp(path.join(os.tmpdir(), 'ev-'));
+    const task = generateEventPagesTask({ outDir: out });
+    const quiet = { info() {}, warn() {}, debug() {}, error() {} };
+    await task.run(task.config, { globals: { fitnessActivities: withPhotos, fitnessIndex: { profile: { displayName: 'James King', showPhotoGallery: true } }, siteUrl: '' }, logger: quiet });
+    const html = await fs.readFile(path.join(out, 'life', 'event', 'hyrox-birmingham-2026-10-27', 'index.html'), 'utf8');
+    assert.equal((html.match(/class="ev-collage__tile"/g) || []).length, 2);
+    assert.doesNotMatch(html, /class="ev-race__art"/);
+  });
 });
 
 describe('activity page', () => {
@@ -165,7 +177,7 @@ describe('activity page', () => {
     const v = buildActivityView(solo, {}, { hyrox: h });
     assert.deepEqual(v.act.anchors.slice(0, 3).map((a) => a.value), ['1:29:42', '#270', '#60']);
     assert.ok(v.act.raceDay.some((d) => d.label === 'division' && d.value === "Open Men's Solo"));
-    assert.equal(v.act.progress[0].key, 'men_open', "this race's division first");
+    assert.equal(v.act.chase?.key, 'men_open', "only this race's division");
   });
   test('division-less FitGlue hybrid records are dropped; a division PB gets the band', () => {
     const fast = raceFile({ slug: 'manc', date: '2027-03-01T09:00:00Z', title: "Hyrox Manchester - Open Men's Solo", division: 'men_open', label: "Open Men's Solo", total: 4900, run: 300, stn: 280 });
@@ -185,7 +197,8 @@ describe('activity page', () => {
     assert.match(html, /act-race__row/);
     assert.match(html, /\+5:55/);
     assert.match(html, /act-eventlink/);
-    assert.match(html, /hyrox PB progression/);
+    assert.match(html, /PB chase · Open Men&#x27;s Solo/);
+    assert.doesNotMatch(html, /Open Men&#x27;s Doubles PB chase/, 'no doubles chart on the solo page');
     assert.doesNotMatch(html, /Completed via ROXFIT/);
   });
   test('OG card: division in the kicker, total first, the PB gap as the footnote', () => {
@@ -215,16 +228,69 @@ describe('partner credit', () => {
   });
 });
 
-describe('progression chart', () => {
-  test('one chart per division, PBs marked, current race highlighted', () => {
-    const charts = progressionCharts(buildHyroxHistory(all), { highlight: 'bham-solo' });
-    const open = charts.find((c) => c.key === 'men_open');
-    assert.equal(open?.points.length, 2);
-    assert.equal(open?.points[0].isPB, true);
-    assert.equal(open?.points[1].isPB, false);
-    assert.equal(open?.points[1].current, true);
-    assert.ok((open?.points[0].cy ?? 0) < (open?.points[1].cy ?? 0), 'faster is higher');
-    assert.equal(open?.pb, '1:23:47');
+describe('PB chase (point in time)', () => {
+  const h = buildHyroxHistory(all);
+  test('the Birmingham solo is red against the Olympia PB it was chasing; Olympia is context', () => {
+    const c = pbChase(h, 'men_open', ['bham-solo']);
+    assert.equal(c?.rows.length, 1);
+    const r = c?.rows[0];
+    assert.equal(r?.tone, 'loss', 'slower than the PB: red, not green');
+    assert.equal(r?.delta, '+5:55');
+    assert.equal(r?.pbTime, '1:23:47');
+    assert.ok((r?.pbLeft ?? 0) < (r?.left ?? 0), 'faster is to the left');
+    assert.deepEqual(c?.context.map((x) => x.url), ['/life/activity/olympia'], 'earlier races only; the sim is left out');
+    assert.equal(c?.plot, true);
+  });
+  test('Olympia stops at Olympia: the later Birmingham solo is not shown, and it was a PB when run', () => {
+    const c = pbChase(h, 'men_open', ['olympia']);
+    assert.deepEqual(c?.context, [], 'nothing after it');
+    assert.equal(c?.count, 1);
+    assert.equal(c?.plot, false, 'a lone race gets the verdict, no axis');
+    assert.equal(c?.rows[0].tone, 'gain');
+    assert.equal(c?.rows[0].verdict, "PB — first Open Men's Solo");
+    const v = buildRaceView(olympia, h);
+    assert.equal(v?.firstLabel, "PB — first Open Men's Solo");
+    assert.equal(v?.totalDelta, '', 'no PB stood before it');
+  });
+  test('Rome shows doubles only, up to Rome', () => {
+    const v = buildActivityView(rome, {}, { hyrox: h });
+    assert.equal(v.act.chase?.key, 'men_doubles');
+    assert.deepEqual(v.act.chase?.context, []);
+    assert.equal(v.act.race?.firstLabel, "PB — first Open Men's Doubles");
+  });
+  test('a new PB is green and measured against the PB that stood before it', () => {
+    const fast = raceFile({ slug: 'manc', date: '2027-03-01T09:00:00Z', title: "Hyrox Manchester - Open Men's Solo", division: 'men_open', label: "Open Men's Solo", total: 4900, run: 300, stn: 280 });
+    const c = pbChase(buildHyroxHistory([...all, fast]), 'men_open', ['manc']);
+    assert.equal(c?.rows[0].tone, 'gain');
+    assert.equal(c?.rows[0].pbTime, '1:23:47', 'Olympia stood before it, not itself');
+    assert.match(c?.rows[0].verdict ?? '', /^New Open Men's Solo PB — 2:07 faster than 1:23:47/);
+    assert.deepEqual(c?.context.map((x) => x.url), ['/life/activity/olympia', '/life/activity/bham-solo']);
+  });
+  test('simulations and unknown divisions get no chase', () => {
+    assert.equal(pbChase(h, 'men_open', ['sim']), null);
+    assert.equal(pbChase(h, 'nope', ['bham-solo']), null);
+  });
+});
+
+describe('/life PB wall: Hyrox per division (F5.5)', () => {
+  const h = buildHyroxHistory(all);
+  test('one section per division: total first, then stations + Roxzone in race order, then the runs, each linked', () => {
+    const w = hyroxWall(h);
+    assert.deepEqual(w.map((d) => d.label), ["Open Men's Solo", "Open Men's Doubles"], 'in the order first raced');
+    const [solo, dbl] = w;
+    assert.deepEqual([solo.total?.display, solo.total?.url, solo.total?.where], ['1:23:47', '/life/activity/olympia', 'London Olympia']);
+    assert.deepEqual([dbl.total?.display, dbl.total?.url, dbl.total?.where], ['1:12:34', '/life/activity/rome', 'Rome']);
+    assert.deepEqual(solo.stations.map((s) => s.name), ['SkiErg', 'Sled Push', 'Sled Pull', 'Burpee Broad Jumps', 'Row', 'Farmers Carry', 'Sandbag Lunges', 'Wall Balls', 'Roxzone']);
+    assert.equal(solo.runs.length, 8);
+    // Birmingham's solo was slower overall but quicker on the runs (320 s vs 340 s): those PBs link to it.
+    assert.deepEqual([solo.runs[0].display, solo.runs[0].url], ['5:20', '/life/activity/bham-solo']);
+    assert.equal(solo.stations.find((s) => s.name === 'Roxzone')?.url, '/life/activity/bham-solo', "Olympia had no Roxzone; the sim's 400 s never counts");
+  });
+  test('the wall puts the Hyrox sections between the bike and the iron, in the Hyrox ink', () => {
+    const g = buildPbBoard([{ recordType: 'fastest_5k', value: 1302, unit: 'seconds', achievedAt: '2026-04-04T09:00:00Z' }, { recordType: 'deadlift_1rm', value: 170, unit: 'kg', achievedAt: '2026-10-22T10:10:21Z' }], hyroxWall(h));
+    assert.deepEqual(g.map((x) => x.key), ['run', 'hyrox-men_open', 'hyrox-men_doubles', 'iron']);
+    assert.equal(g[1].typeClass, 'fit-type--crossfit');
+    assert.equal(g[1].title, "hyrox · Open Men's Solo");
   });
 });
 

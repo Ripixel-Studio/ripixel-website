@@ -1,0 +1,57 @@
+{{!-- Hyrox PB chase (F5.5), one per division. Context: a pbChase() model. This race
+     against the PB it was chasing — red when slower, green when it set a PB — with the
+     division's earlier races as context, on one time axis: faster to the left. History
+     stops at this race. --}}
+{{#if rows.length}}
+<section class="act-card act-chase" aria-label="{{label}} PB chase">
+  <div class="act-card__inner">
+    <div class="act-card__head">
+      <span class="act-card__title">· 🎯 PB chase · {{label}} ·</span>
+      <span class="act-card__right">{{count}} {{raceWord}} in this division{{#unless multiple}}, up to this one{{/unless}}</span>
+    </div>
+
+    {{#each rows}}
+    <p class="act-chase__verdict act-chase__verdict--{{tone}}">
+      {{#if ../multiple}}<b>{{name}} · {{date}}:</b> {{/if}}{{#if delta}}{{#if isPB}}🏆 {{verdict}}{{else}}<span class="act-chase__delta">{{delta}}</span> slower than the PB it was chasing{{/if}}{{else}}🏆 {{verdict}}{{/if}}
+      {{#if pbTime}}<span class="act-chase__vs">PB to beat: <a href="{{pbUrl}}">{{pbTime}} · {{pbName}} · {{pbDate}}</a></span>{{/if}}
+    </p>
+    {{/each}}
+
+    {{#if plot}}
+    <div class="act-chase__plot" role="img" aria-label="{{label}} finish times on a time axis, faster to the left">
+      <div class="act-chase__ends" aria-hidden="true"><span>◀ faster</span><span>slower ▶</span></div>
+      <div class="act-chase__track">
+        {{#each ticks}}<span class="act-chase__tick" style="left: {{left}}%"><i>{{label}}</i></span>{{/each}}
+
+        {{#if context.length}}
+        <div class="act-chase__lane act-chase__lane--context">
+          <span class="act-chase__lane-l">before</span>
+          {{#each context}}
+          <a class="act-chase__ctx act-chase__ctx--{{align}}{{#if isPB}} act-chase__ctx--pb{{/if}}{{#if above}} act-chase__ctx--above{{/if}}" href="{{url}}" style="left: {{left}}%" title="{{title}}">
+            <i class="act-chase__dot" aria-hidden="true"></i>
+            <span class="act-chase__ctx-l">{{name}} · {{date}}<b>{{time}}{{#if isPB}} PB{{/if}}</b></span>
+          </a>
+          {{/each}}
+        </div>
+        {{/if}}
+
+        {{#each rows}}
+        <div class="act-chase__lane act-chase__lane--focus act-chase__lane--{{tone}}">
+          <span class="act-chase__lane-l">{{#if ../multiple}}{{name}}{{else}}this race{{/if}}</span>
+          {{#if pbTime}}
+          <span class="act-chase__pb" style="left: {{pbLeft}}%" aria-hidden="true"></span>
+          <span class="act-chase__gap" style="left: {{gapLeft}}%; width: {{gapWidth}}%" aria-hidden="true"></span>
+          {{/if}}
+          <span class="act-chase__this act-chase__this--{{timeAlign}}" style="left: {{left}}%">
+            <i class="act-chase__dot" aria-hidden="true"></i>
+            <b>{{time}}</b>{{#if delta}} <span class="act-chase__delta">{{delta}}</span>{{else}} <span class="act-chase__delta">PB</span>{{/if}}
+          </span>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+    {{/if}}
+    <p class="act-note act-note--quiet">Green is a PB in this division, red is slower than the PB that stood before the race. Only races up to this one are shown; simulations are left out.</p>
+  </div>
+</section>
+{{/if}}

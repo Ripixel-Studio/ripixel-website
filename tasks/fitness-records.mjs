@@ -47,6 +47,13 @@ export const STATIONS = /** @type {Record<string, string>} */ ({
 });
 const STATION_ORDER = Object.keys(STATIONS);
 
+/** FitGlue pkg/hyrox division keys (per-division records since fitglue#96), longest first. */
+export const HYROX_DIVISIONS = /** @type {[string, string][]} */ ([
+  ['women_pro_doubles', "Pro Women's Doubles"], ['men_pro_doubles', "Pro Men's Doubles"],
+  ['mixed_doubles', 'Mixed Doubles (Open)'], ['women_doubles', "Open Women's Doubles"], ['men_doubles', "Open Men's Doubles"],
+  ['women_open', "Open Women's Solo"], ['men_open', "Open Men's Solo"], ['women_pro', "Pro Women's Solo"], ['men_pro', "Pro Men's Solo"],
+]);
+
 /**
  * `leg_press_horizontal_(machine)` → `Leg Press Horizontal (Machine)`;
  * `seated_cable_row_-_bar_grip` → `Seated Cable Row – Bar Grip`.
@@ -70,6 +77,7 @@ export function exerciseName(s) {
  * @property {string} metric   what was measured (`FASTEST`, `EST. 1RM`, `HEAVIEST LIFT`, …)
  * @property {string} metricKey  stable id of the metric (`fastest`, `1rm`, `heaviest`, …)
  * @property {string} race     hybrid races: `HYROX`, `ATHX`; else ''
+ * @property {string} [division]  Hyrox per-division records: the division's label ("Open Men's Solo")
  * @property {number} order    sort position inside the group (distance / race order)
  */
 
@@ -87,12 +95,21 @@ export function recordLabel(recordType) {
 
   const hybrid = key.match(/^hybrid_race_([a-z0-9]+)_(.+)$/);
   if (hybrid) {
-    const station = hybrid[2];
+    let station = hybrid[2];
+    let division = '';
+    for (const [k, label] of HYROX_DIVISIONS) {
+      if (station.startsWith(`${k}_`)) {
+        division = label;
+        station = station.slice(k.length + 1);
+        break;
+      }
+    }
+    const run = station.match(/^run_(\d)$/);
     const i = STATION_ORDER.indexOf(station);
     return {
-      ...base, group: 'hyrox', race: hybrid[1].toUpperCase(),
-      name: STATIONS[station] || exerciseName(station).toUpperCase(),
-      metric: 'FASTEST', metricKey: 'fastest', order: i === -1 ? 500 : i,
+      ...base, group: 'hyrox', race: hybrid[1].toUpperCase(), division,
+      name: run ? `RUN ${run[1]}` : STATIONS[station] || exerciseName(station).toUpperCase(),
+      metric: 'FASTEST', metricKey: 'fastest', order: run ? 100 + Number(run[1]) : i === -1 ? 500 : i,
     };
   }
 
