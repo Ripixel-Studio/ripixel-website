@@ -33,17 +33,26 @@
   background-image: radial-gradient(circle, var(--ink-section) 1px, transparent 1.4px);
   background-size: 4px 4px; opacity: .14; mix-blend-mode: multiply; pointer-events: none;
 }
+/* The art box never crops: the image sits whole (contain) over a blurred, tinted copy of
+   itself that fills the letterbox. Portrait photos get a taller box on phones. */
 .act-hero__art {
-  position: relative; aspect-ratio: 16 / 6; overflow: hidden;
-  border-bottom: 3px solid var(--ink); background: var(--paper-2);
+  position: relative; aspect-ratio: 16 / 9; max-height: 72vh; width: 100%; overflow: hidden;
+  border-bottom: 3px solid var(--ink); background: var(--paper-2); isolation: isolate;
 }
-.act-hero__art img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.85) contrast(1.05); }
+.act-hero__fill {
+  position: absolute; inset: -40px; width: calc(100% + 80px); height: calc(100% + 80px); max-width: none;
+  object-fit: cover; filter: blur(28px) saturate(.9) brightness(.9); z-index: 0;
+}
 .act-hero__art::after {
-  content: ''; position: absolute; inset: 0;
-  background: color-mix(in srgb, var(--ink-section) 22%, transparent); mix-blend-mode: multiply;
+  content: ''; position: absolute; inset: 0; z-index: 1;
+  background: color-mix(in srgb, var(--ink-section) 26%, transparent); mix-blend-mode: multiply;
+}
+.act-hero__img {
+  position: relative; z-index: 2; display: block; width: 100%; height: 100%;
+  object-fit: contain; filter: saturate(.92) contrast(1.04);
 }
 .act-hero__art-stamp {
-  position: absolute; right: 14px; bottom: 12px; z-index: 1;
+  position: absolute; right: 14px; bottom: 12px; z-index: 3;
   background: var(--paper); color: var(--ink); transform: rotate(-3deg);
 }
 .act-hero__body { position: relative; padding: 20px 24px 22px; }
@@ -157,9 +166,17 @@
 .act-hybrid__seg--run { background: color-mix(in srgb, var(--ink-section) 14%, #fff); }
 .act-hybrid__dur { font-weight: 700; }
 
-.act-desc { margin-bottom: 18px; padding: 0 2px; }
-.act-desc__label { font-family: var(--f-mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-section); margin-bottom: 4px; }
-.act-desc__body { font-family: var(--f-scrib); font-size: 26px; line-height: 1.15; color: var(--ink); white-space: pre-line; }
+/* His own words: a pull quote straight under the hero */
+.act-words {
+  position: relative; margin: -6px 0 22px; padding: 16px 22px 14px 26px;
+  background: var(--paper-4); border: 2px solid var(--ink); border-left: 8px solid var(--ink-section);
+  transform: rotate(-.3deg);
+}
+.act-words__label { font-family: var(--f-mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-section); margin-bottom: 6px; }
+.act-words__body { font-family: var(--f-scrib); font-size: clamp(24px, 3.2vw, 34px); line-height: 1.12; color: var(--ink); white-space: pre-line; margin: 0; quotes: '“' '”'; }
+.act-words__body::before { content: open-quote; color: var(--ink-section); margin-right: 2px; }
+.act-words__body::after { content: close-quote; color: var(--ink-section); margin-left: 2px; }
+.act-words__by { font-family: var(--f-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; opacity: .7; margin-top: 8px; text-align: right; }
 
 .act-ai { background: #fff; border: 2px solid var(--ink); border-left: 6px solid var(--ink-section); padding: 14px 20px; }
 .act-ai__label { font-family: var(--f-mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-section); margin-bottom: 6px; }
@@ -184,7 +201,7 @@
 .act-photos { display: flex; gap: 14px; overflow-x: auto; padding: 4px 4px 12px; margin-bottom: 14px; scroll-snap-type: x proximity; }
 .act-photo { flex: 0 0 auto; width: min(320px, 78vw); scroll-snap-align: start; transform: rotate(-.6deg); }
 .act-photo:nth-child(even) { transform: rotate(.8deg); }
-.act-photo img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.act-photo img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; cursor: zoom-in; }
 
 .act-map__svg { display: block; width: 100%; max-height: 420px; color: var(--ink); }
 .act-map__start { fill: var(--ink-green); }
@@ -305,3 +322,149 @@
   .act-band__n { font-size: 34px; }
   .act-dots { grid-template-columns: repeat(7, 1fr); }
 }
+
+/* ─── Hyrox: stamps, race day, event link ─── */
+.act-stamp--division { color: var(--ink-blue); }
+.act-stamp--pb-big   { color: #fff; background: var(--ink-green); opacity: 1; transform: rotate(-2deg); }
+
+.act-raceday { display: flex; flex-wrap: wrap; gap: 8px 10px; margin-bottom: 14px; }
+.act-raceday__item {
+  display: flex; align-items: baseline; gap: 6px; padding: 6px 10px; background: #fff; border: 1.5px solid var(--ink);
+  font-family: var(--f-mono); font-size: 12px;
+}
+.act-raceday__l { font-size: 9px; letter-spacing: .16em; text-transform: uppercase; opacity: .6; }
+.act-raceday__v { font-weight: 700; }
+
+.act-eventlink {
+  display: grid; gap: 2px; margin-bottom: 18px; padding: 12px 16px; background: var(--ink); color: var(--paper);
+  border: 2px solid var(--ink); box-shadow: 5px 5px 0 var(--ink-section); text-decoration: none;
+}
+.act-eventlink:hover { background: var(--ink-section); }
+.act-eventlink__kicker { font-family: var(--f-mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-yellow); }
+.act-eventlink__name { font-family: var(--f-disp); font-size: 30px; line-height: 1; }
+.act-eventlink__others { font-family: var(--f-mono); font-size: 11px; opacity: .8; }
+
+/* ─── Hyrox race breakdown: interleaved run/station bars ─── */
+.act-race { --run: var(--ink-blue); --stn: var(--ink-orange); } /* validated pair (dataviz CVD check) */
+.act-race__head { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 28px; margin-bottom: 14px; }
+.act-race__total-n { font-family: var(--f-disp); font-size: clamp(48px, 7vw, 72px); line-height: .9; color: var(--ink); }
+.act-race__total-l, .act-race__vs-l, .act-race__rank-l {
+  font-family: var(--f-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; opacity: .72; margin-top: 4px;
+}
+.act-race__vs-n, .act-race__rank-n { font-family: var(--f-disp); font-size: 36px; line-height: .95; }
+.act-race__vs--gain .act-race__vs-n { color: var(--ink-green); }
+.act-race__vs--loss .act-race__vs-n { color: var(--ink-red); }
+.act-race__vs-l a { color: inherit; border-bottom: 1px solid currentColor; }
+.act-race__pb { color: var(--ink-green); font-weight: 700; }
+
+.act-race__legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-family: var(--f-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; opacity: .75; margin-bottom: 8px; }
+.act-race__key { display: inline-block; width: 12px; height: 8px; border-radius: 0 4px 4px 0; vertical-align: middle; margin-right: 4px; }
+.act-race__key--run { background: var(--run); }
+.act-race__key--stn { background: var(--stn); }
+
+.act-race__rows { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 2px; }
+.act-race__row {
+  display: grid; grid-template-columns: 22px minmax(92px, 150px) 1fr 74px 58px; align-items: center; gap: 8px;
+  font-family: var(--f-mono); font-size: 12px; padding: 3px 0;
+}
+.act-race__row--stn { background: color-mix(in srgb, var(--stn) 6%, transparent); }
+.act-race__icon { text-align: center; }
+.act-race__label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.act-race__row--stn .act-race__label { font-weight: 700; }
+.act-race__track { position: relative; height: 22px; background: rgba(23,19,17,.05); }
+.act-race__bar {
+  position: absolute; left: 0; top: 0; bottom: 0; min-width: 44px; border-radius: 0 4px 4px 0;
+  display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; box-sizing: border-box;
+}
+.act-race__row--run .act-race__bar { background: var(--run); }
+.act-race__row--stn .act-race__bar { background: var(--stn); }
+.act-race__dur { color: #fff; font-weight: 700; font-size: 11px; white-space: nowrap; }
+.act-race__hr { text-align: right; white-space: nowrap; color: var(--ink); }
+.act-race__hr small { opacity: .6; }
+.act-race__delta { text-align: right; font-weight: 700; white-space: nowrap; }
+.act-race__delta--gain { color: var(--ink-green); }
+.act-race__delta--loss { color: var(--ink-red); }
+.act-race__delta--even { opacity: .6; }
+
+.act-race__split { display: flex; flex-wrap: wrap; gap: 0; border: 1.5px solid var(--ink); margin-bottom: 10px; }
+.act-race__split > div { flex: 1 1 120px; display: grid; gap: 2px; padding: 8px 12px; border-right: 1.5px dashed rgba(23,19,17,.3); }
+.act-race__split > div:last-child { border-right: 0; }
+.act-race__split-l { font-family: var(--f-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; opacity: .7; }
+.act-race__split b { font-family: var(--f-disp); font-size: 26px; font-weight: 400; }
+.act-race__callouts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.act-race__callout { font-family: var(--f-mono); font-size: 11px; padding: 3px 8px; border: 1.5px solid currentColor; background: #fff; }
+.act-race__callout--gain { color: var(--ink-green); }
+.act-race__callout--loss { color: var(--ink-red); }
+
+/* Pace splits: HR per km */
+.act-bar__hr { font-family: var(--f-mono); font-size: 11px; white-space: nowrap; min-width: 64px; text-align: right; }
+.act-bar__hr small { opacity: .6; }
+
+/* ─── PB progression ─── */
+.act-progress__grid { display: grid; grid-template-columns: 1fr; gap: 18px; max-width: 760px; }
+.act-progress__fig { margin: 0; }
+.act-progress__cap { font-family: var(--f-mono); font-size: 11px; margin-bottom: 4px; }
+.act-progress__svg { display: block; width: 100%; height: auto; overflow: visible; }
+.act-progress__grid-line { stroke: rgba(23,19,17,.15); stroke-width: 1; stroke-dasharray: 2 3; }
+.act-progress__tick, .act-progress__date { font-family: var(--f-mono); font-size: 12px; fill: var(--ink); opacity: .65; }
+.act-progress__val { font-family: var(--f-mono); font-size: 14px; font-weight: 700; fill: var(--ink); }
+.act-progress__best { stroke: var(--ink-green); stroke-width: 2; stroke-linejoin: round; }
+.act-progress__hit { fill: transparent; }
+.act-progress__dot { fill: #fff; stroke: var(--ink); stroke-width: 2; }
+.act-progress__dot--pb { fill: var(--ink-green); stroke: #fff; }
+.act-progress__dot--current { stroke: var(--ink-section); stroke-width: 3; }
+
+/* ─── Lightbox (CSS :target) ─── */
+.act-lightbox {
+  position: fixed; inset: 0; z-index: 1000; display: none; align-items: center; justify-content: center;
+  padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px calc(env(safe-area-inset-bottom, 0px) + 64px);
+}
+.act-lightbox:target { display: flex; }
+.act-lightbox__backdrop { position: absolute; inset: 0; background: rgba(12,10,9,.92); }
+.act-lightbox__img { position: relative; max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 10px 40px rgba(0,0,0,.5); }
+.act-lightbox__bar {
+  position: absolute; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  display: flex; justify-content: center; align-items: center; gap: 10px; font-family: var(--f-mono);
+}
+.act-lightbox__nav, .act-lightbox__close {
+  color: var(--paper); border: 1.5px solid var(--paper); padding: 6px 12px; font-size: 16px; text-decoration: none; background: rgba(0,0,0,.4);
+}
+.act-lightbox__nav:hover, .act-lightbox__close:hover { background: var(--ink-section); border-color: var(--ink-section); }
+.act-lightbox__count { color: var(--paper); font-size: 12px; letter-spacing: .1em; opacity: .8; }
+
+@media (max-width: 640px) {
+  .act-hero__art { aspect-ratio: 4 / 5; max-height: 78vh; }
+  .act-race__row { grid-template-columns: 18px minmax(70px, 96px) 1fr 50px 46px; gap: 5px; font-size: 11px; }
+  .act-race__hr small { display: none; }
+  .act-race__track { height: 20px; }
+  .act-words { padding: 12px 14px 10px 16px; }
+  .act-eventlink__name { font-size: 24px; }
+}
+
+/* ─── Race-weekend event page ─── */
+.ev-races { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 18px; }
+.ev-race {
+  display: flex; flex-direction: column; background: #fff; border: 2px solid var(--ink); color: var(--ink);
+  text-decoration: none; box-shadow: 5px 5px 0 color-mix(in srgb, var(--ink-section) 40%, transparent);
+}
+.ev-race:hover { box-shadow: 5px 5px 0 var(--ink-section); }
+.ev-race__art { position: relative; aspect-ratio: 4 / 3; overflow: hidden; border-bottom: 2px solid var(--ink); isolation: isolate; }
+.ev-race__body { padding: 12px 16px 14px; display: grid; gap: 6px; }
+.ev-race__kicker { font-family: var(--f-mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-section); }
+.ev-race__total { font-family: var(--f-disp); font-size: 48px; line-height: .95; }
+.ev-race__meta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-family: var(--f-mono); font-size: 11px; }
+.ev-race__words { font-family: var(--f-scrib); font-size: 22px; line-height: 1.1; margin: 4px 0 0; white-space: pre-line; }
+.ev-race__more { font-family: var(--f-mono); font-size: 11px; color: var(--ink-section); margin-top: 4px; }
+
+.ev-compare__wrap { overflow-x: auto; }
+.ev-compare__table { width: 100%; border-collapse: collapse; font-family: var(--f-mono); font-size: 12px; min-width: 420px; }
+.ev-compare__table th, .ev-compare__table td { text-align: left; padding: 4px 8px; border-bottom: 1px dashed rgba(23,19,17,.2); vertical-align: middle; }
+.ev-compare__table thead th { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+.ev-compare__table td { position: relative; min-width: 150px; }
+.ev-compare__bar { position: absolute; left: 0; top: 4px; bottom: 4px; border-radius: 0 4px 4px 0; opacity: .22; }
+.ev-compare__run .ev-compare__bar { background: var(--ink-blue); }
+.ev-compare__stn .ev-compare__bar { background: var(--ink-orange); }
+.ev-compare__stn th { font-weight: 700; }
+.ev-compare__v { position: relative; font-weight: 700; margin-right: 8px; }
+.ev-compare__hr { position: relative; margin-right: 8px; opacity: .8; }
+.ev-compare__table .act-race__delta { position: relative; }

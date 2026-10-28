@@ -218,6 +218,8 @@ export const tasks = [
     fitnessRoundupPagesTask(), // S2.4 roundup pages: /life/roundup/<key> + /life/roundups from fitnessRoundups
     // S2.3 activity pages — /life/activity/<slug>/ from fitnessActivities (needs fetch-fitness above; before the sitemap scan)
     (await import('./tasks/fitness-activity-pages.mjs')).generateActivityPagesTask(),
+    // F5.2 race-weekend pages — /life/event/<slug> when several races share an event within a few days
+    (await import('./tasks/fitness-event-pages.mjs')).generateEventPagesTask(),
     fitnessFeedTask(), // S2.5 Atom feed at /life/feed.xml — activities + fitnessRoundupPages, newest first, 50 entries
 
     // Generate individual thought article pages (adds readTime to each item)
