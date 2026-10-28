@@ -1,21 +1,33 @@
-{{!-- Activity hero: stamps, banner/photo, title, credit line. Context: `act`. --}}
-<header class="act-hero{{#if bannerUrl}} act-hero--banner{{/if}}{{#if bgPhotoUrl}} act-hero--photo{{/if}}">
+{{!-- Activity hero: stamps, banner/photo, title, credit line. Context: `act`.
+     Laid out by the picture's shape (F5.5, `heroShape` from the build's photo sizes):
+     portrait beside the title block (picture left on desktop), landscape or square full
+     width above it; on phones always stacked, picture first. The art box takes the
+     picture's own aspect ratio, so nothing is cropped and there is no letterbox unless
+     the picture is taller than the screen allows (then the blurred copy fills the sides).
+     Without a known shape the small script below reads it from the loaded image. --}}
+<header class="act-hero{{#if bannerUrl}} act-hero--banner{{/if}}{{#if bgPhotoUrl}} act-hero--photo{{/if}}{{#if heroShape}} act-hero--{{heroShape}}{{/if}}">
   {{#if bannerUrl}}
-  <div class="act-hero__art">
-    <img src="{{bannerUrl}}" alt="" loading="eager" fetchpriority="high" decoding="async" />
+  <div class="act-hero__art"{{#if heroRatio}} style="aspect-ratio: {{heroRatio}}"{{/if}}>
+    <img class="act-hero__fill" src="{{bannerUrl}}" alt="" aria-hidden="true" loading="eager" decoding="async" />
+    <img class="act-hero__img" src="{{bannerUrl}}" alt="" loading="eager" fetchpriority="high" decoding="async" />
     <span class="stamp act-hero__art-stamp">🎨 AI banner</span>
   </div>
   {{else}}{{#if bgPhotoUrl}}
-  <div class="act-hero__art act-hero__art--photo">
-    <img src="{{bgPhotoUrl}}" alt="" loading="eager" fetchpriority="high" decoding="async" />
+  <div class="act-hero__art act-hero__art--photo"{{#if heroRatio}} style="aspect-ratio: {{heroRatio}}"{{/if}}>
+    <img class="act-hero__fill" src="{{bgPhotoUrl}}" alt="" aria-hidden="true" loading="eager" decoding="async" />
+    <img class="act-hero__img" src="{{bgPhotoUrl}}" alt="Photo from {{title}}" loading="eager" fetchpriority="high" decoding="async" />
   </div>
   {{/if}}{{/if}}
+  {{#unless heroShape}}{{#if bannerUrl}}{{> activity-hero-shape}}{{else}}{{#if bgPhotoUrl}}{{> activity-hero-shape}}{{/if}}{{/if}}{{/unless}}
 
   <div class="act-hero__body">
     <div class="act-hero__stamps">
       <span class="stamp act-stamp act-stamp--type">{{icon}} {{typeLabel}}</span>
+      {{#if race.divisionLabel}}<span class="stamp act-stamp act-stamp--division">🏷️ {{race.divisionLabel}}</span>{{/if}}
       {{#if source}}<span class="stamp act-stamp act-stamp--source">via {{source}}</span>{{/if}}
       {{#if dateStamp}}<span class="stamp act-stamp act-stamp--date">{{dateStamp}}</span>{{/if}}
+      {{#if race.isTotalPB}}<span class="stamp act-stamp act-stamp--pb-big">🏆 division PB</span>{{/if}}
+      {{#if race.firstLabel}}<span class="stamp act-stamp act-stamp--pb-big">🏆 {{race.firstLabel}}</span>{{/if}}
       {{#if prCount}}<span class="stamp act-stamp act-stamp--pr">+{{prCount}} PR</span>{{/if}}
       {{#if destinationCount}}<span class="stamp act-stamp act-stamp--dest">→ {{destinationCount}} {{destinationWord}}</span>{{/if}}
     </div>
@@ -23,7 +35,7 @@
     <h1 class="act-hero__title">{{title}}<span class="act-hero__dot">.</span></h1>
 
     <div class="act-hero__credit">
-      by <b>{{owner}}</b>{{#if boosterCount}} · enriched by {{boosterCount}} {{boosterWord}}{{/if}}{{#if locationName}} · 🌍 {{locationName}}{{/if}}
+      by <b>{{owner}}</b>{{#if race.partner}} &amp; <b>{{race.partner}}</b>{{/if}}{{#if boosterCount}} · enriched by {{boosterCount}} {{boosterWord}}{{/if}}{{#if locationName}} · 🌍 {{locationName}}{{/if}}
     </div>
   </div>
 </header>

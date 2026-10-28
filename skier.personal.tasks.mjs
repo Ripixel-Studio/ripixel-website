@@ -20,6 +20,9 @@ import { fitnessLifeTask } from './tasks/fitness-life.mjs';
 import { fitnessActivityViewsTask } from './tasks/fitness-activity-views.mjs';
 import { fitnessRoundupViewsTask } from './tasks/fitness-roundup-views.mjs';
 import { fitnessOgImagesTask } from './tasks/fitness-og-images.mjs';
+import { fitnessSessionsViewTask } from './tasks/fitness-sessions.mjs';
+import { fitnessEventViewsTask } from './tasks/fitness-event-views.mjs';
+import { fitnessPhotoDimsTask } from './tasks/fitness-photo-dims.mjs';
 import { fitnessFeedItemsTask, FEED_PATH as FITNESS_FEED_PATH } from './tasks/fitness-feed-items.mjs';
 import { lifePageTasks } from './tasks/life-pages.mjs';
 
@@ -215,15 +218,19 @@ export const tasks = [
     // Sets fitnessIndex, fitnessActivities, fitnessRoundups, fitnessUnavailable, fitnessSource.
     // Env: FITNESS_DATA_BASE (URL), FITNESS_DATA_SOURCE=live|cache|fixtures. See README "Fitness data".
     fetchFitnessTask(),
+    fitnessPhotoDimsTask(), // F5.5 `fitnessPhotoDims`: hero photo sizes (portrait beside the title, else full width); before the view tasks
     fitnessLifeTask(), // S2.2 `fitnessLife` for /life (rendered by generate-pages below)
     // S2.5 OG cards — /life/og/{activity,roundup}/<id>.png via sharp, cached in .cache/og. Runs BEFORE the
     // view tasks because they read `fitnessOgImages` to point og:image at the rendered card.
     fitnessOgImagesTask(),
     fitnessActivityViewsTask(), // S2.3 `fitnessActivityPages`: one view model per activity
+    fitnessEventViewsTask(), // F5.2 `fitnessEventPages`: one view model per race weekend
+    fitnessSessionsViewTask(), // F5.3 `fitnessSessionsPage`: every session, by month, with type filters
     fitnessRoundupViewsTask(), // S2.4 `fitnessRoundupPages` + `fitnessRoundupsIndex`
     fitnessFeedItemsTask(), // S2.5 `fitnessFeedItems` + `fitnessFeedUpdated`: 50 entries, newest first
 
-    // /life/activity/<slug>, /life/roundup/<key>, /life/roundups, /life/feed.xml — Skier builtins
+    // /life/activity/<slug>, /life/event/<slug>, /life/roundup/<key>, /life/roundups, /life/sessions,
+    // /life/feed.xml — Skier builtins
     ...lifePageTasks({ outDir: './public/personal', siteUrl: SITE_URL }),
 
     // Generate individual thought article pages (adds readTime to each item)

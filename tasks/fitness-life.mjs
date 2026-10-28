@@ -15,11 +15,16 @@
  * "Data contract (S0)" §2, §6 and §8.
  */
 import fs from 'node:fs/promises';
+import { activityTheme, FAMILIES, hybridRaceLabel, typeKeyOf, typeKeyOfTitle } from './fitness-theme.mjs';
+import { recordLabel, latestRecords } from './fitness-records.mjs';
+import { routePath } from './fitness-activity-views.mjs';
+import { buildHyroxHistory, hyroxWall } from './fitness-hyrox.mjs';
 
 export const DEFAULT_EVENTS_FILE = 'personal/items/life/fitness.json';
 export const ACTIVITY_HREF = '/life/activity';
 export const ROUNDUP_HREF = '/life/roundup';
 export const ROUNDUPS_HREF = '/life/roundups';
+export const SESSIONS_HREF = '/life/sessions';
 export const CARD_COUNT = 6;
 export const NEXT_UP_COUNT = 5;
 export const WEEK_DAYS = 7;
@@ -188,7 +193,7 @@ const STRIP = { colW: 40, barW: 28, baseY: 56, unit: 12, pad: 6 };
  * Seven strip bars for [start, start+7d). `levels` maps YYYY-MM-DD → {level, count}.
  * Coordinates are precomputed so the template is a plain `#each`.
  * @param {Date} start  UTC midnight (roundup periodStart) or a site-local day
- * @param {Map<string, {level: number, count: number}>} levels
+ * @param {Map<string, {level: number, count: number, typeKey?: string}>} levels
  */
 export function stripDays(start, levels) {
   const days = [];
@@ -198,12 +203,14 @@ export function stripDays(start, levels) {
     const hit = levels.get(key) || { level: 0, count: 0 };
     const level = Math.max(0, Math.min(4, hit.level));
     const h = level ? level * STRIP.unit : 3;
+    const typeKey = level && hit.typeKey ? hit.typeKey : '';
     days.push({
       key,
       letter: DAY_LETTERS[i],
       label: fmt(d, { weekday: 'short', day: 'numeric', month: 'short' }).replace(',', ''),
       level,
-      levelClass: `fit-strip__bar--l${level}`,
+      levelClass: `fit-strip__bar--l${level}${typeKey ? ` fit-type--${typeKey}` : ''}`,
+      typeKey,
       count: hit.count,
       sessions: hit.count === 1 ? '1 session' : `${hit.count} sessions`,
       x: i * STRIP.colW + STRIP.pad,
@@ -232,6 +239,25 @@ function weekStats(t) {
 }
 
 /**
+ * The family of each site-local day's longest session, `YYYY-MM-DD` → type key:
+ * the effort strip colours a day's bar by it.
+ * @param {any} index
+ */
+export function dominantTypes(index) {
+  /** @type {Map<string, {typeKey: string, secs: number}>} */
+  const best = new Map();
+  for (const e of index?.activities || []) {
+    const t = parse(e?.startTime);
+    if (!t) continue;
+    const key = ymd(t);
+    const secs = Number(e.durationSeconds) || 0;
+    const cur = best.get(key);
+    if (!cur || secs > cur.secs) best.set(key, { typeKey: typeKeyOf(e.activityType), secs });
+  }
+  return new Map([...best].map(([k, v]) => [k, v.typeKey]));
+}
+
+/**
  * "This week" block: latest weekly roundup, else the 7 days ending on the
  * latest activity, else null.
  * @param {any} index @param {any[]} roundupFiles @param {Date} now
@@ -244,9 +270,12 @@ export function buildWeek(index, roundupFiles, now) {
     const end = parse(r.periodEnd);
     if (start && end) {
       const levels = new Map();
+      const types = dominantTypes(index);
       for (const d of r.dayEntries || []) {
         if (d && typeof d.date === 'string') {
-          levels.set(d.date, { level: Number(d.effortLevel) || 0, count: Number(d.activityCount) || 0 });
+          levels.set(d.date, {
+            level: Number(d.effortLevel) || 0, count: Number(d.activityCount) || 0, typeKey: types.get(d.date),
+          });
         }
       }
       const days = stripDays(start, levels);
@@ -297,6 +326,8 @@ export function buildWeek(index, roundupFiles, now) {
     tot.kcal += Number(e.caloriesKcal) || 0;
     tot.elevation += Number(e.elevationGainM) || 0;
   }
+  const types = dominantTypes(index);
+  for (const [k, v] of levels) v.typeKey = types.get(k);
   const days = stripDays(startNoon, levels);
   return {
     mode: 'activities',
@@ -313,9 +344,60 @@ export function buildWeek(index, roundupFiles, now) {
 // ---------------------------------------------------------------------------
 // Activity cards
 
-/** @param {any} e index entry */
-export function buildCard(e) {
+/** @param {unknown} u */
+function httpsUrl(u) {
+  return typeof u === 'string' && /^https:\/\//.test(u) ? u : '';
+}
+
+/** Route points thinned to at most `max` (first and last kept). @param {any[]} pts @param {number} max */
+function thin(pts, max) {
+  if (pts.length <= max) return pts;
+  const step = (pts.length - 1) / (max - 1);
+  return Array.from({ length: max }, (_, i) => pts[Math.round(i * step)]);
+}
+
+/**
+ * The picture for a card: the activity's first photo, else its exported route
+ * thumbnail, else a route drawn from the activity file's GPS points, else a
+ * type-coloured placeholder. Exactly one of `photo`, `route`, `placeholder` is set.
+ * @param {any} e index entry @param {any} [file] the full activity file, when loaded
+ */
+export function cardPicture(e, file) {
+  const photos = (Array.isArray(e.photoUrls) ? e.photoUrls : []).map(httpsUrl).filter(Boolean);
+  const thumb = httpsUrl(e.routeThumbnailUrl);
+  const img = photos[0] || thumb;
+  if (img) {
+    return {
+      photo: img, isPhoto: Boolean(photos[0]), route: null, placeholder: false,
+      photoCount: photos.length > 1 ? `+${photos.length - 1}` : '',
+      pictureClass: 'fit-photo--photo',
+    };
+  }
+  const pts = Array.isArray(file?.routePoints) ? file.routePoints : [];
+  const r = pts.length >= 10 ? routePath(thin(pts, 120), { size: 200, pad: 6 }) : null;
+  if (r) {
+    return {
+      photo: '', isPhoto: false, route: { d: r.d, w: r.w, h: r.h, start: r.start, end: r.end },
+      placeholder: false, photoCount: '', pictureClass: 'fit-photo--route',
+    };
+  }
+  return { photo: '', isPhoto: false, route: null, placeholder: true, photoCount: '', pictureClass: 'fit-photo--placeholder' };
+}
+
+/**
+ * The one stat a session tile shows: distance for distance sports, weight
+ * moved for lifting, else time on the clock.
+ * @param {string} family @param {{value: string, unit: string, label: string}[]} stats
+ */
+function keyStatOf(family, stats) {
+  const want = family === 'distance' ? 'distance' : family === 'strength' ? 'moved' : 'time';
+  return stats.find((x) => x.label === want) || stats.find((x) => x.label === 'time') || stats[0] || null;
+}
+
+/** @param {any} e index entry @param {any} [file] full activity file (for the route) */
+export function buildCard(e, file) {
   const { family, glyph } = familyOf(e);
+  const theme = activityTheme(e.activityType);
   const start = parse(e.startTime);
   /** @type {{value: string, unit: string, label: string}[]} */
   const stats = [];
@@ -334,7 +416,7 @@ export function buildCard(e) {
     push(bpm > 0, String(bpm), 'bpm', 'avg hr');
     push(kcal > 0, thousands(kcal), 'kcal', 'burned');
   } else if (family === 'strength') {
-    push(sets > 0, String(sets), '', 'sets');
+    push(sets > 1, String(sets), '', 'sets');
     const w = tonnage(kg);
     push(kg > 0, w.value, w.unit, 'moved');
     push(dur > 0, duration(dur), '', 'time');
@@ -344,22 +426,26 @@ export function buildCard(e) {
     push(kcal > 0, thousands(kcal), 'kcal', 'burned');
     push(bpm > 0, String(bpm), 'bpm', 'avg hr');
   }
-  const thumb = typeof e.routeThumbnailUrl === 'string' && /^https:\/\//.test(e.routeThumbnailUrl)
-    ? e.routeThumbnailUrl : '';
+  const thumb = httpsUrl(e.routeThumbnailUrl);
+  const typeText = hybridRaceLabel(e.title) || typeLabel(e.activityType);
   return {
     slug: e.slug,
     href: `${ACTIVITY_HREF}/${encodeURIComponent(e.slug)}`,
     title: e.title || 'Untitled activity',
     date: start ? dayStamp(start) : '',
     dateTime: start ? start.toISOString() : '',
-    typeLabel: typeLabel(e.activityType),
+    typeLabel: typeText,
+    ...theme,
     source: sourceLabel(e.source),
     glyph,
     family,
     stats,
+    keyStat: keyStatOf(family, stats),
     prLabel: typeof e.prLabel === 'string' && e.prLabel ? e.prLabel : '',
     thumb,
     hasThumb: Boolean(thumb),
+    ...cardPicture(e, file),
+    pictureWord: typeText.split(' ').slice(0, 2).join(' '),
     location: typeof e.locationName === 'string' ? e.locationName : '',
   };
 }
@@ -419,47 +505,108 @@ export function buildRoundupTeaser(summary, file) {
 // ---------------------------------------------------------------------------
 // Lifetime stats, streaks, PBs
 
-const PR_SUFFIX = /_(1rm|set_volume|volume|reps)$/;
-const CARDIO_NAMES = /** @type {Record<string, string>} */ ({
-  '400m': '400M', '1k': '1K', '1_mile': '1 MILE', '5k': '5K', '10k': '10K',
-  half_marathon: 'HALF MARATHON', marathon: 'MARATHON',
-});
+/** @param {number} v @param {string} unit */
+function prDisplay(v, unit) {
+  if (unit === 'seconds') return clock(v);
+  if (unit === 'meters') return `${km(v)} km`;
+  if (unit === 'kg') return kgLabel(v);
+  return `${Math.round(v * 10) / 10} ${unit}`.trim();
+}
 
 /** @param {any} pr ShowcaseTopPR */
 export function buildPr(pr) {
-  const type = String(pr?.recordType || '');
-  const suffix = type.match(PR_SUFFIX)?.[1];
-  const base = type.replace(PR_SUFFIX, '');
-  const name = suffix ? base.toUpperCase() : (CARDIO_NAMES[base] || base.replace(/_/g, ' ').toUpperCase());
-  const metric = suffix ? suffix.replace('_', ' ').toUpperCase() : 'BEST';
+  const label = recordLabel(pr?.recordType);
   const unit = String(pr?.unit || '');
   const value = Number(pr?.value) || 0;
   const prev = pr?.previousValue == null ? null : Number(pr.previousValue);
-  let display;
-  if (unit === 'seconds') display = clock(value);
-  else if (unit === 'meters') display = `${km(value)} km`;
-  else if (unit === 'kg') display = kgLabel(value);
-  else display = `${value} ${unit}`.trim();
+  const display = prDisplay(value, unit);
   let delta = '';
-  if (prev != null && Number.isFinite(prev) && prev !== value) {
+  const tiny = unit === 'seconds' ? 0.5 : 0.05; // a sub-second "improvement" would print as −0s
+  if (prev != null && Number.isFinite(prev) && Math.abs(prev - value) >= tiny) {
     const diff = value - prev;
     const sign = diff > 0 ? '+' : '−';
     const abs = Math.abs(diff);
     if (unit === 'seconds') delta = `${sign}${abs >= 60 ? clock(abs) : `${Math.round(abs)}s`}`;
     else if (unit === 'kg') delta = `${sign}${kgLabel(abs)}`;
     else if (unit === 'meters') delta = `${sign}${km(abs)} km`;
-    else delta = `${sign}${abs}`;
+    else delta = `${sign}${Math.round(abs * 10) / 10}`;
   }
   const at = parse(pr?.achievedAt);
   return {
-    name, metric, display, unit, delta,
-    improved: delta ? (unit === 'seconds' ? value < prev : value > prev) : false,
+    name: label.name, metric: label.metric, metricKey: label.metricKey, group: label.group, race: label.race,
+    order: label.order, display, unit, value, delta,
+    improved: delta && prev != null ? (unit === 'seconds' ? value < prev : value > prev) : false,
     date: at ? longDate(at) : '',
+    ts: at ? at.getTime() : 0,
   };
 }
 
-/** @param {any} index */
-export function buildStats(index) {
+/** Distances the front page shows, in order; anything else is on the activity / roundup pages. */
+const RUN_PBS = ['1K', '1 MILE', '5K', '10K', 'HALF MARATHON', 'MARATHON', 'LONGEST RUN'];
+const RIDE_PBS = ['10K', '20K', '40K', '50K', '100K', 'LONGEST RIDE'];
+const IRON_COUNT = 8;
+/** Strength metrics on the wall, in display order: the two that are weight actually lifted. */
+const IRON_METRICS = ['heaviest', '1rm'];
+
+/**
+ * The personal-bests wall, grouped by kind of record, then by exercise:
+ *   ON FOOT (fastest standard distances + longest run), ON THE BIKE,
+ *   HYROX, one section per division (F5.5: total, stations + Roxzone, runs, each
+ *   linked to the race that set it; see hyroxWall), IRON (one tile per exercise
+ *   carrying its heaviest lift and est. 1RM together, heaviest exercises first).
+ * Volume and rep records stay on the activity and roundup pages. FitGlue's
+ * division-less `hybrid_race_hyrox_*` records mixed doubles with solo, so they are
+ * not on the wall; the Hyrox sections come from the race history instead.
+ * @param {any[]} prs  current records (see latestRecords)
+ * @param {ReturnType<typeof hyroxWall>} [hyrox]  the Hyrox sections
+ */
+export function buildPbBoard(prs, hyrox = []) {
+  const all = (Array.isArray(prs) ? prs : []).map(buildPr);
+  /** @param {string} g @param {string[]} keep */
+  const pick = (g, keep) => keep
+    .map((name) => all.find((p) => p.group === g && p.name === name))
+    .filter(Boolean)
+    .map((p) => tile(/** @type {any} */ (p).name, [/** @type {any} */ (p)]));
+  /** @param {string} name @param {any[]} metrics */
+  const tile = (name, metrics) => {
+    const latest = metrics.reduce((a, b) => (b.ts > a.ts ? b : a));
+    return {
+      name,
+      metrics: metrics.map(({ metric, display, delta, improved }) => ({ metric, display, delta, improved })),
+      single: metrics.length === 1,
+      date: latest.date,
+    };
+  };
+
+  /** @type {Map<string, any[]>} */
+  const byExercise = new Map();
+  for (const p of all) {
+    if (p.group !== 'strength' || !IRON_METRICS.includes(p.metricKey)) continue;
+    const k = p.name.toLowerCase();
+    byExercise.set(k, [...(byExercise.get(k) || []), p]);
+  }
+  const iron = [...byExercise.values()]
+    .map((ms) => ms.sort((a, b) => IRON_METRICS.indexOf(a.metricKey) - IRON_METRICS.indexOf(b.metricKey)))
+    .sort((a, b) => Math.max(...b.map((m) => m.value)) - Math.max(...a.map((m) => m.value)))
+    .slice(0, IRON_COUNT)
+    .map((ms) => tile(ms[0].name, ms));
+
+  const groups = [
+    { key: 'run', title: 'on foot', typeClass: 'fit-type--run', tiles: pick('run', RUN_PBS) },
+    { key: 'ride', title: 'on the bike', typeClass: 'fit-type--ride', tiles: pick('ride', RIDE_PBS) },
+    ...hyrox.filter((h) => h.total || h.stations.length).map((h) => ({
+      key: `hyrox-${h.key}`, title: `hyrox · ${h.label}`, typeClass: 'fit-type--crossfit', tiles: [], hyrox: h,
+    })),
+    { key: 'iron', title: 'iron · heaviest lift & est. 1RM', typeClass: 'fit-type--strength', tiles: iron },
+  ].filter((g) => g.tiles.length > 0 || g.hyrox);
+  return groups;
+}
+
+/**
+ * @param {any} index @param {any[]} [roundupFiles] every roundup file: their prsAchieved fill in the PB wall
+ * @param {any[]} [activityFiles] every activity file: the Hyrox races give the wall its per-division PBs
+ */
+export function buildStats(index, roundupFiles = [], activityFiles = []) {
   const p = index?.profile || {};
   const streaks = index?.streaks || { currentWeeks: 0, longestWeeks: 0 };
   const sh = p.streakHistory || null;
@@ -493,8 +640,16 @@ export function buildStats(index) {
   const reps = Number(p.totalReps) || 0;
   const kg = Number(p.totalWeightKg) || 0;
   const w = tonnage(kg);
-  const since = parse(p.createdAt);
+  const firstActivity = (index?.activities || [])
+    .map((/** @type {any} */ e) => parse(e?.startTime))
+    .filter(Boolean)
+    .reduce((/** @type {Date|null} */ a, /** @type {Date} */ b) => (!a || b < a ? b : a), null);
+  const since = parse(p.createdAt) || firstActivity;
   const last = parse(p.latestActivityAt);
+  const prGroups = buildPbBoard(latestRecords(
+    ...(roundupFiles || []).map((f) => f?.roundup?.prsAchieved),
+    p.topPrs,
+  ), hyroxWall(buildHyroxHistory(activityFiles)));
 
   return {
     strip,
@@ -520,8 +675,8 @@ export function buildStats(index) {
       reps: thousands(reps),
       moved: `${w.value} ${w.unit}`,
     },
-    prs: (Array.isArray(p.topPrs) ? p.topPrs : []).map(buildPr),
-    hasPrs: Array.isArray(p.topPrs) && p.topPrs.length > 0,
+    prGroups,
+    hasPrs: prGroups.length > 0,
     since: since ? monthYear(since) : '',
     lastActive: last ? longDate(last) : '',
     subtitle: typeof p.subtitle === 'string' ? p.subtitle : '',
@@ -600,96 +755,143 @@ function nextUpEntry(e, t, now) {
   };
 }
 
+/** Monday (site-local noon) of the week containing `now`. @param {Date} now */
+function weekMonday(now) {
+  const dow = (dayIndex(now) + 3) % 7; // 1970-01-01 was a Thursday → Monday = 0
+  return localDay(now, -dow);
+}
+
 /**
- * Seven day columns from today: the regular sessions in each.
- * @param {{ e: any, t: {start: Date, end: Date, allDay: boolean} }[]} regular  upcoming only
+ * This week, Monday to Sunday, from both calendars and the record:
+ * a day is **active** when a session was actually logged on it (index
+ * activities), whatever was planned; still-to-come entries from the Fitness
+ * Regular and Fitness Events calendars show as **planned**; a past day with
+ * neither is a rest day. Races from the Events calendar are marked.
+ * @param {{ e: any, t: {start: Date, end: Date, allDay: boolean} }[]} upcoming  both calendars, not yet ended
+ * @param {any[]} activities  index entries
  * @param {Date} now
  */
-export function weekStrip(regular, now) {
+export function weekStrip(upcoming, activities, now) {
+  const monday = weekMonday(now);
+  const todayKey = ymd(now);
   const days = [];
   for (let i = 0; i < WEEK_DAYS; i++) {
-    const d = localDay(now, i);
+    const d = new Date(monday.getTime() + i * 86_400_000);
     const key = ymd(d);
-    const sessions = regular
+    const done = (activities || [])
+      .map((e) => ({ e, t: parse(e?.startTime) }))
+      .filter((x) => x.t && typeof x.e.slug === 'string' && ymd(/** @type {Date} */ (x.t)) === key)
+      .sort((a, b) => /** @type {Date} */ (a.t).getTime() - /** @type {Date} */ (b.t).getTime())
+      .map(({ e, t }) => {
+        const theme = activityTheme(e.activityType);
+        return {
+          title: e.title || typeLabel(e.activityType),
+          time: hm(/** @type {Date} */ (t)),
+          href: `${ACTIVITY_HREF}/${encodeURIComponent(e.slug)}`,
+          typeClass: theme.typeClass,
+          typeKey: theme.typeKey,
+        };
+      });
+    const planned = upcoming
       .filter(({ t }) => ymd(t.start) === key)
       .sort((a, b) => a.t.start.getTime() - b.t.start.getTime())
-      .map(({ e, t }) => ({
-        title: e.title,
-        time: t.allDay ? '' : hm(t.start),
-        kind: e.kind === 'class' ? 'class' : 'session',
-        kindClass: e.kind === 'class' ? 'fit-week-strip__session--class' : 'fit-week-strip__session--session',
-        location: typeof e.location === 'string' ? e.location : '',
-      }));
+      .map(({ e, t }) => {
+        const race = e.calendar === 'events';
+        const typeKey = typeKeyOfTitle(e.title);
+        return {
+          title: e.title,
+          time: t.allDay ? '' : hm(t.start),
+          kind: race ? (e.kind === 'race' ? 'race' : 'event') : (e.kind === 'class' ? 'class' : 'session'),
+          isEvent: race,
+          typeClass: `fit-type--${typeKey}`,
+          location: typeof e.location === 'string' ? e.location : '',
+        };
+      });
+    const isToday = key === todayKey;
+    const isPast = key < todayKey;
+    const state = done.length ? 'active' : planned.length ? 'planned' : isPast || isToday ? 'rest' : 'open';
     days.push({
       key,
       dow: fmt(d, { weekday: 'short' }).toUpperCase(),
       num: fmt(d, { day: 'numeric' }),
       label: fmt(d, { weekday: 'long', day: 'numeric', month: 'short' }).replace(',', ''),
-      isToday: i === 0,
-      sessions,
-      hasSessions: sessions.length > 0,
-      count: sessions.length,
+      isToday,
+      isPast,
+      done,
+      hasDone: done.length > 0,
+      planned,
+      hasPlanned: planned.length > 0,
+      state,
+      stateClass: `fit-week-strip__day--${state}`,
+      isRest: state === 'rest',
+      isOpen: state === 'open',
+      count: done.length + planned.length,
     });
   }
   return days;
 }
 
 /**
- * The "on the calendar" block from the export (preferred) or the hand-written list.
+ * The "on the calendar" block. Next up: the Fitness Events calendar only (races
+ * and one-offs — the big things), or the hand-written list when the export is
+ * missing. This week: see weekStrip.
  * @param {any} exported   events.json object or null
  * @param {any[]} handwritten  fitness.json events
  * @param {Date} now
+ * @param {any[]} [activities] index entries, for the days already done
  */
-export function buildCalendar(exported, handwritten, now) {
-  const none = { source: 'none', meta: '', nextUp: [], hasNextUp: false, week: [], hasWeek: false, hasAny: false };
-  if (exported && Array.isArray(exported.events)) {
-    const upcoming = exported.events
-      .map((e) => ({ e, t: parseEntry(e) }))
-      .filter((x) => x.t && x.t.end > now)
-      .sort((a, b) => a.t.start.getTime() - b.t.start.getTime());
-    const nextUp = upcoming
+export function buildCalendar(exported, handwritten, now, activities = []) {
+  const hasExport = Boolean(exported && Array.isArray(exported.events));
+  const upcoming = hasExport
+    ? exported.events
+      .map((/** @type {any} */ e) => ({ e, t: parseEntry(e) }))
+      .filter((/** @type {any} */ x) => x.t && x.t.end > now)
+      .sort((/** @type {any} */ a, /** @type {any} */ b) => a.t.start.getTime() - b.t.start.getTime())
+    : [];
+  const week = weekStrip(upcoming, activities, now);
+  const hasWeek = week.some((d) => d.count > 0);
+
+  let nextUp;
+  let source;
+  let meta;
+  if (hasExport) {
+    source = 'calendar';
+    meta = 'races & one-offs, the regular sessions, and what actually got done';
+    nextUp = upcoming
       .filter(({ e }) => e.calendar === 'events')
       .slice(0, NEXT_UP_COUNT)
       .map(({ e, t }) => nextUpEntry(e, t, now));
-    const week = weekStrip(upcoming.filter(({ e }) => e.calendar === 'regular'), now);
-    const hasWeek = week.some((d) => d.hasSessions);
-    return {
-      source: 'calendar',
-      meta: 'races, one-offs & the regular sessions, straight off the calendar',
-      nextUp,
-      hasNextUp: nextUp.length > 0,
-      week: hasWeek ? week : [],
-      hasWeek,
-      hasAny: nextUp.length > 0 || hasWeek,
-    };
+  } else {
+    const today = ymd(now);
+    nextUp = (Array.isArray(handwritten) ? handwritten : [])
+      .filter((e) => e && typeof e.title === 'string' && typeof e.date === 'string' && e.date >= today)
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .slice(0, NEXT_UP_COUNT)
+      .map((e) => {
+        const start = parse(`${e.date}T00:00:00Z`) || now;
+        const end = new Date(start.getTime() + 86_400_000);
+        const race = /\brace\b/i.test(String(e.tag || ''));
+        return nextUpEntry({
+          id: '',
+          title: e.title,
+          kind: race ? 'race' : 'other',
+          location: '',
+          description: [e.tag, e.description].filter((x) => typeof x === 'string' && x).join(' — '),
+        }, { start, end, allDay: true }, now);
+      });
+    source = nextUp.length ? 'handwritten' : 'none';
+    meta = nextUp.length ? 'races & events, hand-written for now' : '';
   }
-
-  const today = ymd(now);
-  const nextUp = (Array.isArray(handwritten) ? handwritten : [])
-    .filter((e) => e && typeof e.title === 'string' && typeof e.date === 'string' && e.date >= today)
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .slice(0, NEXT_UP_COUNT)
-    .map((e) => {
-      const start = parse(`${e.date}T00:00:00Z`) || now;
-      const end = new Date(start.getTime() + 86_400_000);
-      const race = /\brace\b/i.test(String(e.tag || ''));
-      return nextUpEntry({
-        id: '',
-        title: e.title,
-        kind: race ? 'race' : 'other',
-        location: '',
-        description: [e.tag, e.description].filter((x) => typeof x === 'string' && x).join(' — '),
-      }, { start, end, allDay: true }, now);
-    });
-  if (!nextUp.length) return none;
   return {
-    source: 'handwritten',
-    meta: 'races & events, hand-written for now',
+    source,
+    meta,
     nextUp,
-    hasNextUp: true,
-    week: [],
-    hasWeek: false,
-    hasAny: true,
+    hasNextUp: nextUp.length > 0,
+    week: hasWeek ? week : [],
+    hasWeek,
+    weekRange: hasWeek ? rangeLabel(weekMonday(now), new Date(weekMonday(now).getTime() + WEEK_DAYS * 86_400_000)) : '',
+    activeDays: week.filter((d) => d.hasDone).length,
+    hasAny: nextUp.length > 0 || hasWeek,
   };
 }
 
@@ -697,10 +899,11 @@ export function buildCalendar(exported, handwritten, now) {
 // Assembly
 
 /**
- * @param {{ index: any, roundups?: any[], events?: any[], calendar?: any, unavailable?: boolean, now?: Date }} input
- *   `events` is the hand-written list (fallback only); `calendar` the events.json object or null.
+ * @param {{ index: any, activities?: any[], roundups?: any[], events?: any[], calendar?: any, unavailable?: boolean, now?: Date }} input
+ *   `events` is the hand-written list (fallback only); `calendar` the events.json object or null;
+ *   `activities` the full activity files (their route points draw a card's picture when it has no photo).
  */
-export function buildLifeModel({ index, roundups = [], events = [], calendar = null, unavailable = false, now = new Date() }) {
+export function buildLifeModel({ index, activities = [], roundups = [], events = [], calendar = null, unavailable = false, now = new Date() }) {
   const idx = index || { activities: [], roundups: [], profile: null, streaks: { currentWeeks: 0, longestWeeks: 0 } };
   const entries = Array.isArray(idx.activities) ? idx.activities.filter((e) => e && typeof e.slug === 'string') : [];
   const sorted = [...entries].sort(
@@ -710,12 +913,14 @@ export function buildLifeModel({ index, roundups = [], events = [], calendar = n
   const latestSummary = summaries[0] || null;
   const latestFile = latestSummary ? roundups.find((f) => f?.key === latestSummary.key) : undefined;
 
+  const files = filesBySlug(activities);
   const available = !unavailable && entries.length > 0;
   return {
     available,
     hasData: entries.length > 0,
     week: available ? buildWeek(idx, roundups, now) : null,
-    activities: sorted.slice(0, CARD_COUNT).map(buildCard),
+    activities: sorted.slice(0, CARD_COUNT).map((e) => buildCard(e, files.get(e.slug))),
+    sessionsHref: SESSIONS_HREF,
     hasActivities: sorted.length > 0,
     activityCount: entries.length,
     moreActivities: Math.max(0, entries.length - CARD_COUNT),
@@ -723,9 +928,20 @@ export function buildLifeModel({ index, roundups = [], events = [], calendar = n
     roundupsHref: ROUNDUPS_HREF,
     roundupCount: summaries.length,
     hasRoundups: summaries.length > 0,
-    stats: available ? buildStats(idx) : null,
-    calendar: buildCalendar(calendar, events, now),
+    stats: available ? buildStats(idx, roundups, activities) : null,
+    calendar: buildCalendar(calendar, events, now, available ? entries : []),
   };
+}
+
+/** Activity files by slug. @param {any[]} activities */
+export function filesBySlug(activities) {
+  /** @type {Map<string, any>} */
+  const m = new Map();
+  for (const f of Array.isArray(activities) ? activities : []) {
+    const slug = f?.slug || f?.indexEntry?.slug;
+    if (typeof slug === 'string') m.set(slug, f);
+  }
+  return m;
 }
 
 /** @param {string} file @param {{ warn(m: string): void }} logger */
@@ -753,6 +969,7 @@ export function fitnessLifeTask(config = {}) {
       const events = await readEvents(cfg.eventsFile || DEFAULT_EVENTS_FILE, ctx.logger);
       const fitnessLife = buildLifeModel({
         index: g.fitnessIndex,
+        activities: Array.isArray(g.fitnessActivities) ? g.fitnessActivities : [],
         roundups: Array.isArray(g.fitnessRoundups) ? g.fitnessRoundups : [],
         events,
         calendar: g.fitnessEvents || null,
@@ -763,7 +980,8 @@ export function fitnessLifeTask(config = {}) {
         `Life page: ${fitnessLife.activities.length} cards, week=${fitnessLife.week?.mode || 'none'}, ` +
         `roundup=${fitnessLife.roundup?.key || 'none'}, calendar=${fitnessLife.calendar.source} ` +
         `(${fitnessLife.calendar.nextUp.length} next up, ` +
-        `${fitnessLife.calendar.week.reduce((a, d) => a + d.count, 0)} sessions this week)`,
+        `${fitnessLife.calendar.week.reduce((a, d) => a + d.count, 0)} sessions this week, ` +
+        `${fitnessLife.calendar.activeDays} active)`,
       );
       return { fitnessLife };
     },

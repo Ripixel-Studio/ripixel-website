@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+{{> head}}
+
+<body class="page-life page-sessions" data-page="life">
+  <div class="paper-wash" aria-hidden="true"></div>
+  <div class="paper-dot" aria-hidden="true"></div>
+
+  {{> masthead}}
+
+  <div class="zine-content fit-page">
+
+    <svg class="reg-mark" style="position:absolute;top:4px;left:6px" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+      <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <line x1="0" y1="9" x2="18" y2="9" stroke="currentColor" stroke-width="1.2"/>
+      <line x1="9" y1="0" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/>
+    </svg>
+
+    <nav class="thought-breadcrumb" aria-label="Breadcrumb">
+      <a href="/life">life</a> / sessions
+    </nav>
+
+    <div class="page-hero fit-hero fit-hero--sessions">
+      <div class="page-hero__left">
+        <div class="page-hero__section-label">· THE WHOLE RECORD ·</div>
+        <h1 class="page-hero__h1 fit-hero__h1">SESSIONS.</h1>
+        <div class="fit-hero__strap">every run, ride, class and lift — newest first.</div>
+      </div>
+      <div class="page-hero__aside fit-hero__aside">
+        <span class="stamp">{{fitnessSessions.totalLabel}}</span>
+      </div>
+    </div>
+
+    {{#if fitnessUnavailable}}
+    <div class="fit-unavailable">
+      ⚠ fitness data unavailable — this build could not reach the showcase export, so there are no sessions to list. check back later.
+    </div>
+    {{/if}}
+
+    {{#if fitnessSessions.hasFilters}}
+    <div class="fit-filters" role="group" aria-label="Filter by activity type" hidden data-fit-filters>
+      <button type="button" class="fit-filter fit-filter--all" aria-pressed="true" data-filter="all">all <span>{{fitnessSessions.total}}</span></button>
+      {{#each fitnessSessions.filters}}
+      <button type="button" class="fit-filter {{typeClass}}" aria-pressed="false" data-filter="{{key}}"><span aria-hidden="true">{{glyph}}</span> {{label}} <span>{{count}}</span></button>
+      {{/each}}
+    </div>
+    {{/if}}
+
+    <div class="fit-sessions" data-fit-sessions data-page-size="{{fitnessSessions.pageSize}}">
+      {{#each fitnessSessions.months}}
+      <section class="fit-month" data-month>
+        <div class="fit-month__head">
+          <h2 class="fit-month__title">{{title}}</h2>
+          <span class="fit-month__count" data-month-count>{{countLabel}}</span>
+        </div>
+        <ol class="fit-tiles">
+          {{#each items}}
+          {{> fitness-session-tile}}
+          {{/each}}
+        </ol>
+      </section>
+      {{/each}}
+    </div>
+
+    <p class="fit-sessions__empty" hidden data-fit-empty>nothing of that type on the record.</p>
+    <button type="button" class="fit-more fit-more--button" hidden data-fit-more>show more sessions ↓</button>
+
+    <footer class="roundup-foot">
+      <div class="roundup-foot__meta">
+        <a class="roundup-foot__back" href="/life">← back to life</a>
+      </div>
+    </footer>
+  </div>
+
+  {{> footer}}
+
+  <div class="paper-grain" aria-hidden="true"></div>
+
+  <script>
+  // Type filter + progressive reveal. Without JS every session is listed.
+  (function () {
+    var root = document.querySelector('[data-fit-sessions]');
+    if (!root) return;
+    var size = Number(root.getAttribute('data-page-size')) || 48;
+    var tiles = Array.prototype.slice.call(root.querySelectorAll('.fit-tile'));
+    var months = Array.prototype.slice.call(root.querySelectorAll('[data-month]'));
+    var more = document.querySelector('[data-fit-more]');
+    var empty = document.querySelector('[data-fit-empty]');
+    var bar = document.querySelector('[data-fit-filters]');
+    var filter = 'all';
+    var shown = size;
+    try { var h = decodeURIComponent(location.hash.slice(1)); if (h) filter = h; } catch (e) {}
+
+    function apply() {
+      var n = 0, total = 0;
+      tiles.forEach(function (t) {
+        var match = filter === 'all' || t.getAttribute('data-type') === filter;
+        if (match) total++;
+        var show = match && n < shown;
+        if (show) n++;
+        t.hidden = !show;
+      });
+      months.forEach(function (m) {
+        var visible = m.querySelectorAll('.fit-tile:not([hidden])').length;
+        var matching = filter === 'all' ? m.querySelectorAll('.fit-tile').length
+          : m.querySelectorAll('.fit-tile[data-type="' + filter + '"]').length;
+        var c = m.querySelector('[data-month-count]');
+        if (c) c.textContent = matching + (matching === 1 ? ' session' : ' sessions');
+        m.hidden = visible === 0;
+      });
+      if (more) more.hidden = total <= shown;
+      if (empty) empty.hidden = total > 0;
+      if (bar) Array.prototype.forEach.call(bar.querySelectorAll('[data-filter]'), function (b) {
+        b.setAttribute('aria-pressed', String(b.getAttribute('data-filter') === filter));
+      });
+    }
+    if (bar) {
+      bar.hidden = false;
+      if (!bar.querySelector('[data-filter="' + filter + '"]')) filter = 'all';
+      bar.addEventListener('click', function (ev) {
+        var b = ev.target.closest('[data-filter]');
+        if (!b) return;
+        filter = b.getAttribute('data-filter');
+        shown = size;
+        history.replaceState(null, '', filter === 'all' ? location.pathname : '#' + filter);
+        apply();
+      });
+    }
+    if (more) more.addEventListener('click', function () { shown += size; apply(); });
+    apply();
+  })();
+  </script>
+</body>
+</html>

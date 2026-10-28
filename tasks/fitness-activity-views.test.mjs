@@ -436,3 +436,33 @@ describe('task', () => {
     assert.equal(warnings.length, 1);
   });
 });
+
+describe('calories, the type chip and the type ink (F5.5)', async () => {
+  const { calorieFigure, foodComparison } = await import('./fitness-calories.mjs');
+  const { hybridRaceLabel } = await import('./fitness-theme.mjs');
+  test("the platform's calories over FitGlue's estimate", () => {
+    const solo = { activityData: { sessions: [{ totalCalories: 1346 }] }, enrichments: { calories: { kcal: 523, comparisonText: '≈ 1.8 slice of pizza 🍕' } } };
+    assert.deepEqual(calorieFigure(solo), { kcal: 1346, source: 'platform', note: '≈ 4.7 slice of pizza 🍕' });
+    const hevy = { activityData: { sessions: [{}] }, enrichments: { calories: { kcal: 310 } } };
+    assert.deepEqual(calorieFigure(hevy), { kcal: 310, source: 'estimate', note: '' });
+    assert.deepEqual(calorieFigure({}, { caloriesKcal: 200 }), { kcal: 200, source: 'estimate', note: '' });
+    assert.deepEqual(calorieFigure({}), { kcal: 0, source: '', note: '' });
+    assert.equal(foodComparison(40), '');
+  });
+  test('the calories module says where the figure came from', () => {
+    const has = (/** @type {string} */ k) => k === 'CALORIES_BURNED';
+    const activity = { source: 'SOURCE_STRAVA', activityData: { sessions: [{ totalCalories: 1132 }] }, enrichments: { calories: { kcal: 440 } } };
+    const m = buildModule('calories', { en: activity.enrichments, series: {}, has, category: 'strength', activityType: 'ACTIVITY_TYPE_CROSSFIT', activity, entry: {} });
+    assert.equal(m?.cells[0].value, '1,132');
+    assert.equal(m?.right, 'from Strava');
+  });
+  test('Hyrox races are labelled Hyrox, not CROSSFIT', () => {
+    assert.equal(hybridRaceLabel("Hyrox Birmingham - Open Men's Solo"), 'HYROX');
+    assert.equal(hybridRaceLabel('Morning WOD'), '');
+    assert.equal(hybridRaceLabel('Race', { hasRace: true }), 'HYROX', 'a race breakdown is a Hyrox race');
+  });
+  test('an activity page takes its type ink', () => {
+    const v = buildActivityView({ slug: 'r', activity: { title: 'Run', activityType: 'ACTIVITY_TYPE_RUN', startTime: '2026-01-01T09:00:00Z' }, entry: {} }, {});
+    assert.equal(v.act.typeClass, 'fit-type--run');
+  });
+});

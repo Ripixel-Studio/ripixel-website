@@ -1,0 +1,17 @@
+<!-- Context: a card from buildCard — its photo, else its route, else a type-coloured placeholder.
+     Sits inside an element carrying {{typeClass}} so var(--type) is the activity's ink. -->
+<div class="fit-photo {{pictureClass}}" aria-hidden="true">
+  {{#if photo}}
+  <img src="{{photo}}" alt="" loading="lazy" decoding="async" width="640" height="400">
+  {{#if photoCount}}<span class="fit-photo__count">{{photoCount}}</span>{{/if}}
+  {{else}}{{#if route}}
+  <svg class="fit-photo__route" viewBox="0 0 {{route.w}} {{route.h}}" preserveAspectRatio="xMidYMid meet">
+    <path d="{{route.d}}"/>
+    <circle cx="{{route.end.x}}" cy="{{route.end.y}}" r="3.5"/>
+  </svg>
+  <span class="fit-photo__glyph">{{glyph}}</span>
+  {{else}}
+  <span class="fit-photo__word">{{pictureWord}}</span>
+  <span class="fit-photo__glyph">{{glyph}}</span>
+  {{/if}}{{/if}}
+</div>

@@ -20,6 +20,7 @@ import crypto from 'node:crypto';
 
 import { buildFitnessCardSVG, rasterise } from '../scripts/generate-og-images.mjs';
 import { buildActivityView } from './fitness-activity-views.mjs';
+import { buildHyroxHistory } from './fitness-hyrox.mjs';
 import { buildRoundupView, parsePeriodKey } from './fitness-roundup-views.mjs';
 
 export const DEFAULT_OUT_DIR = 'public/personal/life/og';
@@ -40,12 +41,14 @@ const silentLogger = { info() {}, warn() {}, error() {}, debug() {} };
  * location as the kicker, and its four hero anchor cells as the numbers.
  * @param {any} file   an element of `fitnessActivities`
  * @param {any} index  `fitnessIndex`
+ * @param {import('./fitness-hyrox.mjs').HyroxHistory|null} [hyrox]  for Hyrox races: PBs per division
  * @returns {{ id: string, kind: 'activity', card: import('../scripts/generate-og-images.mjs').FitnessCard } | null}
  */
-export function activityCard(file, index) {
-  const view = buildActivityView(file, index);
+export function activityCard(file, index, hyrox = null) {
+  const view = buildActivityView(file, index, { hyrox });
   const act = view.act;
   if (!SAFE_ID.test(act.slug)) return null;
+  if (act.race) return raceCard(act);
   const kickerBits = [act.typeLabel, act.dateStamp];
   if (act.locationName) kickerBits.push(act.locationName);
   const stats = act.anchors.filter((a) => a.value && a.value !== '—').map((a) => ({ value: String(a.value), unit: a.unit || '', label: a.label }));
@@ -59,6 +62,27 @@ export function activityCard(file, index) {
       pill: 'FITNESS',
       footnote: act.prCount > 0 ? `+${act.prCount} PERSONAL RECORD${act.prCount === 1 ? '' : 'S'}` : (act.source ? `VIA ${String(act.source).toUpperCase()}` : ''),
     },
+  };
+}
+
+/**
+ * A Hyrox race's card: the division in the kicker, finish time and placings as the
+ * numbers, and the PB badge (or the gap to the division PB) as the footnote.
+ * @param {any} act  buildActivityView().act with a race
+ */
+export function raceCard(act) {
+  const r = act.race;
+  const kicker = ['HYROX', r.divisionLabel, act.dateStamp, act.locationName || String(r.event || '').toUpperCase()].filter(Boolean).join(' · ');
+  const stats = act.anchors.filter((a) => a.value && a.value !== '—').map((a) => ({ value: String(a.value), unit: a.unit || '', label: a.label }));
+  let footnote = '';
+  if (r.isTotalPB) footnote = `NEW ${r.divisionLabel.toUpperCase()} PB${r.totalPbTime ? ` · PREVIOUS ${r.totalPbTime}` : ''}`;
+  else if (r.isFirst) footnote = `FIRST ${r.divisionLabel.toUpperCase()} RACE`;
+  else if (r.totalDelta) footnote = `${r.totalDelta.replace('−', '-')} VS ${r.divisionLabel.toUpperCase()} PB ${r.totalPbTime}`;
+  else if (r.isSimulation) footnote = 'SIMULATION';
+  return {
+    id: act.slug,
+    kind: /** @type {const} */ ('activity'),
+    card: { kicker, title: act.title, stats, pill: r.isTotalPB ? 'PB' : 'HYROX', footnote },
   };
 }
 
@@ -113,9 +137,10 @@ export async function renderFitnessCards(opts = {}) {
 
   /** @type {Array<{ id: string, kind: 'activity'|'roundup', card: any }>} */
   const jobs = [];
+  const hyrox = buildHyroxHistory(opts.activities || []);
   for (const file of opts.activities || []) {
     try {
-      const c = activityCard(file, index);
+      const c = activityCard(file, index, hyrox);
       if (c) jobs.push(c);
     } catch (e) {
       logger.warn(`og card skipped for activity ${JSON.stringify(file?.slug)}: ${errMsg(e)}`);

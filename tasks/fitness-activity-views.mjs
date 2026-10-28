@@ -20,6 +20,11 @@
  * tasks/fitness-activity-views.test.mjs covers.
  */
 import path from 'node:path';
+import { athleteWords } from './fitness-words.mjs';
+import { buildHyroxHistory, buildRaceView, pbChase, eventUrl } from './fitness-hyrox.mjs';
+import { activityTheme, hybridRaceLabel } from './fitness-theme.mjs';
+import { calorieFigure } from './fitness-calories.mjs';
+import { orientationOf } from './fitness-photo-dims.mjs';
 
 export const ACTIVITY_BASE_PATH = '/life/activity';
 /** Where the fitness Atom feed is written (kept as a literal: tasks/fitness-feed-items.mjs imports this module). */
@@ -207,27 +212,13 @@ export function exerciseItemType(activityType, category) {
 // Text helpers
 
 /**
- * The athlete's own words: strip `Posted via FitGlue 💪`, then cut at the
- * first line that starts with a non-ASCII (emoji) character and ends with
- * `:` (an AI-written "emoji: section" header). Contract §3.1.
+ * The athlete's own words (contract §3.1): his paragraphs only, with the source app's
+ * header blocks (ROXFIT's split table), Hevy set dumps and FitGlue's enricher sections
+ * removed. See tasks/fitness-words.mjs.
  * @param {string|undefined|null} text
  */
 export function descriptionPreamble(text) {
-  if (!text) return '';
-  const cleaned = String(text).replace(/\n?\n?Posted via FitGlue\s*💪/g, '').trim();
-  if (!cleaned) return '';
-  const lines = cleaned.split('\n');
-  const kept = [];
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    const startsWithEmoji = line.length > 0 && /** @type {number} */ (line.codePointAt(0)) > 0xff;
-    const isHeader = startsWithEmoji && line.endsWith(':') && line.length > 1;
-    const prevBlank = i > 0 && lines[i - 1].trim() === '';
-    const isSingleLineSection = startsWithEmoji && prevBlank && line.includes(':');
-    if (isHeader || isSingleLineSection) break;
-    kept.push(lines[i]);
-  }
-  return kept.join('\n').trim();
+  return athleteWords(text);
 }
 
 const AI_ALLOWED_TAGS = new Set(['p', 'br', 'strong', 'em', 'b', 'i', 'ul', 'ol', 'li']);
@@ -686,12 +677,16 @@ export function buildModule(key, ctx) {
       if (num(d.bestSplitSecondsPerKm) > 0) cells.push(cell(fmtPace(d.bestSplitSecondsPerKm), '/km', 'best split'));
       const splits = Array.isArray(d.splits) ? d.splits.filter((s) => num(s.seconds) > 0) : [];
       const slowest = splits.reduce((m, s) => Math.max(m, num(s.seconds)), 0);
-      const bars = splits.map((s) => ({ label: `${s.km} km`, value: fmtPace(s.seconds), pct: slowest ? Math.round((num(s.seconds) / slowest) * 100) : 0 }));
+      const kmHr = new Map((Array.isArray(ctx.kmSplits) ? ctx.kmSplits : []).map((k) => [num(k.km), k]));
+      const bars = splits.map((s) => {
+        const hr = kmHr.get(num(s.km));
+        return { label: `${s.km} km`, value: fmtPace(s.seconds), pct: slowest ? Math.round((num(s.seconds) / slowest) * 100) : 0, hr: hr && num(hr.avgHr) > 0 ? `${Math.round(hr.avgHr)}` : '', hrMax: hr && num(hr.maxHr) > 0 ? `${Math.round(hr.maxHr)}` : '' };
+      });
       const paceSeries = Array.isArray(series.speedMs) ? series.speedMs.map((v) => (num(v) > 0 ? 1000 / v : null)) : null;
       return {
         key, title: 'Pace', cells,
         sparkline: paceSeries ? spark(paceSeries, { invert: true }) : null, sparkCaption: 'pace (faster is higher)',
-        bars: bars.length ? { rows: bars } : null,
+        bars: bars.length ? { rows: bars, hasHr: bars.some((b) => b.hr) } : null,
         note: num(d.paceDropPercent) > 0 ? `😓 ${Math.round(d.paceDropPercent)}% pace drop in the final quarter` : '',
       };
     }
@@ -743,9 +738,11 @@ export function buildModule(key, ctx) {
       };
     }
     case 'calories': {
-      const d = en.calories;
-      if (!has('CALORIES_BURNED') || !d || num(d.kcal) <= 0) return null;
-      return { key, title: 'Calories', cells: [cell(fmtNumber(d.kcal), 'kcal', 'burned', { lead: true })], note: d.comparisonText || '' };
+      // The platform's figure (Strava's) over FitGlue's estimate (F5.5).
+      const c = ctx.calories ?? calorieFigure(ctx.activity, ctx.entry);
+      if ((!has('CALORIES_BURNED') && c.source !== 'platform') || c.kcal <= 0) return null;
+      const right = c.source === 'platform' ? `from ${sourceLabel(ctx.activity?.source) || 'the source'}` : 'estimated';
+      return { key, title: 'Calories', right, cells: [cell(fmtNumber(c.kcal), 'kcal', 'burned', { lead: true })], note: c.note };
     }
     case 'training-load': {
       const d = en.trainingLoad;
@@ -867,7 +864,7 @@ export function buildModule(key, ctx) {
     }
     case 'pr-callout': {
       const d = en.personalRecords;
-      const records = Array.isArray(d?.records) ? d.records : [];
+      const records = Array.isArray(ctx.records) ? ctx.records : Array.isArray(d?.records) ? d.records : [];
       if (!has('PERSONAL_RECORDS') || !records.length) return null;
       return {
         key, title: 'Personal records', right: `${records.length} new`,
@@ -1001,11 +998,39 @@ export function anchorStats({ category, distanceM, durationS, avgBpm, maxBpm, ca
 }
 
 /**
+ * Hero anchors for a Hyrox race: finish time, then the official placings when the timing
+ * app reported them (else runs / stations), then average HR.
+ * @param {any} race  buildRaceView() output
+ * @param {number} avgBpm
+ */
+export function raceAnchors(race, avgBpm) {
+  const out = [{ value: race.total || '—', unit: '', label: 'finish time' }];
+  for (const r of race.ranks) out.push({ value: r.value, unit: '', label: `${r.label} rank` });
+  if (out.length < 3) out.push({ value: race.runs || '—', unit: '', label: 'running' });
+  if (out.length < 3) out.push({ value: race.stations || '—', unit: '', label: 'stations' });
+  out.push(avgBpm > 0 ? { value: String(avgBpm), unit: 'bpm', label: 'avg hr' } : { value: race.roxzone || '—', unit: '', label: 'roxzone' });
+  return out.slice(0, 4);
+}
+
+/**
+ * Hero layout from the picture's size: `heroShape` ('portrait' | 'landscape' | 'square',
+ * '' when unknown) and `heroRatio` ("1080 / 1440") for the art box's aspect-ratio.
+ * @param {{ w: number, h: number }|undefined} dims
+ */
+export function heroLayout(dims) {
+  const heroShape = orientationOf(dims);
+  return { heroShape, heroRatio: heroShape && dims ? `${Math.round(dims.w)} / ${Math.round(dims.h)}` : '' };
+}
+
+/**
  * Build the template context for one activity file.
  * @param {any} file     an element of `fitnessActivities` (activity file + indexEntry)
  * @param {any} index    `fitnessIndex`
- * @param {{ siteUrl?: string, ogCard?: string }} [opts]  `ogCard` is the rendered OG card URL from
- *   tasks/fitness-og-images.mjs; when set it is the og:image, else banner → first photo → section card.
+ * @param {{ siteUrl?: string, ogCard?: string, hyrox?: import('./fitness-hyrox.mjs').HyroxHistory|null, photoDims?: Record<string, { w: number, h: number }> }} [opts]
+ *   `ogCard` is the rendered OG card URL from tasks/fitness-og-images.mjs; when set it is the og:image,
+ *   else banner → first photo → section card. `hyrox` is buildHyroxHistory(fitnessActivities), for PBs
+ *   per division, race weekends and the PB chase. `photoDims` (fitnessPhotoDims) lays the hero out by the
+ *   picture's shape.
  */
 export function buildActivityView(file, index, opts = {}) {
   const activity = file?.activity ?? {};
@@ -1036,9 +1061,17 @@ export function buildActivityView(file, index, opts = {}) {
   const reps = allSets.length ? allSets.reduce((s, x) => s + num(x.reps), 0) : num(entry.totalReps);
   const avgBpm = num(en.heartRate?.avgBpm) || num(entry.avgHeartRate) || num(sessions[0]?.avgHeartRate);
   const maxBpm = num(en.heartRate?.maxBpm) || num(sessions[0]?.maxHeartRate);
-  const calories = num(en.calories?.kcal) || num(entry.caloriesKcal);
-  const records = has('PERSONAL_RECORDS') && Array.isArray(en.personalRecords?.records) ? en.personalRecords.records : [];
-  const prCount = records.length;
+  const calorieInfo = calorieFigure(activity, entry);
+  const calories = calorieInfo.kcal;
+  // Hyrox race (F5.2): the export's `race` plus PBs per division across the whole history.
+  // FitGlue's division-less hybrid_race_* records are superseded by the per-division ones
+  // computed here, so they are dropped from this page.
+  const history = opts.hyrox ?? null;
+  const description = descriptionPreamble(activity.description);
+  const race = buildRaceView(file, history, { words: description });
+  const allRecords = has('PERSONAL_RECORDS') && Array.isArray(en.personalRecords?.records) ? en.personalRecords.records : [];
+  const records = race ? allRecords.filter((r) => !String(r?.recordType ?? '').startsWith('hybrid_race_')) : allRecords;
+  const prCount = records.length + (race ? race.prCount : 0);
   const icon = typeIcon(activityType);
   const title = String(activity.title ?? entry.title ?? 'Activity');
   const bannerUrl = en.aiBanner?.imageUrl && /^https:\/\//.test(en.aiBanner.imageUrl) ? en.aiBanner.imageUrl : '';
@@ -1047,12 +1080,11 @@ export function buildActivityView(file, index, opts = {}) {
   const destinationCount = num(entry.destinationCount);
 
   // Pre-grid pieces
-  const description = descriptionPreamble(activity.description);
   const aiSummaryHtml = has('AI_COMPANION') ? sanitizeAiHtml(en.aiSummary?.html) : '';
   const hybrid = has('HYBRID_RACE_TAGGER') && Array.isArray(activity.activityData?.hybridRaceSummary?.segments)
     ? activity.activityData.hybridRaceSummary.segments
     : [];
-  const hybridRace = hybrid.length
+  const hybridRace = hybrid.length && !race
     ? {
         total: fmtClock(hybrid.reduce((s, x) => s + num(x.durationSeconds), 0)),
         segments: hybrid.map((s) => ({ icon: s.icon || (s.isRun ? '🏃' : '🏋️'), label: s.label || '', duration: fmtClock(s.durationSeconds) || '—', isRun: !!s.isRun })),
@@ -1078,7 +1110,17 @@ export function buildActivityView(file, index, opts = {}) {
     ? { eventName: pk.eventName, finishTime: pk.finishTime || '—', position: num(pk.position) > 0 ? `#${pk.position}` : '—', ageGrade: pk.ageGrade || '—', totalParkruns: num(pk.totalParkruns) > 0 ? String(pk.totalParkruns) : '', isTimePb: !!pk.isTimePb, isAgeGradePb: !!pk.isAgeGradePb }
     : null;
   let prBand = null;
-  if (records.length) {
+  if (race?.isTotalPB) {
+    const more = prCount - 1;
+    prBand = {
+      label: `${race.divisionLabel} PB`.toUpperCase(),
+      sub: ['HYROX · NEW PERSONAL BEST', race.totalPbTime ? `PREVIOUS ${race.totalPbTime}` : '', more > 0 ? `+${more} MORE BELOW` : ''].filter(Boolean).join(' · '),
+      value: race.total,
+      unit: '',
+      delta: race.totalDelta,
+      message: '',
+    };
+  } else if (records.length && !race) {
     const top = topPR(records);
     const parsed = parseRecordType(top.recordType);
     const v = prValue(top.newValue, top.unit);
@@ -1118,7 +1160,7 @@ export function buildActivityView(file, index, opts = {}) {
   // Grid modules in §4 order; the set list is its own partial but slots in order.
   const prNames = new Set(records.map((r) => parseRecordType(r.recordType).exercise));
   const setList = category === 'strength' || allSets.length ? groupStrengthSets(allSets, prNames) : null;
-  const ctx = { en, series, has, category, activityType, entry, activity };
+  const ctx = { en, series, has, category, activityType, entry, activity, kmSplits: file?.kmSplits, records, calories: calorieInfo };
   const modules = [];
   for (const key of moduleOrderFor(category)) {
     if (key === 'zones') {
@@ -1126,7 +1168,8 @@ export function buildActivityView(file, index, opts = {}) {
       continue;
     }
     if (key === 'set-list') {
-      if (setList) modules.push({ key, title: 'Workout', right: setList.right, wide: true, setList });
+      // A race's sets are its splits, which the race breakdown already shows.
+      if (setList && !race) modules.push({ key, title: 'Workout', right: setList.right, wide: true, setList });
       continue;
     }
     const m = buildModule(key, ctx);
@@ -1140,10 +1183,37 @@ export function buildActivityView(file, index, opts = {}) {
   if (category !== 'cardio-time' && calories > 0) extraStats.push({ value: fmtNumber(calories), unit: 'kcal', label: 'calories' });
   if (num(entry.elevationGainM) > 0) extraStats.push({ value: Math.round(entry.elevationGainM), unit: 'm', label: 'elevation gain' });
   if (category !== 'cardio-time' && maxBpm > 0) extraStats.push({ value: maxBpm, unit: 'bpm', label: 'max hr' });
-  if (category === 'strength' && reps > 0) extraStats.push({ value: fmtNumber(reps), unit: '', label: 'reps' });
-  if (category === 'strength' && avgBpm > 0) extraStats.push({ value: avgBpm, unit: 'bpm', label: 'avg hr' });
+  if (category === 'strength' && reps > 0 && !race) extraStats.push({ value: fmtNumber(reps), unit: '', label: 'reps' });
+  if (category === 'strength' && avgBpm > 0 && !race) extraStats.push({ value: avgBpm, unit: 'bpm', label: 'avg hr' });
   if (typeof entry.tempC === 'number') extraStats.push({ value: `${Math.round(entry.tempC)}°`, unit: 'C', label: entry.weatherDescription ? String(entry.weatherDescription).toLowerCase() : 'temperature' });
   if (destinationCount > 0) extraStats.push({ value: destinationCount, unit: '', label: `destination${destinationCount === 1 ? '' : 's'}`, subtext: 'pushed to' });
+
+  // Race-day context, the event weekend it belongs to, and the PB progression.
+  const eventGroup = race ? history?.eventBySlug.get(slug) : undefined;
+  const eventLink = eventGroup
+    ? {
+        url: eventUrl(eventGroup.slug),
+        name: eventGroup.name,
+        count: eventGroup.slugs.length,
+        others: eventGroup.slugs.filter((x) => x !== slug).map((x) => history?.races.get(x)).filter(Boolean).map((r) => ({ url: r.url, title: r.title, total: r.total, division: r.divisionLabel, isPB: r.isPB })),
+      }
+    : null;
+  const weather = en.weather && typeof en.weather.tempC === 'number'
+    ? `${Math.round(en.weather.tempC)}°C${en.weather.weatherDescription ? ` · ${String(en.weather.weatherDescription).toLowerCase()}` : ''}`
+    : typeof entry.tempC === 'number' ? `${Math.round(entry.tempC)}°C${entry.weatherDescription ? ` · ${String(entry.weatherDescription).toLowerCase()}` : ''}` : '';
+  const raceDay = race
+    ? [
+        { icon: '📍', label: 'venue', value: locationName || race.event },
+        { icon: '📅', label: 'race day', value: fmtDateShort(activity.startTime ?? entry.startTime) },
+        { icon: '🏷️', label: 'division', value: race.divisionLabel },
+        weather ? { icon: '🌡️', label: 'weather', value: weather } : null,
+        race.partner ? { icon: '🤝', label: 'partner', value: race.partner } : null,
+      ].filter((x) => x && x.value)
+    : [];
+  // This race against the PB it was chasing, its own division only, history up to it (F5.5).
+  const divisionKey = String(file?.race?.division?.key ?? '');
+  const chase = race && history && divisionKey && !race.isSimulation ? pbChase(history, divisionKey, [slug]) : null;
+  const gallery = photos.map((src, i) => ({ src, id: `photo-${i + 1}`, n: i + 1, prev: `#photo-${i === 0 ? photos.length : i}`, next: `#photo-${i + 2 > photos.length ? 1 : i + 2}`, total: photos.length }));
 
   const ogDescription = truncate(description || stripTags(aiSummaryHtml) || `${typeLabel(activityType).toLowerCase()} · ${fmtDateShort(activity.startTime ?? entry.startTime)}`, 200);
   const ogImage = (opts.ogCard && /^https?:\/\//.test(opts.ogCard) ? opts.ogCard : '') || bannerUrl || photos[0] || '';
@@ -1167,7 +1237,8 @@ export function buildActivityView(file, index, opts = {}) {
       canonical,
       title,
       icon,
-      typeLabel: typeLabel(activityType),
+      typeLabel: hybridRaceLabel(title, { hasRace: !!race, event: race?.event }) || typeLabel(activityType),
+      ...activityTheme(activityType),
       category,
       source: sourceLabel(activity.source ?? entry.source),
       dateStamp: fmtDateStamp(activity.startTime ?? entry.startTime),
@@ -1175,18 +1246,24 @@ export function buildActivityView(file, index, opts = {}) {
       prCount,
       bannerUrl,
       bgPhotoUrl: !bannerUrl && photos[0] ? photos[0] : '',
+      ...heroLayout(opts.photoDims?.[bannerUrl || photos[0] || '']),
       owner: String(activity.ownerDisplayName ?? index?.profile?.displayName ?? 'James').toUpperCase(),
       boosterCount,
       boosterWord: boosterCount === 1 ? 'BOOSTER' : 'BOOSTERS',
       destinationCount,
       destinationWord: destinationCount === 1 ? 'DESTINATION' : 'DESTINATIONS',
       locationName: locationName.toUpperCase(),
-      anchors: anchorStats({ category, distanceM, durationS, avgBpm, maxBpm, calories, pace: num(en.pace?.avgPaceSecondsPerKm), speedKmh: num(en.speed?.avgSpeedKmh), sets, volumeKg, prCount, icon }),
+      anchors: race ? raceAnchors(race, avgBpm) : anchorStats({ category, distanceM, durationS, avgBpm, maxBpm, calories, pace: num(en.pace?.avgPaceSecondsPerKm), speedKmh: num(en.speed?.avgSpeedKmh), sets, volumeKg, prCount, icon }),
       extraStats,
       parkrun,
       milestone,
       prBand,
       hybridRace,
+      race,
+      raceDay,
+      eventLink,
+      chase,
+      gallery,
       description,
       aiSummaryHtml,
       tags,
@@ -1225,6 +1302,7 @@ export function fitnessActivityViewsTask() {
         ctx.logger.warn('No fitness activities to render (fitnessActivities is empty)');
         return { fitnessActivityPages: [] };
       }
+      const hyrox = buildHyroxHistory(activities);
       const pages = [];
       for (const file of activities) {
         const slug = file?.slug ?? file?.entry?.showcaseId;
@@ -1233,7 +1311,7 @@ export function fitnessActivityViewsTask() {
           continue;
         }
         const ogCard = g.fitnessOgImages?.activity?.[String(slug)];
-        pages.push(buildActivityView(file, g.fitnessIndex, { siteUrl: g.siteUrl, ogCard }));
+        pages.push(buildActivityView(file, g.fitnessIndex, { siteUrl: g.siteUrl, ogCard, hyrox, photoDims: g.fitnessPhotoDims }));
       }
       ctx.logger.info(`Activity views: ${pages.length} of ${activities.length}`);
       return { fitnessActivityPages: pages };

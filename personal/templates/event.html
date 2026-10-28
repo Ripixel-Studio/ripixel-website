@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+{{> head}}
+
+<body class="page-life page-activity page-event {{ev.typeClass}}" data-page="life">
+  <div class="paper-wash" aria-hidden="true"></div>
+  <div class="paper-dot" aria-hidden="true"></div>
+
+  {{> masthead}}
+
+  <div class="zine-content">
+    <nav class="act-crumb" aria-label="Breadcrumb">
+      <a class="act-crumb__back" href="/life">← back to /life</a>
+      <span class="act-crumb__sep">·</span>
+      <span class="act-crumb__here">race weekend</span>
+    </nav>
+
+    {{#with ev}}
+    <header class="act-hero{{#if collage.length}} act-hero--collage{{/if}}">
+      {{#if collage.length}}
+      {{!-- One tile per race: its highlight photo, cropped to the tile (faces kept high), labelled. --}}
+      <div class="ev-collage" style="--cols: {{collageCols}}">
+        {{#each collage}}
+        <a class="ev-collage__tile" href="{{url}}">
+          <img src="{{src}}" alt="{{division}}, {{date}}" loading="eager" decoding="async" />
+          <span class="ev-collage__label"><b>{{total}}</b> {{division}}{{#if isPB}} · 🏆 PB{{/if}}<small>{{date}}</small></span>
+        </a>
+        {{/each}}
+      </div>
+      {{/if}}
+      <div class="act-hero__body">
+        <div class="act-hero__stamps">
+          <span class="stamp act-stamp act-stamp--type">🏁 RACE WEEKEND</span>
+          <span class="stamp act-stamp act-stamp--date">{{range}}</span>
+          <span class="stamp act-stamp act-stamp--division">{{raceCount}} {{raceWord}} · {{divisionCount}} division{{#unless (eq divisionCount 1)}}s{{/unless}}</span>
+          {{#if pbCount}}<span class="stamp act-stamp act-stamp--pb-big">🏆 {{pbCount}} PB</span>{{/if}}
+        </div>
+        <h1 class="act-hero__title">{{name}}<span class="act-hero__dot">.</span></h1>
+        <div class="act-hero__credit">by <b>{{owner}}</b> · 🌍 {{venue}}</div>
+      </div>
+    </header>
+
+    <div class="stat-strip act-anchors">
+      <div class="stat-strip__item"><div class="stat-strip__num">{{raceCount}}</div><div class="stat-strip__label">{{raceWord}}</div></div>
+      <div class="stat-strip__item"><div class="stat-strip__num">{{totalTime}}</div><div class="stat-strip__label">time racing</div></div>
+      <div class="stat-strip__item"><div class="stat-strip__num">{{divisionCount}}</div><div class="stat-strip__label">divisions</div></div>
+      <div class="stat-strip__item"><div class="stat-strip__num">{{#if pbCount}}{{pbCount}}{{else}}—{{/if}}</div><div class="stat-strip__label">division PBs</div></div>
+    </div>
+
+    <div class="ev-races">
+      {{#each cards}}
+      <a class="ev-race" href="{{url}}">
+        {{!-- With the header collage the photo is already up top: the card is the race's numbers and words. --}}
+        {{#unless ../collage.length}}{{#if photo}}<div class="ev-race__art"><img class="act-hero__fill" src="{{photo}}" alt="" aria-hidden="true" loading="lazy" /><img class="act-hero__img" src="{{photo}}" alt="" loading="lazy" decoding="async" /></div>{{/if}}{{/unless}}
+        <div class="ev-race__body">
+          <div class="ev-race__kicker">{{date}} · {{division}}</div>
+          <div class="ev-race__total">{{total}}{{#if isPB}} <span class="stamp act-stamp act-stamp--pb-big">🏆 PB</span>{{/if}}</div>
+          <div class="ev-race__meta">
+            {{#if totalDelta}}<span class="act-race__delta act-race__delta--{{totalTone}}">{{totalDelta}} vs PB {{totalPbTime}}</span>{{else}}{{#if isFirst}}<span class="act-race__delta act-race__delta--gain">🏆 {{firstLabel}}</span>{{/if}}{{/if}}
+            {{#each ranks}}<span>{{value}} {{label}}</span>{{/each}}
+            {{#if avgHr}}<span>♥ {{avgHr}} avg</span>{{/if}}
+            {{#if partner}}<span>🤝 with {{partner}}</span>{{/if}}
+          </div>
+          {{#if words}}<blockquote class="ev-race__words">{{words}}</blockquote>{{/if}}
+          <div class="ev-race__more">the full breakdown →</div>
+        </div>
+      </a>
+      {{/each}}
+    </div>
+
+    {{#if compare.length}}
+    <section class="act-card ev-compare" aria-label="Splits side by side">
+      <div class="act-card__inner">
+        <div class="act-card__head">
+          <span class="act-card__title">· ⚖️ splits side by side ·</span>
+          <span class="act-card__right">{{#each cards}}{{#unless @first}} vs {{/unless}}{{division}}{{/each}}</span>
+        </div>
+        <div class="ev-compare__wrap">
+        <table class="ev-compare__table">
+          <thead><tr><th scope="col">segment</th>{{#each cards}}<th scope="col">{{division}}<br><small>{{date}}</small></th>{{/each}}</tr></thead>
+          <tbody>
+            {{#each compare}}
+            <tr class="{{#if isRun}}ev-compare__run{{else}}ev-compare__stn{{/if}}">
+              <th scope="row"><span aria-hidden="true">{{icon}}</span> {{label}}</th>
+              {{#each cells}}
+              <td>
+                <span class="ev-compare__bar" style="width: {{pct}}%"></span>
+                <span class="ev-compare__v">{{duration}}{{#if isPB}} <b class="act-race__pb">PB</b>{{/if}}</span>
+                {{#if hr}}<span class="ev-compare__hr">♥ {{hr}}</span>{{/if}}
+                {{#if delta}}<span class="act-race__delta act-race__delta--{{deltaTone}}">{{delta}}</span>{{/if}}
+              </td>
+              {{/each}}
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+        </div>
+        <p class="act-note act-note--quiet">Each race against the PB in its own division as it stood that day. Doubles times are shared work, so they are never compared with solo times.</p>
+      </div>
+    </section>
+    {{/if}}
+
+    {{#each chases}}{{> activity-chase this}}{{/each}}
+
+    {{> activity-gallery gallery}}
+
+    <a class="act-aside__back" href="/life">← all activity</a>
+    {{/with}}
+  </div>
+
+  {{> footer}}
+
+  <div class="paper-grain" aria-hidden="true"></div>
+</body>
+</html>

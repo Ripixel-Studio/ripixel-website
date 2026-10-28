@@ -1,5 +1,9 @@
-{{!-- Pre-grid rows in §4 order: hybrid race → description → AI summary → milestone → tags → photos → map. Context: `act`. --}}
-{{#if hybridRace}}
+{{!-- Pre-grid rows in §4 order: hybrid race → AI summary → milestone → tags → photos → map. His own words sit
+     above, under the hero (activity-words). Context: `act`. --}}
+{{#if race}}
+{{> activity-race race}}
+{{#if chase}}{{> activity-chase chase}}{{/if}}
+{{else}}{{#if hybridRace}}
 <section class="act-card act-hybrid" aria-label="Race breakdown">
   <div class="act-card__inner">
     <div class="act-card__head">
@@ -17,14 +21,7 @@
     </div>
   </div>
 </section>
-{{/if}}
-
-{{#if description}}
-<section class="act-desc" aria-label="From the athlete">
-  <div class="act-desc__label">from the athlete</div>
-  <p class="act-desc__body">{{description}}</p>
-</section>
-{{/if}}
+{{/if}}{{/if}}
 
 {{#if aiSummaryHtml}}
 <section class="pull-quote act-ai" aria-label="AI summary">
@@ -48,15 +45,7 @@
 </div>
 {{/if}}
 
-{{#if photos.length}}
-<section class="act-photos" aria-label="Photos">
-  {{#each photos}}
-  <a class="photo-block act-photo" href="{{this}}" rel="noopener">
-    <img src="{{this}}" alt="Activity photo" loading="lazy" decoding="async" />
-  </a>
-  {{/each}}
-</section>
-{{/if}}
+{{> activity-gallery gallery}}
 
 {{#if route}}
 <section class="act-card act-map" aria-label="Route">

@@ -1,13 +1,16 @@
 // @ts-check
 /**
  * The /life pages and feed, rendered by Skier builtins from the globals the
- * fitness data tasks set (fitness-activity-views, fitness-roundup-views,
- * fitness-feed-items). Configuration only — no rendering code lives here.
+ * fitness data tasks set (fitness-activity-views, fitness-event-views,
+ * fitness-roundup-views, fitness-sessions, fitness-feed-items). Configuration
+ * only — no rendering code lives here.
  *
  *   fitnessActivityPages  → life/activity/<slug>/index.html  (generateDataPagesTask)
  *   fitnessRoundupPages   → life/roundup/<key>.html          (generateDataPagesTask)
  *   fitnessRoundupsIndex  → life/roundups.html               (generatePagesTask, personal/pages/life/)
+ *   fitnessSessionsPage   → life/sessions.html               (generatePagesTask, personal/pages/life/)
  *   fitnessFeedItems      → life/feed.xml                    (generateFeedTask, Atom only)
+ *   fitnessEventPages     → life/event/<slug>/index.html     (generateDataPagesTask)
  *
  * Kept apart from skier.personal.tasks.mjs so the tests can run exactly these
  * tasks against the fixtures.
@@ -17,8 +20,12 @@ import { generateDataPagesTask, generateFeedTask, generatePagesTask } from 'skie
 import { activityOutPath } from './fitness-activity-views.mjs';
 import { keyToPath as roundupOutPath } from './fitness-roundup-views.mjs';
 import { FEED_PATH, FEED_TITLE, FEED_SUBTITLE } from './fitness-feed-items.mjs';
+import { eventOutPath } from './fitness-event-views.mjs';
 
-/** Handlebars helpers the activity partials use (`{{#if (eq type "strength")}}` in exercise-item). */
+/**
+ * Handlebars helpers the activity and event partials use (`{{#if (eq type "strength")}}` in
+ * exercise-item, `{{#unless (eq total 1)}}` in activity-gallery).
+ */
 export const templateHelpers = {
   eq: (/** @type {unknown} */ a, /** @type {unknown} */ b) => a === b,
 };
@@ -56,12 +63,16 @@ export function lifePageTasks({
       outPath: (/** @type {any} */ page) => roundupOutPath(page.roundup.key),
     }),
 
-    // /life/roundups — the one page in personal/pages/life/
+    // /life/roundups and /life/sessions — the pages in personal/pages/life/, each with its own view model
     generatePagesTask({
       pagesDir,
       partialsDir,
       outDir: `${outDir}/life`,
-      additionalVarsFn: ({ fitnessRoundupsIndex }) => /** @type {Record<string, unknown>} */ (fitnessRoundupsIndex),
+      additionalVarsFn: ({ currentPage, fitnessRoundupsIndex, fitnessSessionsPage }) => {
+        /** @type {Record<string, unknown>} */
+        const views = { roundups: fitnessRoundupsIndex, sessions: fitnessSessionsPage };
+        return /** @type {Record<string, unknown>} */ (views[currentPage] ?? {});
+      },
     }),
 
     // /life/feed.xml
@@ -81,6 +92,17 @@ export function lifePageTasks({
         updated: '${fitnessFeedUpdated}',
         generator: 'ripixel-website',
       },
+    }),
+
+    // /life/event/<slug> (directory form, like the activity pages)
+    generateDataPagesTask({
+      // @ts-ignore — Skier resolves this `${var}` reference to the global array at runtime
+      items: '${fitnessEventPages}',
+      template: `${templatesDir}/event.html`,
+      partialsDir,
+      outDir,
+      outPath: (/** @type {any} */ page) => eventOutPath(page.ev.slug),
+      helpers: templateHelpers,
     }),
   ];
 }

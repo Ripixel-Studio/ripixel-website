@@ -1,0 +1,114 @@
+/* =========================================
+   ACTIVITY-TYPE INKS — every /life page (F5.3)
+   One class per family from tasks/fitness-theme.mjs. Each sets:
+     --type     the family's ink (fills, rules, halftone dots)
+     --type-on  text on a solid --type fill (WCAG AA ≥ 4.5 on 10px mono caps)
+   Hues: FitGlue's Aurora palette (fitglue-web tokens.css + the showcase
+   family stamps), re-weighted as riso inks for the cream paper.
+   Use: put `fit-type--<key>` on the element, then var(--type) inside it.
+   ========================================= */
+/* --type-text (F5.5): the ink as text and thin rules on paper or white — the hue
+   darkened toward --ink until it holds WCAG AA (≥ 4.6:1 on #F5EFDF and #fff). The
+   activity and event pages use it as their section ink. */
+.fit-type--run      { --type: #C42A72; --type-on: #fff;       --type-text: #C42A72; }
+.fit-type--ride     { --type: #18A9C4; --type-on: var(--ink); --type-text: #187384; }
+.fit-type--swim     { --type: #2148C0; --type-on: #fff;       --type-text: #2148C0; }
+.fit-type--paddle   { --type: #1A6F94; --type-on: #fff;       --type-text: #1A6F94; }
+.fit-type--hike     { --type: #0B7A4B; --type-on: #fff;       --type-text: #0B7A4B; }
+.fit-type--strength { --type: #F25B1C; --type-on: var(--ink); --type-text: #B54719; }
+.fit-type--crossfit { --type: #F2C13C; --type-on: var(--ink); --type-text: #806726; }
+.fit-type--hiit     { --type: #E5484D; --type-on: var(--ink); --type-text: #BC3D41; }
+.fit-type--yoga     { --type: #7C3AED; --type-on: #fff;       --type-text: #7C3AED; }
+.fit-type--sport    { --type: #7BB52A; --type-on: var(--ink); --type-text: #537420; }
+.fit-type--other    { --type: #6B6259; --type-on: #fff;       --type-text: #6B6259; }
+
+/* A type chip: solid ink, mono caps. */
+.fit-chip {
+  display: inline-block;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: var(--type, var(--ink));
+  color: var(--type-on, var(--paper));
+  border: 1.5px solid var(--ink);
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+/* Photo slot: the photo, else a route on a wash, else a halftone placeholder. */
+.fit-photo {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--type, var(--ink)) 16%, #fff);
+  border-bottom: 2px solid var(--ink);
+}
+.fit-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%; /* portrait phone photos: keep the faces */
+  filter: saturate(0.92) contrast(1.04);
+}
+.fit-photo__route {
+  position: absolute;
+  inset: 8% 10%;
+  width: 80%;
+  height: 84%;
+}
+.fit-photo__route path {
+  fill: none;
+  stroke: var(--type);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.fit-photo__route circle { fill: var(--ink); }
+.fit-photo--placeholder::before,
+.fit-photo--route::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, var(--type, var(--ink)) 1.1px, transparent 1.6px);
+  background-size: 6px 6px;
+  opacity: 0.45;
+}
+.fit-photo--route::before { opacity: 0.18; }
+.fit-photo__glyph {
+  position: absolute;
+  right: 10px;
+  bottom: 4px;
+  font-size: 46px;
+  line-height: 1;
+  filter: grayscale(0.1);
+  opacity: 0.9;
+}
+.fit-photo__word {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  font-family: var(--f-disp);
+  font-size: 34px;
+  line-height: 0.9;
+  color: var(--ink);
+  text-transform: uppercase;
+  mix-blend-mode: multiply;
+  opacity: 0.82;
+  max-width: 70%;
+}
+.fit-photo__count {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  padding: 1px 6px;
+  background: var(--ink);
+  color: var(--paper);
+}
