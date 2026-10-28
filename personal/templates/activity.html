@@ -25,6 +25,8 @@
     {{#with act}}
     {{> activity-hero}}
 
+    {{> activity-words}}
+
     <!-- Headline numbers: the four anchor cells by category, then whatever else the data has -->
     <div class="stat-strip act-anchors">
       {{#each anchors}}
@@ -34,6 +36,8 @@
       </div>
       {{/each}}
     </div>
+
+    {{> activity-raceday}}
 
     {{#if extraStats.length}}
     {{#> stat-grid modifier="act-extra"}}

@@ -1,0 +1,33 @@
+{{!-- Photo strip + full-screen viewer. CSS-only (:target), so it works without script;
+     the inline script adds Escape / arrow keys. Context: `gallery` items. --}}
+{{#if this.length}}
+<section class="act-photos" aria-label="Photos">
+  {{#each this}}
+  <a class="photo-block act-photo" href="#{{id}}" aria-label="Open photo {{n}} of {{total}}">
+    <img src="{{src}}" alt="Activity photo {{n}}" loading="lazy" decoding="async" />
+  </a>
+  {{/each}}
+</section>
+{{#each this}}
+<div class="act-lightbox" id="{{id}}" role="dialog" aria-label="Photo {{n}} of {{total}}">
+  <a class="act-lightbox__backdrop" href="#_" aria-label="Close"></a>
+  <img class="act-lightbox__img" src="{{src}}" alt="Activity photo {{n}}" loading="lazy" decoding="async" />
+  <div class="act-lightbox__bar">
+    {{#unless (eq total 1)}}<a class="act-lightbox__nav" href="{{prev}}" data-lb="prev" aria-label="Previous photo">←</a>{{/unless}}
+    <span class="act-lightbox__count">{{n}} / {{total}}</span>
+    {{#unless (eq total 1)}}<a class="act-lightbox__nav" href="{{next}}" data-lb="next" aria-label="Next photo">→</a>{{/unless}}
+    <a class="act-lightbox__nav" href="{{src}}" target="_blank" rel="noopener" aria-label="Open original">⤢</a>
+    <a class="act-lightbox__close" href="#_" data-lb="close" aria-label="Close">✕</a>
+  </div>
+</div>
+{{/each}}
+<script>
+document.addEventListener('keydown', function (e) {
+  var open = document.querySelector('.act-lightbox:target');
+  if (!open) return;
+  var key = e.key === 'Escape' ? 'close' : e.key === 'ArrowLeft' ? 'prev' : e.key === 'ArrowRight' ? 'next' : '';
+  var link = key && open.querySelector('[data-lb="' + key + '"]');
+  if (link) { e.preventDefault(); location.replace(link.getAttribute('href')); }
+});
+</script>
+{{/if}}

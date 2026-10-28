@@ -1,0 +1,56 @@
+{{!-- Hyrox race breakdown: runs and stations interleaved as bars (ROXFIT order), with
+     per-segment heart rate and the delta to his PB in the same division as it stood
+     before this race. Context: `race` (buildRaceView). --}}
+<section class="act-card act-race" aria-label="Race breakdown">
+  <div class="act-card__inner">
+    <div class="act-card__head">
+      <span class="act-card__title">· 🏁 race breakdown{{#if divisionLabel}} · {{divisionLabel}}{{/if}} ·</span>
+      <span class="act-card__right">{{#if isSimulation}}simulation{{else}}{{#if isFirst}}first race in this division{{else}}{{gainsLosses}}{{/if}}{{/if}}</span>
+    </div>
+
+    <div class="act-race__head">
+      <div class="act-race__total">
+        <div class="act-race__total-n">{{total}}</div>
+        <div class="act-race__total-l">finish time{{#if isTotalPB}} · <b class="act-race__pb">🏆 PB</b>{{/if}}</div>
+      </div>
+      {{#if totalDelta}}
+      <div class="act-race__vs act-race__vs--{{totalTone}}">
+        <div class="act-race__vs-n">{{totalDelta}}</div>
+        <div class="act-race__vs-l">vs PB {{totalPbTime}}{{#if totalPbTitle}} · <a href="{{totalPbUrl}}">{{totalPbTitle}}</a>{{/if}}</div>
+      </div>
+      {{/if}}
+      {{#each ranks}}
+      <div class="act-race__rank"><div class="act-race__rank-n">{{value}}</div><div class="act-race__rank-l">{{label}}</div></div>
+      {{/each}}
+    </div>
+
+    <div class="act-race__legend" aria-hidden="true">
+      <span><i class="act-race__key act-race__key--run"></i> run</span>
+      <span><i class="act-race__key act-race__key--stn"></i> station</span>
+      {{#if hasHr}}<span>♥ avg / max bpm</span>{{/if}}
+      {{#if hasDeltas}}<span>Δ vs PB before this race</span>{{/if}}
+    </div>
+
+    <ol class="act-race__rows">
+      {{#each rows}}
+      <li class="act-race__row{{#if isRun}} act-race__row--run{{else}} act-race__row--stn{{/if}}" title="{{tooltip}}">
+        <span class="act-race__icon" aria-hidden="true">{{icon}}</span>
+        <span class="act-race__label">{{label}}{{#if isPB}} <b class="act-race__pb">PB</b>{{/if}}</span>
+        <span class="act-race__track"><span class="act-race__bar" style="width: {{pct}}%"><span class="act-race__dur">{{duration}}</span></span></span>
+        <span class="act-race__hr">{{#if avgHr}}♥ {{avgHr}}<small>/{{maxHr}}</small>{{/if}}</span>
+        <span class="act-race__delta act-race__delta--{{deltaTone}}">{{delta}}</span>
+      </li>
+      {{/each}}
+    </ol>
+
+    <div class="act-race__split">
+      <div><span class="act-race__split-l">🏃 running</span><b>{{runs}}</b></div>
+      <div><span class="act-race__split-l">💪 stations</span><b>{{stations}}</b></div>
+      {{#if roxzone}}<div><span class="act-race__split-l">⏸️ roxzone</span><b>{{roxzone}}</b></div>{{/if}}
+    </div>
+
+    {{#if biggestGain}}<div class="act-race__callouts">{{#if biggestGain}}<span class="act-race__callout act-race__callout--gain">biggest gain: {{biggestGain}}</span>{{/if}}{{#if biggestLoss}}<span class="act-race__callout act-race__callout--loss">biggest loss: {{biggestLoss}}</span>{{/if}}</div>{{/if}}
+
+    {{#each notes}}<p class="act-note act-note--quiet">{{this}}</p>{{/each}}
+  </div>
+</section>

@@ -1,0 +1,169 @@
+// @ts-check
+/**
+ * Race-weekend event pages (F5.2): /life/event/<slug>.
+ *
+ * When several of his races fall at the same event within EVENT_WINDOW_DAYS (doubles on
+ * the Tuesday, solo on the Wednesday), they get one combined page linking every race:
+ * each race's division, time, PB standing and his words, the splits side by side, a
+ * shared gallery and the PB progression. Grouping lives in tasks/fitness-hyrox.mjs
+ * (buildHyroxHistory → events) and works for any number of races and divisions.
+ *
+ *   personal/templates/event.html  →  public/personal/life/event/<slug>/index.html
+ */
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
+import { createActivityRenderer, buildActivityView, fmtDateShort, slugToOutPath } from './fitness-activity-pages.mjs';
+import { buildHyroxHistory, buildRaceView, progressionCharts, eventUrl, clock } from './fitness-hyrox.mjs';
+
+export const DEFAULT_TEMPLATE = 'personal/templates/event.html';
+export const DEFAULT_OUT_DIR = 'public/personal';
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** "27–28 Oct 2026", "30 Sep – 2 Oct 2026", "27 Oct 2026". @param {string} a @param {string} b */
+export function dateRange(a, b) {
+  const x = new Date(Date.parse(a));
+  const y = new Date(Date.parse(b));
+  if (Number.isNaN(x.getTime())) return '';
+  if (Number.isNaN(y.getTime()) || x.toISOString().slice(0, 10) === y.toISOString().slice(0, 10)) return fmtDateShort(a);
+  if (x.getUTCMonth() === y.getUTCMonth() && x.getUTCFullYear() === y.getUTCFullYear()) {
+    return `${x.getUTCDate()}–${y.getUTCDate()} ${MONTHS[x.getUTCMonth()]} ${x.getUTCFullYear()}`;
+  }
+  return `${x.getUTCDate()} ${MONTHS[x.getUTCMonth()]} – ${fmtDateShort(b)}`;
+}
+
+/** @param {string} slug @param {string} [outDir] */
+export function eventOutPath(slug, outDir = DEFAULT_OUT_DIR) {
+  // Same safety rules as activity slugs; reuse the check, then swap the folder.
+  const activityPath = slugToOutPath(slug, outDir);
+  return path.join(path.dirname(path.dirname(path.dirname(activityPath))), 'event', slug, 'index.html');
+}
+
+/**
+ * Template context for one event.
+ * @param {import('./fitness-hyrox.mjs').EventGroup} event
+ * @param {import('./fitness-hyrox.mjs').HyroxHistory} history
+ * @param {any} index  fitnessIndex
+ * @param {{ siteUrl?: string, ogImages?: Record<string, string> }} [opts]
+ */
+export function buildEventView(event, history, index, opts = {}) {
+  const siteUrl = (opts.siteUrl || '').replace(/\/+$/, '');
+  const races = event.slugs.map((slug) => history.races.get(slug)).filter(Boolean);
+  const cards = races.map((info) => {
+    const view = buildActivityView(info.file, index, { hyrox: history });
+    const race = view.act.race;
+    return {
+      url: info.url,
+      title: info.title,
+      date: fmtDateShort(info.date),
+      division: info.divisionLabel,
+      total: info.total,
+      isPB: !!race?.isTotalPB,
+      totalDelta: race?.totalDelta || '',
+      totalTone: race?.totalTone || '',
+      totalPbTime: race?.totalPbTime || '',
+      isFirst: !!race?.isFirst,
+      ranks: race?.ranks || [],
+      partner: race?.partner || '',
+      words: view.act.description,
+      avgHr: view.act.anchors.find((a) => a.label === 'avg hr')?.value || '',
+      photo: view.act.bgPhotoUrl || view.act.bannerUrl || '',
+      race,
+      photos: view.act.photos,
+      location: view.act.locationName,
+    };
+  });
+
+  // Splits side by side: one row per segment key in race order, one cell per race.
+  const keys = [];
+  for (const c of cards) for (const r of c.race?.rows || []) if (!keys.some((k) => k.key === r.key)) keys.push({ key: r.key, label: r.label, icon: r.icon, isRun: r.isRun });
+  const longest = Math.max(1, ...cards.flatMap((c) => (c.race?.rows || []).map((r) => r.pct)));
+  const compare = keys.map((k) => ({
+    ...k,
+    cells: cards.map((c) => {
+      const r = (c.race?.rows || []).find((x) => x.key === k.key);
+      return r ? { duration: r.duration, pct: Math.round((r.pct / longest) * 1000) / 10, hr: r.avgHr || '', delta: r.delta, deltaTone: r.deltaTone, isPB: r.isPB } : { duration: '—', pct: 0 };
+    }),
+  }));
+
+  const totalSeconds = races.reduce((s, r) => s + r.totalSeconds, 0);
+  const pbCount = cards.filter((c) => c.isPB).length;
+  const photos = cards.flatMap((c) => c.photos);
+  const gallery = photos.map((src, i) => ({ src, id: `photo-${i + 1}`, n: i + 1, prev: `#photo-${i === 0 ? photos.length : i}`, next: `#photo-${i + 2 > photos.length ? 1 : i + 2}`, total: photos.length }));
+  const divisions = [...new Set(races.map((r) => r.divisionKey).filter(Boolean))];
+  const heroPhoto = cards.map((c) => c.photo).find(Boolean) || '';
+  const name = `Hyrox ${event.name}`;
+  const range = dateRange(event.start, event.end);
+  const canonical = siteUrl ? `${siteUrl}${eventUrl(event.slug)}` : '';
+  const description = `${races.length} races in ${range}: ${cards.map((c) => `${c.division} ${c.total}${c.isPB ? ' (PB)' : ''}`).join(', ')}.`;
+  const ogImage = cards.map((c) => opts.ogImages?.[c.url.split('/').pop() ?? '']).find(Boolean) || heroPhoto;
+
+  return {
+    page: 'life',
+    subpage: `| ${name}`,
+    description,
+    currentPage: `life/event/${event.slug}`,
+    headTitle: `${name} — James King`,
+    ogType: 'article',
+    ogImage,
+    canonical,
+    publishedTime: event.start,
+    ev: {
+      slug: event.slug,
+      name,
+      range,
+      venue: cards.map((c) => c.location).find(Boolean) || event.name.toUpperCase(),
+      heroPhoto,
+      cards,
+      compare,
+      raceCount: races.length,
+      raceWord: races.length === 1 ? 'race' : 'races',
+      totalTime: clock(totalSeconds),
+      pbCount,
+      divisionCount: divisions.length,
+      gallery,
+      progress: progressionCharts(history, { only: divisions }),
+      owner: String(index?.profile?.displayName ?? 'James').toUpperCase(),
+    },
+  };
+}
+
+/**
+ * The Skier task: one page per race weekend. Runs after fetch-fitness (and after the OG
+ * task, whose card URLs it reuses for og:image).
+ * @param {{ template?: string, partialsDir?: string, outDir?: string }} [config]
+ */
+export function generateEventPagesTask(config = {}) {
+  return {
+    name: 'generate-event-pages',
+    title: 'Generate /life/event/<slug> race-weekend pages',
+    config,
+    run: async (/** @type {any} */ cfg, /** @type {any} */ ctx) => {
+      const activities = Array.isArray(ctx.globals.fitnessActivities) ? ctx.globals.fitnessActivities : [];
+      const history = buildHyroxHistory(activities);
+      if (!history.events.length) {
+        ctx.logger.info('Event pages: no race weekends');
+        return { fitnessEventSlugs: [] };
+      }
+      const render = await createActivityRenderer({ template: cfg.template || DEFAULT_TEMPLATE, partialsDir: cfg.partialsDir });
+      const outDir = cfg.outDir || DEFAULT_OUT_DIR;
+      const slugs = [];
+      for (const event of history.events) {
+        let outPath;
+        try {
+          outPath = eventOutPath(event.slug, outDir);
+        } catch (e) {
+          ctx.logger.warn(e instanceof Error ? e.message : String(e));
+          continue;
+        }
+        const view = buildEventView(event, history, ctx.globals.fitnessIndex, { siteUrl: ctx.globals.siteUrl, ogImages: ctx.globals.fitnessOgImages?.activity });
+        await fs.mkdir(path.dirname(outPath), { recursive: true });
+        await fs.writeFile(outPath, render({ ...ctx.globals, ...view }));
+        slugs.push(event.slug);
+      }
+      ctx.logger.info(`Event pages: ${slugs.length} written under ${path.join(outDir, 'life', 'event')}`);
+      return { fitnessEventSlugs: slugs };
+    },
+  };
+}

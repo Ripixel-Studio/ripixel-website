@@ -28,6 +28,7 @@
         <span class="act-bar__label">{{label}}</span>
         <svg class="act-bar__svg" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="1" width="{{pct}}" height="8" class="act-bar__fill" /></svg>
         <span class="act-bar__value">{{value}}</span>
+        {{#if ../bars.hasHr}}<span class="act-bar__hr">{{#if hr}}♥ {{hr}}<small>/{{hrMax}}</small>{{/if}}</span>{{/if}}
       </div>
       {{/each}}
     </div>

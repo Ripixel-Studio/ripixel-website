@@ -1,0 +1,15 @@
+{{!-- Race-day context strip + the race weekend this belongs to. Context: `act`. --}}
+{{#if raceDay.length}}
+<section class="act-raceday" aria-label="Race day">
+  {{#each raceDay}}
+  <div class="act-raceday__item"><span class="act-raceday__icon" aria-hidden="true">{{icon}}</span><span class="act-raceday__l">{{label}}</span><span class="act-raceday__v">{{value}}</span></div>
+  {{/each}}
+</section>
+{{/if}}
+{{#if eventLink}}
+<a class="act-eventlink" href="{{eventLink.url}}">
+  <span class="act-eventlink__kicker">race weekend · {{eventLink.count}} races</span>
+  <span class="act-eventlink__name">Hyrox {{eventLink.name}} →</span>
+  <span class="act-eventlink__others">{{#each eventLink.others}}{{#unless @first}} · {{/unless}}also {{division}} {{total}}{{#if isPB}} 🏆{{/if}}{{/each}}</span>
+</a>
+{{/if}}
