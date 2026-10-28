@@ -7,7 +7,8 @@ import os from 'node:os';
 import path from 'node:path';
 
 import { athleteWords } from './fitness-words.mjs';
-import { buildHyroxHistory, buildRaceView, groupEvents, partnerName, pbChase, deltaClock, clock } from './fitness-hyrox.mjs';
+import { buildHyroxHistory, buildRaceView, groupEvents, partnerName, pbChase, hyroxWall, deltaClock, clock } from './fitness-hyrox.mjs';
+import { buildPbBoard } from './fitness-life.mjs';
 import { buildActivityView, createActivityRenderer } from './fitness-activity-pages.mjs';
 import { buildEventView, dateRange, generateEventPagesTask } from './fitness-event-pages.mjs';
 import { activityCard } from './fitness-og-images.mjs';
@@ -268,6 +269,28 @@ describe('PB chase (point in time)', () => {
   test('simulations and unknown divisions get no chase', () => {
     assert.equal(pbChase(h, 'men_open', ['sim']), null);
     assert.equal(pbChase(h, 'nope', ['bham-solo']), null);
+  });
+});
+
+describe('/life PB wall: Hyrox per division (F5.5)', () => {
+  const h = buildHyroxHistory(all);
+  test('one section per division: total first, then stations + Roxzone in race order, then the runs, each linked', () => {
+    const w = hyroxWall(h);
+    assert.deepEqual(w.map((d) => d.label), ["Open Men's Solo", "Open Men's Doubles"], 'in the order first raced');
+    const [solo, dbl] = w;
+    assert.deepEqual([solo.total?.display, solo.total?.url, solo.total?.where], ['1:23:47', '/life/activity/olympia', 'London Olympia']);
+    assert.deepEqual([dbl.total?.display, dbl.total?.url, dbl.total?.where], ['1:12:34', '/life/activity/rome', 'Rome']);
+    assert.deepEqual(solo.stations.map((s) => s.name), ['SkiErg', 'Sled Push', 'Sled Pull', 'Burpee Broad Jumps', 'Row', 'Farmers Carry', 'Sandbag Lunges', 'Wall Balls', 'Roxzone']);
+    assert.equal(solo.runs.length, 8);
+    // Birmingham's solo was slower overall but quicker on the runs (320 s vs 340 s): those PBs link to it.
+    assert.deepEqual([solo.runs[0].display, solo.runs[0].url], ['5:20', '/life/activity/bham-solo']);
+    assert.equal(solo.stations.find((s) => s.name === 'Roxzone')?.url, '/life/activity/bham-solo', "Olympia had no Roxzone; the sim's 400 s never counts");
+  });
+  test('the wall puts the Hyrox sections between the bike and the iron, in the Hyrox ink', () => {
+    const g = buildPbBoard([{ recordType: 'fastest_5k', value: 1302, unit: 'seconds', achievedAt: '2026-04-04T09:00:00Z' }, { recordType: 'deadlift_1rm', value: 170, unit: 'kg', achievedAt: '2026-10-22T10:10:21Z' }], hyroxWall(h));
+    assert.deepEqual(g.map((x) => x.key), ['run', 'hyrox-men_open', 'hyrox-men_doubles', 'iron']);
+    assert.equal(g[1].typeClass, 'fit-type--crossfit');
+    assert.equal(g[1].title, "hyrox · Open Men's Solo");
   });
 });
 

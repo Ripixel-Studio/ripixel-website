@@ -615,6 +615,28 @@
   margin-top: 3px;
 }
 
+/* Hyrox PBs per division (F5.5): the total as a lead tile, then two linked lists
+   (stations + Roxzone, runs) in the Hyrox ink. Lists stack on phones. */
+.fit-hx { display: grid; grid-template-columns: minmax(150px, 0.8fr) 2fr; gap: 8px; align-items: start; }
+.fit-hx__total { color: var(--ink); text-decoration: none; }
+.fit-hx__total .fit-pr__value { font-size: 40px; margin-top: 4px; }
+.fit-hx__total:hover .fit-pr__date { opacity: 1; text-decoration: underline; }
+.fit-hx__lists { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fit-hx__list {
+  margin: 0; padding: 4px 0; list-style: none; background: #fff;
+  border: 2px solid var(--ink); border-left: 6px solid var(--type);
+  box-shadow: 3px 3px 0 rgba(23,19,17,0.13);
+}
+.fit-hx__list li + li { border-top: 1px dashed rgba(23,19,17,0.15); }
+.fit-hx__list a {
+  display: grid; grid-template-columns: 1fr auto; column-gap: 8px; align-items: baseline;
+  padding: 3px 9px; color: var(--ink); text-decoration: none;
+}
+.fit-hx__list a:hover { background: var(--paper-2); }
+.fit-hx__n { font: 700 10px var(--f-mono); letter-spacing: .05em; text-transform: uppercase; }
+.fit-hx__t { font-family: var(--f-disp); font-weight: 400; font-size: 19px; line-height: 1.1; grid-row: span 2; align-self: center; }
+.fit-hx__w { font: 9px var(--f-mono); letter-spacing: .08em; opacity: .6; text-transform: uppercase; }
+
 /* ─── 5. Events (hand-written) ─────────── */
 .fit-events {
   margin: 0;
@@ -726,6 +748,12 @@
   }
   .fit-consistency__weeks { grid-template-columns: repeat(13, minmax(0, 1fr)); }
   .fit-prs__wall { grid-template-columns: 1fr 1fr; }
+  .fit-hx, .fit-hx__lists { grid-template-columns: 1fr; }
+  /* The eight runs fit two to a row on a phone. */
+  .fit-hx__list--runs { display: grid; grid-template-columns: 1fr 1fr; }
+  .fit-hx__list--runs li + li { border-top: 0; }
+  .fit-hx__list--runs li:nth-child(n+3) { border-top: 1px dashed rgba(23,19,17,0.15); }
+  .fit-hx__list--runs li:nth-child(even) { border-left: 1px dashed rgba(23,19,17,0.15); }
   .fit-event { grid-template-columns: 56px 1fr; gap: 12px; }
 }
 

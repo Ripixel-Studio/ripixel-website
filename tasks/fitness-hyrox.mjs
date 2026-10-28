@@ -440,7 +440,7 @@ function tickLabel(t) {
 }
 
 /** "Hyrox - London Olympia 25/26 - 1:23:47 🎉" / "London Olympia" → a short event name. */
-function shortEvent(s) {
+export function shortEvent(s) {
   const t = String(s ?? '').replace(/^hyrox\s*[-–:]?\s*/i, '').replace(/\s*[-–]\s*\d{1,2}:\d{2}(:\d{2})?.*$/, '').replace(/\s+\d{2}\/\d{2}\b.*$/, '').trim();
   return t || String(s ?? '');
 }
@@ -451,4 +451,51 @@ function shortDate(iso) {
   if (Number.isNaN(t)) return '';
   const d = new Date(t);
   return `${d.getUTCDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getUTCMonth()]} ${String(d.getUTCFullYear()).slice(2)}`;
+}
+
+// ---------------------------------------------------------------------------
+// The /life PB wall (F5.5): Hyrox PBs per division
+
+/** Stations in race order, as the wall names them. */
+export const WALL_STATIONS = /** @type {[string, string][]} */ ([
+  ['skierg', 'SkiErg'], ['sled_push', 'Sled Push'], ['sled_pull', 'Sled Pull'], ['burpee_broad_jump', 'Burpee Broad Jumps'],
+  ['rowing', 'Row'], ['farmers_carry', 'Farmers Carry'], ['sandbag_lunges', 'Sandbag Lunges'], ['wall_balls', 'Wall Balls'],
+  ['roxzone', 'Roxzone'],
+]);
+
+/**
+ * The Hyrox sections of the /life personal-bests wall: one per division raced, in the
+ * order he first raced them. Each has the total first, then every station and Roxzone
+ * in race order, then the eight runs; every PB links to the race that set it.
+ *
+ * Built from the same history as the race pages (the export's `race` key on every
+ * loaded activity: official splits, simulations excluded), so the wall and the race
+ * pages always agree. FitGlue's per-division `hybrid_race_hyrox_<division>_*` records
+ * hold the same bests but do not reach the export (profile.topPrs is the 3 latest time
+ * PRs and the 5 heaviest lifts).
+ * @param {HyroxHistory|null|undefined} history
+ */
+export function hyroxWall(history) {
+  if (!history) return [];
+  return history.divisions
+    .filter((d) => d.best.total_time || Object.keys(d.best).length)
+    .map((d) => {
+      /** @param {string} key @param {string} name */
+      const pb = (key, name) => {
+        const b = d.best[key];
+        if (!b) return null;
+        const info = history.races.get(b.slug);
+        const where = String(info?.file?.race?.event || '') || shortEvent(b.title);
+        return {
+          name, display: clock(b.seconds), url: `/life/activity/${b.slug}`, where, date: shortDate(b.date),
+          title: `${d.label} ${name} PB: ${clock(b.seconds)} · ${b.title} · ${shortDate(b.date)}`,
+        };
+      };
+      const stations = WALL_STATIONS.map(([k, n]) => pb(k, n)).filter(Boolean);
+      const runs = Array.from({ length: 8 }, (_, i) => pb(`run_${i + 1}`, `Run ${i + 1}`)).filter(Boolean);
+      return {
+        key: d.key, label: d.label, races: d.races.length, raceWord: d.races.length === 1 ? 'race' : 'races',
+        total: pb('total_time', 'Total time'), stations, runs,
+      };
+    });
 }

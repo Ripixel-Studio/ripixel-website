@@ -18,6 +18,7 @@ import fs from 'node:fs/promises';
 import { activityTheme, FAMILIES, hybridRaceLabel, typeKeyOf, typeKeyOfTitle } from './fitness-theme.mjs';
 import { recordLabel, latestRecords } from './fitness-records.mjs';
 import { routePath } from './fitness-activity-pages.mjs';
+import { buildHyroxHistory, hyroxWall } from './fitness-hyrox.mjs';
 
 export const DEFAULT_EVENTS_FILE = 'personal/items/life/fitness.json';
 export const ACTIVITY_HREF = '/life/activity';
@@ -550,12 +551,16 @@ const IRON_METRICS = ['heaviest', '1rm'];
 /**
  * The personal-bests wall, grouped by kind of record, then by exercise:
  *   ON FOOT (fastest standard distances + longest run), ON THE BIKE,
- *   HYROX STATIONS (by race order), IRON (one tile per exercise carrying its
- *   heaviest lift and est. 1RM together, heaviest exercises first).
- * Volume and rep records stay on the activity and roundup pages.
+ *   HYROX, one section per division (F5.5: total, stations + Roxzone, runs, each
+ *   linked to the race that set it; see hyroxWall), IRON (one tile per exercise
+ *   carrying its heaviest lift and est. 1RM together, heaviest exercises first).
+ * Volume and rep records stay on the activity and roundup pages. FitGlue's
+ * division-less `hybrid_race_hyrox_*` records mixed doubles with solo, so they are
+ * not on the wall; the Hyrox sections come from the race history instead.
  * @param {any[]} prs  current records (see latestRecords)
+ * @param {ReturnType<typeof hyroxWall>} [hyrox]  the Hyrox sections
  */
-export function buildPbBoard(prs) {
+export function buildPbBoard(prs, hyrox = []) {
   const all = (Array.isArray(prs) ? prs : []).map(buildPr);
   /** @param {string} g @param {string[]} keep */
   const pick = (g, keep) => keep
@@ -573,11 +578,6 @@ export function buildPbBoard(prs) {
     };
   };
 
-  const hyrox = all
-    .filter((p) => p.group === 'hyrox')
-    .sort((a, b) => a.order - b.order)
-    .map((p) => tile(p.name, [p]));
-
   /** @type {Map<string, any[]>} */
   const byExercise = new Map();
   for (const p of all) {
@@ -594,14 +594,19 @@ export function buildPbBoard(prs) {
   const groups = [
     { key: 'run', title: 'on foot', typeClass: 'fit-type--run', tiles: pick('run', RUN_PBS) },
     { key: 'ride', title: 'on the bike', typeClass: 'fit-type--ride', tiles: pick('ride', RIDE_PBS) },
-    { key: 'hyrox', title: 'hyrox stations', typeClass: 'fit-type--crossfit', tiles: hyrox },
+    ...hyrox.filter((h) => h.total || h.stations.length).map((h) => ({
+      key: `hyrox-${h.key}`, title: `hyrox · ${h.label}`, typeClass: 'fit-type--crossfit', tiles: [], hyrox: h,
+    })),
     { key: 'iron', title: 'iron · heaviest lift & est. 1RM', typeClass: 'fit-type--strength', tiles: iron },
-  ].filter((g) => g.tiles.length > 0);
+  ].filter((g) => g.tiles.length > 0 || g.hyrox);
   return groups;
 }
 
-/** @param {any} index @param {any[]} [roundupFiles] every roundup file: their prsAchieved fill in the PB wall */
-export function buildStats(index, roundupFiles = []) {
+/**
+ * @param {any} index @param {any[]} [roundupFiles] every roundup file: their prsAchieved fill in the PB wall
+ * @param {any[]} [activityFiles] every activity file: the Hyrox races give the wall its per-division PBs
+ */
+export function buildStats(index, roundupFiles = [], activityFiles = []) {
   const p = index?.profile || {};
   const streaks = index?.streaks || { currentWeeks: 0, longestWeeks: 0 };
   const sh = p.streakHistory || null;
@@ -644,7 +649,7 @@ export function buildStats(index, roundupFiles = []) {
   const prGroups = buildPbBoard(latestRecords(
     ...(roundupFiles || []).map((f) => f?.roundup?.prsAchieved),
     p.topPrs,
-  ));
+  ), hyroxWall(buildHyroxHistory(activityFiles)));
 
   return {
     strip,
@@ -923,7 +928,7 @@ export function buildLifeModel({ index, activities = [], roundups = [], events =
     roundupsHref: ROUNDUPS_HREF,
     roundupCount: summaries.length,
     hasRoundups: summaries.length > 0,
-    stats: available ? buildStats(idx, roundups) : null,
+    stats: available ? buildStats(idx, roundups, activities) : null,
     calendar: buildCalendar(calendar, events, now, available ? entries : []),
   };
 }

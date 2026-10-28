@@ -40,6 +40,30 @@
     {{#each prGroups}}
     <section class="fit-prs__group {{typeClass}}">
       <h3 class="fit-prs__group-title">{{title}}</h3>
+      {{#if hyrox}}{{#with hyrox}}
+      {{!-- Hyrox PBs, one division (F5.5): total first, then stations + Roxzone and the runs. --}}
+      <div class="fit-hx">
+        {{#if total}}{{#with total}}
+        <a class="fit-pr fit-hx__total" href="{{url}}" title="{{title}}">
+          <span class="fit-pr__name">{{name}}</span>
+          <span class="fit-pr__value">{{display}}</span>
+          <span class="fit-pr__date">{{where}} · {{date}} →</span>
+        </a>
+        {{/with}}{{/if}}
+        <div class="fit-hx__lists">
+          {{#if stations.length}}
+          <ul class="fit-hx__list" aria-label="{{label}} station PBs">
+            {{#each stations}}<li><a href="{{url}}" title="{{title}}"><span class="fit-hx__n">{{name}}</span><b class="fit-hx__t">{{display}}</b><span class="fit-hx__w">{{where}}</span></a></li>{{/each}}
+          </ul>
+          {{/if}}
+          {{#if runs.length}}
+          <ul class="fit-hx__list fit-hx__list--runs" aria-label="{{label}} run PBs">
+            {{#each runs}}<li><a href="{{url}}" title="{{title}}"><span class="fit-hx__n">{{name}}</span><b class="fit-hx__t">{{display}}</b><span class="fit-hx__w">{{where}}</span></a></li>{{/each}}
+          </ul>
+          {{/if}}
+        </div>
+      </div>
+      {{/with}}{{else}}
       <ul class="fit-prs__wall">
         {{#each tiles}}
         <li class="fit-pr">
@@ -55,6 +79,7 @@
         </li>
         {{/each}}
       </ul>
+      {{/if}}
     </section>
     {{/each}}
   </div>
