@@ -1,21 +1,13 @@
-<!-- Context: one of fitnessLife.activities -->
-<a class="fit-card fit-card--{{family}}" href="{{href}}">
+<!-- Context: one of fitnessLife.activities (buildCard) -->
+<a class="fit-card fit-card--{{family}} {{typeClass}}" href="{{href}}">
+  {{> fitness-picture}}
   <div class="fit-card__inner">
     <div class="fit-card__top">
-      <span class="fit-card__type"><span aria-hidden="true">{{glyph}}</span> {{typeLabel}}</span>
+      <span class="fit-chip fit-card__type"><span aria-hidden="true">{{glyph}}</span> {{typeLabel}}</span>
       <time class="fit-card__date" datetime="{{dateTime}}">{{date}}</time>
     </div>
-    <div class="fit-card__main">
-      <div class="fit-card__text">
-        <h3 class="fit-card__title">{{title}}</h3>
-        {{#if location}}<div class="fit-card__where">🌍 {{location}}</div>{{/if}}
-      </div>
-      {{#if hasThumb}}
-      <div class="fit-card__thumb">
-        <img src="{{thumb}}" alt="" loading="lazy" decoding="async" width="72" height="72">
-      </div>
-      {{/if}}
-    </div>
+    <h3 class="fit-card__title">{{title}}</h3>
+    {{#if location}}<div class="fit-card__where">🌍 {{location}}</div>{{/if}}
     <dl class="fit-card__stats">
       {{#each stats}}
       <div class="fit-card__stat">

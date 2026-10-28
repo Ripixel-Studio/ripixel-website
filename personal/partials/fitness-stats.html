@@ -37,19 +37,26 @@
   {{#if hasPrs}}
   <div class="fit-prs">
     <div class="fit-prs__label">· PERSONAL BESTS ·</div>
-    <ul class="fit-prs__wall">
-      {{#each prs}}
-      <li class="fit-pr">
-        <span class="fit-pr__name">{{name}}</span>
-        <span class="fit-pr__metric">{{metric}}</span>
-        <span class="fit-pr__value">{{display}}</span>
-        <span class="fit-pr__meta">
-          {{#if delta}}<span class="fit-pr__delta{{#if improved}} fit-pr__delta--up{{/if}}">{{delta}}</span>{{/if}}
+    {{#each prGroups}}
+    <section class="fit-prs__group {{typeClass}}">
+      <h3 class="fit-prs__group-title">{{title}}</h3>
+      <ul class="fit-prs__wall">
+        {{#each tiles}}
+        <li class="fit-pr">
+          <span class="fit-pr__name">{{name}}</span>
+          {{#each metrics}}
+          <span class="fit-pr__row">
+            <span class="fit-pr__metric">{{metric}}</span>
+            <span class="fit-pr__value">{{display}}</span>
+            {{#if delta}}<span class="fit-pr__delta{{#if improved}} fit-pr__delta--up{{/if}}">{{delta}}</span>{{/if}}
+          </span>
+          {{/each}}
           {{#if date}}<span class="fit-pr__date">{{date}}</span>{{/if}}
-        </span>
-      </li>
-      {{/each}}
-    </ul>
+        </li>
+        {{/each}}
+      </ul>
+    </section>
+    {{/each}}
   </div>
   {{/if}}
 </div>

@@ -8,8 +8,9 @@ import { fileURLToPath } from 'node:url';
 import { loadFitnessData } from './fitness-fetch.mjs';
 import {
   buildLifeModel, buildWeek, buildCard, buildPr, buildRoundupTeaser, buildCalendar, countdown,
-  effortLevelOf, fitnessLifeTask, km, clock, duration, rangeLabel, stripDays,
+  effortLevelOf, fitnessLifeTask, km, clock, duration, rangeLabel, stripDays, buildPbBoard, cardPicture,
 } from './fitness-life.mjs';
+import { latestRecords, recordLabel } from './fitness-records.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const NOW = new Date('2026-10-25T10:00:00Z');
@@ -154,6 +155,42 @@ describe('activity cards', () => {
   });
 });
 
+describe('card pictures and type inks', () => {
+  const route = Array.from({ length: 30 }, (_, i) => [52.95 + i * 0.001, -0.85 + Math.sin(i / 4) * 0.002]);
+  test('first photo wins, with a +n badge for the rest', () => {
+    const p = cardPicture({ photoUrls: ['https://x/a.jpg', 'https://x/b.jpg', 'http://insecure/c.jpg'], routeThumbnailUrl: 'https://x/r.png' });
+    assert.equal(p.photo, 'https://x/a.jpg');
+    assert.equal(p.isPhoto, true);
+    assert.equal(p.photoCount, '+1');
+  });
+  test('then the exported route thumbnail, then a route drawn from the GPS points, then a placeholder', () => {
+    assert.equal(cardPicture({ routeThumbnailUrl: 'https://x/r.png' }).photo, 'https://x/r.png');
+    const drawn = cardPicture({}, { routePoints: route });
+    assert.equal(drawn.photo, '');
+    assert.ok(drawn.route && /^M/.test(drawn.route.d));
+    assert.equal(drawn.pictureClass, 'fit-photo--route');
+    const none = cardPicture({}, { routePoints: route.slice(0, 5) });
+    assert.equal(none.placeholder, true);
+    assert.equal(none.pictureClass, 'fit-photo--placeholder');
+  });
+  test('cards carry the FitGlue family ink', () => {
+    const t = (activityType) => buildCard({ slug: 's', activityType }).typeClass;
+    assert.equal(t('ACTIVITY_TYPE_RUN'), 'fit-type--run');
+    assert.equal(t('ACTIVITY_TYPE_TRAIL_RUN'), 'fit-type--run');
+    assert.equal(t('ACTIVITY_TYPE_CROSSFIT'), 'fit-type--crossfit');
+    assert.equal(t('ACTIVITY_TYPE_PILATES'), 'fit-type--yoga');
+    assert.equal(t('ACTIVITY_TYPE_WORKOUT'), 'fit-type--strength');
+    assert.equal(t('ACTIVITY_TYPE_SOMETHING_NEW'), 'fit-type--other');
+  });
+  test('key stat: distance, weight moved, else time; a lone set is not a stat', () => {
+    assert.equal(buildCard({ slug: 'r', activityType: 'ACTIVITY_TYPE_RUN', distanceMeters: 5100, durationSeconds: 1440 }).keyStat.label, 'distance');
+    const pil = buildCard({ slug: 'p', activityType: 'ACTIVITY_TYPE_PILATES', totalSets: 1, durationSeconds: 3000 });
+    assert.equal(pil.keyStat.label, 'time');
+    assert.ok(!pil.stats.some((x) => x.label === 'sets'));
+    assert.equal(buildCard({ slug: 'w', activityType: 'ACTIVITY_TYPE_WEIGHT_TRAINING', totalSets: 14, totalWeightKg: 5680 }).keyStat.label, 'moved');
+  });
+});
+
 describe('roundup teaser', () => {
   test('weekly: labels, secondary stat, PR count, AI summary', async () => {
     const d = await fixtures();
@@ -190,7 +227,7 @@ describe('stats and PBs', () => {
       (({ name, metric, display, delta, improved }) => ({ name, metric, display, delta, improved }))(
         buildPr({ recordType: 'Deadlift (Barbell)_1rm', value: 180, unit: 'kg', previousValue: 175, achievedAt: '2026-09-02T18:30:00Z' }),
       ),
-      { name: 'DEADLIFT (BARBELL)', metric: '1RM', display: '180 kg', delta: '+5 kg', improved: true },
+      { name: 'Deadlift (Barbell)', metric: 'EST. 1RM', display: '180 kg', delta: '+5 kg', improved: true },
     );
     const five = buildPr({ recordType: '5k', value: 1192, unit: 'seconds', previousValue: 1206, achievedAt: '2026-10-17T08:19:52Z' });
     assert.equal(five.name, '5K');
@@ -218,7 +255,55 @@ describe('stats and PBs', () => {
     assert.equal(s.zone.effortShare, '72%');
     assert.equal(s.strength.moved, '2,432 t');
     assert.equal(s.since, 'APR 2025');
-    assert.equal(s.prs.length, 5);
+    assert.deepEqual(s.prGroups.map((g) => g.key), ['run', 'iron']);
+    assert.deepEqual(s.prGroups[0].tiles.map((t) => t.name), ['5K', '10K']);
+    // iron: heaviest exercise first, one tile each; set volume (roundup only) is not on the wall
+    assert.deepEqual(s.prGroups[1].tiles.map((t) => t.name), ['Deadlift (Barbell)', 'Squat (Barbell)', 'Bench Press (Barbell)']);
+    assert.deepEqual(s.prGroups[1].tiles[0].metrics.map((m) => `${m.metric} ${m.display}`), ['EST. 1RM 180 kg']);
+  });
+
+  test('PB wall: live record keys get real names, 1RM and heaviest lift share a tile, groups by kind', () => {
+    const prs = [
+      { recordType: 'fastest_5k', value: 1302.8, unit: 'seconds', achievedAt: '2026-04-04T09:00:00Z', previousValue: 1330 },
+      { recordType: 'fastest_400m', value: 87.5, unit: 'seconds', achievedAt: '2026-09-21T08:00:00Z' },
+      { recordType: 'longest_run', value: 43176, unit: 'meters', achievedAt: '2026-01-11T09:00:00Z' },
+      { recordType: 'fastest_ride_20k', value: 2625.7, unit: 'seconds', achievedAt: '2025-12-23T09:00:00Z' },
+      { recordType: 'hybrid_race_hyrox_wall_balls', value: 257, unit: 'seconds', achievedAt: '2026-10-27T12:10:02Z' },
+      { recordType: 'hybrid_race_hyrox_burpee_broad_jump', value: 194, unit: 'seconds', achievedAt: '2026-10-27T12:10:02Z' },
+      { recordType: 'leg_press_horizontal_(machine)_1rm', value: 197.4, unit: 'kg', achievedAt: '2025-12-31T10:17:37Z', previousValue: 175 },
+      { recordType: 'leg_press_1rm', value: 219.8, unit: 'kg', achievedAt: '2025-07-27T19:35:54Z' },
+      { recordType: 'leg_press_heaviest_weight', value: 120, unit: 'kg', achievedAt: '2025-07-27T19:35:54Z' },
+      { recordType: 'seated_cable_row_-_bar_grip_heaviest_weight', value: 58, unit: 'kg', achievedAt: '2026-10-22T10:10:21Z' },
+      { recordType: 'leg_press_volume', value: 9000, unit: 'kg', achievedAt: '2025-07-27T19:35:54Z' },
+    ];
+    const g = buildPbBoard(prs);
+    assert.deepEqual(g.map((x) => x.key), ['run', 'ride', 'hyrox', 'iron']);
+    assert.deepEqual(g[0].tiles.map((t) => t.name), ['5K', 'LONGEST RUN']); // 400 m is not a front-page distance
+    assert.equal(g[0].tiles[1].metrics[0].display, '43.2 km');
+    assert.deepEqual(g[1].tiles.map((t) => t.name), ['20K']);
+    assert.deepEqual(g[2].tiles.map((t) => t.name), ['BURPEE BROAD JUMPS', 'WALL BALLS']); // race order
+    assert.deepEqual(g[3].tiles.map((t) => t.name), ['Leg Press', 'Leg Press Horizontal (Machine)', 'Seated Cable Row – Bar Grip']);
+    assert.deepEqual(g[3].tiles[0].metrics.map((m) => m.metric), ['HEAVIEST LIFT', 'EST. 1RM']);
+    assert.ok(!JSON.stringify(g).includes('_'), 'no raw keys reach the page');
+  });
+
+  test('latestRecords: the newest record per key wins across lists', () => {
+    const r = latestRecords(
+      [{ recordType: 'fastest_5k', value: 1330, unit: 'seconds', achievedAt: '2026-01-01T00:00:00Z' }],
+      [{ recordType: 'fastest_5k', value: 1302, unit: 'seconds', achievedAt: '2026-04-04T00:00:00Z' }, null, { recordType: 'x' }],
+    );
+    assert.deepEqual(r.map((x) => x.value), [1302]);
+  });
+
+  test('recordLabel names every FitGlue key shape', () => {
+    assert.deepEqual(
+      ['fastest_half_marathon', 'fastest_1_mile', 'fastest_ride_10k', 'deadlift_1rm', 'bench_press_(barbell)_set_volume',
+        'pull_up_reps', 'hybrid_race_hyrox_sled_push', 'hybrid_race_athx_total_time', 'highest_elevation_gain', 'odd_thing']
+        .map((k) => { const l = recordLabel(k); return `${l.group}|${l.name}|${l.metric}`; }),
+      ['run|HALF MARATHON|FASTEST', 'run|1 MILE|FASTEST', 'ride|10K|FASTEST', 'strength|Deadlift|EST. 1RM',
+        'strength|Bench Press (Barbell)|BEST SET', 'strength|Pull Up|MOST REPS', 'hyrox|SLED PUSH|FASTEST',
+        'hyrox|TOTAL TIME|FASTEST', 'run|MOST CLIMBING|ELEVATION', 'other|ODD THING|BEST'],
+    );
   });
 
   test('a fresh profile (no streakHistory, no PRs, no zone split) still builds', () => {
@@ -271,30 +356,52 @@ describe('on the calendar', () => {
     assert.equal(c.nextUp[1].description, 'Second day. Solo this time; the doubles were the warm-up.');
   });
 
-  test('fixtures: this week is seven days from today with the regular sessions, classes marked', async () => {
+  test('fixtures: this week is Monday to Sunday, both calendars, planned vs done', async () => {
     const d = await fixtures();
-    const c = buildCalendar(d.events, [], NOW);
+    const c = buildCalendar(d.events, [], NOW, d.index.activities);
     assert.equal(c.hasWeek, true);
     assert.equal(c.week.length, 7);
-    assert.deepEqual(c.week.map((x) => x.dow), ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']);
-    assert.deepEqual(c.week.map((x) => x.num), ['25', '26', '27', '28', '29', '30', '31']);
-    assert.equal(c.week[0].isToday, true);
-    // Sunday's club run ended at 11:00Z, NOW is 10:00Z → still upcoming (in progress).
-    assert.deepEqual(c.week[0].sessions.map((s) => s.title), ['Bingham Sunday Running Club']);
-    assert.deepEqual(c.week[1].sessions.map((s) => `${s.time} ${s.title} ${s.kind}`), ['08:00 Tower Pilates class']);
-    assert.deepEqual(c.week[2].sessions.map((s) => s.title), ['Hyrox Class']); // the Hyrox race is not a session
-    assert.deepEqual(c.week[4].sessions.map((s) => s.kind), ['class', 'class']);
-    assert.equal(c.week[5].hasSessions, false);
-    assert.deepEqual(c.week[6].sessions.map((s) => s.title), ['Newark Parkrun']);
-    // 1 Nov is day 8: outside the strip.
-    assert.ok(!c.week.some((x) => x.sessions.some((s) => /Halloween/.test(s.title))));
+    // NOW is Sunday 25 Oct: the week is Mon 19 – Sun 25.
+    assert.deepEqual(c.week.map((x) => x.dow), ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']);
+    assert.deepEqual(c.week.map((x) => x.num), ['19', '20', '21', '22', '23', '24', '25']);
+    assert.equal(c.weekRange, '19 – 25 OCT 2026');
+    assert.equal(c.week[6].isToday, true);
+    // Sunday's club run ended at 11:00Z, NOW is 10:00Z → still planned.
+    assert.deepEqual(c.week[6].planned.map((s) => s.title), ['Bingham Sunday Running Club']);
+    assert.equal(c.week[6].state, 'planned');
+    // past days with nothing logged are rest days
+    assert.equal(c.week[0].state, 'rest');
+    assert.equal(c.activeDays, 0);
+  });
+
+  test('a day with a logged activity is active, even with a race or nothing planned on it', () => {
+    // Tue 27 + Wed 28 Oct: the Hyrox doubles and solo, raced; the regular calendar had nothing.
+    const now = new Date('2026-10-28T16:00:00Z');
+    const acts = [
+      { slug: 'dbl', title: "Hyrox Birmingham - Open Men's Doubles", activityType: 'ACTIVITY_TYPE_CROSSFIT', startTime: '2026-10-27T12:10:02Z' },
+      { slug: 'solo', title: "Hyrox Birmingham - Open Men's Solo", activityType: 'ACTIVITY_TYPE_CROSSFIT', startTime: '2026-10-28T08:20:02Z' },
+      { slug: 'old', title: 'Last week', activityType: 'ACTIVITY_TYPE_RUN', startTime: '2026-10-25T09:00:00Z' },
+    ];
+    const c = buildCalendar(ex([
+      { id: 'c', calendar: 'regular', title: 'Hyrox Class', start: '2026-10-29T18:00:00Z', end: '2026-10-29T19:00:00Z', allDay: false, kind: 'class' },
+      { id: 'r', calendar: 'events', title: 'Rutland Night 10k', start: '2026-11-01T17:30:00Z', end: '2026-11-01T18:30:00Z', allDay: false, kind: 'race' },
+    ]), [], now, acts);
+    assert.deepEqual(c.week.map((d) => d.state), ['rest', 'active', 'active', 'planned', 'open', 'open', 'planned']);
+    assert.deepEqual(c.week[1].done.map((x) => `${x.time} ${x.typeClass} ${x.href}`), ['12:10 fit-type--crossfit /life/activity/dbl']);
+    assert.equal(c.week[2].isToday, true);
+    assert.equal(c.week[3].planned[0].typeClass, 'fit-type--crossfit');
+    // a race from the Events calendar shows in the week and stays the big Next Up callout
+    assert.deepEqual(c.week[6].planned.map((p) => `${p.kind} ${p.isEvent}`), ['race true']);
+    assert.deepEqual(c.nextUp.map((e) => e.title), ['Rutland Night 10k']);
+    assert.equal(c.activeDays, 2);
   });
 
   test('an ended session has dropped off; a day with none says so', async () => {
     const d = await fixtures();
     const c = buildCalendar(d.events, [], new Date('2026-10-25T12:00:00Z'));
-    assert.deepEqual(c.week[0].sessions, []);
-    assert.equal(c.week[0].hasSessions, false);
+    // nothing logged in the fixtures' window and the one session has ended → no strip at all
+    assert.equal(c.hasWeek, false);
+    assert.deepEqual(c.week, []);
   });
 
   test('export present but nothing upcoming → nothing rendered, no hand-written fallback', () => {
@@ -313,14 +420,19 @@ describe('on the calendar', () => {
     const only = buildCalendar(ex([
       { id: 'r', calendar: 'regular', title: 'Spin', start: '2026-10-28T18:00:00Z', end: '2026-10-28T19:00:00Z', allDay: false, kind: 'class' },
     ]), [], NOW);
-    assert.equal(only.hasAny, true);
+    assert.equal(only.hasAny, false);
     assert.equal(only.hasNextUp, false);
-    assert.equal(only.hasWeek, true);
+    assert.equal(only.hasWeek, false); // the 28th is next week; NOW's week (19–25) has nothing
     const races = buildCalendar(ex([
       { id: 'e', calendar: 'events', title: 'Parkrun', start: '2026-11-07T09:00:00Z', end: '2026-11-07T10:00:00Z', allDay: false, kind: 'race' },
     ]), [], NOW);
     assert.equal(races.hasNextUp, true);
     assert.equal(races.hasWeek, false);
+    const inWeek = buildCalendar(ex([
+      { id: 'r', calendar: 'regular', title: 'Spin', start: '2026-10-25T18:00:00Z', end: '2026-10-25T19:00:00Z', allDay: false, kind: 'class' },
+    ]), [], NOW);
+    assert.equal(inWeek.hasWeek, true);
+    assert.equal(inWeek.hasNextUp, false);
   });
 
   test('entries without a usable start or title are skipped', () => {
@@ -400,7 +512,7 @@ describe('model + task', () => {
     assert.equal(out.fitnessLife.calendar.nextUp.length, 5);
     assert.match(
       logs.join('\n'),
-      /Life page: 3 cards, week=roundup, roundup=week-42-2026, calendar=calendar \(5 next up, 7 sessions this week\)/,
+      /Life page: 3 cards, week=roundup, roundup=week-42-2026, calendar=calendar \(5 next up, 1 sessions this week, 0 active\)/,
     );
   });
 
