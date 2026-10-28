@@ -15,7 +15,7 @@
  * "Data contract (S0)" §2, §6 and §8.
  */
 import fs from 'node:fs/promises';
-import { activityTheme, FAMILIES, typeKeyOf, typeKeyOfTitle } from './fitness-theme.mjs';
+import { activityTheme, FAMILIES, hybridRaceLabel, typeKeyOf, typeKeyOfTitle } from './fitness-theme.mjs';
 import { recordLabel, latestRecords } from './fitness-records.mjs';
 import { routePath } from './fitness-activity-pages.mjs';
 
@@ -426,7 +426,7 @@ export function buildCard(e, file) {
     push(bpm > 0, String(bpm), 'bpm', 'avg hr');
   }
   const thumb = httpsUrl(e.routeThumbnailUrl);
-  const typeText = typeLabel(e.activityType);
+  const typeText = hybridRaceLabel(e.title) || typeLabel(e.activityType);
   return {
     slug: e.slug,
     href: `${ACTIVITY_HREF}/${encodeURIComponent(e.slug)}`,

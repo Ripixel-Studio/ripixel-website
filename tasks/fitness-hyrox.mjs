@@ -321,6 +321,8 @@ export function buildRaceView(file, history, opts = {}) {
     totalPbUrl: totalPb ? `/life/activity/${totalPb.slug}` : '',
     isTotalPB,
     isFirst: counts && !!standing?.isFirst,
+    // A first race in a division is that division's PB on the day (F5.5).
+    firstLabel: counts && standing?.isFirst ? `PB — first ${race.division?.label || 'race'}` : '',
     runs: clock(race.runSeconds),
     stations: clock(race.stationSeconds),
     roxzone: clock(race.roxzoneSeconds),
@@ -347,50 +349,100 @@ function parseDelta(s) {
 }
 
 // ---------------------------------------------------------------------------
-// PB progression chart (inline SVG, one small multiple per division)
+// PB chase (F5.5): a race against the PB it was chasing, point in time
+
+/** Minute steps the axis may tick at. */
+const TICK_STEPS = [60, 120, 300, 600, 900, 1800];
 
 /**
+ * The PB chase for one division: each focus race against the PB that stood before it
+ * (red when slower, green when it set a PB), with the division's earlier races as
+ * context, on one time axis that runs faster ← → slower. History stops at the last
+ * focus race, so a page never shows races that came after it. Simulations are not
+ * races and are left out.
+ *
+ * Positions are percentages of the track (the partial lays it out in HTML, so text
+ * stays readable at phone width).
+ *
  * @param {HyroxHistory|null|undefined} history
- * @param {{ highlight?: string, only?: string[] }} [opts]  highlight a race slug; limit to division keys
+ * @param {string} divisionKey
+ * @param {string[]} focusSlugs  this race (activity page) or the event's races in this division
  */
-export function progressionCharts(history, opts = {}) {
-  if (!history) return [];
-  const W = 480, H = 150, padL = 62, padR = 16, padT = 26, padB = 36;
-  return history.divisions
-    .filter((d) => d.races.length && (!opts.only || opts.only.includes(d.key)))
-    .map((d) => {
-      const totals = d.races.map((r) => r.total).filter((t) => t > 0);
-      const lo = Math.min(...totals), hi = Math.max(...totals);
-      const span = Math.max(hi - lo, 120);
-      const yMin = lo - span * 0.25, yMax = hi + span * 0.25;
-      // Faster is higher: y grows with time.
-      const y = (t) => +(padT + ((t - yMin) / (yMax - yMin)) * (H - padT - padB)).toFixed(1);
-      const n = d.races.length;
-      const x = (i) => +(n === 1 ? (padL + W - padR) / 2 : padL + (i * (W - padL - padR)) / (n - 1)).toFixed(1);
-      let best = Infinity;
-      const bestPath = [];
-      const points = d.races.map((r, i) => {
-        const wasBest = r.total < best;
-        if (wasBest) best = r.total;
-        bestPath.push(`${i === 0 ? 'M' : 'L'}${x(i)},${y(best)}`);
-        if (i < n - 1) bestPath.push(`L${x(i + 1)},${y(best)}`);
-        return {
-          cx: x(i), cy: y(r.total), label: clock(r.total),
-          date: shortDate(r.date), event: r.event || r.title, url: `/life/activity/${r.slug}`,
-          isPB: wasBest, current: r.slug === opts.highlight,
-          title: `${r.title}: ${clock(r.total)}${wasBest ? ' · PB' : ''}`,
-          labelY: +(y(r.total) - 10).toFixed(1),
-          anchor: n > 1 && i === 0 ? 'start' : n > 1 && i === n - 1 ? 'end' : 'middle',
-        };
-      });
-      const ticks = [lo, hi].filter((v, i, a) => a.indexOf(v) === i).map((t) => ({ y: y(t), label: clock(t) }));
-      return {
-        key: d.key, label: d.label, w: W, h: H, padL, axisY: H - padB, axisX2: W - padR,
-        bestPath: bestPath.join(' '), points, ticks,
-        pb: clock(Math.min(...totals)), count: n,
-        dateY: H - padB + 16,
-      };
-    });
+export function pbChase(history, divisionKey, focusSlugs) {
+  const d = history?.byDivision.get(divisionKey);
+  if (!d) return null;
+  const focus = new Set(focusSlugs);
+  const lastIdx = d.races.reduce((m, r, i) => (focus.has(r.slug) ? i : m), -1);
+  if (lastIdx < 0) return null;
+  const races = d.races.slice(0, lastIdx + 1).filter((r) => r.total > 0);
+  const chased = races
+    .filter((r) => focus.has(r.slug))
+    .map((r) => ({ race: r, pb: history?.bySlug.get(r.slug)?.before.total_time }));
+  const times = [...races.map((r) => r.total), ...chased.map((c) => c.pb?.seconds ?? 0)].filter((t) => t > 0);
+  const lo = Math.min(...times), hi = Math.max(...times);
+  const span = Math.max(hi - lo, 240);
+  const pad = span * 0.14;
+  const x0 = lo - pad, x1 = hi + pad;
+  const pct = (/** @type {number} */ t) => Math.round(((t - x0) / (x1 - x0)) * 1000) / 10;
+  const step = TICK_STEPS.find((st) => (x1 - x0) / st <= 6) ?? 3600;
+  const ticks = [];
+  for (let t = Math.ceil(x0 / step) * step; t <= x1; t += step) ticks.push({ left: pct(t), label: tickLabel(t) });
+  const label = d.label;
+
+  const context = races
+    .filter((r) => !focus.has(r.slug))
+    .map((r, i) => ({
+      left: pct(r.total), url: `/life/activity/${r.slug}`, time: clock(r.total), isPB: r.isPB,
+      // Labels above the dot (clear of the PB-to-beat marker below), alternating when crowded.
+      name: shortEvent(r.event || r.title), date: shortDate(r.date), above: i % 2 === 0,
+      align: pct(r.total) > 70 ? 'end' : pct(r.total) < 30 ? 'start' : 'mid',
+      title: `${r.title} · ${clock(r.total)}${r.isPB ? ' · PB' : ''} · ${shortDate(r.date)}`,
+    }));
+
+  const rows = chased.map(({ race, pb }) => {
+    const isPB = race.isPB;
+    const delta = pb ? race.total - pb.seconds : 0;
+    const tone = !pb || isPB ? 'gain' : delta > 0 ? 'loss' : 'even';
+    const a = pb ? Math.min(pct(pb.seconds), pct(race.total)) : 0;
+    const b = pb ? Math.max(pct(pb.seconds), pct(race.total)) : 0;
+    let verdict;
+    if (!pb) verdict = `PB — first ${label}`;
+    else if (isPB) verdict = `New ${label} PB — ${deltaClock(delta).replace('−', '')} faster than ${clock(pb.seconds)}`;
+    else if (delta === 0) verdict = `Equalled the ${label} PB, ${clock(pb.seconds)}`;
+    else verdict = `${deltaClock(delta)} slower than the ${label} PB it was chasing`;
+    return {
+      url: `/life/activity/${race.slug}`, name: shortEvent(race.event || race.title), date: shortDate(race.date),
+      time: clock(race.total), left: pct(race.total), tone, isPB, isFirst: !pb, verdict,
+      delta: pb ? deltaClock(delta) : '',
+      pbLeft: pb ? pct(pb.seconds) : 0, pbTime: pb ? clock(pb.seconds) : '',
+      pbName: pb ? shortEvent(pb.title) : '', pbDate: pb ? shortDate(pb.date) : '', pbUrl: pb ? `/life/activity/${pb.slug}` : '',
+      gapLeft: a, gapWidth: Math.max(0.6, Math.round((b - a) * 10) / 10),
+      // Labels hang inward so they stay inside the track at either end.
+      timeAlign: pct(race.total) > 60 ? 'end' : 'start',
+      pbAlign: pb && pct(pb.seconds) > 60 ? 'end' : 'start',
+    };
+  });
+
+  return {
+    key: d.key, label, rows, context, ticks,
+    count: races.length,
+    // A division's only race has nothing to sit against: the verdict says it all.
+    plot: races.length > 1,
+    raceWord: races.length === 1 ? 'race' : 'races',
+    multiple: rows.length > 1,
+  };
+}
+
+/** Axis label: 5040 → "1h24", 3300 → "55 min". @param {number} t */
+function tickLabel(t) {
+  const m = Math.round(t / 60);
+  return m >= 60 ? `${Math.floor(m / 60)}h${String(m % 60).padStart(2, '0')}` : `${m} min`;
+}
+
+/** "Hyrox - London Olympia 25/26 - 1:23:47 🎉" / "London Olympia" → a short event name. */
+function shortEvent(s) {
+  const t = String(s ?? '').replace(/^hyrox\s*[-–:]?\s*/i, '').replace(/\s*[-–]\s*\d{1,2}:\d{2}(:\d{2})?.*$/, '').replace(/\s+\d{2}\/\d{2}\b.*$/, '').trim();
+  return t || String(s ?? '');
 }
 
 /** @param {string} iso */

@@ -20,6 +20,7 @@ import { fitnessLifeTask } from './tasks/fitness-life.mjs';
 import { fitnessRoundupPagesTask } from './tasks/fitness-roundup-pages.mjs';
 import { fitnessOgImagesTask } from './tasks/fitness-og-images.mjs';
 import { fitnessSessionsPageTask } from './tasks/fitness-sessions.mjs';
+import { fitnessPhotoDimsTask } from './tasks/fitness-photo-dims.mjs';
 import { fitnessFeedTask, FEED_PATH as FITNESS_FEED_PATH } from './tasks/fitness-feed.mjs';
 import { sitemapSlashlessTask } from './tasks/sitemap-slashless.mjs';
 
@@ -212,6 +213,7 @@ export const tasks = [
     // Sets fitnessIndex, fitnessActivities, fitnessRoundups, fitnessUnavailable, fitnessSource.
     // Env: FITNESS_DATA_BASE (URL), FITNESS_DATA_SOURCE=live|cache|fixtures. See README "Fitness data".
     fetchFitnessTask(),
+    fitnessPhotoDimsTask(), // F5.5 hero photo sizes (portrait beside the title, else full width); before the page tasks
     fitnessLifeTask(), // S2.2 life page — builds `fitnessLife` from the fitness globals; must precede generate-pages
     // S2.5 OG cards — /life/og/{activity,roundup}/<id>.png via sharp, cached in .cache/og. Runs BEFORE the page
     // tasks because they read `fitnessOgImages` to point og:image at the rendered card.

@@ -98,3 +98,25 @@ export function typeKeyOfTitle(title) {
   if (/walk|hike/.test(t)) return 'hike';
   return 'other';
 }
+
+/** Hybrid race brands, as a title or the export's `race` names them (F5.5). */
+const HYBRID_RACES = /** @type {[RegExp, string][]} */ ([
+  [/\bhyrox\b/i, 'HYROX'],
+  [/\bathx\b/i, 'ATHX'],
+  [/\bdeka\b/i, 'DEKA'],
+]);
+
+/**
+ * The type word for a hybrid race or class: FitGlue types Hyrox races CROSSFIT and
+ * Hyrox classes WEIGHT_TRAINING, so the chip said "CROSSFIT" on a Hyrox race. Returns
+ * the brand ("HYROX") when the activity has a Hyrox race breakdown or its title names
+ * one, else "".
+ * @param {unknown} title
+ * @param {{ hasRace?: boolean, event?: unknown }} [opts]  `hasRace`: the export carries a `race` (always Hyrox today)
+ * @returns {string}
+ */
+export function hybridRaceLabel(title, opts = {}) {
+  const text = `${String(title ?? '')} ${String(opts.event ?? '')}`;
+  for (const [re, label] of HYBRID_RACES) if (re.test(text)) return label;
+  return opts.hasRace ? 'HYROX' : '';
+}
