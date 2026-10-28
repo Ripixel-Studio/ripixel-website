@@ -7,8 +7,10 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { runSkierTasks } from './skier-test-runner.mjs';
+
 import {
-  slugToOutPath,
+  activityOutPath,
   activityUrl,
   fmtKm,
   fmtDistance,
@@ -39,9 +41,10 @@ import {
   buildModule,
   buildActivityView,
   deriveCategory,
-  generateActivityPagesTask,
-} from './fitness-activity-pages.mjs';
+  fitnessActivityViewsTask,
+} from './fitness-activity-views.mjs';
 import { loadFitnessData } from './fitness-fetch.mjs';
+import { lifePageTasks } from './life-pages.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const FIXTURES = path.join(REPO, 'fixtures', 'fitness');
@@ -55,14 +58,13 @@ async function fixtureIndex() {
 }
 
 describe('slug → path', () => {
-  test('maps a showcase id to public/personal/life/activity/<slug>/index.html (served at /life/activity/<slug>)', () => {
-    assert.equal(slugToOutPath('colwick-parkrun-2026-10-17'), path.join('public/personal', 'life', 'activity', 'colwick-parkrun-2026-10-17', 'index.html'));
-    assert.equal(slugToOutPath('x', '/tmp/out'), '/tmp/out/life/activity/x/index.html');
+  test('maps a showcase id to life/activity/<slug>/index.html under the output dir (served at /life/activity/<slug>)', () => {
+    assert.equal(activityOutPath('colwick-parkrun-2026-10-17'), 'life/activity/colwick-parkrun-2026-10-17/index.html');
     assert.equal(activityUrl('colwick-parkrun-2026-10-17'), '/life/activity/colwick-parkrun-2026-10-17');
   });
   test('rejects anything that could escape the directory', () => {
     for (const bad of ['', '../etc', 'a/b', 'a\\b', '.hidden', 'a..b', 42, null, undefined, 'x'.repeat(202)]) {
-      assert.throws(() => slugToOutPath(/** @type {any} */ (bad)), new RegExp('unusable activity slug'), String(bad));
+      assert.throws(() => activityOutPath(/** @type {any} */ (bad)), new RegExp('unusable activity slug'), String(bad));
     }
   });
 });
@@ -371,24 +373,33 @@ describe('view model from the fixtures', () => {
 });
 
 describe('task', () => {
-  test('writes one page per activity from the fixtures and skips bad slugs', async () => {
+  /** @param {string[]} into */
+  const logger = (into) => ({ info() {}, warn(/** @type {string} */ m) { into.push(m); }, error() {}, debug() {} });
+
+  test('builds one view per activity from the fixtures and skips bad slugs', async () => {
+    const data = await loadFitnessData({ env: {}, source: 'fixtures', fixturesDir: FIXTURES });
+    const warnings = [];
+    const task = fitnessActivityViewsTask();
+    const out = await task.run(task.config, {
+      debug: false,
+      globals: { fitnessIndex: data.index, fitnessActivities: [...data.activities, { slug: '../escape', activity: {}, entry: {} }], siteUrl: 'https://james.ripixel.co.uk' },
+      logger: logger(warnings),
+    });
+    assert.deepEqual(out.fitnessActivityPages.map((/** @type {any} */ p) => p.act.slug), ['colwick-parkrun-2026-10-17', 'evening-ride-to-the-reservoir-2026-10-15', 'push-day-2026-10-13']);
+    assert.equal(warnings.length, 1);
+    assert.match(warnings[0], /unusable activity slug/);
+  });
+
+  test('Skier renders the pages from the views (the activity template, partials and helpers)', async () => {
     const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'activity-pages-'));
     try {
       const data = await loadFitnessData({ env: {}, source: 'fixtures', fixturesDir: FIXTURES });
-      const warnings = [];
-      const ctx = {
-        debug: false,
-        globals: {
-          fitnessIndex: data.index, fitnessActivities: [...data.activities, { slug: '../escape', activity: {}, entry: {} }], year: 2026, cacheHash: 'x', siteUrl: 'https://james.ripixel.co.uk',
-          fitnessOgImages: { activity: { 'colwick-parkrun-2026-10-17': 'https://james.ripixel.co.uk/life/og/activity/colwick-parkrun-2026-10-17.png' }, roundup: {} },
-        },
-        logger: { info() {}, warn(m) { warnings.push(m); }, error() {}, debug() {} },
+      const globals = {
+        fitnessIndex: data.index, fitnessActivities: data.activities, fitnessRoundups: [], year: 2026, cacheHash: 'x', siteUrl: 'https://james.ripixel.co.uk',
+        fitnessOgImages: { activity: { 'colwick-parkrun-2026-10-17': 'https://james.ripixel.co.uk/life/og/activity/colwick-parkrun-2026-10-17.png' }, roundup: {} },
       };
-      const task = generateActivityPagesTask({ outDir: tmp, template: path.join(REPO, 'personal/templates/activity.html'), partialsDir: path.join(REPO, 'personal/partials') });
-      const out = await task.run(task.config, ctx);
-      assert.deepEqual(out.fitnessActivitySlugs, ['colwick-parkrun-2026-10-17', 'evening-ride-to-the-reservoir-2026-10-15', 'push-day-2026-10-13']);
-      assert.equal(warnings.length, 1);
-      assert.match(warnings[0], /unusable activity slug/);
+      const [activityPages] = lifePageTasks({ outDir: tmp, siteUrl: globals.siteUrl });
+      await runSkierTasks([fitnessActivityViewsTask(), activityPages], globals);
       const html = await fs.readFile(path.join(tmp, 'life', 'activity', 'colwick-parkrun-2026-10-17', 'index.html'), 'utf8');
       assert.match(html, /<title>Colwick parkrun #87 — James King<\/title>/);
       assert.match(html, /<meta property="og:image" content="https:\/\/james\.ripixel\.co\.uk\/life\/og\/activity\/colwick-parkrun-2026-10-17\.png"/);
@@ -410,17 +421,18 @@ describe('task', () => {
       const ride = await fs.readFile(path.join(tmp, 'life', 'activity', 'evening-ride-to-the-reservoir-2026-10-15', 'index.html'), 'utf8');
       assert.match(ride, /<meta property="og:image" content="https:\/\/[^"]*\/banner\.png"/, 'no card for this slug → the AI banner');
       const strength = await fs.readFile(path.join(tmp, 'life', 'activity', 'push-day-2026-10-13', 'index.html'), 'utf8');
-      assert.match(strength, /class="exercise-item exercise-strength"/);
+      assert.match(strength, /class="exercise-item exercise-strength"/, 'exercise-item needs the eq helper');
       assert.match(strength, /4×8 × 80kg/);
     } finally {
       await fs.rm(tmp, { recursive: true, force: true });
     }
   });
-  test('does nothing (and does not throw) when there are no activities', async () => {
+
+  test('no activities → an empty view list and a warning', async () => {
     const warnings = [];
-    const task = generateActivityPagesTask({ outDir: '/nonexistent/should-not-be-written' });
-    const out = await task.run(task.config, { debug: false, globals: { fitnessActivities: [] }, logger: { info() {}, warn(m) { warnings.push(m); }, error() {}, debug() {} } });
-    assert.deepEqual(out, {});
+    const task = fitnessActivityViewsTask();
+    const out = await task.run(task.config, { debug: false, globals: { fitnessActivities: [] }, logger: logger(warnings) });
+    assert.deepEqual(out, { fitnessActivityPages: [] });
     assert.equal(warnings.length, 1);
   });
 });

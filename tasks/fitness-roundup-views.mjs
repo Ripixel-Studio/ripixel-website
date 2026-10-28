@@ -1,12 +1,14 @@
 // @ts-check
 /**
- * Roundup pages (S2.4).
+ * Roundup views (S2.4) — data only.
  *
- * Renders one page per roundup file in `fitnessRoundups` (see
- * tasks/fitness-fetch.mjs) and an index of all of them:
+ * Shapes each roundup file in `fitnessRoundups` (see tasks/fitness-fetch.mjs)
+ * into `fitnessRoundupPages`, and all of them into `fitnessRoundupsIndex`.
+ * Skier renders them (see skier.personal.tasks.mjs):
  *
- *   public/personal/life/roundup/<periodKey>.html   →  /life/roundup/<periodKey>
- *   public/personal/life/roundups.html              →  /life/roundups
+ *   fitnessRoundupPages[i]  →  public/personal/life/roundup/<periodKey>.html   (generateDataPagesTask)
+ *   fitnessRoundupsIndex    →  public/personal/life/roundups.html              (generatePagesTask,
+ *                                                                               personal/pages/life/roundups.html)
  *
  * Firebase `cleanUrls` serves the extension-less URLs. Weekly, monthly and
  * yearly roundups share one template (`personal/templates/roundup.html`) with
@@ -16,18 +18,12 @@
  * Field semantics follow the S0 data contract in
  * jarvis-memory/specs/ripixel-website/fitness-zine.md §6 and §8.
  */
-import fs from 'node:fs/promises';
 import path from 'node:path';
-import Handlebars from 'handlebars';
 
-export const DEFAULT_TEMPLATE = 'personal/templates/roundup.html';
-export const DEFAULT_INDEX_TEMPLATE = 'personal/templates/roundups-index.html';
-export const DEFAULT_PARTIALS_DIR = 'personal/partials';
-export const DEFAULT_OUT_DIR = 'public/personal';
 export const ROUNDUP_URL_BASE = '/life/roundup';
 export const ROUNDUPS_INDEX_URL = '/life/roundups';
 export const ACTIVITY_URL_BASE = '/life/activity';
-/** Where tasks/fitness-feed.mjs writes the Atom feed (a literal here: that module imports this one). */
+/** Where the fitness Atom feed is written (a literal here: tasks/fitness-feed-items.mjs imports this module). */
 export const FITNESS_FEED_PATH = '/life/feed.xml';
 
 /** Period keys as `periodKey()` in roundup_generator.go mints them (contract §0). */
@@ -104,10 +100,10 @@ export function keyToUrl(key) {
   return `${ROUNDUP_URL_BASE}/${key}`;
 }
 
-/** The output file for a key, relative to outDir: `life/roundup/<key>.html`. */
-export function keyToPath(key, outDir = '') {
+/** The output file for a key, relative to the output directory: `life/roundup/<key>.html`. */
+export function keyToPath(key) {
   if (!parsePeriodKey(key)) throw new Error(`not a period key: ${JSON.stringify(key)}`);
-  return path.join(outDir, 'life', 'roundup', `${key}.html`);
+  return path.posix.join('life', 'roundup', `${key}.html`);
 }
 
 /** `ROUNDUP_PERIOD_TYPE_WEEK` → 'week'; falls back to the key's prefix. */
@@ -655,35 +651,18 @@ export function buildIndexView(files) {
 /** @param {unknown} e */
 const errMsg = (e) => (e instanceof Error ? e.message : String(e));
 
-async function registerPartials(hb, dir) {
-  const files = await fs.readdir(dir);
-  for (const f of files) {
-    const ext = path.extname(f);
-    if (ext !== '.html' && ext !== '.hbs') continue;
-    hb.registerPartial(path.basename(f, ext), await fs.readFile(path.join(dir, f), 'utf8'));
-  }
-}
-
 /**
- * @param {{ template?: string, indexTemplate?: string, partialsDir?: string, outDir?: string }} [config]
+ * Builds the roundup page and index view models (after fetch-fitness and
+ * fitness-og-images). A roundup whose view throws is logged and left out of
+ * both the pages and the index.
  */
-export function fitnessRoundupPagesTask(config = {}) {
+export function fitnessRoundupViewsTask() {
   return {
-    name: 'fitness-roundup-pages',
-    title: 'Generate fitness roundup pages (/life/roundup/<key> + /life/roundups)',
-    config,
-    run: async (/** @type {any} */ cfg, /** @type {any} */ ctx) => {
-      const template = cfg.template || DEFAULT_TEMPLATE;
-      const indexTemplate = cfg.indexTemplate || DEFAULT_INDEX_TEMPLATE;
-      const partialsDir = cfg.partialsDir || DEFAULT_PARTIALS_DIR;
-      const outDir = cfg.outDir || DEFAULT_OUT_DIR;
+    name: 'fitness-roundup-views',
+    title: 'Build the /life/roundup/<key> and /life/roundups view models from fitnessRoundups',
+    config: {},
+    run: async (/** @type {any} */ _cfg, /** @type {any} */ ctx) => {
       const g = ctx.globals;
-
-      const hb = Handlebars.create();
-      await registerPartials(hb, partialsDir);
-      const renderPage = hb.compile(await fs.readFile(template, 'utf8'));
-      const renderIndex = hb.compile(await fs.readFile(indexTemplate, 'utf8'));
-
       const index = g.fitnessIndex || {};
       const files = (Array.isArray(g.fitnessRoundups) ? g.fitnessRoundups : []).filter((f) => {
         if (f && parsePeriodKey(f.key)) return true;
@@ -699,45 +678,39 @@ export function fitnessRoundupPagesTask(config = {}) {
         showPhotoGallery: Boolean(index.profile?.showPhotoGallery),
       };
       const siteUrl = String(g.siteUrl || '').replace(/\/+$/, '');
-      const common = { page: 'life', fitnessIndex: index, atomFeed: FITNESS_FEED_PATH };
       const ogCards = g.fitnessOgImages?.roundup || {};
 
+      /** Template variables per roundup page, rendered by Skier's generateDataPagesTask. */
       const pages = [];
       for (const file of files) {
         try {
           const view = buildRoundupView(file, viewCtx);
           const ogImage = typeof ogCards[file.key] === 'string' && /^https?:\/\//.test(ogCards[file.key]) ? ogCards[file.key] : '';
-          const html = renderPage({
-            ...g, ...common,
+          pages.push({
+            page: 'life', atomFeed: FITNESS_FEED_PATH,
             subpage: `| ${view.subpage} roundup`, description: view.description, roundup: view,
             ogType: 'article', ogImage, canonical: siteUrl ? `${siteUrl}${view.url}` : '', publishedTime: view.generatedAt,
           });
-          const outPath = keyToPath(file.key, outDir);
-          await fs.mkdir(path.dirname(outPath), { recursive: true });
-          await fs.writeFile(outPath, html);
-          pages.push({ key: file.key, url: view.url, title: view.short, periodType: view.type, periodStart: file.roundup?.periodStart || '', periodEnd: file.roundup?.periodEnd || '', generatedAt: view.generatedAt, description: view.description });
-          ctx.logger.debug(`Generated ${outPath}`);
         } catch (e) {
           ctx.logger.error(`roundup ${file.key}: ${errMsg(e)}`);
         }
       }
 
-      const groups = buildIndexView(files.filter((f) => pages.some((p) => p.key === f.key)));
-      const indexHtml = renderIndex({
-        ...g, ...common,
+      const built = new Set(pages.map((p) => p.roundup.key));
+      const groups = buildIndexView(files.filter((f) => built.has(f.key)));
+      /** Template variables for /life/roundups, rendered by Skier's generatePagesTask. */
+      const fitnessRoundupsIndex = {
+        page: 'life', atomFeed: FITNESS_FEED_PATH,
         subpage: '| roundups',
         description: 'Weekly, monthly and yearly training roundups — every session, summed up.',
         roundupGroups: groups,
         roundupCount: pages.length,
         roundupCountLabel: `${pages.length} issue${pages.length === 1 ? '' : 's'}`,
         fitnessUnavailable: Boolean(g.fitnessUnavailable),
-      });
-      const indexPath = path.join(outDir, 'life', 'roundups.html');
-      await fs.mkdir(path.dirname(indexPath), { recursive: true });
-      await fs.writeFile(indexPath, indexHtml);
+      };
 
-      ctx.logger.info(`Roundup pages: ${pages.length} generated + index`);
-      return { fitnessRoundupPages: pages };
+      ctx.logger.info(`Roundup views: ${pages.length} pages + index`);
+      return { fitnessRoundupPages: pages, fitnessRoundupsIndex };
     },
   };
 }

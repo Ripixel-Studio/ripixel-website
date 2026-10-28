@@ -11,14 +11,18 @@ import {
   FEED_PATH,
   FEED_LIMIT,
   rfc3339,
-  xmlEsc,
+  htmlEsc,
   activityItem,
   roundupItem,
+  roundupPageMeta,
   feedItems,
-  buildAtom,
-  fitnessFeedTask,
-} from './fitness-feed.mjs';
+  toFeedArticles,
+  feedUpdated,
+  fitnessFeedItemsTask,
+} from './fitness-feed-items.mjs';
 import { loadFitnessData } from './fitness-fetch.mjs';
+import { lifePageTasks } from './life-pages.mjs';
+import { runSkierTasks } from './skier-test-runner.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const FIXTURES = path.join(REPO, 'fixtures', 'fitness');
@@ -27,8 +31,10 @@ const SITE = 'https://james.ripixel.co.uk';
 async function fixtures() {
   return loadFitnessData({ env: {}, source: 'fixtures', fixturesDir: FIXTURES });
 }
-/** The `fitnessRoundupPages` entry S2.4's task returns for the fixture roundup. */
-const WEEK_PAGE = { key: 'week-42-2026', url: '/life/roundup/week-42-2026', title: 'Week 42 · 2026', periodType: 'week', periodStart: '2026-10-12T00:00:00Z', periodEnd: '2026-10-19T00:00:00Z', generatedAt: '2026-10-19T00:05:12Z' };
+/** The feed's view (`roundupPageMeta`) of the fixture roundup's page. */
+const WEEK_PAGE = { key: 'week-42-2026', url: '/life/roundup/week-42-2026', generatedAt: '2026-10-19T00:05:12Z' };
+/** The same roundup as an element of `fitnessRoundupPages` (page variables from fitness-roundup-views). */
+const WEEK_PAGE_VARS = { page: 'life', subpage: '| week 42 2026 roundup', roundup: { ...WEEK_PAGE, short: 'Week 42 · 2026' } };
 
 /**
  * Minimal well-formedness check: every element closes in order, no raw `<`/`&` in text.
@@ -59,8 +65,11 @@ describe('helpers', () => {
     assert.equal(rfc3339('nope'), '');
     assert.equal(rfc3339(undefined), '');
   });
-  test('xmlEsc escapes the five characters', () => {
-    assert.equal(xmlEsc(`a & b < c > "d"`), 'a &amp; b &lt; c &gt; &quot;d&quot;');
+  test('htmlEsc escapes &, <, > and "', () => {
+    assert.equal(htmlEsc(`a & b < c > "d"`), 'a &amp; b &lt; c &gt; &quot;d&quot;');
+  });
+  test('roundupPageMeta reads key, url and generatedAt from the page variables', () => {
+    assert.deepEqual(roundupPageMeta(WEEK_PAGE_VARS), WEEK_PAGE);
   });
 });
 
@@ -141,60 +150,65 @@ describe('feedItems', () => {
   });
 });
 
-describe('buildAtom', () => {
-  test('is balanced, escaped, newest first, with self/alternate links and feed updated = latest entry', async () => {
+describe('toFeedArticles / feedUpdated', () => {
+  test('maps items onto Skier FeedArticles: escaped text, id = link, dates, kind as category', async () => {
     const data = await fixtures();
     const items = feedItems({ activities: data.activities, roundupPages: [WEEK_PAGE], roundups: data.roundups, index: data.index, siteUrl: SITE });
     items[1].title = 'Tom & Jerry <5K> "race"';
-    const xml = buildAtom(items, { siteUrl: SITE });
-    assertBalanced(xml);
-    assert.match(xml, /^<\?xml version="1.0" encoding="utf-8"\?>\n<feed xmlns="http:\/\/www\.w3\.org\/2005\/Atom">/);
-    assert.match(xml, /<link rel="self" type="application\/atom\+xml" href="https:\/\/james\.ripixel\.co\.uk\/life\/feed\.xml"\/>/);
-    assert.match(xml, /<link rel="alternate" type="text\/html" href="https:\/\/james\.ripixel\.co\.uk\/life"\/>/);
-    assert.match(xml, /<title>Tom &amp; Jerry &lt;5K&gt; &quot;race&quot;<\/title>/);
-    assert.equal((xml.match(/<entry>/g) || []).length, 4);
-    assert.ok(xml.indexOf('week-42-2026') < xml.indexOf('colwick-parkrun'), 'roundup (generated 19 Oct) precedes the 17 Oct run');
-    assert.match(xml, /<feed[^]*?<updated>2026-10-19T00:05:12Z<\/updated>/);
-    assert.match(xml, /<category term="roundup" label="Roundup"\/>/);
-    assert.match(xml, /<summary type="text">Run · 5\.01 km/);
-    assert.doesNotMatch(xml, /fitglue\.tech/);
+    const articles = toFeedArticles(items);
+    assert.equal(articles.length, 4);
+    assert.deepEqual(articles[0].categories, [{ term: 'roundup', name: 'Roundup' }]);
+    assert.deepEqual(articles[1].categories, [{ term: 'activity', name: 'Activity' }]);
+    assert.equal(articles[1].title, 'Tom &amp; Jerry &lt;5K&gt; &quot;race&quot;');
+    assert.equal(articles[1].id, articles[1].link);
+    assert.equal(articles[0].publishedObj.toISOString(), '2026-10-19T00:05:12.000Z');
+    assert.ok(articles.every((a) => a.dateObj instanceof Date && !Number.isNaN(a.dateObj.getTime())));
+    assert.ok(articles.every((a) => !('body' in a)), 'summary only, no <content>');
   });
-  test('an empty feed is still a valid feed', () => {
-    const xml = buildAtom([], { siteUrl: SITE, now: new Date('2026-10-25T12:00:00Z') });
-    assertBalanced(xml);
-    assert.match(xml, /<updated>2026-10-25T12:00:00Z<\/updated>/);
-    assert.doesNotMatch(xml, /<entry>/);
+  test('feed <updated> is the latest entry, or now for an empty feed', async () => {
+    const data = await fixtures();
+    const items = feedItems({ activities: data.activities, roundupPages: [WEEK_PAGE], roundups: data.roundups, index: data.index, siteUrl: SITE });
+    assert.equal(feedUpdated(items).toISOString(), '2026-10-19T00:05:12.000Z');
+    const now = new Date('2026-10-25T12:00:00Z');
+    assert.equal(feedUpdated([], now), now);
   });
 });
 
-describe('fitnessFeedTask', () => {
-  test('writes public/personal/life/feed.xml from the globals', async () => {
+describe('fitnessFeedItemsTask + Skier generateFeedTask', () => {
+  /** Run the items task and the feed task from life-pages.mjs into a temp dir. */
+  async function build(globals) {
     const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'fitness-feed-'));
+    const feedTask = lifePageTasks({ outDir: tmp, siteUrl: SITE })[3];
+    const logs = [];
+    await runSkierTasks([fitnessFeedItemsTask(), feedTask], globals, logs);
+    return { tmp, logs, xml: await fs.readFile(path.join(tmp, 'life', 'feed.xml'), 'utf8') };
+  }
+
+  test('writes public/personal/life/feed.xml from the globals: balanced, newest first, self/alternate links', async () => {
+    const data = await fixtures();
+    const { tmp, xml } = await build({ siteUrl: SITE, fitnessIndex: data.index, fitnessActivities: data.activities, fitnessRoundups: data.roundups, fitnessRoundupPages: [WEEK_PAGE_VARS] });
     try {
-      const data = await fixtures();
-      const logs = [];
-      const task = fitnessFeedTask({ outDir: tmp });
-      const out = await task.run(task.config, {
-        debug: false,
-        globals: { siteUrl: SITE, fitnessIndex: data.index, fitnessActivities: data.activities, fitnessRoundups: data.roundups, fitnessRoundupPages: [WEEK_PAGE] },
-        logger: { info: (m) => logs.push(m), warn: (m) => logs.push(m), error: (m) => logs.push(m), debug() {} },
-      });
-      assert.deepEqual(out, { fitnessFeedPath: FEED_PATH, fitnessFeedCount: 4 });
-      const xml = await fs.readFile(path.join(tmp, 'life', 'feed.xml'), 'utf8');
-      assertBalanced(xml);
+      assertBalanced(xml.replace(/<!\[CDATA\[[\s\S]*?\]\]>/g, 'cdata'));
+      assert.match(xml, /^<\?xml version="1.0" encoding="utf-8"\?>\n<feed xmlns="http:\/\/www\.w3\.org\/2005\/Atom">/);
+      assert.match(xml, /<link rel="self" href="https:\/\/james\.ripixel\.co\.uk\/life\/feed\.xml"\/>/);
+      assert.match(xml, /<link rel="alternate" href="https:\/\/james\.ripixel\.co\.uk\/life"\/>/);
+      assert.match(xml, /<id>https:\/\/james\.ripixel\.co\.uk\/life<\/id>/);
       assert.equal((xml.match(/<entry>/g) || []).length, 4);
-      assert.match(logs.join('\n'), /4 entries \(3 activities, 1 roundups\)/);
+      assert.ok(xml.indexOf('week-42-2026') < xml.indexOf('colwick-parkrun'), 'roundup (generated 19 Oct) precedes the 17 Oct run');
+      assert.match(xml, /<feed[^]*?<updated>2026-10-19T00:05:12\.000Z<\/updated>/);
+      assert.match(xml, /<category label="Roundup" term="roundup"\/>/);
+      assert.match(xml, /<summary type="html"><!\[CDATA\[Run · 5\.01 km/);
+      assert.match(xml, /<generator>ripixel-website<\/generator>/);
+      assert.doesNotMatch(xml, /fitglue\.tech/);
     } finally {
       await fs.rm(tmp, { recursive: true, force: true });
     }
   });
   test('with no fitness data writes an empty, valid feed', async () => {
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'fitness-feed-'));
+    const { tmp, xml } = await build({});
     try {
-      const task = fitnessFeedTask({ outDir: tmp });
-      const out = await task.run(task.config, { debug: false, globals: {}, logger: { info() {}, warn() {}, error() {}, debug() {} } });
-      assert.equal(out.fitnessFeedCount, 0);
-      assertBalanced(await fs.readFile(path.join(tmp, 'life', 'feed.xml'), 'utf8'));
+      assertBalanced(xml);
+      assert.doesNotMatch(xml, /<entry>/);
     } finally {
       await fs.rm(tmp, { recursive: true, force: true });
     }

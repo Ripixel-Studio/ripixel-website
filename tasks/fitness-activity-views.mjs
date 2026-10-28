@@ -1,39 +1,33 @@
 // @ts-check
 /**
- * Fitness activity pages task (S2.3).
+ * Fitness activity views (S2.3) — data only.
  *
- * Renders one static page per showcased activity from the `fitnessActivities`
- * global that tasks/fitness-fetch.mjs sets (contract: jarvis-memory
- * specs/ripixel-website/fitness-zine.md, "Data contract (S0)" §3/§4/§8).
+ * Shapes the `fitnessActivities` global that tasks/fitness-fetch.mjs sets
+ * (contract: jarvis-memory specs/ripixel-website/fitness-zine.md, "Data
+ * contract (S0)" §3/§4/§8) into `fitnessActivityPages`: one plain view model
+ * per activity. Skier's generateDataPagesTask renders each one with
+ * personal/templates/activity.html (see skier.personal.tasks.mjs):
  *
- *   personal/templates/activity.html  →  public/personal/life/activity/<slug>/index.html
+ *   fitnessActivityPages[i]  →  public/personal/life/activity/<slug>/index.html
  *
  * The page is linked and canonicalised slash-less (/life/activity/<slug>; firebase.json has
  * trailingSlash: false, so the directory form 301s to it). The directory output is kept
- * because Firebase serves <slug>/index.html at /life/activity/<slug> under cleanUrls. Skier has
- * no "page per object in a global" builtin, so this compiles the template
- * itself with Handlebars (the same library Skier uses), registering the site's
- * partials from personal/partials/.
+ * because Firebase serves <slug>/index.html at /life/activity/<slug> under cleanUrls.
  *
- * Everything presentational is computed here into a plain view model so the
- * template only does `{{#if}}` / `{{#each}}` — the maths (SVG paths, unit
- * formatting, module gating in §4's order) lives in exported functions that
- * tasks/fitness-activity-pages.test.mjs covers.
+ * Everything presentational is computed here so the template only does
+ * `{{#if}}` / `{{#each}}` — the maths (SVG paths, unit formatting, module
+ * gating in §4's order) lives in exported functions that
+ * tasks/fitness-activity-views.test.mjs covers.
  */
-import fs from 'node:fs/promises';
 import path from 'node:path';
-import Handlebars from 'handlebars';
 import { athleteWords } from './fitness-words.mjs';
 import { buildHyroxHistory, buildRaceView, pbChase, eventUrl } from './fitness-hyrox.mjs';
 import { activityTheme, hybridRaceLabel } from './fitness-theme.mjs';
 import { calorieFigure } from './fitness-calories.mjs';
 import { orientationOf } from './fitness-photo-dims.mjs';
 
-export const DEFAULT_TEMPLATE = 'personal/templates/activity.html';
-export const DEFAULT_PARTIALS_DIR = 'personal/partials';
-export const DEFAULT_OUT_DIR = 'public/personal';
 export const ACTIVITY_BASE_PATH = '/life/activity';
-/** Where tasks/fitness-feed.mjs writes the Atom feed (kept as a literal: that module imports this one). */
+/** Where the fitness Atom feed is written (kept as a literal: tasks/fitness-feed-items.mjs imports this module). */
 export const FITNESS_FEED_PATH = '/life/feed.xml';
 
 /** Same shape the fetch task accepts; slugs become file names. */
@@ -42,18 +36,22 @@ const SAFE_SLUG = /^[A-Za-z0-9][A-Za-z0-9._-]{0,200}$/;
 // ---------------------------------------------------------------------------
 // Slug → path
 
+/** @param {unknown} slug */
+export function isSafeSlug(slug) {
+  return typeof slug === 'string' && SAFE_SLUG.test(slug) && !slug.includes('..');
+}
+
 /**
- * Where a slug's page is written and served. Throws on anything that is not a
- * plain showcase id (path separators, `..`, empty) so a bad index entry can
- * never escape the output directory.
+ * Where a slug's page is written, relative to the output directory. Throws on
+ * anything that is not a plain showcase id (path separators, `..`, empty) so a
+ * bad index entry can never escape it.
  * @param {string} slug
- * @param {string} [outDir]
  */
-export function slugToOutPath(slug, outDir = DEFAULT_OUT_DIR) {
-  if (typeof slug !== 'string' || !SAFE_SLUG.test(slug) || slug.includes('..')) {
+export function activityOutPath(slug) {
+  if (!isSafeSlug(slug)) {
     throw new Error(`unusable activity slug ${JSON.stringify(slug)}`);
   }
-  return path.join(outDir, 'life', 'activity', slug, 'index.html');
+  return path.posix.join('life', 'activity', slug, 'index.html');
 }
 
 /** @param {string} slug */
@@ -1285,72 +1283,38 @@ export function buildActivityView(file, index, opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// Handlebars environment + task
-
-/** @param {string} partialsDir */
-async function registerPartials(hb, partialsDir) {
-  const files = (await fs.readdir(partialsDir)).filter((f) => /\.(html|hbs)$/.test(f));
-  for (const f of files) {
-    hb.registerPartial(f.replace(/\.(html|hbs)$/, ''), await fs.readFile(path.join(partialsDir, f), 'utf8'));
-  }
-}
-
-/** A Handlebars instance with the site's partials and the helpers they use. */
-export async function createActivityRenderer({ template = DEFAULT_TEMPLATE, partialsDir = DEFAULT_PARTIALS_DIR } = {}) {
-  const hb = Handlebars.create();
-  hb.registerHelper('eq', (a, b) => a === b);
-  hb.registerHelper('times', function (n, options) {
-    let out = '';
-    for (let i = 0; i < num(n); i++) out += options.fn(i);
-    return out;
-  });
-  await registerPartials(hb, partialsDir);
-  const compiled = hb.compile(await fs.readFile(template, 'utf8'));
-  return (/** @type {Record<string, unknown>} */ vars) => compiled(vars);
-}
+// The Skier task
 
 /**
- * The Skier task. Runs after fetch-fitness; reads `fitnessActivities` and
- * `fitnessIndex` from globals and writes one page per listed slug.
- * @param {{ template?: string, partialsDir?: string, outDir?: string }} [config]
+ * Builds `fitnessActivityPages` from `fitnessActivities` + `fitnessIndex`
+ * (after fetch-fitness and fitness-og-images, which supplies the og:image).
+ * Activities whose slug is unusable as a file name are skipped with a warning.
  */
-export function generateActivityPagesTask(config = {}) {
+export function fitnessActivityViewsTask() {
   return {
-    name: 'generate-activity-pages',
-    title: 'Generate /life/activity/<slug> pages from fitnessActivities',
-    config,
-    run: async (/** @type {any} */ cfg, /** @type {any} */ ctx) => {
-      const outDir = cfg.outDir || DEFAULT_OUT_DIR;
-      const activities = Array.isArray(ctx.globals.fitnessActivities) ? ctx.globals.fitnessActivities : [];
+    name: 'fitness-activity-views',
+    title: 'Build the /life/activity/<slug> view models from fitnessActivities',
+    config: {},
+    run: async (/** @type {any} */ _cfg, /** @type {any} */ ctx) => {
+      const g = ctx.globals;
+      const activities = Array.isArray(g.fitnessActivities) ? g.fitnessActivities : [];
       if (!activities.length) {
         ctx.logger.warn('No fitness activities to render (fitnessActivities is empty)');
-        return {};
+        return { fitnessActivityPages: [] };
       }
-      const render = await createActivityRenderer(cfg);
       const hyrox = buildHyroxHistory(activities);
-      let written = 0;
-      /** @type {string[]} */
-      const slugs = [];
+      const pages = [];
       for (const file of activities) {
         const slug = file?.slug ?? file?.entry?.showcaseId;
-        let outPath;
-        try {
-          outPath = slugToOutPath(slug, outDir);
-        } catch (e) {
-          ctx.logger.warn(e instanceof Error ? e.message : String(e));
+        if (!isSafeSlug(slug)) {
+          ctx.logger.warn(`unusable activity slug ${JSON.stringify(slug)}`);
           continue;
         }
-        const ogCard = ctx.globals.fitnessOgImages?.activity?.[String(slug)];
-        const view = buildActivityView(file, ctx.globals.fitnessIndex, { siteUrl: ctx.globals.siteUrl, ogCard, hyrox, photoDims: ctx.globals.fitnessPhotoDims });
-        const html = render({ ...ctx.globals, ...view });
-        await fs.mkdir(path.dirname(outPath), { recursive: true });
-        await fs.writeFile(outPath, html);
-        slugs.push(view.act.slug);
-        written++;
-        ctx.logger.debug(`Generated ${outPath}`);
+        const ogCard = g.fitnessOgImages?.activity?.[String(slug)];
+        pages.push(buildActivityView(file, g.fitnessIndex, { siteUrl: g.siteUrl, ogCard, hyrox, photoDims: g.fitnessPhotoDims }));
       }
-      ctx.logger.info(`Activity pages: ${written} written under ${path.join(outDir, 'life', 'activity')}`);
-      return { fitnessActivitySlugs: slugs };
+      ctx.logger.info(`Activity views: ${pages.length} of ${activities.length}`);
+      return { fitnessActivityPages: pages };
     },
   };
 }

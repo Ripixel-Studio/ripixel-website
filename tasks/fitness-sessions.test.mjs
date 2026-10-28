@@ -8,7 +8,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { loadFitnessData } from './fitness-fetch.mjs';
-import { buildSessions, fitnessSessionsPageTask, PAGE_SIZE } from './fitness-sessions.mjs';
+import { buildSessions, fitnessSessionsViewTask, PAGE_SIZE } from './fitness-sessions.mjs';
+import { lifePageTasks } from './life-pages.mjs';
+import { runSkierTasks } from './skier-test-runner.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -31,25 +33,27 @@ describe('/life/sessions', () => {
     assert.equal(s.pageSize, PAGE_SIZE);
   });
 
-  test('the task writes life/sessions.html with every session and the filter chips', async () => {
+  test('Skier renders life/sessions.html from the view, with every session and the filter chips', async () => {
     const d = await loadFitnessData({ source: 'fixtures', fixturesDir: path.join(REPO, 'fixtures', 'fitness') });
     const out = await fs.mkdtemp(path.join(os.tmpdir(), 'sessions-'));
-    const logs = [];
-    const task = fitnessSessionsPageTask({
-      outDir: out,
-      template: path.join(REPO, 'personal/templates/sessions.html'),
-      partialsDir: path.join(REPO, 'personal/partials'),
-    });
-    await task.run(task.config, {
-      globals: { fitnessIndex: d.index, fitnessActivities: d.activities, siteUrl: 'https://james.ripixel.co.uk' },
-      logger: { info: (m) => logs.push(m), warn() {}, error() {}, debug() {} },
-    });
-    const html = await fs.readFile(path.join(out, 'life', 'sessions.html'), 'utf8');
-    assert.equal((html.match(/class="fit-tile /g) || []).length, d.index.activities.length);
-    assert.match(html, /data-filter="run"/);
-    assert.match(html, /<link rel="canonical" href="https:\/\/james\.ripixel\.co\.uk\/life\/sessions" \/>/);
-    assert.match(html, /href="\/life\/activity\/colwick-parkrun-2026-10-17"/);
-    assert.match(logs.join('\n'), /Sessions page: 3 sessions/);
-    await fs.rm(out, { recursive: true, force: true });
+    try {
+      const lifePages = lifePageTasks({
+        outDir: out,
+        siteUrl: 'https://james.ripixel.co.uk',
+        pagesDir: path.join(REPO, 'personal/pages/life'),
+        partialsDir: path.join(REPO, 'personal/partials'),
+      })[2];
+      const globals = { fitnessIndex: d.index, fitnessActivities: d.activities, siteUrl: 'https://james.ripixel.co.uk' };
+      await runSkierTasks([fitnessSessionsViewTask(), lifePages], globals);
+      assert.match(/** @type {any} */ (globals).fitnessSessionsPage.fitnessSessions.totalLabel, /^3 sessions$/);
+      const html = await fs.readFile(path.join(out, 'life', 'sessions.html'), 'utf8');
+      assert.equal((html.match(/class="fit-tile /g) || []).length, d.index.activities.length);
+      assert.match(html, /data-filter="run"/);
+      assert.match(html, /<link rel="canonical" href="https:\/\/james\.ripixel\.co\.uk\/life\/sessions" \/>/);
+      assert.match(html, /href="\/life\/activity\/colwick-parkrun-2026-10-17"/);
+      assert.match(html, /<title>[^<]*sessions/);
+    } finally {
+      await fs.rm(out, { recursive: true, force: true });
+    }
   });
 });

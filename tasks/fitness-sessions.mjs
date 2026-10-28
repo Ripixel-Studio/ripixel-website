@@ -8,19 +8,12 @@
  * cards at a time ("show more"), and photos are `loading="lazy"`, so ~700
  * cards cost a few hundred KB of HTML and only the photos near the viewport.
  *
- * The view model is built here; the page is personal/templates/sessions.html
- * rendered with the site partials, written to public/personal/life/sessions.html.
+ * The view model is built here (`fitnessSessionsPage`, data only); Skier renders
+ * personal/pages/life/sessions.html with it to public/personal/life/sessions.html.
  */
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import Handlebars from 'handlebars';
-
 import { buildCard, filesBySlug, SESSIONS_HREF, TZ } from './fitness-life.mjs';
 import { FAMILIES } from './fitness-theme.mjs';
 
-export const DEFAULT_TEMPLATE = 'personal/templates/sessions.html';
-export const DEFAULT_PARTIALS_DIR = 'personal/partials';
-export const DEFAULT_OUT_DIR = 'public/personal';
 export const PAGE_SIZE = 48;
 
 /** @param {Date} d */
@@ -78,44 +71,30 @@ export function buildSessions(index, activities = []) {
   };
 }
 
-async function registerPartials(/** @type {typeof Handlebars} */ hb, /** @type {string} */ dir) {
-  for (const f of await fs.readdir(dir)) {
-    const ext = path.extname(f);
-    if (ext !== '.html' && ext !== '.hbs') continue;
-    hb.registerPartial(path.basename(f, ext), await fs.readFile(path.join(dir, f), 'utf8'));
-  }
-}
-
 /**
- * The Skier task. After fetch-fitness; before the sitemap scan.
- * @param {{ template?: string, partialsDir?: string, outDir?: string }} [config]
+ * The data task: `fitnessSessionsPage`, the template variables for /life/sessions
+ * (rendered by Skier's generatePagesTask from personal/pages/life/sessions.html; see
+ * tasks/life-pages.mjs). After fetch-fitness.
  */
-export function fitnessSessionsPageTask(config = {}) {
+export function fitnessSessionsViewTask() {
   return {
-    name: 'fitness-sessions-page',
-    title: 'Generate /life/sessions (every session, filterable by type)',
-    config,
-    run: async (/** @type {any} */ cfg, /** @type {any} */ ctx) => {
+    name: 'fitness-sessions-view',
+    title: 'Build the /life/sessions view model (every session, filterable by type)',
+    config: {},
+    run: async (/** @type {any} */ _cfg, /** @type {any} */ ctx) => {
       const g = ctx.globals || {};
-      const hb = Handlebars.create();
-      await registerPartials(hb, cfg.partialsDir || DEFAULT_PARTIALS_DIR);
-      const render = hb.compile(await fs.readFile(cfg.template || DEFAULT_TEMPLATE, 'utf8'));
       const sessions = buildSessions(g.fitnessIndex, Array.isArray(g.fitnessActivities) ? g.fitnessActivities : []);
       const siteUrl = String(g.siteUrl || '').replace(/\/+$/, '');
-      const html = render({
-        ...g,
+      const fitnessSessionsPage = {
         page: 'life',
         subpage: '| sessions',
         description: `Every training session on the record — ${sessions.totalLabel}, newest first.`,
         canonical: siteUrl ? `${siteUrl}${SESSIONS_HREF}` : '',
         fitnessSessions: sessions,
         fitnessUnavailable: Boolean(g.fitnessUnavailable),
-      });
-      const out = path.join(cfg.outDir || DEFAULT_OUT_DIR, 'life', 'sessions.html');
-      await fs.mkdir(path.dirname(out), { recursive: true });
-      await fs.writeFile(out, html);
-      ctx.logger.info(`Sessions page: ${sessions.total} sessions in ${sessions.months.length} months, ${sessions.filters.length} types`);
-      return {};
+      };
+      ctx.logger.info(`Sessions view: ${sessions.total} sessions in ${sessions.months.length} months, ${sessions.filters.length} types`);
+      return { fitnessSessionsPage };
     },
   };
 }

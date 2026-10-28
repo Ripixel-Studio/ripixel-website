@@ -16,8 +16,6 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { stripTrailingSlashes } from './sitemap-slashless.mjs';
-
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(REPO, 'public', 'personal');
 const ORIGIN = 'https://james.ripixel.co.uk';
@@ -100,15 +98,5 @@ describe('built personal site has no trailing-slash internal links', () => {
     const text = await fs.readFile(sitemap, 'utf8');
     assert.match(text, new RegExp(`<loc>${ORIGIN}/life/activity/[^/<]+</loc>`));
     assert.match(text, new RegExp(`<loc>${ORIGIN}/</loc>`), 'the root keeps its slash');
-  });
-});
-
-describe('stripTrailingSlashes', () => {
-  test('strips page slashes, keeps the origin', () => {
-    const xml = `<loc>${ORIGIN}/</loc>\n<loc>${ORIGIN}/life/activity/x/</loc>\n<loc>${ORIGIN}/about</loc>\n<loc>/</loc>`;
-    assert.equal(
-      stripTrailingSlashes(xml),
-      `<loc>${ORIGIN}/</loc>\n<loc>${ORIGIN}/life/activity/x</loc>\n<loc>${ORIGIN}/about</loc>\n<loc>/</loc>`,
-    );
   });
 });

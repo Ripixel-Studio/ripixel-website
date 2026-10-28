@@ -17,12 +17,16 @@ import {
 } from 'skier';
 import { fetchFitnessTask } from './tasks/fitness-fetch.mjs';
 import { fitnessLifeTask } from './tasks/fitness-life.mjs';
-import { fitnessRoundupPagesTask } from './tasks/fitness-roundup-pages.mjs';
+import { fitnessActivityViewsTask } from './tasks/fitness-activity-views.mjs';
+import { fitnessRoundupViewsTask } from './tasks/fitness-roundup-views.mjs';
 import { fitnessOgImagesTask } from './tasks/fitness-og-images.mjs';
-import { fitnessSessionsPageTask } from './tasks/fitness-sessions.mjs';
+import { fitnessSessionsViewTask } from './tasks/fitness-sessions.mjs';
+import { fitnessEventViewsTask } from './tasks/fitness-event-views.mjs';
 import { fitnessPhotoDimsTask } from './tasks/fitness-photo-dims.mjs';
-import { fitnessFeedTask, FEED_PATH as FITNESS_FEED_PATH } from './tasks/fitness-feed.mjs';
-import { sitemapSlashlessTask } from './tasks/sitemap-slashless.mjs';
+import { fitnessFeedItemsTask, FEED_PATH as FITNESS_FEED_PATH } from './tasks/fitness-feed-items.mjs';
+import { lifePageTasks } from './tasks/life-pages.mjs';
+
+const SITE_URL = 'https://james.ripixel.co.uk';
 
 /** Estimate read time in minutes from raw text (200 wpm)
  * @param {string} text */
@@ -209,22 +213,25 @@ export const tasks = [
     // Load right-now panel data (optional — create right-now.json to enable)
     loadRightNowTask(),
 
+    // ---- /life: data tasks (custom) shape globals; Skier builtins render them ----
     // Fetch the FitGlue showcase export (live → .cache/fitness → fixtures/fitness → empty).
     // Sets fitnessIndex, fitnessActivities, fitnessRoundups, fitnessUnavailable, fitnessSource.
     // Env: FITNESS_DATA_BASE (URL), FITNESS_DATA_SOURCE=live|cache|fixtures. See README "Fitness data".
     fetchFitnessTask(),
-    fitnessPhotoDimsTask(), // F5.5 hero photo sizes (portrait beside the title, else full width); before the page tasks
-    fitnessLifeTask(), // S2.2 life page — builds `fitnessLife` from the fitness globals; must precede generate-pages
-    // S2.5 OG cards — /life/og/{activity,roundup}/<id>.png via sharp, cached in .cache/og. Runs BEFORE the page
-    // tasks because they read `fitnessOgImages` to point og:image at the rendered card.
+    fitnessPhotoDimsTask(), // F5.5 `fitnessPhotoDims`: hero photo sizes (portrait beside the title, else full width); before the view tasks
+    fitnessLifeTask(), // S2.2 `fitnessLife` for /life (rendered by generate-pages below)
+    // S2.5 OG cards — /life/og/{activity,roundup}/<id>.png via sharp, cached in .cache/og. Runs BEFORE the
+    // view tasks because they read `fitnessOgImages` to point og:image at the rendered card.
     fitnessOgImagesTask(),
-    fitnessRoundupPagesTask(), // S2.4 roundup pages: /life/roundup/<key> + /life/roundups from fitnessRoundups
-    // S2.3 activity pages — /life/activity/<slug>/ from fitnessActivities (needs fetch-fitness above; before the sitemap scan)
-    (await import('./tasks/fitness-activity-pages.mjs')).generateActivityPagesTask(),
-    // F5.2 race-weekend pages — /life/event/<slug> when several races share an event within a few days
-    (await import('./tasks/fitness-event-pages.mjs')).generateEventPagesTask(),
-    fitnessSessionsPageTask(), // F5.3 /life/sessions — every session, filterable by type (before the sitemap scan)
-    fitnessFeedTask(), // S2.5 Atom feed at /life/feed.xml — activities + fitnessRoundupPages, newest first, 50 entries
+    fitnessActivityViewsTask(), // S2.3 `fitnessActivityPages`: one view model per activity
+    fitnessEventViewsTask(), // F5.2 `fitnessEventPages`: one view model per race weekend
+    fitnessSessionsViewTask(), // F5.3 `fitnessSessionsPage`: every session, by month, with type filters
+    fitnessRoundupViewsTask(), // S2.4 `fitnessRoundupPages` + `fitnessRoundupsIndex`
+    fitnessFeedItemsTask(), // S2.5 `fitnessFeedItems` + `fitnessFeedUpdated`: 50 entries, newest first
+
+    // /life/activity/<slug>, /life/event/<slug>, /life/roundup/<key>, /life/roundups, /life/sessions,
+    // /life/feed.xml — Skier builtins
+    ...lifePageTasks({ outDir: './public/personal', siteUrl: SITE_URL }),
 
     // Generate individual thought article pages (adds readTime to each item)
     generateItemsTask({
@@ -331,11 +338,10 @@ export const tasks = [
     generateSitemapTask({
         outDir: './public/personal',
         scanDir: './public/personal',
-        siteUrl: 'https://james.ripixel.co.uk',
+        siteUrl: SITE_URL,
+        // The site is slash-less (firebase.json trailingSlash: false): `foo/index.html` → `/foo`
+        trailingSlash: false,
     }),
-
-    // Skier writes `foo/index.html` as `/foo/`; the site is slash-less (firebase.json trailingSlash: false)
-    sitemapSlashlessTask({ outDir: './public/personal' }),
 
     {
         name: 'Copy robots.txt',

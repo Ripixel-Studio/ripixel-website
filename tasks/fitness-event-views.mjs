@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * Race-weekend event pages (F5.2): /life/event/<slug>.
+ * Race-weekend event views (F5.2) — data only: /life/event/<slug>.
  *
  * When several of his races fall at the same event within EVENT_WINDOW_DAYS (doubles on
  * the Tuesday, solo on the Wednesday), they get one combined page linking every race:
@@ -9,17 +9,16 @@
  * race's highlight photo (F5.5). Grouping lives in tasks/fitness-hyrox.mjs
  * (buildHyroxHistory → events) and works for any number of races and divisions.
  *
- *   personal/templates/event.html  →  public/personal/life/event/<slug>/index.html
+ * This module builds `fitnessEventPages`, one view model per weekend; Skier's
+ * generateDataPagesTask renders each with personal/templates/event.html (tasks/life-pages.mjs):
+ *
+ *   fitnessEventPages[i]  →  public/personal/life/event/<slug>/index.html
  */
-import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { createActivityRenderer, buildActivityView, fmtDateShort, slugToOutPath } from './fitness-activity-pages.mjs';
+import { buildActivityView, fmtDateShort, isSafeSlug } from './fitness-activity-views.mjs';
 import { buildHyroxHistory, pbChase, eventUrl, clock } from './fitness-hyrox.mjs';
 import { activityTheme } from './fitness-theme.mjs';
-
-export const DEFAULT_TEMPLATE = 'personal/templates/event.html';
-export const DEFAULT_OUT_DIR = 'public/personal';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -35,11 +34,14 @@ export function dateRange(a, b) {
   return `${x.getUTCDate()} ${MONTHS[x.getUTCMonth()]} – ${fmtDateShort(b)}`;
 }
 
-/** @param {string} slug @param {string} [outDir] */
-export function eventOutPath(slug, outDir = DEFAULT_OUT_DIR) {
-  // Same safety rules as activity slugs; reuse the check, then swap the folder.
-  const activityPath = slugToOutPath(slug, outDir);
-  return path.join(path.dirname(path.dirname(path.dirname(activityPath))), 'event', slug, 'index.html');
+/**
+ * Where an event's page is written, relative to the output directory. Same safety rules
+ * as activity slugs: throws on anything that is not a plain id.
+ * @param {string} slug
+ */
+export function eventOutPath(slug) {
+  if (!isSafeSlug(slug)) throw new Error(`unusable event slug ${JSON.stringify(slug)}`);
+  return path.posix.join('life', 'event', slug, 'index.html');
 }
 
 /**
@@ -140,40 +142,29 @@ export function buildEventView(event, history, index, opts = {}) {
 }
 
 /**
- * The Skier task: one page per race weekend. Runs after fetch-fitness (and after the OG
- * task, whose card URLs it reuses for og:image).
- * @param {{ template?: string, partialsDir?: string, outDir?: string }} [config]
+ * The data task: `fitnessEventPages`, one view model per race weekend. Runs after
+ * fetch-fitness (and after the OG task, whose card URLs it reuses for og:image).
+ * A weekend whose slug is unusable as a file name is skipped with a warning.
  */
-export function generateEventPagesTask(config = {}) {
+export function fitnessEventViewsTask() {
   return {
-    name: 'generate-event-pages',
-    title: 'Generate /life/event/<slug> race-weekend pages',
-    config,
-    run: async (/** @type {any} */ cfg, /** @type {any} */ ctx) => {
-      const activities = Array.isArray(ctx.globals.fitnessActivities) ? ctx.globals.fitnessActivities : [];
+    name: 'fitness-event-views',
+    title: 'Build the /life/event/<slug> race-weekend view models',
+    config: {},
+    run: async (/** @type {any} */ _cfg, /** @type {any} */ ctx) => {
+      const g = ctx.globals;
+      const activities = Array.isArray(g.fitnessActivities) ? g.fitnessActivities : [];
       const history = buildHyroxHistory(activities);
-      if (!history.events.length) {
-        ctx.logger.info('Event pages: no race weekends');
-        return { fitnessEventSlugs: [] };
-      }
-      const render = await createActivityRenderer({ template: cfg.template || DEFAULT_TEMPLATE, partialsDir: cfg.partialsDir });
-      const outDir = cfg.outDir || DEFAULT_OUT_DIR;
-      const slugs = [];
+      const pages = [];
       for (const event of history.events) {
-        let outPath;
-        try {
-          outPath = eventOutPath(event.slug, outDir);
-        } catch (e) {
-          ctx.logger.warn(e instanceof Error ? e.message : String(e));
+        if (!isSafeSlug(event.slug)) {
+          ctx.logger.warn(`unusable event slug ${JSON.stringify(event.slug)}`);
           continue;
         }
-        const view = buildEventView(event, history, ctx.globals.fitnessIndex, { siteUrl: ctx.globals.siteUrl, ogImages: ctx.globals.fitnessOgImages?.activity, photoDims: ctx.globals.fitnessPhotoDims });
-        await fs.mkdir(path.dirname(outPath), { recursive: true });
-        await fs.writeFile(outPath, render({ ...ctx.globals, ...view }));
-        slugs.push(event.slug);
+        pages.push(buildEventView(event, history, g.fitnessIndex, { siteUrl: g.siteUrl, ogImages: g.fitnessOgImages?.activity, photoDims: g.fitnessPhotoDims }));
       }
-      ctx.logger.info(`Event pages: ${slugs.length} written under ${path.join(outDir, 'life', 'event')}`);
-      return { fitnessEventSlugs: slugs };
+      ctx.logger.info(pages.length ? `Event views: ${pages.length} race weekends` : 'Event views: no race weekends');
+      return { fitnessEventPages: pages };
     },
   };
 }

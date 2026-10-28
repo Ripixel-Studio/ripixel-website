@@ -2,9 +2,9 @@
 /**
  * `/life` front-page model (S2.2).
  *
- * Skier's Handlebars environment has no custom helpers (only `#if`, `#each`,
- * `#unless`), so everything the page shows is pre-formatted here into one
- * global, `fitnessLife`, and the templates only loop and test. All inputs are
+ * Everything the page shows is pre-formatted here into one global,
+ * `fitnessLife`, and the templates only loop and test (`#if`, `#each`,
+ * `#unless`); Skier's generatePagesTask renders personal/pages/life.html. All inputs are
  * the S2.1 globals (`fitnessIndex`, `fitnessActivities`, `fitnessRoundups`,
  * `fitnessUnavailable`), the calendar export `fitnessEvents` (S2.6: the Fitness
  * Events / Fitness Regular Google calendars, exported by the box as
@@ -17,7 +17,7 @@
 import fs from 'node:fs/promises';
 import { activityTheme, FAMILIES, hybridRaceLabel, typeKeyOf, typeKeyOfTitle } from './fitness-theme.mjs';
 import { recordLabel, latestRecords } from './fitness-records.mjs';
-import { routePath } from './fitness-activity-pages.mjs';
+import { routePath } from './fitness-activity-views.mjs';
 import { buildHyroxHistory, hyroxWall } from './fitness-hyrox.mjs';
 
 export const DEFAULT_EVENTS_FILE = 'personal/items/life/fitness.json';

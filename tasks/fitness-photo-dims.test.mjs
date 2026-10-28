@@ -8,7 +8,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 
 import { orientationOf, dimsFromBytes, heroImageUrls, loadPhotoDims } from './fitness-photo-dims.mjs';
-import { heroLayout } from './fitness-activity-pages.mjs';
+import { heroLayout } from './fitness-activity-views.mjs';
 
 /** A w×h JPEG, optionally with an EXIF orientation. */
 async function jpeg(w, h, orientation) {

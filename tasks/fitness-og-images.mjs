@@ -8,9 +8,9 @@
  * cached in .cache/og/ keyed by a hash of their SVG, so a rebuild only
  * rasterises what changed.
  *
- * Runs BEFORE the page tasks: it returns `fitnessOgImages`
+ * Runs BEFORE the activity and roundup view tasks: it returns `fitnessOgImages`
  * ({ activity: { [slug]: url }, roundup: { [key]: url } }) and the activity /
- * roundup page tasks read that to set `og:image`. A page whose card is missing
+ * roundup view tasks read that to set `og:image`. A page whose card is missing
  * (sharp unavailable, a render error) falls back to its banner / photo /
  * card_life.png — the build never fails here.
  */
@@ -19,16 +19,16 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 
 import { buildFitnessCardSVG, rasterise } from '../scripts/generate-og-images.mjs';
-import { buildActivityView } from './fitness-activity-pages.mjs';
+import { buildActivityView } from './fitness-activity-views.mjs';
 import { buildHyroxHistory } from './fitness-hyrox.mjs';
-import { buildRoundupView, parsePeriodKey } from './fitness-roundup-pages.mjs';
+import { buildRoundupView, parsePeriodKey } from './fitness-roundup-views.mjs';
 
 export const DEFAULT_OUT_DIR = 'public/personal/life/og';
 export const DEFAULT_CACHE_DIR = '.cache/og';
 export const DEFAULT_URL_BASE = '/life/og';
 export const DEFAULT_CONCURRENCY = 4;
 
-/** Same shape the page tasks accept; ids become file names. */
+/** Same shape the view tasks accept; ids become file names. */
 const SAFE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,200}$/;
 
 const silentLogger = { info() {}, warn() {}, error() {}, debug() {} };
@@ -123,7 +123,7 @@ async function exists(p) {
 
 /**
  * Render every card into `outDir`, reusing `.cache/og` where the SVG has not
- * changed. Returns the URL map the page tasks consume plus counts.
+ * changed. Returns the URL map the view tasks consume plus counts.
  * @param {{ activities?: any[], roundups?: any[], index?: any, outDir?: string, cacheDir?: string, urlBase?: string, siteUrl?: string, fontCacheDir?: string, concurrency?: number, logger?: any }} opts
  */
 export async function renderFitnessCards(opts = {}) {

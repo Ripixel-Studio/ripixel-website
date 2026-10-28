@@ -91,8 +91,8 @@ unchanged file costs a 304.
 `tasks/fitness-life.mjs` runs straight after the fetch and turns those globals into one
 pre-formatted `fitnessLife` global for `personal/pages/life.html` — the week strip, the
 latest six activity cards, the roundup teaser, the totals/streaks/PB block and the "on the
-calendar" block. Skier's Handlebars has no custom helpers, so all formatting lives in that
-task; the `fitness-*` partials only loop and test.
+calendar" block. All formatting lives in that task (it is data, not markup); the
+`fitness-*` partials only loop and test.
 
 **Shared by the /life pages.** `tasks/fitness-theme.mjs` maps a FitGlue activity type to its
 family (`run`, `ride`, `crossfit`, `strength`, `yoga`, …: FitGlue's showcase family map) and
@@ -121,13 +121,20 @@ Downstream tasks can page over the globals directly (`generatePaginatedItemsTask
 
 ### Pages, feed and OG images built from it
 
-| task | output |
-|---|---|
-| `tasks/fitness-og-images.mjs` | `/life/og/activity/<slug>.png`, `/life/og/roundup/<key>.png` — one 1200×630 OG card per page |
-| `tasks/fitness-roundup-pages.mjs` | `/life/roundup/<key>`, `/life/roundups` |
-| `tasks/fitness-activity-pages.mjs` | `/life/activity/<slug>` |
-| `tasks/fitness-sessions.mjs` | `/life/sessions` — every session newest first, by month, filterable by type (JS reveals 48 at a time) |
-| `tasks/fitness-feed.mjs` | **`/life/feed.xml`** — Atom, activities and roundups interleaved newest first, 50 entries |
+Every page and the feed are rendered by Skier builtins; the site's own tasks only shape
+globals (and draw the OG PNGs). The render configuration is `tasks/life-pages.mjs`.
+
+| data task (custom) | global | rendered by (Skier) | output |
+|---|---|---|---|
+| `tasks/fitness-og-images.mjs` | `fitnessOgImages` | — (sharp, see below) | `/life/og/activity/<slug>.png`, `/life/og/roundup/<key>.png` — one 1200×630 OG card per page |
+| `tasks/fitness-activity-views.mjs` | `fitnessActivityPages` | `generateDataPagesTask` + `personal/templates/activity.html` | `/life/activity/<slug>` |
+| `tasks/fitness-event-views.mjs` | `fitnessEventPages` | `generateDataPagesTask` + `personal/templates/event.html` | `/life/event/<slug>` — one page per race weekend (several races at one event within a few days) |
+| `tasks/fitness-roundup-views.mjs` | `fitnessRoundupPages` | `generateDataPagesTask` + `personal/templates/roundup.html` | `/life/roundup/<key>` |
+| `tasks/fitness-roundup-views.mjs` | `fitnessRoundupsIndex` | `generatePagesTask` + `personal/pages/life/roundups.html` | `/life/roundups` |
+| `tasks/fitness-sessions.mjs` | `fitnessSessionsPage` | `generatePagesTask` + `personal/pages/life/sessions.html` | `/life/sessions` — every session newest first, by month, filterable by type (JS reveals 48 at a time) |
+| `tasks/fitness-feed-items.mjs` | `fitnessFeedItems` | `generateFeedTask` (Atom only) | **`/life/feed.xml`** — activities and roundups interleaved newest first, 50 entries |
+
+The sitemap is Skier's `generateSitemapTask` with `trailingSlash: false`.
 
 **Feed.** `https://james.ripixel.co.uk/life/feed.xml`. Each entry is the page title, its
 link, a plain-text summary (headline numbers for an activity, the totals line plus the AI
@@ -144,7 +151,7 @@ Anton / JetBrains Mono faces come from the `@fontsource` packages already instal
 unpacked to `.cache/fonts/` for fontconfig on first use, so nothing needs installing in
 `~/.fonts`. Rendered cards are cached in `.cache/og/` (keyed by the card's SVG) so a
 rebuild only rasterises what changed, and copied into `public/personal/life/og/`. The
-activity and roundup page tasks read the `fitnessOgImages` URL map the OG task returns to
+activity and roundup view tasks read the `fitnessOgImages` URL map the OG task returns to
 set `og:image`; a page without a card (sharp unavailable, a render error) falls back to its
 AI banner → first photo → `card_life.png`, and the build carries on.
 

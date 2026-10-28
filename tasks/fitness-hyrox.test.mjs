@@ -9,8 +9,10 @@ import path from 'node:path';
 import { athleteWords } from './fitness-words.mjs';
 import { buildHyroxHistory, buildRaceView, groupEvents, partnerName, pbChase, hyroxWall, deltaClock, clock } from './fitness-hyrox.mjs';
 import { buildPbBoard } from './fitness-life.mjs';
-import { buildActivityView, createActivityRenderer } from './fitness-activity-pages.mjs';
-import { buildEventView, dateRange, generateEventPagesTask } from './fitness-event-pages.mjs';
+import { buildActivityView } from './fitness-activity-views.mjs';
+import { buildEventView, dateRange, fitnessEventViewsTask } from './fitness-event-views.mjs';
+import { lifePageTasks } from './life-pages.mjs';
+import { runSkierTasks } from './skier-test-runner.mjs';
 import { activityCard } from './fitness-og-images.mjs';
 
 const STATIONS = [['skierg', 'SkiErg'], ['sled_push', 'Sled Push'], ['sled_pull', 'Sled Pull'], ['burpee_broad_jump', 'Burpee Broad Jumps'], ['rowing', 'Row'], ['farmers_carry', 'Farmers Carry'], ['sandbag_lunges', 'Sandbag Lunges'], ['wall_balls', 'Wall Balls']];
@@ -46,6 +48,10 @@ const rome = raceFile({ slug: 'rome', date: '2026-09-27T14:50:05Z', title: 'HYRO
 const doubles = raceFile({ slug: 'bham-doubles', date: '2026-10-27T12:10:02Z', title: "Hyrox Birmingham - Open Men's Doubles", division: 'men_doubles', label: "Open Men's Doubles", total: 4529, run: 330, stn: 170, desc: "Completed via ROXFIT\n\n🏆 Division: Doubles Men\n\nFirst of two races over two days, and Stephen's first Hyrox!\n\n✨ AI Summary:\nA demanding effort." });
 const solo = raceFile({ slug: 'bham-solo', date: '2026-10-28T08:20:02Z', title: "Hyrox Birmingham - Open Men's Solo", division: 'men_open', label: "Open Men's Solo", total: 5382, run: 320, stn: 310, ranks: [270, 60], desc: 'Completed via ROXFIT\n\n🏆 Division: Open Men\n📊 Overall Rank: 270\n\n⏱️ Split Times:\nRun 1: 5:39\nRoxzone: 7:24\n\n\nTwo races within 20hrs?! WHAT WAS I THINKING??\n\n✨ AI Summary:\nGrit.' });
 const all = [solo, doubles, rome, olympia, sim];
+
+/** lifePageTasks() in order: [activity pages, roundup pages, pages/life, feed, event pages]. */
+const ACTIVITY_PAGES = 0;
+const EVENT_PAGES = 4;
 
 describe('per-division PBs', () => {
   const h = buildHyroxHistory(all);
@@ -141,12 +147,13 @@ describe('race weekends', () => {
     assert.equal(dateRange('2026-10-27T12:00:00Z', '2026-10-28T08:00:00Z'), '27–28 Oct 2026');
     assert.equal(dateRange('2026-09-30T12:00:00Z', '2026-10-02T08:00:00Z'), '30 Sep – 2 Oct 2026');
   });
-  test('the task writes one page per event and links back to every race', async () => {
+  test('one view per event, and Skier writes its page linking back to every race', async () => {
     const out = await fs.mkdtemp(path.join(os.tmpdir(), 'ev-'));
-    const task = generateEventPagesTask({ outDir: out });
+    const globals = /** @type {any} */ ({ fitnessActivities: all, fitnessIndex: { profile: { displayName: 'James King' } }, siteUrl: '' });
     const logs = [];
-    const res = await task.run(task.config, { globals: { fitnessActivities: all, fitnessIndex: { profile: { displayName: 'James King' } }, siteUrl: '' }, logger: { info: (m) => logs.push(m), warn: (m) => logs.push(m), debug() {}, error() {} } });
-    assert.deepEqual(res.fitnessEventSlugs, ['hyrox-birmingham-2026-10-27']);
+    await runSkierTasks([fitnessEventViewsTask(), lifePageTasks({ outDir: out, siteUrl: 'https://james.ripixel.co.uk' })[EVENT_PAGES]], globals, logs);
+    assert.deepEqual(globals.fitnessEventPages.map((/** @type {any} */ p) => p.ev.slug), ['hyrox-birmingham-2026-10-27']);
+    assert.deepEqual(logs, []);
     const html = await fs.readFile(path.join(out, 'life', 'event', 'hyrox-birmingham-2026-10-27', 'index.html'), 'utf8');
     assert.match(html, /href="\/life\/activity\/bham-doubles"/);
     assert.match(html, /href="\/life\/activity\/bham-solo"/);
@@ -155,9 +162,8 @@ describe('race weekends', () => {
   test("the header is a collage of each race's photo, and the cards then carry none", async () => {
     const withPhotos = all.map((f) => (f.slug.startsWith('bham') ? { ...f, activity: { ...f.activity, photoUrls: [`https://x.test/${f.slug}.jpg`] } } : f));
     const out = await fs.mkdtemp(path.join(os.tmpdir(), 'ev-'));
-    const task = generateEventPagesTask({ outDir: out });
-    const quiet = { info() {}, warn() {}, debug() {}, error() {} };
-    await task.run(task.config, { globals: { fitnessActivities: withPhotos, fitnessIndex: { profile: { displayName: 'James King', showPhotoGallery: true } }, siteUrl: '' }, logger: quiet });
+    const globals = { fitnessActivities: withPhotos, fitnessIndex: { profile: { displayName: 'James King', showPhotoGallery: true } }, siteUrl: '' };
+    await runSkierTasks([fitnessEventViewsTask(), lifePageTasks({ outDir: out, siteUrl: 'https://james.ripixel.co.uk' })[EVENT_PAGES]], globals);
     const html = await fs.readFile(path.join(out, 'life', 'event', 'hyrox-birmingham-2026-10-27', 'index.html'), 'utf8');
     assert.equal((html.match(/class="ev-collage__tile"/g) || []).length, 2);
     assert.doesNotMatch(html, /class="ev-race__art"/);
@@ -191,8 +197,11 @@ describe('activity page', () => {
     assert.equal(callout, undefined, 'the stale division-less record is not listed');
   });
   test('the page renders the race card, the words, the race-day strip and the event link', async () => {
-    const render = await createActivityRenderer();
-    const html = render({ ...buildActivityView(solo, {}, { hyrox: h }) });
+    const out = await fs.mkdtemp(path.join(os.tmpdir(), 'act-'));
+    const globals = { fitnessActivityPages: [buildActivityView(solo, {}, { hyrox: h })] };
+    await runSkierTasks([lifePageTasks({ outDir: out, siteUrl: 'https://james.ripixel.co.uk' })[ACTIVITY_PAGES]], globals);
+    const html = await fs.readFile(path.join(out, 'life', 'activity', 'bham-solo', 'index.html'), 'utf8');
+    await fs.rm(out, { recursive: true, force: true });
     assert.match(html, /class="act-words"/);
     assert.match(html, /act-race__row/);
     assert.match(html, /\+5:55/);
