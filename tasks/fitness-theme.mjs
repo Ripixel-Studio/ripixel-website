@@ -120,3 +120,23 @@ export function hybridRaceLabel(title, opts = {}) {
   for (const [re, label] of HYBRID_RACES) if (re.test(text)) return label;
   return opts.hasRace ? 'HYROX' : '';
 }
+
+/**
+ * The family inks as hex, for drawings that cannot read CSS (the share cards, F5.4).
+ * Kept in step with personal/assets/styles/main/fitness-types.css by
+ * tasks/fitness-share-cards.test.mjs: `type` is --type, `on` is --type-on (ink → #171311),
+ * `text` is --type-text.
+ */
+export const TYPE_INKS = /** @type {Record<TypeKey, { type: string, on: string, text: string }>} */ ({
+  run: { type: '#C42A72', on: '#FFFFFF', text: '#C42A72' },
+  ride: { type: '#18A9C4', on: '#171311', text: '#187384' },
+  swim: { type: '#2148C0', on: '#FFFFFF', text: '#2148C0' },
+  paddle: { type: '#1A6F94', on: '#FFFFFF', text: '#1A6F94' },
+  hike: { type: '#0B7A4B', on: '#FFFFFF', text: '#0B7A4B' },
+  strength: { type: '#F25B1C', on: '#171311', text: '#B54719' },
+  crossfit: { type: '#F2C13C', on: '#171311', text: '#806726' },
+  hiit: { type: '#E5484D', on: '#171311', text: '#BC3D41' },
+  yoga: { type: '#7C3AED', on: '#FFFFFF', text: '#7C3AED' },
+  sport: { type: '#7BB52A', on: '#171311', text: '#537420' },
+  other: { type: '#6B6259', on: '#FFFFFF', text: '#6B6259' },
+});

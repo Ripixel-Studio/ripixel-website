@@ -49,7 +49,8 @@ export function eventOutPath(slug) {
  * @param {import('./fitness-hyrox.mjs').EventGroup} event
  * @param {import('./fitness-hyrox.mjs').HyroxHistory} history
  * @param {any} index  fitnessIndex
- * @param {{ siteUrl?: string, ogImages?: Record<string, string>, photoDims?: Record<string, { w: number, h: number }> }} [opts]
+ * @param {{ siteUrl?: string, ogCard?: string, share?: any, photoDims?: Record<string, { w: number, h: number }> }} [opts]
+ *   `ogCard` is the weekend's own landscape share card (tasks/fitness-og-images.mjs), `share` its Share-button entry.
  */
 export function buildEventView(event, history, index, opts = {}) {
   const siteUrl = (opts.siteUrl || '').replace(/\/+$/, '');
@@ -104,7 +105,7 @@ export function buildEventView(event, history, index, opts = {}) {
   const range = dateRange(event.start, event.end);
   const canonical = siteUrl ? `${siteUrl}${eventUrl(event.slug)}` : '';
   const description = `${races.length} races in ${range}: ${cards.map((c) => `${c.division} ${c.total}${c.isPB ? ' (PB)' : ''}`).join(', ')}.`;
-  const ogImage = cards.map((c) => opts.ogImages?.[c.url.split('/').pop() ?? '']).find(Boolean) || heroPhoto;
+  const ogImage = (opts.ogCard && /^https?:\/\//.test(opts.ogCard) ? opts.ogCard : '') || heroPhoto;
 
   return {
     page: 'life',
@@ -137,6 +138,7 @@ export function buildEventView(event, history, index, opts = {}) {
       // chased, history up to the event's last race in that division.
       chases: divisions.map((key) => pbChase(history, key, races.filter((r) => r.divisionKey === key).map((r) => r.slug))).filter(Boolean),
       owner: String(index?.profile?.displayName ?? 'James').toUpperCase(),
+      share: opts.share || null,
     },
   };
 }
@@ -161,7 +163,7 @@ export function fitnessEventViewsTask() {
           ctx.logger.warn(`unusable event slug ${JSON.stringify(event.slug)}`);
           continue;
         }
-        pages.push(buildEventView(event, history, g.fitnessIndex, { siteUrl: g.siteUrl, ogImages: g.fitnessOgImages?.activity, photoDims: g.fitnessPhotoDims }));
+        pages.push(buildEventView(event, history, g.fitnessIndex, { siteUrl: g.siteUrl, ogCard: g.fitnessOgImages?.event?.[event.slug], share: g.fitnessShareCards?.event?.[event.slug], photoDims: g.fitnessPhotoDims }));
       }
       ctx.logger.info(pages.length ? `Event views: ${pages.length} race weekends` : 'Event views: no race weekends');
       return { fitnessEventPages: pages };

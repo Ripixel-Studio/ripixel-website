@@ -8,10 +8,11 @@
  *      section, committed under personal/assets/images/. Re-render them with
  *        node scripts/generate-og-images.mjs
  *
- *   2. Fitness cards — one per activity and roundup page, rendered at build
- *      time by tasks/fitness-og-images.mjs into public/personal/life/og/ and
- *      cached in .cache/og/. The drawing lives here so both kinds share one
- *      frame; the Skier task only decides what goes on each card. Preview the
+ *   2. Fitness share cards (F5.4) — Story, Square and Landscape per activity,
+ *      race weekend and roundup, the landscape one doubling as the page's OG
+ *      image. Drawn by scripts/share-cards.mjs, rendered at build time by
+ *      tasks/fitness-og-images.mjs into public/personal/life/share/ and cached
+ *      in .cache/og/. This file lends them its fonts and xmlEsc. Preview the
  *      fitness set without a full build with
  *        node scripts/generate-og-images.mjs --fitness [outDir]
  *      (data comes from the same live → cache → fixtures chain as the build).
@@ -39,7 +40,7 @@ const INK = '#171311';
 const MONO = "'JetBrains Mono', 'Liberation Mono', monospace";
 const DISPLAY = "Anton, 'Impact', 'Liberation Sans Narrow', sans-serif";
 
-/** The life/fitness section ink — every fitness card uses it. */
+/** The life/fitness section ink. */
 export const FITNESS_INK = '#7C3AED';
 
 /** @type {{ id: string, label: string, glyph: string, ink: string, desc: string }[]} */
@@ -165,106 +166,6 @@ export function buildSectionSVG({ label, glyph, ink, desc }) {
     font-family="${MONO}"
     font-size="20" fill="${INK}" opacity="0.65">${xmlEsc(desc)}</text>`;
   return cardShell({ ink, pill: { glyph, label: label.toUpperCase() }, bigGlyph: glyph, inner });
-}
-
-// ---------------------------------------------------------------------------
-// Fitness cards
-
-/** Usable title width and Anton's rough advance per uppercase character. */
-const TITLE_MAX_W = 1088;
-const ANTON_EM_PER_CHAR = 0.5;
-/** Sizes to try: one line first (a one-liner reads better than two bigger lines), then two lines. */
-const TITLE_LADDER = [[150, 1], [136, 1], [124, 1], [112, 1], [100, 1], [112, 2], [100, 2], [88, 2], [76, 2], [64, 2], [56, 2]];
-const TITLE_BASELINE = 410;
-
-/**
- * Fit a display title: the largest size on one line (150 → 100px), else the
- * largest on two lines (112px down — two lines cap at 112 so the block clears
- * the kicker). Anything still too long at 56px is cut with an ellipsis.
- * @param {string} title
- * @returns {{ size: number, lines: string[] }}
- */
-export function fitTitle(title) {
-  const words = String(title).trim().split(/\s+/).filter(Boolean);
-  if (!words.length) return { size: 150, lines: ['ACTIVITY'] };
-  const wrap = (/** @type {number} */ maxChars) => {
-    /** @type {string[]} */
-    const lines = [];
-    let cur = '';
-    for (const w of words) {
-      const next = cur ? `${cur} ${w}` : w;
-      if (next.length <= maxChars || !cur) cur = next;
-      else { lines.push(cur); cur = w; }
-    }
-    if (cur) lines.push(cur);
-    return lines;
-  };
-  for (const [size, maxLines] of TITLE_LADDER) {
-    const maxChars = Math.floor(TITLE_MAX_W / (ANTON_EM_PER_CHAR * size));
-    const lines = wrap(maxChars);
-    if (lines.length <= maxLines && lines.every((l) => l.length <= maxChars)) return { size, lines };
-  }
-  const size = TITLE_LADDER[TITLE_LADDER.length - 1][0];
-  const maxChars = Math.floor(TITLE_MAX_W / (ANTON_EM_PER_CHAR * size));
-  const lines = wrap(maxChars).slice(0, 2);
-  if (lines[1] && lines[1].length > maxChars - 1) lines[1] = lines[1].slice(0, maxChars - 1).trimEnd();
-  lines[1] = (lines[1] ?? lines[0]) + '…';
-  if (lines.length === 1) lines[0] = lines[0].slice(0, maxChars - 1).trimEnd() + '…';
-  return { size, lines };
-}
-
-/**
- * @typedef {{ value: string, unit?: string, label: string }} CardStat
- * @typedef {{ kicker: string, title: string, stats: CardStat[], pill?: string, ink?: string, footnote?: string }} FitnessCard
- */
-
-/**
- * One activity or roundup card: kicker line, big wrapped title bottom-anchored
- * on a rule, then up to four stat cells (Anton numbers, mono labels) — the
- * site's stat-strip in card form.
- * @param {FitnessCard} card
- */
-export function buildFitnessCardSVG(card) {
-  const ink = card.ink || FITNESS_INK;
-  const { size, lines } = fitTitle(String(card.title || '').toUpperCase());
-  const lineH = Math.round(size * 1.05);
-  const titleLines = lines
-    .map((line, i) => {
-      const y = TITLE_BASELINE - (lines.length - 1 - i) * lineH;
-      return `<text x="56" y="${y}" font-family="${DISPLAY}" font-size="${size}" font-weight="400" fill="${INK}" letter-spacing="-2">${xmlEsc(line)}</text>`;
-    })
-    .join('\n  ');
-  const stats = (card.stats || []).filter((s) => s && s.value && s.value !== '—').slice(0, 4);
-  const cellW = 272;
-  const cells = stats
-    .map((s, i) => {
-      const x = 56 + i * cellW;
-      const value = xmlEsc(s.value);
-      const unit = s.unit ? `<tspan font-family="${MONO}" font-size="20" font-weight="700" fill="${ink}" dx="6">${xmlEsc(s.unit)}</tspan>` : '';
-      return `<text x="${x}" y="518" font-family="${DISPLAY}" font-size="64" fill="${INK}" letter-spacing="-1">${value}${unit}</text>
-  <text x="${x}" y="548" font-family="${MONO}" font-size="14" font-weight="700" fill="${INK}" opacity="0.6" letter-spacing="2">${xmlEsc(String(s.label || '').toUpperCase())}</text>`;
-    })
-    .join('\n  ');
-  // Footnote as an outlined stamp on the pill row (right), clear of the title and stat labels.
-  const stampW = card.footnote ? Math.round(28 + String(card.footnote).length * 10.4) : 0;
-  const footnote = card.footnote
-    ? `<rect x="${1144 - stampW}" y="78" width="${stampW}" height="30" fill="none" stroke="${ink}" stroke-width="2"/>
-  <text x="${1144 - stampW / 2}" y="99" text-anchor="middle" font-family="${MONO}" font-size="14" font-weight="700" fill="${ink}" letter-spacing="2">${xmlEsc(String(card.footnote).toUpperCase())}</text>`
-    : '';
-  const inner = `<!-- Kicker -->
-  <text x="56" y="176" font-family="${MONO}" font-size="18" font-weight="700" fill="${ink}" letter-spacing="2">${xmlEsc(String(card.kicker || '').toUpperCase())}</text>
-
-  <!-- Title -->
-  ${titleLines}
-
-  <!-- Rule -->
-  <line x1="56" y1="${TITLE_BASELINE + 26}" x2="1144" y2="${TITLE_BASELINE + 26}" stroke="${ink}" stroke-width="2"/>
-
-  <!-- Stat cells -->
-  ${cells}
-  ${footnote}`;
-  const label = card.pill || 'FITNESS';
-  return cardShell({ ink, pill: { triangle: true, label, width: 60 + label.length * 10.5 }, inner });
 }
 
 // ---------------------------------------------------------------------------
@@ -404,12 +305,12 @@ async function renderFitness(outDir) {
     siteUrl: 'https://james.ripixel.co.uk',
     logger: console,
   });
-  console.log(`\nDone — ${result.rendered} rendered, ${result.cached} from cache, ${result.failed} failed → ${outDir}`);
+  console.log(`\nDone — ${result.images} images for ${result.total} pages: ${result.rendered} rendered, ${result.cached} from cache, ${result.failed} failed → ${outDir}`);
 }
 
 async function main() {
   const args = process.argv.slice(2);
-  if (args[0] === '--fitness') await renderFitness(path.resolve(args[1] || 'public/personal/life/og'));
+  if (args[0] === '--fitness') await renderFitness(path.resolve(args[1] || 'public/personal/life/share'));
   else await renderSections();
 }
 

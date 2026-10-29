@@ -1,0 +1,143 @@
+{{!--
+  Share button + picker (F5.4). Context: a share entry from tasks/fitness-og-images.mjs
+  (fitnessShareCards.<kind>[id]: title, shapes[{ shape, label, w, h, variants[{ id, label, url, file }] }]).
+  Every card is pre-rendered; this only picks one. Phone: the Web Share API with the image
+  file (the share sheet: Instagram Story, WhatsApp…), else a download. Desktop: a download.
+  /…#share opens the picker on load (Jarvis's "your card is ready" push links there).
+--}}
+{{#if shapes.length}}
+<div class="share" data-share data-title="{{title}}">
+  <button type="button" class="share__open" data-share-open aria-haspopup="dialog" aria-controls="share-dialog" hidden>
+    <span aria-hidden="true">↗</span> share card
+  </button>
+  <noscript>{{#each shapes}}{{#if @first}}<a class="share__open" href="{{variants.[0].url}}" download="{{variants.[0].file}}">↓ {{label}} card</a>{{/if}}{{/each}}</noscript>
+  <ul class="share__files" hidden>
+    {{#each shapes}}{{#each variants}}<li data-shape="{{../shape}}" data-variant="{{id}}" data-url="{{url}}" data-file="{{file}}"></li>{{/each}}{{/each}}
+  </ul>
+  <dialog class="share__dialog" id="share-dialog" aria-labelledby="share-dialog-title">
+    <form method="dialog" class="share__form">
+      <div class="share__head">
+        <h2 class="share__title" id="share-dialog-title">Share this card</h2>
+        <button type="submit" class="share__close" value="close" aria-label="Close">×</button>
+      </div>
+      <div class="share__body">
+        <figure class="share__preview" data-share-frame>
+          <img data-share-preview alt="" width="1080" height="1920" decoding="async" />
+        </figure>
+        <div class="share__controls">
+          <fieldset class="share__group">
+            <legend>Shape</legend>
+            {{#each shapes}}
+            <label class="share__chip"><input type="radio" name="share-shape" value="{{shape}}" data-w="{{w}}" data-h="{{h}}"{{#if @first}} checked{{/if}} /> <span>{{label}} <small>{{w}}×{{h}}</small></span></label>
+            {{/each}}
+          </fieldset>
+          {{#each shapes}}{{#if @first}}{{#if variants.[1]}}
+          <fieldset class="share__group">
+            <legend>Background</legend>
+            {{#each variants}}
+            <label class="share__chip"><input type="radio" name="share-variant" value="{{id}}"{{#if @first}} checked{{/if}} /> <span>{{label}}</span></label>
+            {{/each}}
+          </fieldset>
+          {{/if}}{{/if}}{{/each}}
+          <div class="share__actions">
+            <button type="button" class="share__go" data-share-native hidden>Share…</button>
+            <a class="share__go" data-share-download href="#" download>Download</a>
+          </div>
+          <p class="share__status" data-share-status role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </form>
+  </dialog>
+</div>
+<script>
+(function () {
+  var root = document.querySelector('[data-share]');
+  if (!root || !window.HTMLDialogElement) return;
+  var dialog = root.querySelector('dialog');
+  var open = root.querySelector('[data-share-open]');
+  var img = root.querySelector('[data-share-preview]');
+  var frame = root.querySelector('[data-share-frame]');
+  var dl = root.querySelector('[data-share-download]');
+  var native = root.querySelector('[data-share-native]');
+  var status = root.querySelector('[data-share-status]');
+  var files = {};
+  root.querySelectorAll('.share__files li').forEach(function (li) {
+    files[li.dataset.shape + '|' + li.dataset.variant] = { url: li.dataset.url, file: li.dataset.file };
+  });
+  var blobs = {};
+  var canFiles = false;
+  try {
+    // The share sheet is the phone's way out (Instagram Story, WhatsApp); a desktop downloads.
+    canFiles = !!(navigator.canShare && navigator.share && matchMedia('(pointer: coarse)').matches
+      && navigator.canShare({ files: [new File([''], 'card.png', { type: 'image/png' })] }));
+  } catch (e) { canFiles = false; }
+  var pick = function (name) { var el = root.querySelector('input[name="' + name + '"]:checked'); return el ? el.value : ''; };
+  function current() {
+    var shape = pick('share-shape');
+    var variant = pick('share-variant');
+    var hit = files[shape + '|' + variant];
+    if (!hit) {
+      // Older pages carry the Landscape card only, and a photo can drop out of one shape.
+      for (var k in files) if (k.indexOf(shape + '|') === 0) { hit = files[k]; break; }
+    }
+    return hit;
+  }
+  function load(card) {
+    if (!blobs[card.url]) {
+      blobs[card.url] = fetch(card.url).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.blob();
+      }).then(function (b) {
+        return new File([b], card.file, { type: b.type || (/\.png$/.test(card.file) ? 'image/png' : 'image/jpeg') });
+      });
+      blobs[card.url].catch(function () { delete blobs[card.url]; });
+    }
+    return blobs[card.url];
+  }
+  function render() {
+    var shapeEl = root.querySelector('input[name="share-shape"]:checked');
+    var shape = shapeEl ? shapeEl.value : '';
+    root.querySelectorAll('input[name="share-variant"]').forEach(function (v) {
+      v.disabled = !files[shape + '|' + v.value];
+    });
+    var card = current();
+    if (!card) return;
+    img.src = card.url;
+    if (shapeEl) { img.width = +shapeEl.dataset.w; img.height = +shapeEl.dataset.h; frame.dataset.shape = shape; }
+    img.alt = root.dataset.title + ' — ' + (shapeEl ? shapeEl.parentNode.textContent.trim() : '') + ' share card';
+    dl.href = card.url;
+    dl.setAttribute('download', card.file);
+    status.textContent = '';
+    if (canFiles) load(card);
+  }
+  function show() {
+    render();
+    if (!dialog.open) dialog.showModal();
+  }
+  open.hidden = false;
+  if (canFiles) {
+    native.hidden = false;
+  }
+  open.addEventListener('click', show);
+  root.addEventListener('change', function (e) { if (e.target.name && e.target.name.indexOf('share-') === 0) render(); });
+  native.addEventListener('click', function () {
+    var card = current();
+    if (!card) return;
+    load(card).then(function (file) {
+      return navigator.share({ files: [file], title: root.dataset.title });
+    }).then(function () {
+      status.textContent = 'Shared.';
+    }, function (err) {
+      if (err && err.name === 'AbortError') return;
+      if (err && err.name === 'NotAllowedError') { status.textContent = 'Ready — tap Share again.'; return; }
+      status.textContent = 'Sharing is not available here, so the card is downloading instead.';
+      dl.click();
+    });
+  });
+  dl.addEventListener('click', function () { status.textContent = 'Downloading ' + dl.getAttribute('download') + '…'; });
+  dialog.addEventListener('close', function () { open.focus(); if (location.hash === '#share') history.replaceState(null, '', location.pathname + location.search); });
+  dialog.addEventListener('click', function (e) { if (e.target === dialog) dialog.close(); });
+  if (location.hash === '#share') show();
+})();
+</script>
+{{/if}}

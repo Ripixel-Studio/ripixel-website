@@ -688,7 +688,7 @@ export function fitnessRoundupViewsTask() {
           const ogImage = typeof ogCards[file.key] === 'string' && /^https?:\/\//.test(ogCards[file.key]) ? ogCards[file.key] : '';
           pages.push({
             page: 'life', atomFeed: FITNESS_FEED_PATH,
-            subpage: `| ${view.subpage} roundup`, description: view.description, roundup: view,
+            subpage: `| ${view.subpage} roundup`, description: view.description, roundup: { ...view, share: g.fitnessShareCards?.roundup?.[file.key] || null },
             ogType: 'article', ogImage, canonical: siteUrl ? `${siteUrl}${view.url}` : '', publishedTime: view.generatedAt,
           });
         } catch (e) {

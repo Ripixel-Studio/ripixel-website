@@ -1026,11 +1026,11 @@ export function heroLayout(dims) {
  * Build the template context for one activity file.
  * @param {any} file     an element of `fitnessActivities` (activity file + indexEntry)
  * @param {any} index    `fitnessIndex`
- * @param {{ siteUrl?: string, ogCard?: string, hyrox?: import('./fitness-hyrox.mjs').HyroxHistory|null, photoDims?: Record<string, { w: number, h: number }> }} [opts]
+ * @param {{ siteUrl?: string, ogCard?: string, share?: any, hyrox?: import('./fitness-hyrox.mjs').HyroxHistory|null, photoDims?: Record<string, { w: number, h: number }> }} [opts]
  *   `ogCard` is the rendered OG card URL from tasks/fitness-og-images.mjs; when set it is the og:image,
  *   else banner → first photo → section card. `hyrox` is buildHyroxHistory(fitnessActivities), for PBs
  *   per division, race weekends and the PB chase. `photoDims` (fitnessPhotoDims) lays the hero out by the
- *   picture's shape.
+ *   picture's shape. `share` is the page's Share-button entry (fitnessShareCards.activity[slug], F5.4).
  */
 export function buildActivityView(file, index, opts = {}) {
   const activity = file?.activity ?? {};
@@ -1278,6 +1278,7 @@ export function buildActivityView(file, index, opts = {}) {
       boostersDidNotRun: enrichmentsMissing,
       ogImage,
       ogDescription,
+      share: opts.share || null,
     },
   };
 }
@@ -1311,7 +1312,8 @@ export function fitnessActivityViewsTask() {
           continue;
         }
         const ogCard = g.fitnessOgImages?.activity?.[String(slug)];
-        pages.push(buildActivityView(file, g.fitnessIndex, { siteUrl: g.siteUrl, ogCard, hyrox, photoDims: g.fitnessPhotoDims }));
+        const share = g.fitnessShareCards?.activity?.[String(slug)];
+        pages.push(buildActivityView(file, g.fitnessIndex, { siteUrl: g.siteUrl, ogCard, share, hyrox, photoDims: g.fitnessPhotoDims }));
       }
       ctx.logger.info(`Activity views: ${pages.length} of ${activities.length}`);
       return { fitnessActivityPages: pages };
