@@ -16,6 +16,8 @@
     </nav>
 
     {{#with ev}}
+    {{> share-button share}}
+
     <header class="act-hero{{#if collage.length}} act-hero--collage{{/if}}">
       {{#if collage.length}}
       {{!-- One tile per race: its highlight photo, cropped to the tile (faces kept high), labelled. --}}

@@ -13,7 +13,7 @@ import { buildActivityView } from './fitness-activity-views.mjs';
 import { buildEventView, dateRange, fitnessEventViewsTask } from './fitness-event-views.mjs';
 import { lifePageTasks } from './life-pages.mjs';
 import { runSkierTasks } from './skier-test-runner.mjs';
-import { activityCard } from './fitness-og-images.mjs';
+import { activityShareModel } from './fitness-share-models.mjs';
 
 const STATIONS = [['skierg', 'SkiErg'], ['sled_push', 'Sled Push'], ['sled_pull', 'Sled Pull'], ['burpee_broad_jump', 'Burpee Broad Jumps'], ['rowing', 'Row'], ['farmers_carry', 'Farmers Carry'], ['sandbag_lunges', 'Sandbag Lunges'], ['wall_balls', 'Wall Balls']];
 
@@ -210,12 +210,17 @@ describe('activity page', () => {
     assert.doesNotMatch(html, /Open Men&#x27;s Doubles PB chase/, 'no doubles chart on the solo page');
     assert.doesNotMatch(html, /Completed via ROXFIT/);
   });
-  test('OG card: division in the kicker, total first, the PB gap as the footnote', () => {
-    const c = activityCard(solo, {}, h);
-    assert.match(c?.card.kicker ?? '', /^HYROX · Open Men's Solo/);
-    assert.equal(c?.card.stats[0].value, '1:29:42');
-    assert.equal(c?.card.footnote, "+5:55 VS OPEN MEN'S SOLO PB 1:23:47");
-    assert.equal(c?.card.pill, 'HYROX');
+  test('share card: division in the kicker, the total, the PB gap as the badge, a row per segment', () => {
+    const m = activityShareModel(solo, {}, { hyrox: h });
+    assert.equal(m?.template, 'race');
+    assert.match(m?.kicker ?? '', /^HYROX · Open Men's Solo/);
+    assert.equal(m?.title, 'HYROX Birmingham');
+    assert.equal(m?.total, '1:29:42');
+    assert.deepEqual(m?.badge, { kind: 'gap', tone: 'loss', text: '+5:55 vs PB 1:23:47' });
+    assert.equal(m?.pill, 'HYROX');
+    assert.equal(m?.rows.length, 16);
+    assert.ok(m?.rows.every((/** @type {any} */ r) => r.seconds > 0));
+    assert.equal(m?.isRace, true);
   });
   test('the gallery opens in a lightbox, wrapping prev/next', () => {
     const f = structuredClone(solo);

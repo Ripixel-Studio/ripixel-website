@@ -122,11 +122,11 @@ Downstream tasks can page over the globals directly (`generatePaginatedItemsTask
 ### Pages, feed and OG images built from it
 
 Every page and the feed are rendered by Skier builtins; the site's own tasks only shape
-globals (and draw the OG PNGs). The render configuration is `tasks/life-pages.mjs`.
+globals (and draw the share cards). The render configuration is `tasks/life-pages.mjs`.
 
 | data task (custom) | global | rendered by (Skier) | output |
 |---|---|---|---|
-| `tasks/fitness-og-images.mjs` | `fitnessOgImages` | — (sharp, see below) | `/life/og/activity/<slug>.png`, `/life/og/roundup/<key>.png` — one 1200×630 OG card per page |
+| `tasks/fitness-og-images.mjs` | `fitnessOgImages`, `fitnessShareCards` | — (sharp, see below) | `/life/share/<kind>/<id>/<shape>-<background>.(jpg\|png)` — the share cards (the landscape one is the page's OG image) and `/life/share/index.json`, their manifest |
 | `tasks/fitness-activity-views.mjs` | `fitnessActivityPages` | `generateDataPagesTask` + `personal/templates/activity.html` | `/life/activity/<slug>` |
 | `tasks/fitness-event-views.mjs` | `fitnessEventPages` | `generateDataPagesTask` + `personal/templates/event.html` | `/life/event/<slug>` — one page per race weekend (several races at one event within a few days) |
 | `tasks/fitness-roundup-views.mjs` | `fitnessRoundupPages` | `generateDataPagesTask` + `personal/templates/roundup.html` | `/life/roundup/<key>` |
@@ -143,20 +143,52 @@ summary for a roundup), `published` (activity start / roundup generation time) a
 `<link rel="alternate" type="application/atom+xml">`. The thoughts feeds (`/rss.xml`,
 `/atom.xml`, `/json.json`) are unchanged and separate.
 
-**OG images.** `scripts/generate-og-images.mjs` draws every card — the committed section
-cards (`personal/assets/images/card_*.png`) and, at build time, one per activity and
-roundup page with the page title and its headline numbers in the same frame. Rasterising
-is done in-process with [`sharp`](https://sharp.pixelplumbing.com/) (a devDependency); the
-Anton / JetBrains Mono faces come from the `@fontsource` packages already installed and are
-unpacked to `.cache/fonts/` for fontconfig on first use, so nothing needs installing in
-`~/.fonts`. Rendered cards are cached in `.cache/og/` (keyed by the card's SVG) so a
-rebuild only rasterises what changed, and copied into `public/personal/life/og/`. The
-activity and roundup view tasks read the `fitnessOgImages` URL map the OG task returns to
-set `og:image`; a page without a card (sharp unavailable, a render error) falls back to its
-AI banner → first photo → `card_life.png`, and the build carries on.
+**Share cards and OG images (F5.4).** Every activity, race weekend and roundup page gets
+pre-rendered share cards in three shapes — **Story** 1080×1920, **Square** 1080×1080 and
+**Landscape** 1200×630, which is also the page's `og:image`:
+
+- `tasks/fitness-share-models.mjs` — what goes on each card, from the pages' own view models:
+  `event` (a race weekend: every race's total, division, PB badge or gap), `race` (Hyrox:
+  interleaved runs/stations with per-segment avg HR, ranks, PB or vs PB), `parkrun` / `run`
+  (distance, time, pace, km splits, route; position, count, age grade and PB or the gap),
+  `strength` (Hevy: sets, volume, top sets, the session's PBs heaviest lift first), `other`
+  (rides, walks, classes: the four numbers and the HR trace) and `roundup` (totals, sport
+  donut, calendar heatmap, PR wall, vs last period).
+- `scripts/share-cards.mjs` — the drawing (SVG). Two looks: his photo full bleed under an
+  ink scrim, or the activity family's riso ink as the ground (`TYPE_INKS` in
+  `tasks/fitness-theme.mjs`, kept equal to `fitness-types.css` by a test), with the zine
+  frame, Anton and JetBrains Mono either way.
+- `tasks/fitness-og-images.mjs` — scope, backgrounds, rendering, cache, manifest. All three
+  shapes for activities from the last 90 days, every race, every PB activity, every race
+  weekend and recent (and year) roundups; older pages get the Landscape card only.
+  Backgrounds: the photo when there is one (else the ink); full-scope cards also get the ink
+  version, races every photo (up to three) and race weekends a collage of their races'
+  photos first. Photo cards are JPEG, ink cards palette PNG.
+
+Rasterising is in-process with [`sharp`](https://sharp.pixelplumbing.com/) (a
+devDependency); the Anton / JetBrains Mono faces come from the `@fontsource` packages and are
+unpacked to `.cache/fonts/` for fontconfig on first use. Every card is cached in `.cache/og/`
+under its published path, keyed by a hash of its SVG, its background URLs and
+`RENDER_VERSION` (bump it when the compositing changes), so a rebuild only rasterises what
+changed; photos are fetched once into `.cache/og/photos/`. A cold build renders ~2,100 cards
+in about two minutes; a warm one copies them in under a second. A photo that cannot be
+fetched drops that background (`FITNESS_SHARE_PHOTOS=off`, or the fixtures source, skips the
+network), a page with no card falls back to its AI banner → first photo → `card_life.png`,
+and the build carries on.
+
+The **Share** button (`personal/partials/share-button.html`, `fitness-share.css`) is on
+every activity, race weekend and roundup page. It opens a picker (shape, and background where
+there is a choice) over the pre-rendered files; on a phone **Share…** hands the image file
+to the share sheet (Web Share API level 2: Instagram Story, WhatsApp…), elsewhere — and as
+the fallback — it downloads. `…#share` opens the picker on load.
+
+`/life/share/index.json` lists the full-scope cards (`id`, `kind`, `template`, `title`,
+`label`, `date`, `page` with `#share`, `image`, `race`, `pb`, `hash`, newest first). The box
+copies it after each deploy and Jarvis pushes "Your Hyrox card is ready" for new race and
+PB cards (`jarvis/gateway/domains/sharecards.py`).
 
 - Re-render the section cards: `node scripts/generate-og-images.mjs`
-- Preview the fitness cards without a full build: `node scripts/generate-og-images.mjs --fitness [outDir]`
+- Preview the share cards without a full build: `node scripts/generate-og-images.mjs --fitness [outDir]`
 
 ---
 

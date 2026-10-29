@@ -397,6 +397,10 @@ describe('task', () => {
       const globals = {
         fitnessIndex: data.index, fitnessActivities: data.activities, fitnessRoundups: [], year: 2026, cacheHash: 'x', siteUrl: 'https://james.ripixel.co.uk',
         fitnessOgImages: { activity: { 'colwick-parkrun-2026-10-17': 'https://james.ripixel.co.uk/life/og/activity/colwick-parkrun-2026-10-17.png' }, roundup: {} },
+        fitnessShareCards: { activity: { 'colwick-parkrun-2026-10-17': { title: 'Colwick parkrun #87', shapes: [
+          { shape: 'story', label: 'Story', w: 1080, h: 1920, variants: [{ id: 'photo-1', label: 'Photo 1', url: '/life/share/activity/c/story-photo-1.jpg', file: 'c-story.jpg' }, { id: 'ink', label: 'Colour', url: '/life/share/activity/c/story-ink.png', file: 'c-story-ink.png' }] },
+          { shape: 'landscape', label: 'Landscape', w: 1200, h: 630, variants: [{ id: 'photo-1', label: 'Photo 1', url: '/life/share/activity/c/landscape-photo-1.jpg', file: 'c-landscape.jpg' }] },
+        ] } }, event: {}, roundup: {} },
       };
       const [activityPages] = lifePageTasks({ outDir: tmp, siteUrl: globals.siteUrl });
       await runSkierTasks([fitnessActivityViewsTask(), activityPages], globals);
@@ -418,8 +422,17 @@ describe('task', () => {
       assert.doesNotMatch(html, /href="https?:\/\/[^"]*fitglue\.tech/);
       assert.match(html, /class="nav-fitness" href="\/life"/);
       assert.doesNotMatch(html, /<script src="http/);
+      // F5.4 Share button: one file per shape × background, a radio per shape, the background group from the first shape.
+      assert.match(html, /<div class="share" data-share data-title="Colwick parkrun #87">/);
+      assert.equal((html.match(/<li data-shape=/g) || []).length, 3);
+      assert.match(html, /<li data-shape="story" data-variant="ink" data-url="\/life\/share\/activity\/c\/story-ink\.png" data-file="c-story-ink\.png">/);
+      assert.equal((html.match(/type="radio" name="share-shape"/g) || []).length, 2);
+      assert.equal((html.match(/type="radio" name="share-variant"/g) || []).length, 2);
+      assert.match(html, /<noscript><a class="share__open" href="\/life\/share\/activity\/c\/story-photo-1\.jpg" download="c-story\.jpg">/);
+      assert.match(html, /<dialog class="share__dialog" id="share-dialog" aria-labelledby="share-dialog-title">/);
       const ride = await fs.readFile(path.join(tmp, 'life', 'activity', 'evening-ride-to-the-reservoir-2026-10-15', 'index.html'), 'utf8');
       assert.match(ride, /<meta property="og:image" content="https:\/\/[^"]*\/banner\.png"/, 'no card for this slug → the AI banner');
+      assert.doesNotMatch(ride, /data-share/, 'no share entry → no button');
       const strength = await fs.readFile(path.join(tmp, 'life', 'activity', 'push-day-2026-10-13', 'index.html'), 'utf8');
       assert.match(strength, /class="exercise-item exercise-strength"/, 'exercise-item needs the eq helper');
       assert.match(strength, /4×8 × 80kg/);

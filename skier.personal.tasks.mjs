@@ -220,8 +220,9 @@ export const tasks = [
     fetchFitnessTask(),
     fitnessPhotoDimsTask(), // F5.5 `fitnessPhotoDims`: hero photo sizes (portrait beside the title, else full width); before the view tasks
     fitnessLifeTask(), // S2.2 `fitnessLife` for /life (rendered by generate-pages below)
-    // S2.5 OG cards — /life/og/{activity,roundup}/<id>.png via sharp, cached in .cache/og. Runs BEFORE the
-    // view tasks because they read `fitnessOgImages` to point og:image at the rendered card.
+    // F5.4 share cards — /life/share/<kind>/<id>/<shape>-<background>.(jpg|png) via sharp, cached in .cache/og;
+    // the Landscape card is the OG image. Runs BEFORE the view tasks: they read `fitnessOgImages` (og:image)
+    // and `fitnessShareCards` (the Share button).
     fitnessOgImagesTask(),
     fitnessActivityViewsTask(), // S2.3 `fitnessActivityPages`: one view model per activity
     fitnessEventViewsTask(), // F5.2 `fitnessEventPages`: one view model per race weekend
