@@ -308,6 +308,7 @@ describe('rendering', () => {
         image: 'https://james.ripixel.co.uk/life/share/activity/colwick-parkrun-2026-10-17/story-photo-1.jpg',
         race: false, pb: true, hash: 'string',
       });
+      assert.equal(manifest.cards.find((/** @type {any} */ c) => c.id === 'roundup:week-42-2026')?.pb, false, 'a roundup with PRs is not a PB session');
       assert.deepEqual(manifest.cards.map((/** @type {any} */ c) => c.date), [...manifest.cards.map((/** @type {any} */ c) => c.date)].sort().reverse(), 'newest first');
 
       await fs.rm(path.join(tmp, 'out'), { recursive: true, force: true });

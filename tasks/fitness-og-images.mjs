@@ -364,7 +364,8 @@ export async function renderFitnessCards(opts = {}) {
       const lead = shapes.find((s) => s.shape === 'story') || shapes[0];
       manifest.push({
         id: `${kind}:${m.id}`, kind, slug: m.id, template: m.template, title: m.pageTitle, label: m.label, date: m.date,
-        page: `${siteUrl}${m.url}#share`, image: `${siteUrl}${lead.variants[0].url}`, race: !!m.isRace, pb: !!m.isPB, hash: entry.hash,
+        // `pb` means a PB *session* (Jarvis pushes those by default); a roundup's PRs are not one.
+        page: `${siteUrl}${m.url}#share`, image: `${siteUrl}${lead.variants[0].url}`, race: !!m.isRace, pb: !!m.isPB && kind === 'activity', hash: entry.hash,
       });
     }
   }

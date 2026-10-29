@@ -183,7 +183,7 @@ to the share sheet (Web Share API level 2: Instagram Story, WhatsApp…), elsewh
 the fallback — it downloads. `…#share` opens the picker on load.
 
 `/life/share/index.json` lists the full-scope cards (`id`, `kind`, `template`, `title`,
-`label`, `date`, `page` with `#share`, `image`, `race`, `pb`, `hash`, newest first). The box
+`label`, `date`, `page` with `#share`, `image`, `race`, `pb` — a PB session, never a roundup — `hash`, newest first). The box
 copies it after each deploy and Jarvis pushes "Your Hyrox card is ready" for new race and
 PB cards (`jarvis/gateway/domains/sharecards.py`).
 
