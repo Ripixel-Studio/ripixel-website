@@ -21,7 +21,7 @@ import fs from 'node:fs/promises';
 import { activityTheme, FAMILIES, hybridRaceLabel, typeKeyOf } from './fitness-theme.mjs';
 import {
   TZ, WEEK_DAYS, NEXT_UP_COUNT, DAY_MS, parse, fmt, ymd, dayStamp, rangeLabel, countdown, weekMonday, weekKicker,
-  calendarModel, renderCalendar, clientScript,
+  calendarModel, renderCalendar, clientScript, publicEvent,
 } from './life-clock.mjs';
 import { resolveOptions } from './fitness-fetch.mjs';
 import { recordLabel, latestRecords } from './fitness-records.mjs';
@@ -755,7 +755,7 @@ export function buildCalendar(exported, handwritten, now, activities = [], event
   const data = {
     builtAt: now.toISOString(),
     source: hasExport ? 'calendar' : 'handwritten',
-    events: hasExport ? exported.events : handwrittenEvents(handwritten),
+    events: (hasExport ? exported.events : handwrittenEvents(handwritten)).map(publicEvent),
     done,
     eventsUrl,
   };

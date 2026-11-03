@@ -218,7 +218,7 @@ export function buildSection(name, sec, now = new Date(), outingNotables = []) {
           num(a.unlocked) != null && num(a.total) != null && row('Achievements', `${group(a.unlocked)} / ${group(a.total)}`),
           num(sec.backlog) != null && row('Backlog', group(sec.backlog), 'games'),
         ].filter(Boolean),
-        mostPlayed: names(sec.mostPlayed), recent: names(sec.recent), serious: names(sec.serious), silly: names(sec.silly),
+        mostPlayed: names(sec.mostPlayed), recent: names(sec.recent), serious: names(sec.serious), silly: sameList(names(sec.silly), names(sec.serious)) ? [] : names(sec.silly),
       };
     }
     case 'code': {
@@ -338,6 +338,9 @@ export function buildHub(lifeIndex, fitnessLife, now = new Date()) {
   };
 }
 
+/** Same game names, ignoring case. @param {{name: string}[]} a @param {{name: string}[]} b */
+const sameList = (a, b) => a.length > 0 && a.length === b.length && a.every((x, i) => x.name.toLowerCase() === b[i].name.toLowerCase());
+
 const BIT_LABELS = {
   'personal.height': 'Height', 'personal.likes': 'Likes', 'personal.boardgames': 'Board games', 'personal.desk': 'Desk',
   'body.weight_kg': 'Weight', 'games.serious': 'Serious games', 'games.silly': 'Silly games',
@@ -368,6 +371,7 @@ export function personalBits(facts) {
       value = listText(f.value) + (f.unit && !Array.isArray(f.value) ? ` ${f.unit}` : '');
     }
     if (!value) continue;
+    if (key === 'games.silly' && out.some((b) => b.key === 'games.serious' && b.value.toLowerCase() === value.toLowerCase())) continue;
     out.push({ key, label, value, tone: String(f.tone || 'neutral') });
   }
   return out;

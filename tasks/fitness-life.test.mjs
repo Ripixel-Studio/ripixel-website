@@ -359,7 +359,7 @@ describe('on the calendar', () => {
     assert.equal(c.nextUp[0].dateTime, '2026-10-27T12:10:00.000Z');
     assert.equal(c.nextUp[4].allDay, true);
     assert.equal(c.nextUp[4].time, '');
-    assert.equal(c.nextUp[1].description, 'Second day. Solo this time; the doubles were the warm-up.');
+    assert.equal(c.nextUp[1].description, undefined); // descriptions are never public
   });
 
   test('fixtures: this week is Monday to Sunday, both calendars, planned vs done', async () => {
@@ -465,7 +465,7 @@ describe('on the calendar', () => {
     assert.deepEqual(c.nextUp.map((x) => x.title), ['Sooner', 'A thing', 'Later']);
     assert.deepEqual(c.nextUp.map((x) => x.stamp), ['RACE', 'EVENT', 'EVENT']);
     assert.equal(c.nextUp[0].when, 'in 7 days');
-    assert.equal(c.nextUp[0].description, 'Race • 5km — PB attempt');
+    assert.equal(c.nextUp[0].description, undefined);
     assert.equal(c.nextUp[0].allDay, true);
     assert.equal(c.hasWeek, false);
     assert.equal(c.hasAny, true);

@@ -124,6 +124,45 @@ export function typeKeyOfTitle(title) {
   return 'other';
 }
 
+/** Names that never appear in a public calendar title, after "&" or "and". */
+const PRIVATE_NAMES = ['Sarah', 'Sara'];
+
+/**
+ * A calendar title with partner or people phrases removed: "with <Name>" and
+ * "w/ <Name>" (any capitalised name), and "& <Name>" / "and <Name>" for the
+ * listed private names. Backstop for the exporter, which also screens them.
+ * @param {unknown} title
+ */
+export function cleanTitle(title) {
+  const names = PRIVATE_NAMES.join('|');
+  const out = String(title ?? '')
+    .replace(/\s*[-\u2013\u2014,(]?\s*\b(?:with|w\/)\s+[A-Z][\p{L}'\u2019-]*(?:\s+[A-Z][\p{L}'\u2019-]*)*\)?/gu, '')
+    .replace(new RegExp(`\\s*(?:&|\\band\\b)\\s+(?:${names})\\b`, 'gu'), '')
+    .replace(new RegExp(`\\b(?:${names})\\b\\s*(?:&|\\band\\b)\\s*`, 'gu'), '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+  return out;
+}
+
+/** A location is public only for races and parkruns. @param {any} e */
+export function publicLocation(e) {
+  if (!e || typeof e.location !== 'string') return '';
+  return e.kind === 'race' || /\bparkrun\b/i.test(String(e.title || '')) ? e.location : '';
+}
+
+/**
+ * An export entry as the page may hold and show it: no description or notes,
+ * a location only for races and parkruns, a title without people phrases.
+ * @param {any} e
+ */
+export function publicEvent(e) {
+  if (!e || typeof e !== 'object') return e;
+  const { description, notes, ...rest } = e;
+  void description; void notes;
+  const title = typeof e.title === 'string' ? cleanTitle(e.title) || 'Session' : e.title;
+  return { ...rest, title, location: publicLocation(e) };
+}
+
 /** A calendar export entry → parsed dates, or null when the start is unusable. @param {any} e */
 export function parseEntry(e) {
   if (!e || typeof e.title !== 'string') return null;
@@ -138,7 +177,7 @@ export function nextUpEntry(e, t, now) {
   const race = e.kind === 'race';
   return {
     id: typeof e.id === 'string' ? e.id : '',
-    title: e.title,
+    title: cleanTitle(e.title),
     kind: race ? 'race' : 'event',
     stamp: race ? 'RACE' : 'EVENT',
     stampClass: race ? 'fit-event__stamp--race' : 'fit-event__stamp--event',
@@ -148,8 +187,7 @@ export function nextUpEntry(e, t, now) {
     date: dayStamp(t.start),
     time: t.allDay ? '' : hm(t.start),
     when: countdown(t.start, t.end, t.allDay, now),
-    location: typeof e.location === 'string' ? e.location : '',
-    description: typeof e.description === 'string' ? e.description : '',
+    location: publicLocation(e),
     dateTime: t.start.toISOString(),
     allDay: t.allDay,
   };
@@ -191,12 +229,12 @@ export function weekStrip(upcoming, done, now) {
       .map(({ e, t }) => {
         const race = e.calendar === 'events';
         return {
-          title: e.title,
+          title: cleanTitle(e.title),
           time: t.allDay ? '' : hm(t.start),
           kind: race ? (e.kind === 'race' ? 'race' : 'event') : (e.kind === 'class' ? 'class' : 'session'),
           isEvent: race,
           typeClass: `fit-type--${typeKeyOfTitle(e.title)}`,
-          location: typeof e.location === 'string' ? e.location : '',
+          location: publicLocation(e),
         };
       });
     const isToday = key === todayKey;
@@ -284,7 +322,6 @@ function renderEvent(e) {
 <time class="fit-event__when" datetime="${esc(e.dateTime)}">${esc(e.when)}</time>
 ${e.location ? `<span class="fit-event__where">· ${esc(e.location)}</span>` : ''}
 </div>
-${e.description ? `<p class="fit-event__desc">${esc(e.description)}</p>` : ''}
 </div>
 </li>`;
 }

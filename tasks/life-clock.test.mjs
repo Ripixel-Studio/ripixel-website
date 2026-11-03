@@ -222,3 +222,47 @@ describe('the page script (clientScript in a vm, Date faked)', () => {
     assert.match(page.html(), /races &amp; one-offs, the regular sessions/);
   });
 });
+
+describe('privacy backstops (invented names)', () => {
+  const NOON = new Date('2026-10-26T10:00:00Z');
+  const mk = (over) => ({ id: 'x', calendar: 'events', title: 'Thing', start: '2026-10-28T10:00:00Z', end: '2026-10-28T11:00:00Z', allDay: false, kind: 'race', ...over });
+
+  test('descriptions and notes are never rendered, in Next up or in the data', async () => {
+    const { publicEvent } = await import('./life-clock.mjs');
+    const ev = mk({ description: 'Secret note about Zelda', notes: 'private note', location: 'Some Venue' });
+    const m = calendarModel({ source: 'calendar', events: [ev], done: [] }, NOON);
+    assert.ok(!('description' in m.nextUp[0]));
+    const html = renderCalendar(m);
+    assert.ok(!html.includes('Secret note') && !html.includes('fit-event__desc'));
+    const clean = publicEvent(ev);
+    assert.ok(!('description' in clean) && !('notes' in clean));
+  });
+
+  test('a location shows only for races and parkruns', () => {
+    const evs = [
+      mk({ id: 'a', title: 'Valley 10k', kind: 'race', location: 'Valley Park' }),
+      mk({ id: 'b', title: 'Testville parkrun', kind: 'other', location: 'Testville Rec' }),
+      mk({ id: 'c', title: 'Spin', calendar: 'events', kind: 'other', location: '1 Example Rd, Testville AB1 2CD' }),
+      mk({ id: 'd', title: 'Pilates', calendar: 'regular', kind: 'class', location: '2 Example Rd, Testville AB1 2CD' }),
+    ];
+    const m = calendarModel({ source: 'calendar', events: evs, done: [] }, NOON);
+    const html = renderCalendar(m);
+    assert.ok(html.includes('Valley Park') && html.includes('Testville Rec'));
+    assert.ok(!html.includes('Example Rd') && !html.includes('AB1 2CD'));
+    for (const d of m.week) for (const p of d.planned) if (p.title === 'Pilates' || p.title === 'Spin') assert.equal(p.location, '');
+  });
+
+  test('people phrases leave titles', async () => {
+    const { cleanTitle } = await import('./life-clock.mjs');
+    assert.equal(cleanTitle('Flexibility Pilates with Sarah'), 'Flexibility Pilates');
+    assert.equal(cleanTitle('Hyrox Doubles & Sarah'), 'Hyrox Doubles');
+    assert.equal(cleanTitle('Run with Zelda Quill'), 'Run');
+    assert.equal(cleanTitle('Strength & Conditioning'), 'Strength & Conditioning');
+    const m = calendarModel({ source: 'calendar', events: [mk({ title: 'Valley 10k with Zelda' })], done: [] }, NOON);
+    assert.ok(!renderCalendar(m).includes('Zelda'));
+  });
+
+  test('the page script applies the same rules to a refetched events.json', () => {
+    assert.ok(/publicLocation\(e\)/.test(SOURCE) && !/e\.description/.test(SOURCE));
+  });
+});
