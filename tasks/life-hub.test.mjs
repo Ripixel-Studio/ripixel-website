@@ -187,3 +187,8 @@ test('a section with lists but a null headline has data', () => {
   assert.equal(buildSection('reading', { headline: null, totals: { year: { books: 0 } } }).empty, false);
   assert.equal(buildSection('games', { updated: '2026-11-03', staleDays: 2, headline: null, mostPlayed: [], recent: [], achievements: {}, serious: '' }).empty, true);
 });
+
+test('games with a null headline leads with total hours', () => {
+  const v = buildSection('games', { headline: null, hoursTotal: 2625, mostPlayed: [{ name: 'A', hours: 1 }] });
+  assert.deepEqual(v.headline, { value: '2,625', unit: 'h', label: 'played, all time' });
+});

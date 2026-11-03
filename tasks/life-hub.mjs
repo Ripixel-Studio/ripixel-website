@@ -79,6 +79,12 @@ function headlineOf(h) {
   return { value: v == null ? String(h.value) : (Number.isInteger(v) ? group(v) : one(v)), unit: String(h.unit || ''), label: String(h.label || '') };
 }
 
+/** A section whose export gives no headline still leads with its own figure where it has one. @param {string} name @param {any} sec */
+function fallbackHeadline(name, sec) {
+  if (name === 'games' && num(sec.hoursTotal) != null) return { value: group(num(sec.hoursTotal)), unit: 'h', label: 'played, all time' };
+  return null;
+}
+
 /** Newest notable by month (the first of equals). @param {any[]|undefined} list */
 function latestOf(list) {
   let best = null;
@@ -154,7 +160,7 @@ function mediaView(sec, outings) {
 export function buildSection(name, sec, now = new Date(), outingNotables = []) {
   const base = { name, href: SECTION_HREF(name), title: /** @type {any} */ (TITLES)[name] || name };
   if (!hasData(sec)) return { ...base, staleLabel: '', empty: true, headline: null, latest: null };
-  const view = { ...base, staleLabel: staleLabel(sec.staleDays), updated: String(sec.updated || ''), empty: false, headline: headlineOf(sec.headline), latest: /** @type {any} */ (null) };
+  const view = { ...base, staleLabel: staleLabel(sec.staleDays), updated: String(sec.updated || ''), empty: false, headline: headlineOf(sec.headline) ?? fallbackHeadline(name, sec), latest: /** @type {any} */ (null) };
   const weekly = sec.weekly;
   switch (name) {
     case 'body': {
