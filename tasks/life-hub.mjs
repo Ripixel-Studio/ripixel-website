@@ -363,15 +363,18 @@ export function lifeFacts(facts) {
 }
 
 /**
- * FitGlue's first-commit date, from the export: the `code.project.fitglue.started` fact,
- * else the `code.projects` row named fitglue. Empty when neither is there.
+ * FitGlue's start year: the earliest `started` across every project whose name starts with
+ * "fitglue" (fitglue-server, fitglue-web, ...), from the `code.projects` rows and the matching
+ * `code.project.fitglue_*.started` facts. Empty when there are none.
  * @param {any} idx the life index
  */
 export function fitglueStarted(idx) {
-  const fact = (Array.isArray(idx?.facts) ? idx.facts : []).filter(isPublic).find((f) => f.key === 'code.project.fitglue.started');
-  const row = (Array.isArray(idx?.sections?.code?.projects) ? idx.sections.code.projects : []).find((p) => /^fitglue$/i.test(String(p?.name || '')));
-  const m = /^(\d{4})-\d{2}-\d{2}/.exec(String(fact?.value || row?.started || ''));
-  return m ? m[1] : '';
+  const facts = (Array.isArray(idx?.facts) ? idx.facts : []).filter(isPublic)
+    .filter((f) => /^code\.project\.fitglue([_-][^.]*)?\.started$/i.test(f.key)).map((f) => String(f.value || ''));
+  const rows = (Array.isArray(idx?.sections?.code?.projects) ? idx.sections.code.projects : [])
+    .filter((p) => /^fitglue/i.test(String(p?.name || ''))).map((p) => String(p?.started || ''));
+  const dates = [...facts, ...rows].filter((d) => /^\d{4}-\d{2}-\d{2}/.test(d)).sort();
+  return dates.length ? dates[0].slice(0, 4) : '';
 }
 
 export function lifeHubTask(config = {}) {

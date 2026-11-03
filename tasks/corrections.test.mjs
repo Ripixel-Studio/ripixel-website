@@ -13,7 +13,7 @@ import { generatePagesTask } from 'skier';
 
 import { fetchFitnessTask } from './fitness-fetch.mjs';
 import { fitnessLifeTask, whatIDo } from './fitness-life.mjs';
-import { lifeHubTask } from './life-hub.mjs';
+import { lifeHubTask, fitglueStarted } from './life-hub.mjs';
 import { workViewTask } from './work-view.mjs';
 import { templateHelpers } from './life-pages.mjs';
 import { runSkierTasks } from './skier-test-runner.mjs';
@@ -114,11 +114,49 @@ describe('corrections', () => {
     assert.equal(globals.latestProjectDate, '2023 → present');
   });
 
-  test('missing facts drop the claims rather than invent them', async () => {
-    const g = { ...globals, lifeIndex: { ...globals.lifeIndex, facts: [] } };
+  test('real export shape: earliest across every fitglue-* project', () => {
+    // live naming: no `fitglue` row, three suffixed rows and facts
+    const rows = [
+      { name: 'fitglue-mobile', started: '2026-01-15' }, { name: 'fitglue-web', started: '2025-12-24' },
+      { name: 'fitglue-server', started: '2025-12-18' }, { name: 'skier', started: '2025-07-10' },
+    ];
+    assert.equal(fitglueStarted({ facts: [], sections: { code: { projects: rows } } }), '2025');
+    const facts = [
+      { key: 'code.project.fitglue_mobile.started', value: '2026-01-15' },
+      { key: 'code.project.fitglue_server.started', value: '2024-12-18' },
+      { key: 'code.project.skier.started', value: '2020-01-01' },
+    ];
+    assert.equal(fitglueStarted({ facts, sections: {} }), '2024');
+    assert.equal(fitglueStarted({ facts: [{ ...facts[1], visibility: 'private' }], sections: {} }), '');
+    assert.equal(fitglueStarted({ facts: [], sections: { code: { projects: [rows[3]] } } }), '');
+    assert.equal(fitglueStarted(null), '');
+  });
+
+  test('fixture uses the real naming and the earliest wins', () => {
+    assert.ok(globals.lifeIndex.facts.some((f) => f.key === 'code.project.fitglue_server.started'));
+    assert.ok(!globals.lifeIndex.facts.some((f) => f.key === 'code.project.fitglue.started'));
+    assert.equal(globals.fitglueStartedYear, '2023');
+  });
+
+  test('missing start drops the claims rather than invent them', async () => {
+    const g = { ...globals, lifeIndex: { ...globals.lifeIndex, facts: [], sections: { ...globals.lifeIndex.sections, code: { ...globals.lifeIndex.sections.code, projects: [] } } } };
     await runSkierTasks([lifeHubTask()], g, []);
     assert.equal(g.latestProjectDate, '');
     assert.equal(g.fitglueStartedYear, '');
+    const o2 = await fs.mkdtemp(path.join(os.tmpdir(), 'corrections-nodate-'));
+    await runSkierTasks([generatePagesTask({
+      pagesDir: path.join(REPO, 'personal/pages'), partialsDir: path.join(REPO, 'personal/partials'),
+      outDir: o2, helpers: templateHelpers, additionalVarsFn: ({ currentPage }) => ({ page: currentPage === 'index' ? 'home' : currentPage }),
+    })], g, []);
+    const idx = await fs.readFile(path.join(o2, 'index.html'), 'utf8');
+    const proj = await fs.readFile(path.join(o2, 'projects.html'), 'utf8');
+    await fs.rm(o2, { recursive: true, force: true });
+    assert.doesNotMatch(idx, /built \S+ · still|→ present/);
+    assert.doesNotMatch(idx, /latest →<\/span> FitGlue<\/span>\s*<span class="section-card__latest-date">/);
+    assert.match(idx, /still shipping/);
+    assert.doesNotMatch(proj, /built \S+ · still/);
+    assert.match(proj, /still shipping/);
+    assert.doesNotMatch(idx, /· still shipping/);
   });
 
   test('orphans gone', () => {

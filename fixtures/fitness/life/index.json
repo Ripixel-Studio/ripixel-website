@@ -8,7 +8,8 @@
     {"key": "personal.likes", "label": "Likes", "value": ["invented cola", "sample toast"], "tone": "fun"},
     {"key": "personal.boardgames", "label": "Board games", "value": "keen, rarely wins", "tone": "fun"},
     {"key": "site.started_year", "label": "Site started", "value": 2019, "unit": "", "tone": "neutral"},
-    {"key": "code.project.fitglue.started", "label": "FitGlue started", "value": "2023-05-14", "unit": "", "tone": "neutral"}
+    {"key": "code.project.fitglue_server.started", "label": "fitglue-server started", "value": "2023-05-14", "unit": "", "tone": "neutral"},
+    {"key": "code.project.fitglue_web.started", "label": "fitglue-web started", "value": "2023-06-02", "unit": "", "tone": "neutral"}
   ],
   "sections": {
     "body": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value": 80.1, "unit": "kg", "label": "weight"},
@@ -29,6 +30,8 @@
       "serious": "Fixture Quest", "silly": "Sample Tactics"},
     "code": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value": 154, "unit": "", "label": "commits this year"},
       "projects": [{"name": "example-site", "started": "2024-03-14", "languages": ["JavaScript", "CSS"], "url": "https://example.test/example-site"},
+                   {"name": "fitglue-web", "started": "2023-06-02", "languages": ["TypeScript"], "url": null},
+                   {"name": "fitglue-server", "started": "2023-05-14", "languages": ["Go"], "url": null},
                    {"name": "sample-tool", "started": "2025-08-02", "languages": ["Python"], "url": null}],
       "languagesByYear": {"2025": {"Python": 55.0, "JavaScript": 45.0}, "2026": {"JavaScript": 60.5, "Python": 39.5}},
       "commitsByMonth": [{"month": "2026-09", "n": 70}, {"month": "2026-10", "n": 84}],
