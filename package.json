@@ -40,6 +40,6 @@
         "nodemon": "^3.0.0",
         "sharp": "^0.35.5",
         "skier": "git+https://github.com/Ripixel-Studio/skier.git#ad8178372e1679c9ebb7ca0be2266ef223eefae2",
-        "standard-version": "^9.0.0"
+        "commit-and-tag-version": "^9.0.0"
     }
 }
