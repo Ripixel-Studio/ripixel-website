@@ -60,6 +60,33 @@ export function projectSegments(segments, bounds, width = 1000) {
   return { viewBox: `0 0 ${w} ${h}`, paths };
 }
 
+/**
+ * The sheet is fitted to where the routes mostly are, not to the export's whole
+ * extent: a weekend in Rome or Poland would otherwise shrink home turf to a speck.
+ * Centre = median point; a segment whose middle point lies within RADIUS_DEG
+ * (about 165 km, Nottinghamshire to Birmingham and back) of it is kept, and the
+ * bounds are those of the kept segments' points, padded 5%. Far trips are left
+ * off the sheet. Too few points: no change.
+ * @param {number[][][]} segments @param {any} bounds
+ * @returns {{ segments: number[][][], bounds: any }}
+ */
+const RADIUS_DEG = 1.5;
+export function coreOfSegments(segments, bounds) {
+  const pts = segments.flat();
+  if (pts.length < 100) return { segments, bounds };
+  const med = (/** @type {number[]} */ a) => a.slice().sort((x, y) => x - y)[Math.floor(a.length / 2)];
+  const cLat = med(pts.map((x) => x[0])), cLng = med(pts.map((x) => x[1]));
+  const k = Math.cos((cLat * Math.PI) / 180);
+  const near = (/** @type {number[]} */ pt) => Math.hypot(pt[0] - cLat, (pt[1] - cLng) * k) <= RADIUS_DEG;
+  const kept = segments.filter((seg) => seg.length && near(seg[Math.floor(seg.length / 2)]));
+  if (!kept.length) return { segments, bounds };
+  const kp = kept.flat().filter(near);
+  const lats = kp.map((x) => x[0]), lngs = kp.map((x) => x[1]);
+  const minLat = Math.min(...lats), maxLat = Math.max(...lats), minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+  const padLat = (maxLat - minLat) * 0.05, padLng = (maxLng - minLng) * 0.05;
+  return { segments: kept, bounds: [minLat - padLat, minLng - padLng, maxLat + padLat, maxLng + padLng] };
+}
+
 export function lifeHeatmapTask(config = {}) {
   return {
     name: 'life-heatmap',
@@ -68,7 +95,8 @@ export function lifeHeatmapTask(config = {}) {
     run: async (/** @type {any} */ _cfg, /** @type {any} */ ctx) => {
       const doc = ctx.globals?.lifeHeatmap;
       if (!doc || !Array.isArray(doc.segments)) return { lifeHeatmapView: null };
-      const { viewBox, paths } = projectSegments(doc.segments, doc.bounds);
+      const core = coreOfSegments(doc.segments, doc.bounds);
+      const { viewBox, paths } = projectSegments(core.segments, core.bounds);
       const count = Number.isFinite(doc.activities) ? doc.activities : paths.length;
       ctx.logger.info(`Life heatmap: ${paths.length} segments from ${count} activities`);
       return { lifeHeatmapView: { viewBox, paths, count } };

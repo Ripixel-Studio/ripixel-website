@@ -86,3 +86,14 @@ test('count falls back to the number of segments', async () => {
   const g = await runSkierTasks([lifeHeatmapTask()], { lifeHeatmap: { schemaVersion: 1, segments, bounds } });
   assert.equal(/** @type {any} */ (g.lifeHeatmapView).count, segments.length);
 });
+
+import { coreOfSegments } from './life-heatmap.mjs';
+test('a far trip does not shrink home turf', () => {
+  const home = Array.from({ length: 30 }, (_, i) => Array.from({ length: 10 }, (_, j) => [51 + i * 0.003, -1 + j * 0.003]));
+  const rome = [[[41.9, 12.5], [41.901, 12.5]]];
+  const out = coreOfSegments([...home, ...rome], [41.9, -1, 51.1, 12.5]);
+  assert.equal(out.segments.length, 30);
+  assert.ok(out.bounds[2] < 52 && out.bounds[3] < 0);
+  const few = coreOfSegments([[[51, -1], [51.1, -1]]], [51, -1, 51.1, -1]);
+  assert.equal(few.segments.length, 1);
+});
