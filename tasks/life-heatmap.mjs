@@ -64,13 +64,13 @@ export function projectSegments(segments, bounds, width = 1000) {
  * The sheet is fitted to where the routes mostly are, not to the export's whole
  * extent: a weekend in Rome or Poland would otherwise shrink home turf to a speck.
  * Centre = median point; a segment whose middle point lies within RADIUS_DEG
- * (about 165 km, Nottinghamshire to Birmingham and back) of it is kept, and the
+ * (about 65 km: the home counties of the routes) of it is kept, and the
  * bounds are those of the kept segments' points, padded 5%. Far trips are left
  * off the sheet. Too few points: no change.
  * @param {number[][][]} segments @param {any} bounds
  * @returns {{ segments: number[][][], bounds: any }}
  */
-const RADIUS_DEG = 1.5;
+const RADIUS_DEG = 0.6;
 export function coreOfSegments(segments, bounds) {
   const pts = segments.flat();
   if (pts.length < 100) return { segments, bounds };
