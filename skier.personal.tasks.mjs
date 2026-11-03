@@ -25,6 +25,7 @@ import { fitnessEventViewsTask } from './tasks/fitness-event-views.mjs';
 import { fitnessPhotoDimsTask } from './tasks/fitness-photo-dims.mjs';
 import { fitnessFeedItemsTask, FEED_PATH as FITNESS_FEED_PATH } from './tasks/fitness-feed-items.mjs';
 import { lifeHubTask } from './tasks/life-hub.mjs';
+import { lifeHeatmapTask } from './tasks/life-heatmap.mjs';
 import { lifePageTasks } from './tasks/life-pages.mjs';
 
 const SITE_URL = 'https://james.ripixel.co.uk';
@@ -219,6 +220,7 @@ export const tasks = [
     // Sets fitnessIndex, fitnessActivities, fitnessRoundups, fitnessUnavailable, fitnessSource.
     // Env: FITNESS_DATA_BASE (URL), FITNESS_DATA_SOURCE=live|cache|fixtures. See README "Fitness data".
     fetchFitnessTask(),
+    lifeHeatmapTask(), // LH3.5 `lifeHeatmapView`: {viewBox, paths, count} or null (data only)
     fitnessPhotoDimsTask(), // F5.5 `fitnessPhotoDims`: hero photo sizes (portrait beside the title, else full width); before the view tasks
     fitnessLifeTask(), // S2.2 `fitnessLife` for /life (rendered by generate-pages below)
     lifeHubTask(), // LH3.4 `lifeHub`, `lifeSections`, `lifePersonal`, `lifeFacts` (data only)
