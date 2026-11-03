@@ -452,12 +452,113 @@ export function buildDeltas(cur, prev) {
 }
 
 // ---------------------------------------------------------------------------
+// Life blocks (LH4.3): watching, listening, reading and outings from the period sidecar
+
+const LIFE_BLOCKS = ['watching', 'listening', 'reading', 'outings'];
+
+/** Kind codes the box sends (queue.SECTIONS) -> plain words. Anything else renders nothing. */
+const LIFE_KIND_LABELS = /** @type {Record<string, string>} */ ({
+  film: 'film', season: 'TV', episode: 'TV', series: 'TV', creator: 'channel', video: 'video',
+  artist: 'artist', track: 'track', podcast: 'podcast', book: 'book', audiobook: 'audiobook',
+  gig: 'gig', cinema: 'cinema',
+});
+
+/** Reason codes the box sends (assess.hard_reason, "sustained") -> plain words; '' means the kind already says it. */
+const LIFE_REASON_LABELS = /** @type {Record<string, string>} */ ({
+  film: 'watched', season: 'finished the season', book: 'finished', sustained: 'kept coming back',
+  gig: '', cinema: '', outing: '',
+});
+
+/**
+ * The heading for one life block.
+ * @param {string} name watching | listening | reading | outings
+ * @param {'week'|'month'|'year'} type
+ * @param {{ short: string }} labels from periodLabels(); `short` is the month name or the year for those types
+ */
+export function lifeHeading(name, type, labels) {
+  const when = type === 'month' ? labels.short.replace(/\s+\d{4}$/, '') : labels.short;
+  if (type === 'week') {
+    return { watching: "This week's watching", listening: "This week's listening", reading: "This week's reading", outings: 'Out and about' }[name] || '';
+  }
+  const pair = type === 'month' ? 'music and podcasts' : 'podcasts and music';
+  return { watching: `${when} in films and TV`, listening: `${when} in ${pair}`, reading: `${when} in books`, outings: `${when}, out` }[name] || '';
+}
+
+/** @param {number} n @param {string} one @param {string} [many] */
+const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+
+/**
+ * "3 films · 14 episodes · 22 h": counts only, zero parts omitted, '' when there are none.
+ * @param {string} name @param {Record<string, any>} [totals]
+ */
+export function totalsLine(name, totals = {}) {
+  const t = totals || {};
+  /** @type {Array<[number, string]>} */
+  let parts = [];
+  if (name === 'watching') {
+    parts = [[num(t.films), 'film'], [num(t.episodes), 'episode'], [num(t.videos), 'video'], [num(t.hours), 'h']];
+  } else if (name === 'listening') {
+    parts = [[num(t.tracks), 'track'], [num(t.podcastEpisodes), 'podcast episode'], [num(t.audiobookHours), 'audiobook h']];
+  } else if (name === 'reading') {
+    parts = [[num(t.books), 'book'], [num(t.pages), 'page']];
+  }
+  return parts.filter(([n]) => n > 0)
+    .map(([n, w]) => (w === 'h' ? `${n} h` : w === 'audiobook h' ? `${n} h audiobooks` : plural(n, w)))
+    .join(' · ');
+}
+
+/** "2026-09" → "September 2026"; month precision is all an outing ever shows. */
+function monthYear(ym) {
+  const m = /^(\d{4})-(\d{2})/.exec(String(ym || ''));
+  if (!m || Number(m[2]) < 1 || Number(m[2]) > 12) return '';
+  return `${MONTHS[Number(m[2]) - 1]} ${m[1]}`;
+}
+
+/** @param {string} name @param {any} n */
+function lifeItem(name, n) {
+  const title = String(n?.title || '').trim();
+  if (!title) return null;
+  const kind = String(n.kind || '').toLowerCase();
+  const kindLabel = LIFE_KIND_LABELS[kind] || '';
+  if (name === 'outings') {
+    // Month precision only, never a venue or a day.
+    return { title: `saw ${title}`, by: '', kindLabel, meta: monthYear(n.month) };
+  }
+  let reason = LIFE_REASON_LABELS[String(n.reason || '').trim().toLowerCase()] || '';
+  if (reason.toLowerCase() === kindLabel.toLowerCase()) reason = '';
+  const bits = [];
+  if (n.season != null && n.season !== '') bits.push(`season ${n.season}`);
+  if (typeof n.year === 'number' && n.year > 0) bits.push(String(n.year));
+  if (reason) bits.push(reason);
+  return { title, by: n.by ? String(n.by) : '', kindLabel, meta: bits.join(' · ') };
+}
+
+/**
+ * @param {any} period the validated life/period sidecar (or nothing)
+ * @param {{ type: 'week'|'month'|'year', short: string }} labels
+ * @returns {{ blocks: Array<{ name: string, heading: string, items: any[], totalsLine: string }>, count: number } | null}
+ */
+export function buildRoundupLife(period, labels) {
+  if (!period || typeof period !== 'object') return null;
+  const blocks = [];
+  for (const name of LIFE_BLOCKS) {
+    const section = period[name];
+    if (!section || typeof section !== 'object') continue;
+    const items = (Array.isArray(section.notable) ? section.notable : []).map((n) => lifeItem(name, n)).filter(Boolean);
+    const line = totalsLine(name, section.totals);
+    if (!items.length && !line) continue;
+    blocks.push({ name, heading: lifeHeading(name, labels.type, labels), items, totalsLine: line });
+  }
+  return blocks.length ? { blocks, count: blocks.length } : null;
+}
+
+// ---------------------------------------------------------------------------
 // View models
 
 /**
  * Everything `personal/templates/roundup.html` renders, as plain data.
  * @param {{ key: string, previousKey?: string, roundup: any }} file
- * @param {{ byKey: Map<string, any>, neighbours: Map<string, any>, activitySlugs: Set<string>, showPhotoGallery: boolean }} ctx
+ * @param {{ byKey: Map<string, any>, neighbours: Map<string, any>, activitySlugs: Set<string>, showPhotoGallery: boolean, lifePeriods?: Record<string, any> }} ctx
  */
 export function buildRoundupView(file, ctx) {
   const r = file.roundup || {};
@@ -608,6 +709,7 @@ export function buildRoundupView(file, ctx) {
     routes, places, placesNote, weather,
     effortStrip, activeDays, dayCount: days.length, zones, hrTracked: Math.round(tracked),
     bestEfforts, highlights, records, prCount, sources: sources.join(' · '),
+    life: buildRoundupLife(ctx.lifePeriods?.[key], labels),
     aiSummary, prevNav, nextNav, hasNav: Boolean(prevNav || nextNav), description,
     indexUrl: ROUNDUPS_INDEX_URL,
   };
@@ -676,6 +778,7 @@ export function fitnessRoundupViewsTask() {
         neighbours: resolveNeighbours(files),
         activitySlugs,
         showPhotoGallery: Boolean(index.profile?.showPhotoGallery),
+        lifePeriods: g.lifePeriods || {},
       };
       const siteUrl = String(g.siteUrl || '').replace(/\/+$/, '');
       const ogCards = g.fitnessOgImages?.roundup || {};

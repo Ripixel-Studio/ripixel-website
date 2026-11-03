@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "key": "week-42-2026",
+  "periodType": "week",
+  "periodStart": "2026-10-12",
+  "periodEnd": "2026-10-19",
+  "generatedAt": "2026-10-19T06:00:00+00:00",
+  "watching": {
+    "notable": [
+      {
+        "key": "a1b2c3d4e5",
+        "kind": "film",
+        "title": "The Invented Harbour",
+        "by": null,
+        "season": null,
+        "year": 2024,
+        "provider": "Fixture Cinema",
+        "month": "2026-10",
+        "reason": "film",
+        "poster": null
+      }
+    ],
+    "totals": {
+      "films": 1,
+      "episodes": 3,
+      "videos": 2,
+      "hours": 5
+    }
+  },
+  "listening": {
+    "notable": [
+      {
+        "key": "f6e5d4c3b2",
+        "kind": "artist",
+        "title": "Sample Echoes",
+        "by": "The Placeholders",
+        "season": null,
+        "year": 2025,
+        "provider": "Fixture Music",
+        "month": "2026-10",
+        "reason": "sustained",
+        "poster": null
+      }
+    ],
+    "totals": {
+      "tracks": 80,
+      "podcastEpisodes": 3,
+      "audiobookHours": 2
+    }
+  },
+  "reading": {
+    "notable": [],
+    "totals": {
+      "books": 0,
+      "pages": 0
+    }
+  }
+}

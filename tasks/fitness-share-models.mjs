@@ -366,6 +366,27 @@ export function roundupCalendar(type, r) {
 }
 
 /**
+ * The period's notables as up to three card lines: one per block first (watching,
+ * listening, reading), then outings, then whatever is left in recency order.
+ * @param {any} life  buildRoundupLife's output (or null)
+ * @returns {{ lines: string[], more: number } | null}
+ */
+export function roundupLifeLines(life) {
+  const blocks = life?.blocks || [];
+  const queues = blocks.map((/** @type {any} */ b) => (b.items || []).map((/** @type {any} */ it) => {
+    const kind = String(it.kindLabel || '');
+    const head = kind ? kind.charAt(0).toUpperCase() + kind.slice(1) : '';
+    return head ? `${head} · ${it.title}` : String(it.title);
+  }));
+  const total = queues.reduce((/** @type {number} */ s, /** @type {string[]} */ q) => s + q.length, 0);
+  if (!total) return null;
+  const lines = [];
+  for (const q of queues) if (lines.length < 3 && q.length) lines.push(q.shift());
+  for (let i = 0; lines.length < 3 && i < 3; i++) for (const q of queues) if (lines.length < 3 && q.length) lines.push(q.shift());
+  return { lines, more: total - lines.length };
+}
+
+/**
  * The model for one roundup.
  * @param {any} file  an element of fitnessRoundups
  * @param {any} ctx   buildRoundupView's ctx (byKey, neighbours, activitySlugs, showPhotoGallery)
@@ -411,6 +432,7 @@ export function roundupShareModel(file, ctx) {
     prCount: view.prCount,
     vs: view.comparison && view.comparison.deltas.length ? { label: view.comparison.label, deltas: view.comparison.deltas } : null,
     photos: view.photos.map((/** @type {any} */ p) => httpsUrl(p.url)).filter(Boolean).slice(0, 3),
+    life: roundupLifeLines(view.life),
   };
 }
 

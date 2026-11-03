@@ -12,6 +12,7 @@
  *   <base>/events.json          (S2.6: the Fitness calendars, written by the box)
  *   <base>/life/index.json      (life hub export, plan 2; schema in jarvis docs/domains/lifehub.md)
  *   <base>/life/heatmap.json    (trimmed route segments, plan 3 Task 2)
+ *   <base>/life/period/<periodKey>.json  (per-roundup sidecar, plan 4; optional, one per roundup key)
  *
  * Source order is live → cache → fixtures → empty, unless FITNESS_DATA_SOURCE
  * forces one. The build never fails because of fitness data: the worst case is
@@ -26,6 +27,7 @@
  *                       hand-written list
  *   lifeIndex           the validated life/index.json or null (optional, like events)
  *   lifeHeatmap         the validated life/heatmap.json or null
+ *   lifePeriods         { [roundup key]: validated life/period doc }; {} when there are none
  *   fitnessUnavailable  boolean
  *   fitnessSource       'live' | 'cache' | 'fixtures' | 'none'
  */
@@ -66,6 +68,7 @@ const SAFE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,200}$/;
  * @property {any|null} events
  * @property {any|null} lifeIndex
  * @property {any|null} lifeHeatmap
+ * @property {Record<string, any>} lifePeriods
  * @property {Source|'none'} source
  * @property {boolean} unavailable
  * @property {string[]} notes   one line per source tried and why it was passed over
@@ -178,6 +181,16 @@ export function validateHeatmap(doc, logger = silentLogger) {
 }
 
 /**
+ * life/period/<key>.json is optional: schemaVersion 1 and a `key` equal to the file name, else dropped.
+ * @param {any} doc @param {string} key @param {Logger} [logger]
+ */
+export function validatePeriod(doc, key, logger = silentLogger) {
+  if (doc && typeof doc === 'object' && doc.schemaVersion === 1 && doc.key === key) return doc;
+  logger.warn(`life/period/${key}.json ignored: expected schemaVersion 1 and key ${key}`);
+  return null;
+}
+
+/**
  * Ids listed in the index, filtered to ones that are safe to use as paths.
  * @param {any[]} list
  * @param {string} field
@@ -233,7 +246,7 @@ async function pool(items, limit, fn) {
 // Readers. Each returns { index, activityFiles, roundupFiles } or throws when
 // the source is unusable (no index). Missing individual files are skipped.
 
-/** @typedef {{ index: any, activityFiles: Map<string, any>, roundupFiles: Map<string, any>, events: any|null, lifeIndex?: any|null, lifeHeatmap?: any|null }} RawSet */
+/** @typedef {{ index: any, activityFiles: Map<string, any>, roundupFiles: Map<string, any>, events: any|null, lifeIndex?: any|null, lifeHeatmap?: any|null, lifePeriods?: Record<string, any> }} RawSet */
 
 /**
  * @param {string} dir
@@ -266,7 +279,13 @@ export async function readFromDir(dir, logger = silentLogger) {
   }
   const lifeIndex = await readOptional(path.join(dir, 'life', 'index.json'), validateLife, logger);
   const lifeHeatmap = await readOptional(path.join(dir, 'life', 'heatmap.json'), validateHeatmap, logger);
-  return { index, activityFiles, roundupFiles, events, lifeIndex, lifeHeatmap };
+  /** @type {Record<string, any>} */
+  const lifePeriods = {};
+  for (const id of roundupFiles.keys()) {
+    const doc = await readOptional(path.join(dir, 'life', 'period', `${id}.json`), (d, l) => validatePeriod(d, id, l), logger);
+    if (doc) lifePeriods[id] = doc;
+  }
+  return { index, activityFiles, roundupFiles, events, lifeIndex, lifeHeatmap, lifePeriods };
 }
 
 /**
@@ -335,7 +354,7 @@ export async function readLive(opts) {
       stats.reused++;
       return readJson(cacheFile);
     }
-    if (!res.ok) throw new Error(`HTTP ${res.status} for ${rel}`);
+    if (!res.ok) throw Object.assign(new Error(`HTTP ${res.status} for ${rel}`), { status: res.status });
     const text = await res.text();
     const data = JSON.parse(text);
     await fs.mkdir(path.dirname(cacheFile), { recursive: true });
@@ -354,16 +373,25 @@ export async function readLive(opts) {
   };
 
   /**
-   * One retry, then the cached copy if there is one, else undefined.
+   * One retry, then the cached copy if there is one, else undefined. With `quiet404` (optional
+   * docs) a clean 404 is authoritative: no retry, no warning, not a failure, and the cached copy
+   * and its meta entry are deleted so a withdrawn doc stops showing. The cache is used only for
+   * 5xx and network errors.
    * @param {string} rel
+   * @param {boolean} [quiet404]
    */
-  const getFileLenient = async (rel) => {
+  const getFileLenient = async (rel, quiet404 = false) => {
     let lastErr;
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
         return await getFile(rel);
       } catch (e) {
         lastErr = e;
+        if (quiet404 && /** @type {any} */ (e)?.status === 404) {
+          await fs.rm(path.join(cacheDir, rel), { force: true });
+          delete meta[rel];
+          return undefined;
+        }
       }
     }
     try {
@@ -415,13 +443,27 @@ export async function readLive(opts) {
     (r.kind === 'activity' ? activityFiles : roundupFiles).set(r.id, r.data);
   }
 
+  // Period sidecars: only for keys the index lists (an orphan sidecar is never requested),
+  // through the same limiter. A missing one is normal; the roundup page is then unchanged.
+  /** @type {Record<string, any>} */
+  const lifePeriods = {};
+  const periodResults = await pool(roundupIds, concurrency, async (id) => ({
+    id,
+    data: await getFileLenient(`life/period/${id}.json`, true),
+  }));
+  for (const r of periodResults) {
+    if (r.data === undefined) continue;
+    const doc = validatePeriod(r.data, r.id, logger);
+    if (doc) lifePeriods[r.id] = doc;
+  }
+
   await fs.mkdir(cacheDir, { recursive: true });
   await fs.writeFile(path.join(cacheDir, 'index.json'), indexText);
   await writeJson(path.join(cacheDir, META_FILE), meta);
   logger.debug(
     `live: ${stats.fetched} fetched, ${stats.reused} reused from cache, ${stats.failed} failed`,
   );
-  return { index, activityFiles, roundupFiles, events, lifeIndex, lifeHeatmap, ...stats };
+  return { index, activityFiles, roundupFiles, events, lifeIndex, lifeHeatmap, lifePeriods, ...stats };
 }
 
 // ---------------------------------------------------------------------------
@@ -439,7 +481,7 @@ function ts(iso) {
  * @param {RawSet} raw
  */
 export function assemble(raw) {
-  const { index, activityFiles, roundupFiles, events = null, lifeIndex = null, lifeHeatmap = null } = raw;
+  const { index, activityFiles, roundupFiles, events = null, lifeIndex = null, lifeHeatmap = null, lifePeriods = {} } = raw;
   const activities = [];
   for (const entry of index.activities) {
     const file = entry && activityFiles.get(entry.slug);
@@ -463,7 +505,7 @@ export function assemble(raw) {
       ts(b.roundup?.periodStart) - ts(a.roundup?.periodStart),
   );
 
-  return { index, activities, roundups, events, lifeIndex, lifeHeatmap };
+  return { index, activities, roundups, events, lifeIndex, lifeHeatmap, lifePeriods };
 }
 
 /** @param {unknown} e */
@@ -490,8 +532,8 @@ export async function loadFitnessData(options = {}) {
       if (source === 'live') raw = await readLive(opts);
       else if (source === 'cache') raw = await readFromDir(opts.cacheDir, logger);
       else raw = await readFromDir(opts.fixturesDir, logger);
-      const { index, activities, roundups, events, lifeIndex, lifeHeatmap } = assemble(raw);
-      return { index, activities, roundups, events, lifeIndex, lifeHeatmap, source, unavailable: false, notes };
+      const { index, activities, roundups, events, lifeIndex, lifeHeatmap, lifePeriods } = assemble(raw);
+      return { index, activities, roundups, events, lifeIndex, lifeHeatmap, lifePeriods, source, unavailable: false, notes };
     } catch (e) {
       const where =
         source === 'live' ? opts.baseUrl : source === 'cache' ? opts.cacheDir : opts.fixturesDir;
@@ -507,6 +549,7 @@ export async function loadFitnessData(options = {}) {
     events: null,
     lifeIndex: null,
     lifeHeatmap: null,
+    lifePeriods: {},
     source: 'none',
     unavailable: true,
     notes,
@@ -538,6 +581,7 @@ export function fetchFitnessTask(config = {}) {
           events: null,
           lifeIndex: null,
           lifeHeatmap: null,
+          lifePeriods: {},
           source: 'none',
           unavailable: true,
           notes: [errMsg(e)],
@@ -558,6 +602,7 @@ export function fetchFitnessTask(config = {}) {
         fitnessEvents: data.events,
         lifeIndex: data.lifeIndex,
         lifeHeatmap: data.lifeHeatmap,
+        lifePeriods: data.lifePeriods,
         fitnessUnavailable: data.unavailable,
         fitnessSource: data.source,
       };

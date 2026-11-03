@@ -202,6 +202,10 @@
 
     <!-- 10 · Best efforts + highlights -->
     {{> roundup-highlights roundup}}
+    {{!-- 10b · Watching, listening, reading, outings (only with a period sidecar) --}}
+    {{#if roundup.life}}
+    {{> roundup-life roundup}}
+    {{/if}}
 
     <!-- 11 · Records wall -->
     {{> roundup-records roundup}}

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "key": "week-30-2026",
+  "periodType": "week",
+  "periodStart": "2026-07-20",
+  "periodEnd": "2026-07-27",
+  "generatedAt": "2026-07-27T06:00:00+00:00",
+  "watching": {
+    "notable": [],
+    "totals": {
+      "films": 0,
+      "episodes": 1,
+      "videos": 0,
+      "hours": 1
+    }
+  },
+  "listening": {
+    "notable": [],
+    "totals": {
+      "tracks": 10,
+      "podcastEpisodes": 0,
+      "audiobookHours": 0
+    }
+  },
+  "reading": {
+    "notable": [],
+    "totals": {
+      "books": 0,
+      "pages": 0
+    }
+  },
+  "outings": {
+    "notable": []
+  }
+}

@@ -48,7 +48,7 @@ export const DEFAULT_URL_BASE = '/life/share';
 export const DEFAULT_CONCURRENCY = 6;
 export const FULL_DAYS = 90;
 /** Bump when the drawing changes in a way the SVG hash would not see (compositing, encoders). */
-export const RENDER_VERSION = 'f54.1';
+export const RENDER_VERSION = 'lh4.1';
 const PHOTO_TIMEOUT_MS = 20_000;
 const GUTTER = 8;
 
@@ -108,7 +108,7 @@ export function variantsFor(model, full) {
 
 /**
  * Every card job for the data: activities, race weekends, roundups.
- * @param {{ activities?: any[], roundups?: any[], index?: any, now?: number, photoDims?: any, logger?: any }} opts
+ * @param {{ activities?: any[], roundups?: any[], lifePeriods?: Record<string, any>, index?: any, now?: number, photoDims?: any, logger?: any }} opts
  * @returns {Job[]}
  */
 export function cardJobs(opts) {
@@ -141,6 +141,7 @@ export function cardJobs(opts) {
     neighbours: resolveNeighbours(roundups),
     activitySlugs: new Set((index.activities || []).map((/** @type {any} */ a) => a?.slug).filter(Boolean)),
     showPhotoGallery: !!index.profile?.showPhotoGallery,
+    lifePeriods: opts.lifePeriods || {},
   };
   for (const file of roundups) {
     try {
@@ -249,7 +250,7 @@ const shapeLabel = (shape) => SHAPES[shape].label;
 
 /**
  * Render every card into `outDir`, reusing `cacheDir` where nothing changed.
- * @param {{ activities?: any[], roundups?: any[], index?: any, outDir?: string, cacheDir?: string, urlBase?: string,
+ * @param {{ activities?: any[], roundups?: any[], lifePeriods?: Record<string, any>, index?: any, outDir?: string, cacheDir?: string, urlBase?: string,
  *   siteUrl?: string, fontCacheDir?: string, concurrency?: number, logger?: any, now?: number, photoDims?: any,
  *   fetchImpl?: typeof fetch, offline?: boolean, only?: (job: Job) => boolean }} opts
  */
@@ -286,7 +287,7 @@ export async function renderFitnessCards(opts = {}) {
     const cachePath = path.join(cacheDir, rel);
     try {
       const svg = buildShareSVG(m, shape, variant.mode);
-      const hash = sha([RENDER_VERSION, shape, variant.id, ...variant.bg, svg].join('\n'));
+      const hash = sha([RENDER_VERSION, shape, variant.id, ...variant.bg, JSON.stringify(m.life ?? null), svg].join('\n'));
       let hit = false;
       if (await exists(cachePath)) {
         try { hit = (await fs.readFile(`${cachePath}.sha1`, 'utf8')).trim() === hash; } catch { hit = false; }
@@ -411,6 +412,7 @@ export function fitnessOgImagesTask(config = {}) {
           index: g.fitnessIndex,
           siteUrl: g.siteUrl,
           photoDims: g.fitnessPhotoDims,
+          lifePeriods: g.lifePeriods,
           offline: process.env.FITNESS_DATA_SOURCE === 'fixtures' || process.env.FITNESS_SHARE_PHOTOS === 'off',
           logger: ctx.logger,
         });

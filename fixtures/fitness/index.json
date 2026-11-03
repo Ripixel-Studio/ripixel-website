@@ -395,6 +395,20 @@
       "hasStrength": true,
       "prCount": 3,
       "hasAiSummary": true
+    },
+    {
+      "key": "month-09-2026",
+      "periodType": "ROUNDUP_PERIOD_TYPE_MONTH",
+      "periodStart": "2026-09-01T00:00:00Z",
+      "periodEnd": "2026-10-01T00:00:00Z",
+      "generatedAt": "2026-10-01T00:05:12Z",
+      "totalActivities": 3,
+      "totalDurationSeconds": 8992,
+      "totalDistanceMeters": 37410,
+      "totalWeightKg": 6286.0,
+      "hasStrength": true,
+      "prCount": 3,
+      "hasAiSummary": true
     }
   ]
 }
