@@ -1,0 +1,18 @@
+<!-- Context: a lifeSections view (or a lifeHub card) — breadcrumb, the section's name, its headline and its age -->
+<nav class="thought-breadcrumb" aria-label="Breadcrumb">
+  <a href="/life">life</a> / {{name}}
+</nav>
+<header class="life-head">
+  <h1 class="page-hero__h1 life-head__h1">{{title}}.</h1>
+  {{#if headline}}
+  <p class="life-head__headline">
+    <span class="life-head__num">{{headline.value}}{{#if headline.unit}}<small>{{headline.unit}}</small>{{/if}}</span>
+    <span class="life-head__label">{{headline.label}}</span>
+  </p>
+  {{/if}}
+  {{#if staleLabel}}
+  <p class="life-stale">{{staleLabel}}</p>
+  {{else}}{{#if updated}}
+  <p class="life-head__updated">updated {{updated}}</p>
+  {{/if}}{{/if}}
+</header>

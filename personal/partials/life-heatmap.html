@@ -1,0 +1,7 @@
+<!-- Context: lifeHeatmapView {viewBox, paths, count} — every route on one sheet, ends near home trimmed -->
+<figure class="life-heatmap">
+  <svg class="life-heatmap__map" viewBox="{{viewBox}}" role="img" aria-label="Routes from {{count}} activities, drawn over each other">
+    {{#each paths}}<path d="{{this}}"/>{{/each}}
+  </svg>
+  <figcaption class="life-heatmap__caption">{{count}} activities drawn over each other. The darker the line, the more often I've been along it.</figcaption>
+</figure>

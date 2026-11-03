@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {
-  SECTION_ORDER, SECTION_HREF, staleLabel, sparkPath, sawLabel, buildSection, buildHub, personalBits, lifeFacts, lifeHubTask,
+  SECTION_ORDER, SECTION_HREF, staleLabel, sparkPath, sawLabel, monthLabel, hubNote, buildSection, buildHub, personalBits, lifeFacts, lifeHubTask,
 } from './life-hub.mjs';
 import { runSkierTasks } from './skier-test-runner.mjs';
 
@@ -144,4 +144,28 @@ test('partial totals: absent fields do not become zero rows from nowhere', () =>
   const w = buildSection('watching', { staleDays: 0, headline: { value: 1, unit: '', label: 'x' }, notable: [], totals: { year: { films: 3 }, month: {} } }, now);
   assert.equal(w.stats.length, 1);
   assert.equal(w.stats[0].items[0].value, '3');
+});
+
+test('monthLabel and notables carry it', () => {
+  assert.equal(monthLabel('2026-10'), 'Oct 2026');
+  assert.equal(monthLabel('2026-13'), '');
+  assert.equal(monthLabel(''), '');
+  assert.equal(buildSection('watching', fixture.sections.watching, now).notable[0].monthLabel, 'Oct 2026');
+});
+
+test('hub notes: the latest thing or the next number per section', () => {
+  const hub = buildHub(fixture, { ...fitnessLife, activities: [{ title: 'Invented Run', href: '/life/activity/invented-run' }] }, now);
+  const notes = Object.fromEntries(hub.cards.map((c) => [c.name, c.note]));
+  assert.deepEqual(notes.fitness, { label: 'Latest session', value: 'Invented Run', href: '/life/activity/invented-run' });
+  assert.deepEqual(notes.body, { label: 'Body fat', value: '17.2%', href: '' });
+  assert.deepEqual(notes.sleep, { label: 'Best night', value: '8h 30m', href: '' });
+  assert.equal(notes.food.value, '2,450 kcal');
+  assert.equal(notes.games.value, 'Sample Tactics');
+  assert.deepEqual(notes.code, { label: 'Newest project', value: 'sample-tool', href: '' });
+  assert.equal(notes.watching.value, 'The Invented Harbour');
+  assert.equal(notes.listening.value, 'Sample Echoes, The Placeholders');
+  assert.equal(notes.reading.value, 'A Made-Up Almanac, Ada Example');
+  assert.equal(hubNote('reading', { empty: true }), null);
+  const empty = buildHub(null, null, now);
+  assert.ok(empty.cards.every((c) => c.note === null));
 });

@@ -26,7 +26,7 @@ import { fitnessPhotoDimsTask } from './tasks/fitness-photo-dims.mjs';
 import { fitnessFeedItemsTask, FEED_PATH as FITNESS_FEED_PATH } from './tasks/fitness-feed-items.mjs';
 import { lifeHubTask } from './tasks/life-hub.mjs';
 import { lifeHeatmapTask } from './tasks/life-heatmap.mjs';
-import { lifePageTasks } from './tasks/life-pages.mjs';
+import { lifePageTasks, templateHelpers } from './tasks/life-pages.mjs';
 
 const SITE_URL = 'https://james.ripixel.co.uk';
 
@@ -220,7 +220,7 @@ export const tasks = [
     // Sets fitnessIndex, fitnessActivities, fitnessRoundups, fitnessUnavailable, fitnessSource.
     // Env: FITNESS_DATA_BASE (URL), FITNESS_DATA_SOURCE=live|cache|fixtures. See README "Fitness data".
     fetchFitnessTask(),
-    lifeHeatmapTask(), // LH3.5 `lifeHeatmapView`: {viewBox, paths, count} or null (data only)
+    lifeHeatmapTask(), // LH3.5 `lifeHeatmapView`: {viewBox, paths, count} or null; drawn on /life/fitness
     fitnessPhotoDimsTask(), // F5.5 `fitnessPhotoDims`: hero photo sizes (portrait beside the title, else full width); before the view tasks
     fitnessLifeTask(), // S2.2 `fitnessLife` for /life (rendered by generate-pages below)
     lifeHubTask(), // LH3.4 `lifeHub`, `lifeSections`, `lifePersonal`, `lifeFacts` (data only)
@@ -312,6 +312,7 @@ export const tasks = [
         pagesDir: './personal/pages',
         partialsDir: './personal/partials',
         outDir: './public/personal',
+        helpers: templateHelpers, // `eq` for the /life hub's per-section notes
         additionalVarsFn: ({ currentPage, rightNow, ...vars }) => {
             /** @type {Record<string, string>} */
             const pageMapping = {
@@ -329,12 +330,13 @@ export const tasks = [
                         case 'projects':  return "Shall we take a look at some projects I've done?";
                         case 'changelog': return 'What changes have happened to this site?';
                         case 'home':      return "I'm James King, and I make things for the web";
-                        case 'life':      return "What's going on in my life? Fitness, media, and upcoming events.";
+                        case 'life':      return 'James King, by the numbers: fitness, body, sleep, food, games, code, watching, listening and reading.';
                         default:          return vars.description || '';
                     }
                 })(),
                 rightNow: rightNow || null,
                 atomFeed: page === 'life' ? FITNESS_FEED_PATH : undefined,
+                canonical: page === 'life' ? `${SITE_URL}/life` : vars.canonical,
             };
         },
     }),

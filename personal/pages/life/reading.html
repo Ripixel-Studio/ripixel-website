@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+{{> head}}
+
+<body class="page-life life-ink--reading" data-page="life">
+  <div class="paper-wash" aria-hidden="true"></div>
+  <div class="paper-dot" aria-hidden="true"></div>
+
+  {{> masthead}}
+
+  <div class="zine-content life-page">
+
+    <svg class="reg-mark" style="position:absolute;top:4px;left:6px" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+      <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <line x1="0" y1="9" x2="18" y2="9" stroke="currentColor" stroke-width="1.2"/>
+      <line x1="9" y1="0" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/>
+    </svg>
+
+    {{!-- Reading: books finished and in progress (lifeSections.reading). --}}
+    {{#with section}}
+    {{> life-section-head}}
+    {{#if empty}}
+    {{> life-empty}}
+    {{else}}
+    {{#if current.length}}
+    <h2 class="fit-header">reading <span>now</span>.</h2>
+    <ul class="life-current">
+      {{#each current}}
+      <li class="life-current__item">
+        <span class="life-notable__title">{{title}}</span>
+        {{#if by}}<span class="life-notable__by">{{by}}</span>{{/if}}
+        <span class="life-progress" role="img" aria-label="{{percent}}% read"><span class="life-progress__fill" style="width: {{percent}}%"></span></span>
+        <span class="life-notable__when">{{percent}}% read</span>
+      </li>
+      {{/each}}
+    </ul>
+    {{/if}}
+    {{#each stats}}
+    <section class="life-period">
+      <h2 class="life-period__label">{{label}}</h2>
+      <div class="stat-strip life-stats">
+        {{#each items}}
+        <div class="stat-strip__item">
+          <div class="stat-strip__num">{{value}}{{#if unit}}<small class="fit-stats__unit">{{unit}}</small>{{/if}}</div>
+          <div class="stat-strip__label">{{label}}</div>
+        </div>
+        {{/each}}
+      </div>
+    </section>
+    {{/each}}
+    <h2 class="fit-header"><span>finished</span>.</h2>
+    {{#if notable.length}}
+    {{> life-notable-list items=notable}}
+    {{else}}
+    <p class="life-empty">Nothing has made the list yet.</p>
+    {{/if}}
+    {{#if yearList.length}}
+    <h2 class="fit-header">year by <span>year</span>.</h2>
+    {{#each yearList}}
+    <section class="life-year">
+      <h3 class="life-year__label">{{this}}</h3>
+      {{> life-notable-list items=(lookup ../years this)}}
+    </section>
+    {{/each}}
+    {{/if}}
+    {{/if}}
+    {{/with}}
+
+  </div>
+
+  {{> footer}}
+
+  <div class="paper-grain" aria-hidden="true"></div>
+</body>
+</html>

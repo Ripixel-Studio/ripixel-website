@@ -3,7 +3,10 @@
   "generatedAt": "2026-11-03T06:00:00+00:00",
   "facts": [
     {"key": "fx.films", "label": "Films this year", "value": 42, "unit": "films", "tone": "good"},
-    {"key": "fx.streak", "label": "Logging streak", "value": 12, "unit": "days", "tone": "neutral"}
+    {"key": "fx.streak", "label": "Logging streak", "value": 12, "unit": "days", "tone": "neutral"},
+    {"key": "personal.height", "label": "Height", "value": 180, "unit": "cm", "tone": "neutral"},
+    {"key": "personal.likes", "label": "Likes", "value": ["invented cola", "sample toast"], "tone": "fun"},
+    {"key": "personal.boardgames", "label": "Board games", "value": "keen, rarely wins", "tone": "fun"}
   ],
   "sections": {
     "body": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value": 80.1, "unit": "kg", "label": "weight"},

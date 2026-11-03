@@ -68,3 +68,21 @@ test('fixture doc projects', async () => {
   const v = /** @type {any} */ (g.lifeHeatmapView);
   assert.equal(v.paths.length, doc.segments.length);
 });
+
+test('fixture doc has the schema shape: flat bounds and an activity count', async () => {
+  const doc = JSON.parse(await fs.readFile(new URL('../fixtures/fitness/life/heatmap.json', import.meta.url), 'utf8'));
+  assert.equal(doc.bounds.length, 4);
+  assert.ok(doc.bounds.every((/** @type {unknown} */ n) => typeof n === 'number'));
+  const g = await runSkierTasks([lifeHeatmapTask()], { lifeHeatmap: doc });
+  assert.equal(/** @type {any} */ (g.lifeHeatmapView).count, doc.activities);
+});
+
+test('flat and nested bounds project the same', () => {
+  const nested = [[bounds[0], bounds[1]], [bounds[2], bounds[3]]];
+  assert.deepEqual(projectSegments(segments, nested), projectSegments(segments, bounds));
+});
+
+test('count falls back to the number of segments', async () => {
+  const g = await runSkierTasks([lifeHeatmapTask()], { lifeHeatmap: { schemaVersion: 1, segments, bounds } });
+  assert.equal(/** @type {any} */ (g.lifeHeatmapView).count, segments.length);
+});

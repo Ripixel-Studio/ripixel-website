@@ -6,7 +6,7 @@
  * The only computed strings are SVG path data (`sparkPath`), as `routePath()` is.
  *
  * Globals set by `lifeHubTask()`:
- *   lifeHub       { cards[], outings[] }
+ *   lifeHub       { cards[{name, href, title, headline, latest, note, staleLabel, empty}], outings[] }
  *   lifeSections  { [name]: view }
  *   lifePersonal  [{ key, label, value, tone }]
  *   lifeFacts     { [key]: value }
@@ -32,11 +32,17 @@ export function staleLabel(days) {
   return `last updated ${Math.floor(days)} days ago`;
 }
 
-/** @param {string} month YYYY-MM */
-export function sawLabel(month) {
+/** 'Oct 2026' from YYYY-MM; '' when unusable. @param {string} month */
+export function monthLabel(month) {
   const m = /^(\d{4})-(\d{2})$/.exec(String(month || ''));
   if (!m || +m[2] < 1 || +m[2] > 12) return '';
-  return `saw in ${MONTHS[+m[2] - 1]} ${m[1]}`;
+  return `${MONTHS[+m[2] - 1]} ${m[1]}`;
+}
+
+/** @param {string} month YYYY-MM */
+export function sawLabel(month) {
+  const label = monthLabel(month);
+  return label ? `saw in ${label}` : '';
 }
 
 /**
@@ -86,7 +92,7 @@ function notableView(n) {
   return {
     key: String(n.key || ''), kind: String(n.kind || ''), title: String(n.title || ''),
     by: n.by || '', season: n.season ?? '', year: n.year ?? '', provider: n.provider || '',
-    month: String(n.month || ''), reason: String(n.reason || ''), poster: n.poster || '',
+    month: String(n.month || ''), monthLabel: monthLabel(n.month), reason: String(n.reason || ''), poster: n.poster || '',
   };
 }
 
@@ -164,8 +170,8 @@ export function buildSection(name, sec, now = new Date(), outingNotables = []) {
           num(sec.avgMinutes30) != null && row('Last 30 nights', hm(sec.avgMinutes30)),
           num(sec.avgMinutes90) != null && row('Last 90 nights', hm(sec.avgMinutes90)),
           num(sec.consistencyMinutes) != null && row('Consistency', `±${group(sec.consistencyMinutes)}`, 'min'),
-          sec.best?.date && num(sec.best.minutes) != null && row('Best night', hm(sec.best.minutes), sec.best.date),
-          sec.worst?.date && num(sec.worst.minutes) != null && row('Shortest night', hm(sec.worst.minutes), sec.worst.date),
+          sec.best?.date && num(sec.best.minutes) != null && { ...row('Best night', hm(sec.best.minutes)), sub: String(sec.best.date) },
+          sec.worst?.date && num(sec.worst.minutes) != null && { ...row('Shortest night', hm(sec.worst.minutes)), sub: String(sec.worst.date) },
         ].filter(Boolean),
         charts: [{ key: 'sleep', label: 'Weekly average', path: sparkPath(series(weekly, 'avgMinutes'), 240, 48) }].filter((c) => c.path),
       };
@@ -248,6 +254,39 @@ export function buildSection(name, sec, now = new Date(), outingNotables = []) {
   void now;
 }
 
+/**
+ * The hub's second line for a section: its latest notable thing, or the one number
+ * after the headline that says the most. `{label, value, href}` or null.
+ * @param {string} name @param {any} v the section view (buildSection)
+ */
+export function hubNote(name, v) {
+  if (!v || v.empty) return null;
+  const stat = (/** @type {string} */ label) => {
+    const r = (Array.isArray(v.stats) ? v.stats : []).find((x) => x && x.label === label);
+    return r ? { label: r.label, value: r.unit ? `${r.value}${r.unit === '%' ? '' : ' '}${r.unit}` : String(r.value), href: '' } : null;
+  };
+  const latest = (/** @type {any} */ n) => (n && n.title ? { label: 'Latest', value: n.by ? `${n.title}, ${n.by}` : n.title, href: '' } : null);
+  switch (name) {
+    case 'body': return stat('Body fat') || stat('Resting heart rate');
+    case 'sleep': return stat('Best night');
+    case 'food': return stat('Energy, 30-day average');
+    case 'games': return v.recent?.[0] ? { label: 'Recently', value: v.recent[0].name, href: '' } : null;
+    case 'code': {
+      const p = [...(v.projects || [])].sort((a, b) => b.started.localeCompare(a.started))[0];
+      return p ? { label: 'Newest project', value: p.name, href: p.url || '' } : null;
+    }
+    case 'reading': {
+      const c = v.current?.[0];
+      return latest(v.latest) || (c ? { label: 'Reading now', value: c.by ? `${c.title}, ${c.by}` : c.title, href: '' } : null);
+    }
+    case 'watching':
+    case 'listening':
+      return latest(v.latest);
+    default:
+      return null;
+  }
+}
+
 /** @param {any} lifeIndex */
 function outingNotables(lifeIndex) {
   const o = lifeIndex?.sections?.outings;
@@ -265,13 +304,15 @@ export function buildHub(lifeIndex, fitnessLife, now = new Date()) {
     if (name === 'fitness') {
       const first = fitnessLife?.stats?.strip?.[0];
       const empty = !first;
+      const act = fitnessLife?.activities?.[0];
       return {
         name, href: SECTION_HREF(name), title: TITLES.fitness, empty, staleLabel: '', latest: null,
         headline: empty ? null : { value: String(first.value), unit: String(first.unit || ''), label: String(first.label || '') },
+        note: act && act.title ? { label: 'Latest session', value: String(act.title), href: String(act.href || '') } : null,
       };
     }
     const v = /** @type {any} */ (buildSection(name, sections[name], now, outs));
-    return { name, href: v.href, title: v.title, headline: v.empty ? null : v.headline, latest: v.empty ? null : v.latest, staleLabel: v.staleLabel, empty: v.empty };
+    return { name, href: v.href, title: v.title, headline: v.empty ? null : v.headline, latest: v.empty ? null : v.latest, staleLabel: v.staleLabel, empty: v.empty, note: hubNote(name, v) };
   });
   return {
     cards,
