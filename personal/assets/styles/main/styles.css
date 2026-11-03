@@ -1978,7 +1978,15 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
   margin-bottom: 6px;
 }
 
-.thought-breadcrumb a { color: var(--ink-section); }
+.thought-breadcrumb a {
+  color: var(--ink-section);
+  border-bottom: 1px solid currentColor;
+}
+.thought-breadcrumb a:hover { background: var(--ink-section); color: var(--paper); }
+.thought-breadcrumb a:focus-visible {
+  outline: 2px solid var(--ink-section);
+  outline-offset: 2px;
+}
 
 .thought-header {
   display: grid;
