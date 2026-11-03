@@ -192,3 +192,16 @@ test('games with a null headline leads with total hours', () => {
   const v = buildSection('games', { headline: null, hoursTotal: 2625, mostPlayed: [{ name: 'A', hours: 1 }] });
   assert.deepEqual(v.headline, { value: '2,625', unit: 'h', label: 'played, all time' });
 });
+
+test('silly is dropped when it equals serious (small print and games view)', () => {
+  const bits = personalBits([
+    { key: 'games.serious', value: 'Idle Fixture', tone: 'neutral' },
+    { key: 'games.silly', value: 'idle fixture', tone: 'neutral' },
+  ]);
+  assert.deepEqual(bits.map((b) => b.key), ['games.serious']);
+  const g = buildSection('games', { serious: 'Idle Fixture', silly: 'Idle Fixture' }, new Date('2026-11-01T00:00:00Z'));
+  assert.deepEqual(g.silly, []);
+  assert.deepEqual(g.serious, [{ name: 'Idle Fixture', hours: null }]);
+  const differ = buildSection('games', { serious: 'A Game', silly: 'B Game' }, new Date('2026-11-01T00:00:00Z'));
+  assert.equal(differ.silly.length, 1);
+});
