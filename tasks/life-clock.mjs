@@ -124,24 +124,19 @@ export function typeKeyOfTitle(title) {
   return 'other';
 }
 
-/** Names that never appear in a public calendar title, after "&" or "and". */
-const PRIVATE_NAMES = ['Sarah', 'Sara'];
-
 /**
- * A calendar title with partner or people phrases removed: "with <Name>" and
- * "w/ <Name>" (any capitalised name), and "& <Name>" / "and <Name>" for the
- * listed private names. Backstop for the exporter, which also screens them.
+ * A calendar title with people phrases removed, by shape and with no name
+ * list: "with <Capitalised words>" / "w/ <Name>" anywhere, and "& <Capitalised
+ * word>" when the title is a single activity word followed by it. Backstop for
+ * the exporter, which also removes names.
  * @param {unknown} title
  */
 export function cleanTitle(title) {
-  const names = PRIVATE_NAMES.join('|');
-  const out = String(title ?? '')
+  return String(title ?? '')
     .replace(/\s*[-\u2013\u2014,(]?\s*\b(?:with|w\/)\s+[A-Z][\p{L}'\u2019-]*(?:\s+[A-Z][\p{L}'\u2019-]*)*\)?/gu, '')
-    .replace(new RegExp(`\\s*(?:&|\\band\\b)\\s+(?:${names})\\b`, 'gu'), '')
-    .replace(new RegExp(`\\b(?:${names})\\b\\s*(?:&|\\band\\b)\\s*`, 'gu'), '')
+    .replace(/^(\S+)\s+&\s+[A-Z][\p{L}'\u2019-]*$/u, '$1')
     .replace(/\s{2,}/g, ' ')
     .trim();
-  return out;
 }
 
 /** A location is public only for races and parkruns. @param {any} e */
