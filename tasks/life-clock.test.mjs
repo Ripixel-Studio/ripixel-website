@@ -254,10 +254,11 @@ describe('privacy backstops (invented names)', () => {
 
   test('people phrases leave titles', async () => {
     const { cleanTitle } = await import('./life-clock.mjs');
-    assert.equal(cleanTitle('Flexibility Pilates with Sarah'), 'Flexibility Pilates');
-    assert.equal(cleanTitle('Hyrox Doubles & Sarah'), 'Hyrox Doubles');
+    assert.equal(cleanTitle('Flexibility Pilates with Zelda'), 'Flexibility Pilates');
+    assert.equal(cleanTitle('Pilates & Zelda'), 'Pilates');
+    assert.equal(cleanTitle('Hyrox Doubles & Zelda'), 'Hyrox Doubles & Zelda'); // not a single activity word
     assert.equal(cleanTitle('Run with Zelda Quill'), 'Run');
-    assert.equal(cleanTitle('Strength & Conditioning'), 'Strength & Conditioning');
+    assert.equal(cleanTitle('Long run & coffee'), 'Long run & coffee');
     const m = calendarModel({ source: 'calendar', events: [mk({ title: 'Valley 10k with Zelda' })], done: [] }, NOON);
     assert.ok(!renderCalendar(m).includes('Zelda'));
   });
