@@ -201,10 +201,6 @@ export const tasks = [
             // Homepage static data
             latestProject:     'FitGlue',
             latestProjectDate: '2024 → present',
-            latestRole:        'Monzo',
-            latestRoleDate:    'may 2023 → now',
-            latestRoleTitle:   'senior staff engineer (director)',
-            latestRoleBlurb:   'In the Borrowing collective, looking after the Flex team. Fast growth, brilliant people, ambitious targets.',
         },
         valuesFn: (/** @type {any} */ globals) => {
             const match = globals.changelogHtml && /** @type {string} */ (globals.changelogHtml).match(/v(\d+\.\d+\.\d+)/i);

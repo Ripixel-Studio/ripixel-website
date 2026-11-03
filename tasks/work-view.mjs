@@ -129,6 +129,33 @@ export function buildWorkView(work) {
   };
 }
 
+/** Neutral copy for the homepage when there is no export: no specific claims. */
+export const HOME_FALLBACK = {
+  latestRole: 'work',
+  latestRoleDate: '',
+  latestRoleTitle: '',
+  latestRoleBlurb: 'Where I have worked and what I build with.',
+  workBlurb: 'Where I have worked, and the technologies I use.',
+};
+
+/**
+ * The homepage's current-role globals and the /work card blurb, from the view.
+ * @param {ReturnType<typeof buildWorkView>} view
+ */
+export function homeRoleGlobals(view) {
+  if (!view) return { ...HOME_FALLBACK };
+  const r = view.roles[0];
+  const companies = [...new Set(view.roles.map((x) => x.company))];
+  const list = companies.length > 1 ? `${companies.slice(0, -1).join(', ')} and ${companies[companies.length - 1]}` : companies[0];
+  return {
+    latestRole: r.company,
+    latestRoleDate: r.period.replace(' — ', ' → ').replace(/present$/, 'now'),
+    latestRoleTitle: r.title + (r.team ? ` · ${r.team}` : ''),
+    latestRoleBlurb: r.paragraphs[0] || r.note || '',
+    workBlurb: `Career history (${list}) and a long list of technologies.`,
+  };
+}
+
 export function workViewTask(config = {}) {
   return {
     name: 'work-view',
@@ -137,7 +164,7 @@ export function workViewTask(config = {}) {
     run: async (/** @type {any} */ _cfg, /** @type {any} */ ctx) => {
       const view = buildWorkView(ctx.globals?.lifeIndex?.sections?.work);
       ctx.logger.info(view ? `Work: ${view.roles.length} roles` : 'Work: no section in the export');
-      return { workView: view };
+      return { workView: view, ...homeRoleGlobals(view) };
     },
   };
 }

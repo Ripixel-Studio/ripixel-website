@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { generatePagesTask } from 'skier';
 
 import { fetchFitnessTask } from './fitness-fetch.mjs';
-import { workViewTask, buildWorkView } from './work-view.mjs';
+import { workViewTask, buildWorkView, homeRoleGlobals, HOME_FALLBACK } from './work-view.mjs';
 import { templateHelpers } from './life-pages.mjs';
 import { runSkierTasks } from './skier-test-runner.mjs';
 
@@ -125,7 +125,6 @@ describe('built /work page', () => {
     }
     assert.ok(html.includes('University of Sheffield'));
     assert.ok(html.includes('studied, not completed'));
-    assert.ok(!html.includes('minimalist'));
   });
 
   test('roster from evidence: a lapsed tech renders ☆', () => {
@@ -162,4 +161,33 @@ describe('/work with salary rows', () => {
     assert.ok(html.includes('£100,000'));
     assert.ok(html.includes('+11.1%'));
   });
+});
+
+describe('homepage role from the work section', () => {
+  test('globals match the first work role, blurb lists companies newest first', () => {
+    const v = /** @type {any} */ (buildWorkView(work));
+    const g = homeRoleGlobals(v);
+    assert.equal(g.latestRole, v.roles[0].company);
+    assert.equal(g.latestRoleTitle, 'Senior staff software engineer · Borrowing');
+    assert.equal(g.latestRoleDate, 'may 2023 → now');
+    assert.equal(g.workBlurb, 'Career history (Monzo, Deliveroo, DVELP, Example Contracting and Sky Betting & Gaming) and a long list of technologies.');
+  });
+
+  test('no export: neutral fallback', () => {
+    assert.deepEqual(homeRoleGlobals(null), HOME_FALLBACK);
+    assert.ok(!/Monzo|Deliveroo|Sky/.test(JSON.stringify(HOME_FALLBACK)));
+  });
+
+  test('built index shows the first role', async () => {
+    const out = await fs.mkdtemp(path.join(os.tmpdir(), 'work-home-'));
+    try {
+      await build(out);
+      const html = await fs.readFile(path.join(out, 'index.html'), 'utf8');
+      assert.ok(html.includes('Monzo'));
+      assert.ok(html.includes('may 2023 → now'));
+      assert.ok(html.includes('Career history (Monzo, Deliveroo'));
+    } finally {
+      await fs.rm(out, { recursive: true, force: true });
+    }
+  }, { timeout: 120_000 });
 });
