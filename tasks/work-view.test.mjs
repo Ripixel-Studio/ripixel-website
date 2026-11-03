@@ -65,10 +65,20 @@ describe('buildWorkView', () => {
     assert.equal(sky[0].ink, sky[1].ink);
   });
 
-  test('education says studied, not completed', () => {
+  test('highlights: label required, optional parts only when present, https links only', () => {
     const v = /** @type {any} */ (buildWorkView(work));
-    assert.equal(v.education.status, 'studied, not completed');
-    assert.equal(buildWorkView({ ...work, education: { ...work.education, completed: true } })?.education?.status, 'completed');
+    assert.equal(v.highlights.length, 4);
+    assert.deepEqual(v.highlights[1], { n: '002', label: 'Fixture certificate', detail: '', year: '2021', url: '' });
+    assert.equal(v.highlights[3].year, '');
+    const odd = /** @type {any} */ (buildWorkView({ ...work, highlights: [{ label: 'x', url: 'http://nope', year: '99' }, { label: '' }, null] }));
+    assert.equal(odd.highlights.length, 1);
+    assert.equal(odd.highlights[0].url, '');
+    assert.equal(odd.highlights[0].year, '');
+  });
+
+  test('no highlights, no callout data', () => {
+    assert.equal(/** @type {any} */ (buildWorkView({ ...work, highlights: undefined })).highlights, null);
+    assert.equal(/** @type {any} */ (buildWorkView({ ...work, highlights: [] })).highlights, null);
   });
 
   test('roster marks current and lapsed', () => {
@@ -84,18 +94,32 @@ describe('buildWorkView', () => {
   test('salary table only when work.salary exists, matched by id', () => {
     assert.equal(/** @type {any} */ (buildWorkView(work)).salary, null);
     const salary = [
-      { id: 'fx-role-7', gbp: 100000, delta: 10000, deltaPct: 11.1 },
-      { id: 'fx-role-6', gbp: 90000, delta: -5000, deltaPct: -5.3 },
-      { id: 'nope', gbp: 1, delta: 0, deltaPct: 0 },
+      { id: 'fx-role-7', startGbp: 101300, endGbp: 107650, delta: 12350, deltaPct: 13.9 },
+      { id: 'fx-role-6', startGbp: 88700, endGbp: null, delta: -4150, deltaPct: -4.5 },
+      { id: 'fx-role-5', startGbp: 61250, endGbp: 61250, delta: 0, deltaPct: 0 },
+      { id: 'nope', startGbp: 1, endGbp: null, delta: 0, deltaPct: 0 },
     ];
     const v = /** @type {any} */ (buildWorkView({ ...work, salary }));
-    assert.equal(v.salary.length, 2);
+    assert.equal(v.salary.length, 3);
     assert.equal(v.salary[0].company, 'Monzo');
-    assert.equal(v.salary[0].salary, '£100,000');
-    assert.equal(v.salary[0].delta, '+£10,000');
-    assert.equal(v.salary[0].deltaPct, '+11.1%');
-    assert.equal(v.salary[1].delta, '−£5,000');
+    assert.equal(v.salary[0].salary, '£101,300 → £107,650');
+    assert.equal(v.salary[0].move, '+£12,350 (+13.9%)');
+    assert.equal(v.salary[1].salary, '£88,700');
+    assert.equal(v.salary[1].move, '−£4,150 (−4.5%)');
     assert.equal(v.salary[1].dir, 'down');
+    assert.equal(v.salary[2].salary, '£61,250');
+    assert.equal(v.salary[2].dir, 'flat');
+  });
+
+  test('eight roles: every company gets its own ink', () => {
+    const extra = { id: 'fx-role-0', company: 'Example Training Co', title: 'Assistant', kind: 'employment', from: '2013-07', to: '2014-10', tech: [] };
+    const v = /** @type {any} */ (buildWorkView({ ...work, roles: [...work.roles, extra] }));
+    assert.equal(v.roles.length, 8);
+    assert.equal(v.roles[7].badge, '008');
+    assert.equal(v.roles[7].last, true);
+    const companies = new Set(v.roles.map((r) => r.company));
+    const inks = new Set(v.roles.map((r) => r.ink));
+    assert.equal(inks.size, companies.size);
   });
 });
 
@@ -119,12 +143,21 @@ describe('built /work page', () => {
     assert.equal(cards.length, 2);
   });
 
-  test('no on-call, no NTU, no BSc, no meetings joke; Sheffield is there', () => {
+  test('no on-call, no NTU, no BSc, no meetings joke, no schooling block', () => {
     for (const s of ['on-call', 'on call', 'Nottingham Trent', 'BSc', 'meetings about meetings']) {
       assert.ok(!html.includes(s), s);
     }
-    assert.ok(html.includes('University of Sheffield'));
-    assert.ok(html.includes('studied, not completed'));
+    for (const s of ['SCHOOLING', 'Sheffield', 'studied, not completed']) assert.ok(!html.includes(s), s);
+  });
+
+  test('career highlights callout renders what is present', () => {
+    assert.ok(html.includes('work-highlights'));
+    assert.ok(html.includes('career highlights'));
+    assert.ok(html.includes('href="https://example.com/keynote"'));
+    assert.ok(html.includes('Invented talk about sample widgets'));
+    assert.ok(html.includes('work-highlights__year">2018<'));
+    const bare = html.split('<li class="work-highlights__item">').find((c) => c.includes('Bare highlight')) || '';
+    assert.ok(!bare.split('</li>')[0].match(/__year|__detail|<a /));
   });
 
   test('roster from evidence: a lapsed tech renders ☆', () => {
@@ -144,13 +177,28 @@ describe('built /work page', () => {
   });
 });
 
+describe('/work without highlights', () => {
+  test('nothing drawn when the export has none', async () => {
+    const out = await fs.mkdtemp(path.join(os.tmpdir(), 'work-nohl-'));
+    try {
+      const { highlights, ...rest } = work;
+      await build(out, rest);
+      const html = await fs.readFile(path.join(out, 'work.html'), 'utf8');
+      assert.ok(!html.includes('work-highlights"'));
+      assert.ok(!html.includes('career highlights'));
+    } finally {
+      await fs.rm(out, { recursive: true, force: true });
+    }
+  }, { timeout: 120_000 });
+});
+
 describe('/work with salary rows', () => {
   /** @type {string} */ let out;
   before(async () => {
     out = await fs.mkdtemp(path.join(os.tmpdir(), 'work-sal-'));
     await build(out, { ...work, salary: [
-      { id: 'fx-role-7', gbp: 100000, delta: 10000, deltaPct: 11.1 },
-      { id: 'fx-role-6', gbp: 90000, delta: 5000, deltaPct: 5.9 },
+      { id: 'fx-role-7', startGbp: 101300, endGbp: 107650, delta: 12350, deltaPct: 13.9 },
+      { id: 'fx-role-6', startGbp: 88700, endGbp: null, delta: 4150, deltaPct: 4.9 },
     ] });
   }, { timeout: 120_000 });
   after(() => fs.rm(out, { recursive: true, force: true }));
@@ -158,8 +206,10 @@ describe('/work with salary rows', () => {
   test('the table renders', async () => {
     const html = await fs.readFile(path.join(out, 'work.html'), 'utf8');
     assert.ok(html.includes('work-salary'));
-    assert.ok(html.includes('£100,000'));
-    assert.ok(html.includes('+11.1%'));
+    assert.ok(html.includes('£101,300 → £107,650'));
+    assert.ok(html.includes('<td>£88,700</td>'));
+    assert.ok(html.includes('+£12,350 (+13.9%)'));
+    assert.ok(html.includes('the move into this job'));
   });
 });
 

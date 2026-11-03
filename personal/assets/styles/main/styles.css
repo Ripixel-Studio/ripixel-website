@@ -1624,6 +1624,8 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
 .role-card--magenta { --card-ink: var(--ink-magenta); }
 .role-card--orange { --card-ink: var(--ink-orange); }
 .role-card--yellow { --card-ink: var(--ink-yellow); }
+.role-card--purple { --card-ink: var(--ink-purple); }
+.role-card--red { --card-ink: var(--ink-red); }
 
 .role-card__inner {
   position: relative;
@@ -1656,6 +1658,8 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
 .role-card--magenta     .role-card__num { background: var(--ink-magenta); }
 .role-card--orange  .role-card__num { background: var(--ink-orange); }
 .role-card--yellow       .role-card__num { background: var(--ink-yellow); color: var(--ink); }
+.role-card--purple .role-card__num { background: var(--ink-purple); }
+.role-card--red .role-card__num { background: var(--ink-red); }
 
 .role-card__period {
   font-family: var(--f-mono);
@@ -1680,6 +1684,8 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
 .role-card--magenta     .role-card__company-dot { color: var(--ink-magenta); }
 .role-card--orange  .role-card__company-dot { color: var(--ink-orange); }
 .role-card--yellow       .role-card__company-dot { color: var(--ink-yellow); }
+.role-card--purple .role-card__company-dot { color: var(--ink-purple); }
+.role-card--red .role-card__company-dot { color: var(--ink-red); }
 
 .role-card__title {
   font-family: var(--f-disp);
@@ -1692,6 +1698,8 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
 .role-card--magenta     .role-card__title { color: var(--ink-magenta); }
 .role-card--orange  .role-card__title { color: var(--ink-orange); }
 .role-card--yellow       .role-card__title { color: var(--ink); }
+.role-card--purple .role-card__title { color: var(--ink-purple); }
+.role-card--red .role-card__title { color: var(--ink-red); }
 
 .role-card__body {
   font-family: var(--f-mono);
@@ -1722,6 +1730,8 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
 .role-card--magenta     .role-card__tag { background: rgba(211,46,132,0.07); }
 .role-card--orange  .role-card__tag { background: rgba(242,91,28,0.07); }
 .role-card--yellow       .role-card__tag { background: rgba(242,193,60,0.07); }
+.role-card--purple .role-card__tag { background: rgba(124,58,237,0.07); }
+.role-card--red .role-card__tag { background: rgba(183,38,31,0.07); }
 
 /* ─── /work: the record as a column of cards ─ */
 .work-strap {
@@ -1808,10 +1818,43 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
 .work-salary__table th:first-child { text-align: left; white-space: normal; font-weight: 700; }
 .work-salary__table thead th { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; background: var(--paper); }
 .work-salary__table th small { display: block; font-weight: 400; opacity: 0.7; }
-.work-salary__row--up td:nth-child(3), .work-salary__row--up td:nth-child(4) { color: var(--ink-green); }
-.work-salary__row--down td:nth-child(3), .work-salary__row--down td:nth-child(4) { color: var(--ink-red); }
+.work-salary__row--up td:nth-child(3) { color: var(--ink-green); }
+.work-salary__row--down td:nth-child(3) { color: var(--ink-red); }
 
-.work-edu__status { font-weight: 700; }
+.work-highlights {
+  position: relative;
+  margin: 22px 0 26px;
+  padding: 28px 18px 14px;
+  background: var(--ink-yellow);
+  border: 3px solid var(--ink);
+  box-shadow: 7px 7px 0 var(--ink);
+  transform: rotate(-0.4deg);
+}
+.work-highlights__title {
+  position: absolute;
+  top: -16px;
+  left: 14px;
+  margin: 0;
+  font-family: var(--f-disp);
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1;
+  transform: rotate(-1.5deg);
+}
+.work-highlights__title span {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--ink);
+  color: var(--paper-4);
+}
+.work-highlights__list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 4px 28px; }
+.work-highlights__item { display: flex; gap: 12px; align-items: baseline; padding: 9px 0; border-bottom: 1.5px dashed var(--ink); }
+.work-highlights__n { font-family: var(--f-disp); font-size: 22px; line-height: 1; color: var(--ink); opacity: 0.55; }
+.work-highlights__text { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; min-width: 0; font-family: var(--f-mono); font-size: 12px; color: var(--ink); }
+.work-highlights__label { font-family: var(--f-sans); font-size: 17px; font-weight: 800; overflow-wrap: anywhere; }
+.work-highlights__label a { color: inherit; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.work-highlights__year { padding: 0 6px; border: 1.5px solid var(--ink); background: var(--paper-4); font-weight: 700; }
+.work-highlights__detail { flex-basis: 100%; line-height: 1.5; }
 
 /* Timeline marker */
 .timeline-divider {
