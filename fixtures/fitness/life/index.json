@@ -47,10 +47,180 @@
     "outings": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value": 3, "unit": "", "label": "outings this year"},
       "notable": [{"key": "1122334455", "kind": "gig", "title": "Sample Band Live", "by": null, "season": null, "year": 2026, "provider": null, "month": "2026-10", "reason": "Gig", "poster": null}],
       "years": {"2026": [{"key": "1122334455", "kind": "gig", "title": "Sample Band Live", "by": null, "season": null, "year": 2026, "provider": null, "month": "2026-10", "reason": "Gig", "poster": null}]}},
-    "work": {"updated": "2026-11-03", "staleDays": 0,
-      "roles": [{"id": "fx-role-3", "title": "Principal Engineer", "employer": "Example Co", "from": "2023-01", "to": null},
-                {"id": "fx-role-2", "title": "Senior Engineer", "employer": "Sample Ltd", "from": "2019-06", "to": "2022-12"},
-                {"id": "fx-role-1", "title": "Developer", "employer": "Placeholder Inc", "from": "2015-09", "to": "2019-05"}],
-      "education": [{"institution": "Fixture University", "course": "Computing", "from": "2011", "to": "2014"}]}
+    "work": {
+      "updated": "2026-11-03",
+      "staleDays": 0,
+      "stats": {
+        "yearsShipping": 11,
+        "employers": 4,
+        "contracting": 1,
+        "technologies": 11
+      },
+      "roles": [
+        {
+          "id": "fx-role-7",
+          "company": "Monzo",
+          "title": "Senior staff software engineer",
+          "team": "Borrowing",
+          "from": "2023-05",
+          "to": null,
+          "kind": "employment",
+          "body": "Fixture text: looking after a lending product team. Invented for the build.",
+          "tech": [
+            "go",
+            "typescript",
+            "kubernetes"
+          ],
+          "period": "may 2023 — present"
+        },
+        {
+          "id": "fx-role-6",
+          "company": "Deliveroo",
+          "title": "Staff software engineer",
+          "team": "Care",
+          "from": "2022-07",
+          "to": "2023-05",
+          "kind": "employment",
+          "body": "Fixture text: a bigger remit across several teams.\n\nA second invented paragraph.",
+          "tech": [
+            "typescript",
+            "scala",
+            "go"
+          ],
+          "period": "jul 2022 — may 2023"
+        },
+        {
+          "id": "fx-role-5",
+          "company": "Deliveroo",
+          "title": "Senior software engineer",
+          "team": "Care",
+          "from": "2020-12",
+          "to": "2022-06",
+          "kind": "employment",
+          "body": "Fixture text: services front and back.",
+          "tech": [
+            "typescript",
+            "scala",
+            "react"
+          ],
+          "period": "dec 2020 — jun 2022"
+        },
+        {
+          "id": "fx-role-4",
+          "company": "DVELP",
+          "title": "Senior software engineer",
+          "note": "acting head of engineering for the last six months",
+          "from": "2019-06",
+          "to": "2020-11",
+          "kind": "employment",
+          "body": "Fixture text: client delivery.",
+          "tech": [
+            "typescript",
+            "node",
+            "twilio flex"
+          ],
+          "period": "jun 2019 — nov 2020"
+        },
+        {
+          "id": "fx-role-3",
+          "company": "Example Contracting",
+          "title": "Contract software engineer",
+          "from": "2019-02",
+          "to": "2019-05",
+          "kind": "contract",
+          "body": "Fixture text: a short contract.",
+          "tech": [
+            "typescript",
+            "gatsby"
+          ],
+          "period": "feb 2019 — may 2019"
+        },
+        {
+          "id": "fx-role-2",
+          "company": "Sky Betting & Gaming",
+          "title": "Senior software engineer",
+          "team": "Vegas",
+          "from": "2017-11",
+          "to": "2019-01",
+          "kind": "employment",
+          "body": "Fixture text: promoted and planning more.",
+          "tech": [
+            "typescript",
+            "react",
+            "php"
+          ],
+          "period": "nov 2017 — jan 2019"
+        },
+        {
+          "id": "fx-role-1",
+          "company": "Sky Betting & Gaming",
+          "title": "Software engineer",
+          "team": "Vegas",
+          "from": "2015-11",
+          "to": "2017-10",
+          "kind": "employment",
+          "body": "Fixture text: a first full-time job.",
+          "tech": [
+            "javascript",
+            "php",
+            "symfony"
+          ],
+          "period": "nov 2015 — oct 2017"
+        }
+      ],
+      "roster": [
+        {
+          "name": "go",
+          "current": true
+        },
+        {
+          "name": "typescript",
+          "current": true
+        },
+        {
+          "name": "kubernetes",
+          "current": true
+        },
+        {
+          "name": "scala",
+          "current": false
+        },
+        {
+          "name": "react",
+          "current": false
+        },
+        {
+          "name": "node",
+          "current": false
+        },
+        {
+          "name": "twilio flex",
+          "current": false
+        },
+        {
+          "name": "gatsby",
+          "current": false
+        },
+        {
+          "name": "php",
+          "current": false
+        },
+        {
+          "name": "javascript",
+          "current": false
+        },
+        {
+          "name": "symfony",
+          "current": false
+        }
+      ],
+      "education": {
+        "institution": "University of Sheffield",
+        "subject": "Computer Science",
+        "completed": false,
+        "from": null,
+        "to": null
+      }
+    }
   }
 }

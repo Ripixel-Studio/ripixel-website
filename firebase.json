@@ -58,6 +58,13 @@
         "**/node_modules/**"
       ],
       "cleanUrls": true,
+      "redirects": [
+        {
+          "source": "/profile",
+          "destination": "/work",
+          "type": 301
+        }
+      ],
       "headers": [
         {
           "source": "**/*.@(css|js)",

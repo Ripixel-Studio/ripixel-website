@@ -25,6 +25,7 @@ import { fitnessEventViewsTask } from './tasks/fitness-event-views.mjs';
 import { fitnessPhotoDimsTask } from './tasks/fitness-photo-dims.mjs';
 import { fitnessFeedItemsTask, FEED_PATH as FITNESS_FEED_PATH } from './tasks/fitness-feed-items.mjs';
 import { lifeHubTask } from './tasks/life-hub.mjs';
+import { workViewTask } from './tasks/work-view.mjs';
 import { lifeHeatmapTask } from './tasks/life-heatmap.mjs';
 import { lifePageTasks, templateHelpers } from './tasks/life-pages.mjs';
 
@@ -223,6 +224,7 @@ export const tasks = [
     lifeHeatmapTask(), // LH3.5 `lifeHeatmapView`: {viewBox, paths, count} or null; drawn on /life/fitness
     fitnessPhotoDimsTask(), // F5.5 `fitnessPhotoDims`: hero photo sizes (portrait beside the title, else full width); before the view tasks
     fitnessLifeTask(), // S2.2 `fitnessLife` for /life (rendered by generate-pages below)
+    workViewTask(), // LH3.7 `workView`: stats, roles, roster, education, optional salary (rendered by work.html)
     lifeHubTask(), // LH3.4 `lifeHub`, `lifeSections`, `lifePersonal`, `lifeFacts` (data only)
     // F5.4 share cards — /life/share/<kind>/<id>/<shape>-<background>.(jpg|png) via sharp, cached in .cache/og;
     // the Landscape card is the OG image. Runs BEFORE the view tasks: they read `fitnessOgImages` (og:image)
@@ -326,7 +328,7 @@ export const tasks = [
                 description: (() => {
                     switch (page) {
                         case 'thoughts':  return 'A peak inside my brain you ask? Reader, beware...';
-                        case 'profile':   return `So who am I? I'm James King, a Software Engineer from Nottinghamshire.`;
+                        case 'work':      return 'Where James King has worked, the roles and the technologies, from the export.';
                         case 'projects':  return "Shall we take a look at some projects I've done?";
                         case 'changelog': return 'What changes have happened to this site?';
                         case 'home':      return "I'm James King, and I make things for the web";

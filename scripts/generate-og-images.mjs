@@ -48,7 +48,7 @@ export const PAGES = [
   { id: 'home',      label: 'HELLO!',      glyph: '☼', ink: '#F25B1C', desc: 'software engineer · web app creator · nottinghamshire, uk' },
   { id: 'projects',  label: 'PROJECTS.',   glyph: '◆', ink: '#D32E84', desc: 'things built, shipped, and occasionally abandoned.' },
   { id: 'thoughts',  label: 'THOUGHTS.',   glyph: '◇', ink: '#0F8A56', desc: 'ramblings, how-to guides & the occasional hot take.' },
-  { id: 'profile',   label: 'PROFILE.',    glyph: '◉', ink: '#2148C0', desc: 'career history, tech stack, and a very long meeting history.' },
+  { id: 'work',      label: 'WORK.',       glyph: '◉', ink: '#2148C0', desc: 'where I have worked, what I built, and what I use now.' },
   { id: 'life',      label: 'FITNESS.',    glyph: '△', ink: FITNESS_INK, desc: 'running, riding & generally trying to stay alive.' },
   { id: 'changelog', label: 'CHANGELOG.',  glyph: '◎', ink: '#F25B1C', desc: "what's changed on this site." },
   { id: '404',       label: '404.',        glyph: '×', ink: '#B7261F', desc: '(oh bollocks.)' },
