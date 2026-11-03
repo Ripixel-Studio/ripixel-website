@@ -1052,14 +1052,16 @@ function drawRoundup(model, shape, th) {
       statGrid(th, model.totals, x, w, { cols: 4, size: 66, label: 13 }),
       gap(10),
       model.calendar?.days?.length ? heatmap(th, model.calendar, x, w, model.calendar.type === 'week' ? 70 : 96) : null,
+      lifeBlock(th, model, x, w, 14),
     ].filter(Boolean), S.bottom);
     return left;
   }
   const story = shape === 'story';
+  const lifeStrip = lifeBlock(th, model, x, w, story ? 20 : 17);
   const prs = model.prs || [];
   const nPrs = Math.min(prs.length, story ? 4 : 0);
   const cal = model.calendar;
-  const calH = !cal?.days?.length ? 0 : cal.type === 'week' ? (story ? 170 : 120) : cal.type === 'month' ? (story ? 330 : 190) : (story ? 230 : 160);
+  const calH = !cal?.days?.length ? 0 : cal.type === 'week' ? (story ? 170 : 120) : cal.type === 'month' ? (story ? (lifeStrip ? 230 : 330) : 190) : (story ? (lifeStrip ? 190 : 230) : 160);
   return stack([
     kicker(th, model.kicker, x, w, story ? 26 : 21),
     title(th, model.title, x, w, story ? { max: 170, min: 80, max2: 120 } : { max: 120, min: 60, lines: 1 }),
@@ -1068,7 +1070,7 @@ function drawRoundup(model, shape, th) {
     statGrid(th, model.totals, x, w, story ? { cols: 2, size: 104, label: 19 } : { cols: 4, size: 62, label: 14 }),
     model.sports?.length ? gap(story ? 22 : 12) : null,
     model.sports?.length ? (story ? sectionHead(th, 'by sport', x, w, 20) : null) : null,
-    model.sports?.length && story ? donutBlock(th, model, x, w, 300, 5) : null,
+    model.sports?.length && story ? donutBlock(th, model, x, w, lifeStrip ? 220 : 300, 5) : null,
     !story && model.sports?.length && calH ? beside(donutBlock(th, model, x, w * 0.56 - 20, 230, 4), heatmap(th, cal, x + w * 0.56 + 20, w * 0.44 - 20, cal.type === 'year' ? 150 : 210)) : null,
     !story && model.sports?.length && !calH ? donutBlock(th, model, x, w, 230, 4) : null,
     calH && story ? gap(22) : null,
@@ -1079,7 +1081,31 @@ function drawRoundup(model, shape, th) {
     nPrs ? prWall(th, prs.slice(0, nPrs), x, w, { cols: 2, rows: 2, size: 26 }) : null,
     vs ? gap(story ? 20 : 10) : null,
     vs ? deltaRow(th, vs.deltas, vs.label, x, w, story ? 19 : 15) : null,
+    lifeStrip,
   ].filter(Boolean), S.bottom);
+}
+
+/**
+ * The period's notables (LH4.4): up to three mono lines under a small head, only when
+ * the roundup has a life sidecar.
+ * @param {Theme} th @param {any} model @param {number} x @param {number} w @param {number} size
+ */
+function lifeBlock(th, model, x, w, size) {
+  const life = model.life;
+  if (!life?.lines?.length) return null;
+  const when = model.calendar?.type === 'week' ? 'this week' : model.calendar?.type === 'month' ? 'this month' : model.calendar?.type === 'year' ? 'this year' : 'also';
+  const head = sectionHead(th, `also ${when}`, x, w, Math.round(size * 0.9), life.more > 0 ? `+${life.more} more` : '');
+  const rows = life.lines.map((/** @type {string} */ l) => line(th, l, x, w, size));
+  return {
+    h: 18 + head.h + rows.reduce((/** @type {number} */ s, /** @type {Block} */ b) => s + b.h, 0),
+    draw: (/** @type {number} */ y) => {
+      let cy = y + 18;
+      let out = head.draw(cy);
+      cy += head.h;
+      for (const r of rows) { out += r.draw(cy); cy += r.h; }
+      return out;
+    },
+  };
 }
 
 /** Two blocks side by side, top-aligned. @param {Block} a @param {Block} b */

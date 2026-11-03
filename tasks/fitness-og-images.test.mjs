@@ -10,7 +10,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
-import { renderFitnessCards, fitnessOgImagesTask, cardJobs, isFullScope, variantsFor } from './fitness-og-images.mjs';
+import { renderFitnessCards, fitnessOgImagesTask, cardJobs, isFullScope, variantsFor, RENDER_VERSION } from './fitness-og-images.mjs';
 import { activityShareModel, roundupShareModel, parkrunHistory, parseClock, splitsOf, topSets, prBoxes, roundupCalendar } from './fitness-share-models.mjs';
 import { buildShareSVG, fitDisplay, clipMono, monoW, antonW, SHAPES, SHAPE_ORDER, lighten, shortSegment, watermark, cardTheme } from '../scripts/share-cards.mjs';
 import { buildSectionSVG, woffToSfnt, ensureFonts, getSharp, PAGES } from '../scripts/generate-og-images.mjs';
@@ -31,6 +31,20 @@ async function fixtures() {
 const find = (acts, slug) => acts.find((a) => a.slug === slug);
 /** @param {any[]} roundups */
 const roundupCtx = (roundups) => ({ byKey: new Map(roundups.map((f) => [f.key, f])), neighbours: resolveNeighbours(roundups), activitySlugs: new Set(), showPhotoGallery: true });
+
+/** A fake photo host: every URL is the same small JPEG; `fail` URLs 404. */
+async function photoHost(fail = /never/) {
+  const sharp = await getSharp();
+  const jpeg = await sharp({ create: { width: 300, height: 400, channels: 3, background: '#3a6' } }).jpeg().toBuffer();
+  /** @type {string[]} */
+  const hits = [];
+  const fetchImpl = /** @type {typeof fetch} */ (/** @type {unknown} */ (async (/** @type {string} */ url) => {
+    hits.push(String(url));
+    if (fail.test(String(url))) return new Response('nope', { status: 404 });
+    return new Response(jpeg, { status: 200, headers: { 'content-type': 'image/jpeg' } });
+  }));
+  return { fetchImpl, hits };
+}
 
 describe('theme', () => {
   test('TYPE_INKS match fitness-types.css (--type, --type-on, --type-text)', async () => {
@@ -161,6 +175,7 @@ describe('scope and backgrounds', () => {
       'activity:colwick-parkrun-2026-10-17:story/square/landscape',
       'activity:evening-ride-to-the-reservoir-2026-10-15:story/square/landscape',
       'activity:push-day-2026-10-13:story/square/landscape',
+      'roundup:month-09-2026:story/square/landscape',
       'roundup:week-42-2026:story/square/landscape',
     ]);
     const later = cardJobs({ ...data, now: Date.parse('2027-06-01T00:00:00Z') });
@@ -256,19 +271,6 @@ describe('fonts', () => {
 });
 
 describe('rendering', () => {
-  /** A fake photo host: every URL is the same small JPEG; `fail` URLs 404. */
-  async function photoHost(fail = /never/) {
-    const sharp = await getSharp();
-    const jpeg = await sharp({ create: { width: 300, height: 400, channels: 3, background: '#3a6' } }).jpeg().toBuffer();
-    /** @type {string[]} */
-    const hits = [];
-    const fetchImpl = /** @type {typeof fetch} */ (/** @type {unknown} */ (async (/** @type {string} */ url) => {
-      hits.push(String(url));
-      if (fail.test(String(url))) return new Response('nope', { status: 404 });
-      return new Response(jpeg, { status: 200, headers: { 'content-type': 'image/jpeg' } });
-    }));
-    return { fetchImpl, hits };
-  }
 
   test('renders every shape and background, returns the URL maps and the manifest, and hits the cache on a rebuild', async () => {
     const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'share-render-'));
@@ -278,7 +280,7 @@ describe('rendering', () => {
       const opts = { ...data, now: NOW, outDir: path.join(tmp, 'out'), cacheDir: path.join(tmp, 'cache'), siteUrl: 'https://james.ripixel.co.uk/', fetchImpl: host.fetchImpl };
       const first = await renderFitnessCards(opts);
       // parkrun, roundup: its photo + colour; ride: its AI banner + colour; push day: colour only — × 3 shapes
-      assert.deepEqual({ rendered: first.rendered, cached: first.cached, failed: first.failed, images: first.images }, { rendered: 21, cached: 0, failed: 0, images: 21 });
+      assert.deepEqual({ rendered: first.rendered, cached: first.cached, failed: first.failed, images: first.images }, { rendered: 27, cached: 0, failed: 0, images: 27 });
       assert.equal(first.urls.activity['colwick-parkrun-2026-10-17'], 'https://james.ripixel.co.uk/life/share/activity/colwick-parkrun-2026-10-17/landscape-photo-1.jpg');
       assert.equal(first.urls.roundup['week-42-2026'], 'https://james.ripixel.co.uk/life/share/roundup/week-42-2026/landscape-photo-1.jpg');
       assert.equal(first.urls.activity['push-day-2026-10-13'], 'https://james.ripixel.co.uk/life/share/activity/push-day-2026-10-13/landscape-ink.png');
@@ -313,7 +315,7 @@ describe('rendering', () => {
 
       await fs.rm(path.join(tmp, 'out'), { recursive: true, force: true });
       const second = await renderFitnessCards(opts);
-      assert.deepEqual({ rendered: second.rendered, cached: second.cached }, { rendered: 0, cached: 21 });
+      assert.deepEqual({ rendered: second.rendered, cached: second.cached }, { rendered: 0, cached: 27 });
       assert.equal(host.hits.length, 2, 'a cached card needs no photo');
       assert.equal(second.manifest.find((c) => c.slug === 'colwick-parkrun-2026-10-17')?.hash, pk.hash, 'stable hash');
     } finally {
@@ -343,5 +345,82 @@ describe('rendering', () => {
     const out = await task.run(task.config, { debug: false, globals: {}, logger: { info() {}, warn: (m) => warnings.push(m), error() {}, debug() {} } });
     assert.deepEqual(out, { fitnessOgImages: { activity: {}, event: {}, roundup: {} }, fitnessShareCards: { activity: {}, event: {}, roundup: {} } });
     assert.equal(warnings.length, 1);
+  });
+});
+
+describe('roundup life strip (LH4.4)', () => {
+  const lifeDoc = async (/** @type {string} */ key) => JSON.parse(await fs.readFile(path.join(FIXTURES, 'life', 'period', `${key}.json`), 'utf8'));
+  /** The fixture week plus one synthetic book, so all three blocks have a notable. */
+  async function weekWithBook() {
+    const doc = await lifeDoc('week-42-2026');
+    doc.reading.notable = [{ key: 'b1', kind: 'book', title: 'A Made-Up Atlas', by: 'Nobody', season: null, year: 2023, provider: 'Fixture Books', month: '2026-10', reason: 'book', poster: null }];
+    doc.reading.totals = { books: 1, pages: 300 };
+    return doc;
+  }
+  const withLife = async (/** @type {any} */ doc) => {
+    const { roundups } = await fixtures();
+    return roundupShareModel(roundups[0], { ...roundupCtx(roundups), lifePeriods: doc ? { 'week-42-2026': doc } : {} });
+  };
+
+  test('share model life lines: one per block', async () => {
+    const m = await withLife(await weekWithBook());
+    assert.deepEqual(m.life, { lines: ['Film · The Invented Harbour', 'Artist · Sample Echoes', 'Book · A Made-Up Atlas'], more: 0 });
+  });
+  test('more counts what did not fit, outings read "saw"', async () => {
+    const doc = await weekWithBook();
+    doc.watching.notable.push({ key: 'w2', kind: 'film', title: 'Second Reel', year: 2022, month: '2026-10', reason: 'film' });
+    doc.outings = { notable: [{ key: 'o1', kind: 'gig', title: 'The Placeholders', month: '2026-10' }] };
+    const m = await withLife(doc);
+    assert.equal(m.life.lines.length, 3);
+    assert.equal(m.life.more, 2);
+    doc.reading.notable = []; doc.watching.notable = doc.watching.notable.slice(0, 1);
+    assert.ok((await withLife(doc)).life.lines.includes('Gig · saw The Placeholders'));
+  });
+  test('no sidecar, no life, and the SVG is the previous output', async () => {
+    const m = await withLife(null);
+    assert.equal(m.life, null);
+    const { life, ...rest } = m;
+    for (const shape of SHAPE_ORDER) {
+      assert.equal(buildShareSVG(m, shape, 'ink'), buildShareSVG(rest, shape, 'ink'));
+    }
+  });
+  test('hash changes with life; RENDER_VERSION is lh4.1', async () => {
+    assert.equal(RENDER_VERSION, 'lh4.1');
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'share-life-'));
+    try {
+      const data = await fixtures();
+      const run = async (/** @type {any} */ lifePeriods, /** @type {string} */ n) => {
+        const r = await renderFitnessCards({ ...data, lifePeriods, now: NOW, fetchImpl: (await photoHost()).fetchImpl, only: (/** @type {any} */ j) => j.model.id === 'week-42-2026', outDir: path.join(tmp, n, 'out'), cacheDir: path.join(tmp, n, 'cache'), siteUrl: 'https://james.ripixel.co.uk/' });
+        return r.cards.roundup['week-42-2026'].hash;
+      };
+      const a = await run({}, 'a');
+      const b = await run({ 'week-42-2026': await weekWithBook() }, 'b');
+      assert.ok(a && b && a !== b);
+    } finally {
+      await fs.rm(tmp, { recursive: true, force: true });
+    }
+  });
+  test('story, square and landscape draw the strip inside the shape', async () => {
+    const doc = await weekWithBook();
+    doc.watching.notable[0].title = 'An Extremely Long Invented Film Title That Goes On And On Well Past Any Margin';
+    for (const key of ['week-42-2026', 'month-09-2026']) {
+      const { roundups } = await fixtures();
+      const file = roundups.find((/** @type {any} */ f) => f.key === key);
+      const m = roundupShareModel(file, { ...roundupCtx(roundups), lifePeriods: { [key]: { ...doc, key } } });
+      assert.ok(m.life, key);
+      for (const shape of SHAPE_ORDER) {
+        const svg = buildShareSVG(m, shape, 'ink');
+        assert.match(svg, /ALSO THIS (WEEK|MONTH)/);
+        assert.match(svg, />BOOK · A MADE-UP ATLAS</);
+        for (const t of svg.matchAll(/<text x="([\d.]+)" y="[\d.]+"([^>]*)font-size="([\d.]+)"[^>]*?(?:letter-spacing="(-?[\d.]+)")?>([^<]*)</g)) {
+          const [, x, attrs, size, ls, body] = t;
+          const text = body.replace(/&[a-z]+;/g, '&');
+          if (!/^(FILM|ALBUM|BOOK|· ALSO|\+\d+ MORE)/.test(text)) continue;
+          const w = monoW(text, Number(size), Number(ls || 0));
+          const end = /text-anchor="end"/.test(attrs) ? Number(x) : Number(x) + w;
+          assert.ok(end <= SHAPES[shape].w - SHAPES[shape].m + 2, `${key} ${shape}: "${text}" ends at ${end.toFixed(0)}`);
+        }
+      }
+    }
   });
 });

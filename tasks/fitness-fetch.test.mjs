@@ -7,7 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { loadFitnessData, fetchFitnessTask, emptyIndex } from './fitness-fetch.mjs';
+import { loadFitnessData, fetchFitnessTask, emptyIndex, validatePeriod } from './fitness-fetch.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const FIXTURES = path.join(REPO, 'fixtures', 'fitness');
@@ -27,13 +27,14 @@ function fakeFetch({ dir = FIXTURES, status = 200, etag = '"v1"', fail = /** @ty
     const rel = url.slice(BASE.length + 1);
     if (fail.includes(rel)) throw new Error(`network down for ${rel}`);
     if (status !== 200) return new Response('nope', { status });
-    if (headers['if-none-match'] === etag) return new Response(null, { status: 304 });
+    let body;
     try {
-      const body = await fs.readFile(path.join(dir, rel), 'utf8');
-      return new Response(body, { status: 200, headers: { etag, 'content-type': 'application/json' } });
+      body = await fs.readFile(path.join(dir, rel), 'utf8');
     } catch {
-      return new Response('missing', { status: 404 });
+      return new Response('missing', { status: 404 }); // a real server 404s before it considers If-None-Match
     }
+    if (headers['if-none-match'] === etag) return new Response(null, { status: 304 });
+    return new Response(body, { status: 200, headers: { etag, 'content-type': 'application/json' } });
   };
   return { impl, calls };
 }
@@ -60,7 +61,7 @@ describe('loadFitnessData', () => {
     assert.equal(r.source, 'live');
     assert.equal(r.unavailable, false);
     assert.equal(r.activities.length, 3);
-    assert.equal(r.roundups.length, 1);
+    assert.equal(r.roundups.length, 2);
     assert.deepEqual(
       r.activities.map((a) => a.slug),
       ['colwick-parkrun-2026-10-17', 'evening-ride-to-the-reservoir-2026-10-15', 'push-day-2026-10-13'],
@@ -70,8 +71,8 @@ describe('loadFitnessData', () => {
     assert.equal(r.roundups[0].key, 'week-42-2026');
     assert.equal(r.index.siteSlug, 'james');
 
-    // index + 3 activities + 1 roundup + events.json + life/index.json + life/heatmap.json
-    assert.equal(calls.length, 8);
+    // index + 3 activities + 2 roundups + events.json + life/index.json + life/heatmap.json + 2 period sidecars
+    assert.equal(calls.length, 11);
     assert.equal(r.events.events.length, 15);
     assert.equal(r.events.events[2].title, "Hyrox Birmingham - Open Men's Doubles");
     assert.equal(calls[0].url, `${BASE}/index.json`);
@@ -115,7 +116,7 @@ describe('loadFitnessData', () => {
     assert.equal(r.source, 'live');
     assert.equal(r.activities.length, 3);
     const conditional = second.calls.filter((c) => c.headers['if-none-match'] === '"v1"');
-    assert.equal(conditional.length, 7); // every file except index.json
+    assert.equal(conditional.length, 10); // every file except index.json
   });
 
   test('live failure falls back to the cache', async () => {
@@ -133,7 +134,7 @@ describe('loadFitnessData', () => {
     const r = await loadFitnessData({ env, baseUrl: BASE, cacheDir, fixturesDir: FIXTURES, fetchImpl: impl });
     assert.equal(r.source, 'fixtures');
     assert.equal(r.activities.length, 3);
-    assert.equal(r.roundups.length, 1);
+    assert.equal(r.roundups.length, 2);
     assert.equal(r.notes.length, 2);
   });
 
@@ -203,7 +204,7 @@ describe('life docs', () => {
     assert.equal(r.lifeHeatmap, null);
     assert.equal(r.unavailable, false);
     assert.equal(r.activities.length, 3);
-    assert.equal(r.roundups.length, 1);
+    assert.equal(r.roundups.length, 2);
     assert.equal(r.events.events.length, 15);
   });
 
@@ -254,8 +255,113 @@ describe('life docs', () => {
   });
 });
 
+describe('period sidecars', () => {
+  const opts = () => ({ env, baseUrl: BASE, cacheDir, fixturesDir: path.join(tmp, 'nope') });
+  const mkLogger = (/** @type {string[]} */ warns) => ({ info() {}, warn: (m) => warns.push(m), error() {}, debug() {} });
+
+  test('period sidecars keyed by roundup', async () => {
+    // fixtures: the orphan (week-30-2026) has a file but no roundup, so it is never read
+    const r = await loadFitnessData({ env, source: 'fixtures', fixturesDir: FIXTURES, cacheDir });
+    assert.deepEqual(Object.keys(r.lifePeriods).sort(), ['month-09-2026', 'week-42-2026']);
+    assert.equal(r.lifePeriods['week-42-2026'].watching.notable[0].title, 'The Invented Harbour');
+    // live: only roundup keys are requested
+    const { impl, calls } = fakeFetch();
+    const live = await loadFitnessData({ ...opts(), fetchImpl: impl });
+    assert.deepEqual(Object.keys(live.lifePeriods).sort(), ['month-09-2026', 'week-42-2026']);
+    assert.deepEqual(
+      calls.filter((c) => c.url.includes('/life/period/')).map((c) => c.url.slice(BASE.length + 1)).sort(),
+      ['life/period/month-09-2026.json', 'life/period/week-42-2026.json'],
+    );
+    assert.ok((await fs.readdir(path.join(cacheDir, 'life', 'period'))).includes('week-42-2026.json'));
+    // and the cache source reads them back
+    const cached = await loadFitnessData({ env, source: 'cache', cacheDir });
+    assert.deepEqual(Object.keys(cached.lifePeriods).sort(), ['month-09-2026', 'week-42-2026']);
+  });
+
+  test('missing sidecar is fine', async () => {
+    const dir = path.join(tmp, 'src');
+    await fs.cp(FIXTURES, dir, { recursive: true });
+    await fs.rm(path.join(dir, 'life', 'period', 'month-09-2026.json'));
+    const warns = /** @type {string[]} */ ([]);
+    const logger = mkLogger(warns);
+    const live = await loadFitnessData({ ...opts(), fetchImpl: fakeFetch({ dir }).impl, logger });
+    assert.equal(live.source, 'live');
+    assert.deepEqual(Object.keys(live.lifePeriods), ['week-42-2026']);
+    assert.equal(live.roundups.length, 2);
+    const fx = await loadFitnessData({ env, source: 'fixtures', fixturesDir: dir, cacheDir, logger });
+    assert.deepEqual(Object.keys(fx.lifePeriods), ['week-42-2026']);
+    assert.deepEqual(warns, []);
+    // no life/period dir at all: empty object, nothing else changes
+    await fs.rm(path.join(dir, 'life', 'period'), { recursive: true });
+    const none = await loadFitnessData({ env, source: 'fixtures', fixturesDir: dir, cacheDir, logger });
+    assert.deepEqual(none.lifePeriods, {});
+    assert.equal(none.roundups.length, 2);
+    assert.deepEqual(warns, []);
+  });
+
+  test('mismatched key rejected', async () => {
+    const dir = path.join(tmp, 'src');
+    await fs.cp(FIXTURES, dir, { recursive: true });
+    const f = path.join(dir, 'life', 'period', 'week-42-2026.json');
+    const doc = JSON.parse(await fs.readFile(f, 'utf8'));
+    doc.key = 'week-41-2026';
+    await fs.writeFile(f, JSON.stringify(doc));
+    const warns = /** @type {string[]} */ ([]);
+    const r = await loadFitnessData({ env, source: 'fixtures', fixturesDir: dir, cacheDir, logger: mkLogger(warns) });
+    assert.deepEqual(Object.keys(r.lifePeriods), ['month-09-2026']);
+    assert.equal(warns.length, 1);
+    assert.match(warns[0], /week-42-2026/);
+    const live = await loadFitnessData({ ...opts(), fetchImpl: fakeFetch({ dir }).impl, logger: mkLogger([]) });
+    assert.deepEqual(Object.keys(live.lifePeriods), ['month-09-2026']);
+  });
+
+  test('validatePeriod needs schemaVersion 1 and the same key', () => {
+    assert.equal(validatePeriod({ schemaVersion: 1, key: 'a' }, 'a')?.key, 'a');
+    assert.equal(validatePeriod({ schemaVersion: 2, key: 'a' }, 'a'), null);
+    assert.equal(validatePeriod(null, 'a'), null);
+  });
+
+  test('a live failure on one sidecar re-uses its cached copy', async () => {
+    await loadFitnessData({ ...opts(), fetchImpl: fakeFetch().impl });
+    const r = await loadFitnessData({ ...opts(), fetchImpl: fakeFetch({ fail: ['life/period/week-42-2026.json'] }).impl });
+    assert.deepEqual(Object.keys(r.lifePeriods).sort(), ['month-09-2026', 'week-42-2026']);
+  });
+
+  test('a clean 404 on a sidecar clears its cached copy and meta entry', async () => {
+    await loadFitnessData({ ...opts(), fetchImpl: fakeFetch().impl });
+    const cachedFile = path.join(cacheDir, 'life', 'period', 'week-42-2026.json');
+    await fs.access(cachedFile);
+    const dir = path.join(tmp, 'withdrawn');
+    await fs.cp(FIXTURES, dir, { recursive: true });
+    await fs.rm(path.join(dir, 'life', 'period', 'week-42-2026.json'));
+    const warns = /** @type {string[]} */ ([]);
+    const r = await loadFitnessData({ ...opts(), fetchImpl: fakeFetch({ dir }).impl, logger: mkLogger(warns) });
+    assert.deepEqual(Object.keys(r.lifePeriods), ['month-09-2026']);
+    await assert.rejects(fs.access(cachedFile));
+    const meta = JSON.parse(await fs.readFile(path.join(cacheDir, '.meta.json'), 'utf8'));
+    assert.equal(meta['life/period/week-42-2026.json'], undefined);
+    assert.deepEqual(warns, []);
+    // the cache source no longer shows it either
+    const c = await loadFitnessData({ env, source: 'cache', cacheDir });
+    assert.deepEqual(Object.keys(c.lifePeriods), ['month-09-2026']);
+  });
+
+  test('a 5xx on a sidecar falls back to the cached copy', async () => {
+    await loadFitnessData({ ...opts(), fetchImpl: fakeFetch().impl });
+    const base = fakeFetch().impl;
+    /** @type {typeof fetch} */
+    const flaky = async (input, init) =>
+      String(input).endsWith('/life/period/week-42-2026.json') ? new Response('boom', { status: 503 }) : base(input, init);
+    const warns = /** @type {string[]} */ ([]);
+    const r = await loadFitnessData({ ...opts(), fetchImpl: flaky, logger: mkLogger(warns) });
+    assert.deepEqual(Object.keys(r.lifePeriods).sort(), ['month-09-2026', 'week-42-2026']);
+    assert.equal(warns.length, 1);
+    await fs.access(path.join(cacheDir, 'life', 'period', 'week-42-2026.json'));
+  });
+});
+
 describe('fetchFitnessTask', () => {
-  test('returns exactly the eight globals and logs the source', async () => {
+  test('returns exactly the nine globals and logs the source', async () => {
     const task = fetchFitnessTask({ env: { FITNESS_DATA_SOURCE: 'fixtures' }, fixturesDir: FIXTURES, cacheDir });
     /** @type {string[]} */
     const infos = [];
@@ -263,7 +369,7 @@ describe('fetchFitnessTask', () => {
     const out = await task.run(task.config, ctx);
     assert.deepEqual(Object.keys(out).sort(), [
       'fitnessActivities', 'fitnessEvents', 'fitnessIndex', 'fitnessRoundups', 'fitnessSource', 'fitnessUnavailable',
-      'lifeHeatmap', 'lifeIndex',
+      'lifeHeatmap', 'lifeIndex', 'lifePeriods',
     ]);
     assert.ok(out.lifeIndex.sections.watching);
     assert.ok(out.lifeHeatmap.segments.length > 0);

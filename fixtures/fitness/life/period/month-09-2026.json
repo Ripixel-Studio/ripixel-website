@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "key": "month-09-2026",
+  "periodType": "month",
+  "periodStart": "2026-09-01",
+  "periodEnd": "2026-10-01",
+  "generatedAt": "2026-10-01T06:00:00+00:00",
+  "watching": {
+    "notable": [],
+    "totals": {
+      "films": 3,
+      "episodes": 10,
+      "videos": 4,
+      "hours": 14
+    }
+  },
+  "listening": {
+    "notable": [],
+    "totals": {
+      "tracks": 300,
+      "podcastEpisodes": 9,
+      "audiobookHours": 5
+    }
+  },
+  "reading": {
+    "notable": [
+      {
+        "key": "0a9b8c7d6e",
+        "kind": "book",
+        "title": "A Made-Up Almanac",
+        "by": "Ada Example",
+        "season": null,
+        "year": 2023,
+        "provider": "Fixture Books",
+        "month": "2026-09",
+        "reason": "book",
+        "poster": null
+      }
+    ],
+    "totals": {
+      "books": 1,
+      "pages": 320
+    }
+  },
+  "outings": {
+    "notable": [
+      {
+        "key": "1122334455",
+        "kind": "gig",
+        "title": "Sample Band Live",
+        "by": null,
+        "season": null,
+        "year": 2026,
+        "provider": null,
+        "month": "2026-09",
+        "reason": "gig",
+        "poster": null
+      }
+    ]
+  }
+}

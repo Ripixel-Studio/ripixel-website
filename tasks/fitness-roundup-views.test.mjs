@@ -21,6 +21,9 @@ import {
   fmtKm,
   fmtDuration,
   fmtWeight,
+  buildRoundupLife,
+  lifeHeading,
+  totalsLine,
 } from './fitness-roundup-views.mjs';
 import { lifePageTasks } from './life-pages.mjs';
 import { runSkierTasks } from './skier-test-runner.mjs';
@@ -392,4 +395,157 @@ test('with no data Skier writes just the index and the unavailable notice', asyn
   } finally {
     await fs.rm(outDir, { recursive: true, force: true });
   }
+});
+
+// ---------------------------------------------------------------------------
+// LH4.3: watching, listening, reading and outings
+
+const BASELINE = path.resolve('fixtures/fitness/baseline/week-42-2026.html');
+
+async function renderWeek42(lifePeriods) {
+  const { index, file } = await fixtureCtx();
+  const outDir = await fs.mkdtemp(path.join(os.tmpdir(), 'roundup-life-'));
+  try {
+    await renderRoundups(outDir, {
+      cacheHash: 'test', year: 2026, siteUrl: 'https://james.ripixel.co.uk', fitnessIndex: index, fitnessRoundups: [file], fitnessUnavailable: false, fitnessSource: 'fixtures',
+      fitnessOgImages: { activity: {}, roundup: {} }, ...(lifePeriods ? { lifePeriods } : {}),
+    });
+    return await fs.readFile(path.join(outDir, 'life', 'roundup', 'week-42-2026.html'), 'utf8');
+  } finally {
+    await fs.rm(outDir, { recursive: true, force: true });
+  }
+}
+
+async function lifeFixture(key) {
+  return JSON.parse(await fs.readFile(path.join(FIXTURES, 'life', 'period', `${key}.json`), 'utf8'));
+}
+
+test('BASELINE_WRITE regenerates the committed no-sidecar baseline', { skip: !process.env.BASELINE_WRITE }, async () => {
+  await fs.writeFile(BASELINE, await renderWeek42(null));
+});
+
+async function viewWithLife(lifePeriods) {
+  const { index, file } = await fixtureCtx();
+  return buildRoundupView(file, {
+    byKey: new Map([[file.key, file]]), neighbours: resolveNeighbours([file]),
+    activitySlugs: new Set(index.activities.map((a) => a.slug)), showPhotoGallery: true, lifePeriods,
+  });
+}
+
+test('week roundup gains life blocks', async () => {
+  const v = await viewWithLife({ 'week-42-2026': await lifeFixture('week-42-2026') });
+  assert.equal(v.life.blocks[0].name, 'watching');
+  assert.equal(v.life.blocks[0].heading, "This week's watching");
+  assert.equal(v.life.blocks[0].items[0].title, 'The Invented Harbour');
+  assert.equal(v.life.blocks[0].totalsLine, '1 film · 3 episodes · 2 videos · 5 h');
+  assert.equal(v.life.blocks[1].heading, "This week's listening");
+  assert.deepEqual(v.life.blocks.map((b) => b.name), ['watching', 'listening'], 'empty reading/outings blocks are dropped');
+  assert.equal(v.life.count, 2);
+});
+
+test('film wording says watched, never finished', async () => {
+  const doc = await lifeFixture('week-42-2026');
+  doc.watching.notable[0].reason = 'film';
+  const life = buildRoundupLife(doc, periodLabels('week-42-2026'));
+  const item = life.blocks[0].items[0];
+  assert.match(`${item.kindLabel} ${item.meta}`, /watched/i);
+  assert.doesNotMatch(JSON.stringify(life), /finished/i);
+});
+
+test('month headings', async () => {
+  const labels = periodLabels('month-10-2026');
+  assert.equal(lifeHeading('watching', 'month', labels), 'October in films and TV');
+  assert.equal(lifeHeading('listening', 'month', labels), 'October in music and podcasts');
+  assert.equal(lifeHeading('reading', 'month', labels), 'October in books');
+  assert.equal(lifeHeading('outings', 'month', labels), 'October, out');
+  const doc = await lifeFixture('month-09-2026');
+  const life = buildRoundupLife({ ...doc, key: 'month-10-2026' }, labels);
+  assert.equal(life.blocks[0].heading, 'October in films and TV');
+});
+
+test('year headings', async () => {
+  const labels = periodLabels('year-2026');
+  assert.equal(lifeHeading('watching', 'year', labels), '2026 in films and TV');
+  assert.equal(lifeHeading('listening', 'year', labels), '2026 in podcasts and music');
+  assert.equal(lifeHeading('reading', 'year', labels), '2026 in books');
+  assert.equal(lifeHeading('outings', 'year', labels), '2026, out');
+  assert.equal(lifeHeading('outings', 'week', periodLabels('week-42-2026')), 'Out and about');
+});
+
+test('totalsLine omits zero parts', () => {
+  assert.equal(totalsLine('watching', { films: 3, episodes: 14, videos: 0, hours: 22 }), '3 films · 14 episodes · 22 h');
+  assert.equal(totalsLine('listening', { tracks: 80, podcastEpisodes: 1, audiobookHours: 0 }), '80 tracks · 1 podcast episode');
+  assert.equal(totalsLine('reading', { books: 1, pages: 320 }), '1 book · 320 pages');
+  assert.equal(totalsLine('watching', { films: 0, episodes: 0, videos: 0, hours: 0 }), '');
+  assert.equal(totalsLine('outings', {}), '');
+});
+
+test('no sidecar, no change', async () => {
+  const v = await viewWithLife({});
+  assert.equal(v.life, null);
+  assert.equal(buildRoundupLife(undefined, periodLabels('week-42-2026')), null);
+  const empty = await lifeFixture('week-30-2026');
+  empty.watching.totals = { films: 0, episodes: 0, videos: 0, hours: 0 };
+  empty.listening.totals = { tracks: 0, podcastEpisodes: 0, audiobookHours: 0 };
+  assert.equal(buildRoundupLife(empty, periodLabels('week-30-2026')), null, 'every block empty');
+  const html = await renderWeek42(null);
+  assert.equal(html, await fs.readFile(BASELINE, 'utf8'), 'page is byte-identical to the committed baseline');
+  assert.equal(await renderWeek42({ 'week-99-2026': await lifeFixture('week-42-2026') }), html, 'a sidecar for another key changes nothing');
+});
+
+test('sidecar renders on the page', async () => {
+  const html = await renderWeek42({ 'week-42-2026': await lifeFixture('week-42-2026') });
+  assert.match(html, /This week&#x27;s watching|This week's watching/);
+  assert.match(html, /The Invented Harbour/);
+  assert.match(html, /The Placeholders/);
+});
+
+test('outings month only', async () => {
+  const doc = await lifeFixture('month-09-2026');
+  const life = buildRoundupLife(doc, periodLabels('month-09-2026'));
+  const out = life.blocks.find((b) => b.name === 'outings');
+  assert.equal(out.items[0].title, 'saw Sample Band Live');
+  assert.equal(out.items[0].meta, 'September 2026');
+  assert.doesNotMatch(JSON.stringify(out), /2026-09|\d{1,2}(st|nd|rd|th)/);
+  assert.equal(out.totalsLine, '');
+});
+
+test('orphan sidecar mints no page', async () => {
+  const { index, file } = await fixtureCtx();
+  const task = fitnessRoundupViewsTask();
+  const result = await task.run(task.config, {
+    logger: { info() {}, warn() {}, error() {}, debug() {} }, debug: false,
+    globals: {
+      siteUrl: 'https://x.test', fitnessIndex: index, fitnessRoundups: [file], fitnessUnavailable: false,
+      lifePeriods: { 'week-42-2026': await lifeFixture('week-42-2026'), 'week-30-2026': await lifeFixture('week-30-2026'), 'month-09-2026': await lifeFixture('month-09-2026') },
+    },
+  });
+  assert.equal(result.fitnessRoundupPages.length, 1);
+  assert.equal(result.fitnessRoundupPages[0].roundup.life.blocks[0].heading, "This week's watching");
+});
+
+test('reason and kind codes read as plain words; unknown ones render nothing', async () => {
+  const doc = await lifeFixture('week-42-2026');
+  const items = [
+    { kind: 'season', title: 'S', season: 2, reason: 'season' },
+    { kind: 'creator', title: 'C', reason: 'sustained' },
+    { kind: 'film', title: 'F', year: 2024, reason: 'finished' },
+    { kind: 'mystery', title: 'M', reason: 'gig' },
+    { kind: 'cinema', title: 'X', reason: 'cinema', month: '2026-10' },
+  ];
+  doc.watching.notable = items;
+  doc.outings = { notable: [items[4]] };
+  const life = buildRoundupLife(doc, periodLabels('week-42-2026'));
+  const w = life.blocks.find((b) => b.name === 'watching').items;
+  assert.deepEqual(w.map((i) => [i.kindLabel, i.meta]), [['TV', 'season 2 · finished the season'], ['channel', 'kept coming back'], ['film', '2024'], ['', ''], ['cinema', '']]);
+  assert.doesNotMatch(JSON.stringify(life), /"(sustained|outing)"|mystery/);
+  const out = life.blocks.find((b) => b.name === 'outings').items[0];
+  assert.deepEqual([out.title, out.kindLabel, out.meta], ['saw X', 'cinema', 'October 2026']);
+});
+
+test('a week sidecar without outings renders the other blocks', async () => {
+  const doc = await lifeFixture('week-42-2026');
+  assert.equal('outings' in doc, false);
+  const life = buildRoundupLife(doc, periodLabels('week-42-2026'));
+  assert.deepEqual(life.blocks.map((b) => b.name), ['watching', 'listening']);
 });

@@ -587,3 +587,33 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
 }
 
 /* No animation here: hover only swaps colours, so reduced motion needs nothing extra. */
+
+/* ─── Roundup pages: watching, listening, reading, outings (LH4.3) ───── */
+.roundup-life__heading { font-size: 26px; overflow-wrap: anywhere; }
+
+.roundup-life__totals {
+  font-family: var(--f-mono);
+  font-size: 13px;
+  margin: 0 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.roundup-life__list { list-style: none; margin: 0; padding: 0; }
+
+.roundup-life__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  padding: 7px 0;
+  border-bottom: 1.5px dashed rgba(23,19,17,0.4);
+  font-family: var(--f-mono);
+  font-size: 14px;
+}
+
+.roundup-life__item:last-child { border-bottom: 0; }
+.roundup-life__title { flex: 1 1 12em; overflow-wrap: anywhere; font-weight: 700; }
+.roundup-life__by { color: var(--life-ink); overflow-wrap: anywhere; }
+.roundup-life__meta { flex-basis: 100%; font-size: 12px; opacity: 0.75; }
+.roundup-life__meta b { font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }

@@ -1,0 +1,28 @@
+{{!-- Watching, listening, reading and outings from the period sidecar. Context: roundup view (roundup.life). --}}
+<section class="roundup-section roundup-life">
+  <div class="roundup-section__head">
+    <h2 class="roundup-section__title">BESIDES THE SPORT<span>.</span></h2>
+    <span class="roundup-section__note">watched, heard, read, seen</span>
+  </div>
+  <div class="roundup-grid roundup-grid--2">
+    {{#each life.blocks}}
+    <div class="zine-card roundup-life__block roundup-life__block--{{name}}">
+      <div class="zine-card__inner">
+        <h3 class="life-period__label roundup-life__heading">{{heading}}</h3>
+        {{#if totalsLine}}<p class="roundup-life__totals">{{totalsLine}}</p>{{/if}}
+        {{#if items.length}}
+        <ul class="roundup-life__list">
+          {{#each items}}
+          <li class="roundup-life__item">
+            <span class="roundup-life__title">{{title}}</span>
+            {{#if by}}<span class="roundup-life__by">{{by}}</span>{{/if}}
+            <span class="roundup-life__meta">{{#if kindLabel}}<b>{{kindLabel}}</b>{{/if}}{{#if meta}} · {{meta}}{{/if}}</span>
+          </li>
+          {{/each}}
+        </ul>
+        {{/if}}
+      </div>
+    </div>
+    {{/each}}
+  </div>
+</section>
