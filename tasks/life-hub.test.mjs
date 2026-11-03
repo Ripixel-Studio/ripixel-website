@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {
-  SECTION_ORDER, SECTION_HREF, staleLabel, sawLabel, monthLabel, hubNote, buildSection, buildHub, personalBits, lifeFacts, lifeHubTask,
+  SECTION_ORDER, SECTION_HREF, staleLabel, sawLabel, monthLabel, hubNote, buildSection, buildHub, personalBits, lifeFacts, lifeHubTask, lifeInsights,
 } from './life-hub.mjs';
 import { runSkierTasks } from './skier-test-runner.mjs';
 
@@ -278,4 +278,24 @@ test('code commits chart has axes', () => {
   const c = buildSection('code', fixture.sections.code, now);
   assert.equal(c.commits.label, 'Commits');
   assert.deepEqual(c.commits.xTicks.map((t) => t.label), ['Sep ’26', 'Oct ’26']);
+});
+
+test('lifeInsights filters', () => {
+  const out = lifeInsights({ insights: [{ text: '' }, { text: 'x'.repeat(161) }, { text: 'ok', section: 'body', id: 'a' }, { text: 1 }] });
+  assert.deepEqual(out, [{ id: 'a', text: 'ok', href: '/life/body' }]);
+});
+
+test('lifeInsights: hrefs, cap of 6, order', () => {
+  const rows = Array.from({ length: 8 }, (_, i) => ({ id: 'i' + i, text: 't' + i, section: i === 1 ? 'fitness' : 'games' }));
+  const out = lifeInsights({ insights: rows });
+  assert.equal(out.length, 6);
+  assert.equal(out[0].href, '/life');
+  assert.equal(out[1].href, '/life/fitness');
+  assert.equal(out[5].id, 'i5');
+});
+
+test('no insights', () => {
+  assert.deepEqual(lifeInsights({}), []);
+  assert.deepEqual(lifeInsights(null), []);
+  assert.deepEqual(lifeInsights({ insights: 'x' }), []);
 });

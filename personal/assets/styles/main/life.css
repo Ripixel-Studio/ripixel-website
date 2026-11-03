@@ -812,3 +812,47 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
 .roundup-life__by { color: var(--life-ink); overflow-wrap: anywhere; }
 .roundup-life__meta { flex-basis: 100%; font-size: 12px; opacity: 0.75; }
 .roundup-life__meta b { font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* Did you know? (R2c.4): a loud zine sticker. The items share one grid cell, so the strip is as
+   tall as its longest sentence and rotating never shifts the layout; hidden items stay in flow
+   but invisible. */
+.did-you-know {
+  position: relative;
+  margin: 28px 0 26px;
+  padding: 26px 20px 16px;
+  background: var(--ink-yellow);
+  color: var(--ink);
+  border: 3px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+  transform: rotate(-0.8deg);
+}
+.did-you-know__kicker {
+  position: absolute;
+  top: -14px;
+  left: 14px;
+  margin: 0;
+  padding: 3px 12px;
+  background: var(--ink);
+  color: var(--ink-yellow);
+  font-family: var(--f-disp);
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transform: rotate(1.5deg);
+}
+.did-you-know__list { display: grid; margin: 0; padding: 0; list-style: none; }
+.did-you-know__item,
+.did-you-know__item[hidden] { grid-area: 1 / 1; display: block; }
+.did-you-know__item[hidden] { visibility: hidden; }
+.did-you-know__item a {
+  color: var(--ink);
+  font-family: var(--f-disp);
+  font-size: clamp(22px, 4.2vw, 36px);
+  line-height: 1.12;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.did-you-know__item a:hover,
+.did-you-know__item a:focus-visible { text-decoration: underline; text-decoration-thickness: 3px; }
+.did-you-know__item a:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.life-hub .did-you-know { margin-top: 8px; }

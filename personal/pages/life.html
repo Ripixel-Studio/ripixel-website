@@ -23,6 +23,8 @@
       <p class="fit-hero__strap life-hub__strap">{{lifeHub.cards.length}} bits of my life, counted by a computer so I don't have to.</p>
     </header>
 
+    {{> did-you-know items=(first lifeInsights) rotate=false}}
+
     <ol class="life-index">
       {{#each lifeHub.cards}}
       <li class="life-index__entry life-ink--{{name}}{{#if empty}} life-index__entry--empty{{/if}}">

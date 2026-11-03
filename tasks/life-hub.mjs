@@ -11,6 +11,7 @@
  *   lifeSections  { [name]: view }
  *   lifePersonal  [{ key, label, value, tone }]
  *   lifeFacts     { [key]: value }
+ *   lifeInsights  [{ id, text, href }]  (C5, at most 6)
  *
  * NOTE for Task 7: the `work` section is not part of this task. Its view
  * (`workView`) must carry a salary table (role, salary, delta) shown only when
@@ -486,6 +487,24 @@ export function fitglueStarted(idx) {
   return dates.length ? dates[0].slice(0, 4) : '';
 }
 
+/**
+ * The C5 insights as `[{id, text, href}]`: at most 6, export order, rows without a 1-160
+ * character string `text` dropped. Plain data: the partial does the markup.
+ * @param {any} idx the life export
+ */
+export function lifeInsights(idx) {
+  const rows = Array.isArray(idx?.insights) ? idx.insights : [];
+  /** @type {{id: string, text: string, href: string}[]} */
+  const out = [];
+  for (const r of rows) {
+    if (!r || typeof r.text !== 'string' || r.text.length < 1 || r.text.length > 160) continue;
+    const href = r.section === 'body' ? '/life/body' : r.section === 'fitness' ? '/life/fitness' : '/life';
+    out.push({ id: typeof r.id === 'string' ? r.id : String(out.length), text: r.text, href });
+    if (out.length === 6) break;
+  }
+  return out;
+}
+
 export function lifeHubTask(config = {}) {
   return {
     name: 'life-hub',
@@ -502,6 +521,7 @@ export function lifeHubTask(config = {}) {
       const lifeHub = buildHub(idx, g.fitnessLife, now);
       ctx.logger.info(`Life hub: ${lifeHub.cards.filter((c) => !c.empty).length}/${lifeHub.cards.length} sections have data`);
       return { lifeHub, lifeSections, lifePersonal: personalBits(idx?.facts), lifeFacts: lifeFacts(idx?.facts),
+        lifeInsights: lifeInsights(idx),
         // the homepage's "latest project" line and the "built <year>" badges
         fitglueStartedYear: fitglueStarted(idx),
         latestProjectDate: fitglueStarted(idx) ? `${fitglueStarted(idx)} → present` : '',

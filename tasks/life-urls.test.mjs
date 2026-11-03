@@ -160,6 +160,19 @@ describe('/life URL inventory', () => {
     }
   });
 
+  test('the homepage carries the did-you-know strip, first item visible; the hub shows one', async () => {
+    const home = await read('index.html');
+    assert.match(home, /class="did-you-know"/);
+    const lis = home.match(/<li[^>]*class="did-you-know__item"[^>]*>/g) || [];
+    assert.ok(lis.length >= 2);
+    assert.doesNotMatch(lis[0], /hidden/);
+    assert.match(lis[1], /hidden/);
+    assert.match(home, /prefers-reduced-motion: reduce/);
+    const hub = await read('life.html');
+    assert.equal((hub.match(/class="did-you-know__item"/g) || []).length, 1);
+    assert.doesNotMatch(hub, /prefers-reduced-motion: reduce/);
+  });
+
   test('the old zine links point at /life/fitness', async () => {
     const slug = g.fitnessIndex.activities[0].slug;
     assert.match(await read(`life/activity/${slug}/index.html`), /href="\/life\/fitness"/);
@@ -167,6 +180,17 @@ describe('/life URL inventory', () => {
 });
 
 describe('/life without a life export', () => {
+  test('no insights, no strip', async () => {
+    const out = await fs.mkdtemp(path.join(os.tmpdir(), 'life-urls-noins-'));
+    try {
+      await build(out, { lifeIndex: null, lifeHeatmap: null });
+      assert.doesNotMatch(await fs.readFile(path.join(out, 'index.html'), 'utf8'), /did-you-know/);
+      assert.doesNotMatch(await fs.readFile(path.join(out, 'life.html'), 'utf8'), /did-you-know/);
+    } finally {
+      await fs.rm(out, { recursive: true, force: true });
+    }
+  });
+
   test('the hub and every section say plainly that nothing has come through', async () => {
     const out = await fs.mkdtemp(path.join(os.tmpdir(), 'life-urls-empty-'));
     try {
