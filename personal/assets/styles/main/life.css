@@ -348,6 +348,112 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
   vector-effect: non-scaling-stroke;
 }
 
+/* ─── Line charts with axes (partials/chart-line.html, tasks/chart-axes.mjs) ── */
+.chart {
+  --ink-muted: color-mix(in srgb, var(--ink) 72%, #fff);
+  --chart-grid: var(--paper-2);
+  --chart-h: 140px;
+  background: #fff;
+  border: 2px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--life-ink, var(--ink-section));
+  padding: 12px 14px 10px;
+  margin: 0;
+  min-width: 0;
+}
+
+.chart__label {
+  font-family: var(--f-mono);
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.chart__label span { font-weight: 400; color: var(--ink-muted); }
+
+.chart__plot {
+  display: grid;
+  grid-template-columns: 3.5ch minmax(0, 1fr);
+  grid-template-rows: var(--chart-h) auto;
+  column-gap: 8px;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  line-height: 1;
+  color: var(--ink-muted);
+}
+
+.chart__y,
+.chart__x {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chart__y { grid-area: 1 / 1; }
+.chart__y li {
+  position: absolute;
+  right: 0;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+.chart__x { grid-area: 2 / 2; height: 1.6em; margin-top: 6px; }
+.chart__x li {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.chart__x li:first-child { transform: none; }
+.chart__x li:last-child:not(:first-child) { transform: translateX(-100%); }
+
+.chart__svg {
+  grid-area: 1 / 2;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.chart__grid {
+  stroke: var(--chart-grid);
+  stroke-width: 1;
+}
+
+.chart__area {
+  fill: var(--life-ink, var(--ink-section));
+  opacity: 0.12;
+}
+
+.chart__line {
+  fill: none;
+  stroke: var(--life-ink, var(--ink-section));
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.chart__mark { grid-area: 1 / 2; position: relative; pointer-events: none; }
+.chart__end {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: var(--life-ink, var(--ink-section));
+  box-shadow: 0 0 0 2px #fff;
+}
+.chart__end b {
+  position: absolute;
+  right: 6px;
+  bottom: 8px;
+  font-weight: 700;
+  color: var(--ink);
+  background: #fff;
+  padding: 1px 3px;
+  white-space: nowrap;
+}
+
 /* ─── Section pages: lists ──────────────── */
 .life-notables,
 .life-projects,
