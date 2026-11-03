@@ -76,48 +76,15 @@
     {{/if}}
 
     <!-- 5. On the calendar: the Fitness Events / Fitness Regular calendars (events.json),
-         else the hand-written list. Nothing upcoming → nothing rendered, not even the header. -->
-    {{#if fitnessLife.calendar.hasAny}}
-    <div class="fit-header-row">
-      <h2 class="fit-header">on the <span>calendar</span>.</h2>
-      <span class="fit-header-row__meta">{{fitnessLife.calendar.meta}}</span>
+         else the hand-written list; empty when nothing is upcoming or logged this week.
+         Baked with the build's clock (what a reader without JS sees); the script below
+         (tasks/life-clock.mjs, inlined) redoes it with the reader's clock and a fresh
+         events.json, so "in X days", today and the week are right whenever it is read. -->
+    <div class="fit-cal" data-life-calendar>
+{{{fitnessLife.calendar.html}}}
     </div>
-
-    {{#if fitnessLife.calendar.hasNextUp}}
-    <h3 class="fit-cal__kicker">next up</h3>
-    <ul class="fit-events">
-      {{#each fitnessLife.calendar.nextUp}}
-      {{> fitness-event}}
-      {{/each}}
-    </ul>
-    {{/if}}
-
-    {{#if fitnessLife.calendar.hasWeek}}
-    <h3 class="fit-cal__kicker">this week <span>· {{fitnessLife.calendar.weekRange}} · {{fitnessLife.calendar.activeDays}} active</span></h3>
-    <ol class="fit-week-strip">
-      {{#each fitnessLife.calendar.week}}
-      <li class="fit-week-strip__day {{stateClass}}{{#if isToday}} fit-week-strip__day--today{{/if}}" title="{{label}}">
-        <div class="fit-week-strip__head">
-          <span class="fit-week-strip__dow">{{dow}}</span>
-          <span class="fit-week-strip__num">{{num}}</span>
-          {{#if isToday}}<span class="fit-week-strip__today">today</span>{{/if}}
-        </div>
-        <ul class="fit-week-strip__list">
-          {{#each done}}
-          <li class="fit-week-strip__session fit-week-strip__session--done {{typeClass}}"><a href="{{href}}"><span class="fit-week-strip__time">{{time}}</span> {{title}}</a></li>
-          {{/each}}
-          {{#each planned}}
-          <li class="fit-week-strip__session fit-week-strip__session--planned fit-week-strip__session--{{kind}} {{typeClass}}">{{#if time}}<span class="fit-week-strip__time">{{time}}</span> {{/if}}{{title}}</li>
-          {{/each}}
-        </ul>
-        {{#if isRest}}<span class="fit-week-strip__rest">rest</span>{{/if}}
-        {{#if isOpen}}<span class="fit-week-strip__rest">—</span>{{/if}}
-      </li>
-      {{/each}}
-    </ol>
-    <p class="fit-week-strip__key"><span class="fit-week-strip__key-done">done</span> logged on the record · <span class="fit-week-strip__key-planned">planned</span> on the calendar · 🏁 race</p>
-    {{/if}}
-    {{/if}}
+    <script type="application/json" id="life-calendar-data">{{{fitnessLife.calendar.json}}}</script>
+    <script>{{{fitnessLife.clockJs}}}</script>
 
   </div>
 

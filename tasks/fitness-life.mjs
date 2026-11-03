@@ -11,11 +11,19 @@
  * `events.json`) and, only when that export is unavailable, the hand-written
  * events list in `personal/items/life/fitness.json`.
  *
+ * Time-relative wording (countdowns, the current week, today) lives in
+ * life-clock.mjs, which the page also runs in the browser (S6).
+ *
  * Field meanings follow jarvis-memory specs/ripixel-website/fitness-zine.md
  * "Data contract (S0)" §2, §6 and §8.
  */
 import fs from 'node:fs/promises';
-import { activityTheme, FAMILIES, hybridRaceLabel, typeKeyOf, typeKeyOfTitle } from './fitness-theme.mjs';
+import { activityTheme, FAMILIES, hybridRaceLabel, typeKeyOf } from './fitness-theme.mjs';
+import {
+  TZ, WEEK_DAYS, NEXT_UP_COUNT, DAY_MS, parse, fmt, ymd, dayStamp, rangeLabel, countdown, weekMonday, weekKicker,
+  calendarModel, renderCalendar, clientScript,
+} from './life-clock.mjs';
+import { resolveOptions } from './fitness-fetch.mjs';
 import { recordLabel, latestRecords } from './fitness-records.mjs';
 import { routePath } from './fitness-activity-views.mjs';
 import { buildHyroxHistory, hyroxWall } from './fitness-hyrox.mjs';
@@ -26,9 +34,7 @@ export const ROUNDUP_HREF = '/life/roundup';
 export const ROUNDUPS_HREF = '/life/roundups';
 export const SESSIONS_HREF = '/life/sessions';
 export const CARD_COUNT = 6;
-export const NEXT_UP_COUNT = 5;
-export const WEEK_DAYS = 7;
-export const TZ = 'Europe/London';
+export { TZ, WEEK_DAYS, NEXT_UP_COUNT, countdown, dayStamp, rangeLabel };
 
 // ---------------------------------------------------------------------------
 // Formatting
@@ -78,23 +84,6 @@ function kgLabel(kgv) {
   return `${r.toFixed(1).replace(/\.0$/, '')} kg`;
 }
 
-/** @param {string|undefined|null} iso */
-function parse(iso) {
-  const t = iso ? Date.parse(iso) : NaN;
-  return Number.isNaN(t) ? null : new Date(t);
-}
-
-/** @param {Date} d @param {Intl.DateTimeFormatOptions} opts */
-function fmt(d, opts) {
-  // en-GB abbreviates September as "Sept"; the zine wants three letters everywhere.
-  return new Intl.DateTimeFormat('en-GB', { timeZone: TZ, ...opts }).format(d).replace(/\bSept\b/, 'Sep');
-}
-
-/** `SAT 17 OCT` @param {Date} d */
-export function dayStamp(d) {
-  return fmt(d, { weekday: 'short', day: 'numeric', month: 'short' }).replace(',', '').toUpperCase();
-}
-
 /** `17 OCT 2026` @param {Date} d */
 function longDate(d) {
   return fmt(d, { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase();
@@ -103,22 +92,6 @@ function longDate(d) {
 /** `APR 2025` @param {Date} d */
 function monthYear(d) {
   return fmt(d, { month: 'short', year: 'numeric' }).toUpperCase();
-}
-
-/** `12 – 18 OCT 2026` for [start, endExclusive). @param {Date} start @param {Date} endExcl */
-export function rangeLabel(start, endExcl) {
-  const last = new Date(endExcl.getTime() - 86_400_000);
-  const sameMonth = fmt(start, { month: 'short' }) === fmt(last, { month: 'short' });
-  const left = sameMonth ? fmt(start, { day: 'numeric' }) : fmt(start, { day: 'numeric', month: 'short' });
-  return `${left} – ${fmt(last, { day: 'numeric', month: 'short', year: 'numeric' })}`.toUpperCase();
-}
-
-/** `YYYY-MM-DD` in the site timezone. @param {Date} d */
-function ymd(d) {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit',
-  }).format(d);
-  return parts; // en-CA gives ISO order
 }
 
 /** `ACTIVITY_TYPE_WEIGHT_TRAINING` → `WEIGHT TRAINING` @param {string|undefined} t */
@@ -280,11 +253,13 @@ export function buildWeek(index, roundupFiles, now) {
       }
       const days = stripDays(start, levels);
       const weekNo = String(r.periodKey || weekly.key || '').match(/^week-(\d+)-/)?.[1];
-      const isCurrent = now >= start && now < end;
       const kg = (r.activityTypeBreakdowns || []).reduce((a, b) => a + (Number(b?.totalWeightKg) || 0), 0);
       return {
         mode: 'roundup',
-        kicker: isCurrent ? 'THIS WEEK' : 'LATEST WEEK',
+        kicker: weekKicker(start, end, now),
+        // The page script re-checks the kicker against the reader's clock.
+        kickerStart: start.toISOString(),
+        kickerEnd: end.toISOString(),
         title: weekNo ? `WEEK ${Number(weekNo)}` : 'THE WEEK',
         range: rangeLabel(start, end),
         href: `${ROUNDUP_HREF}/${encodeURIComponent(r.periodKey || weekly.key)}`,
@@ -685,215 +660,93 @@ export function buildStats(index, roundupFiles = [], activityFiles = []) {
 }
 
 // ---------------------------------------------------------------------------
-// On the calendar (S2.6)
+// On the calendar (S2.6, S6)
 //
 // `events.json` from the bucket is the Fitness Events (races, one-offs; 120 days)
 // and Fitness Regular (recurring sessions; 21 days) calendars, one sorted list
 // with `calendar: 'events'|'regular'` and `kind: race|other|class|session`.
 // The hand-written list in fitness.json is only the fallback when that export
-// is unavailable. Past entries are never shown; with nothing upcoming the
-// section renders nothing at all.
+// is unavailable. The model and the markup are life-clock.mjs's, shared with
+// the page's inline script: the build bakes them with its own `now` (the no-JS
+// fallback) and the page renders them again with the reader's clock and a
+// fresh events.json, so a calendar change needs no rebuild.
 
-/** `12:10` in the site timezone (h23 so midnight is 00:00, never 24:00). @param {Date} d */
-function hm(d) {
-  return fmt(d, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
-}
-
-/** Whole days since the epoch of the site-local date of `d`. @param {Date} d */
-function dayIndex(d) {
-  const [y, m, day] = ymd(d).split('-').map(Number);
-  return Math.round(Date.UTC(y, m - 1, day) / 86_400_000);
-}
-
-/** The site-local noon of the day `offset` days after `now`'s day. @param {Date} now @param {number} offset */
-function localDay(now, offset) {
-  const [y, m, d] = ymd(now).split('-').map(Number);
-  return new Date(Date.UTC(y, m - 1, d + offset, 12));
+/**
+ * The hand-written fitness.json events in the export's shape (all-day, Events
+ * calendar, `race` when the tag says so).
+ * @param {any[]} handwritten
+ */
+export function handwrittenEvents(handwritten) {
+  return (Array.isArray(handwritten) ? handwritten : [])
+    .filter((e) => e && typeof e.title === 'string' && typeof e.date === 'string')
+    .map((e) => {
+      const start = parse(`${e.date}T00:00:00Z`);
+      if (!start) return null;
+      return {
+        id: '',
+        calendar: 'events',
+        title: e.title,
+        start: start.toISOString(),
+        end: new Date(start.getTime() + DAY_MS).toISOString(),
+        allDay: true,
+        kind: /\brace\b/i.test(String(e.tag || '')) ? 'race' : 'other',
+        location: '',
+        description: [e.tag, e.description].filter((x) => typeof x === 'string' && x).join(' — '),
+      };
+    })
+    .filter(Boolean);
 }
 
 /**
- * `today 12:10`, `tomorrow`, `in 3 days`, `happening now`.
- * @param {Date} start @param {Date} end @param {boolean} allDay @param {Date} now
+ * An index entry as a logged session for the week strip, pre-themed so the
+ * page script needs no type tables: `{start, title, href, typeClass, typeKey}`.
+ * @param {any} e
  */
-export function countdown(start, end, allDay, now) {
-  if (start <= now && end > now) return allDay ? 'today' : 'happening now';
-  const diff = dayIndex(start) - dayIndex(now);
-  const at = allDay ? '' : ` ${hm(start)}`;
-  if (diff <= 0) return `today${at}`;
-  if (diff === 1) return `tomorrow${at}`;
-  return `in ${diff} days`;
-}
-
-/** A calendar export entry → parsed dates, or null when the start is unusable. @param {any} e */
-function parseEntry(e) {
-  if (!e || typeof e.title !== 'string') return null;
-  const start = parse(e.start);
-  if (!start) return null;
-  const end = parse(e.end) || start;
-  return { start, end: end > start ? end : start, allDay: Boolean(e.allDay) };
-}
-
-/** @param {any} e export entry @param {{start: Date, end: Date, allDay: boolean}} t @param {Date} now */
-function nextUpEntry(e, t, now) {
-  const race = e.kind === 'race';
+export function doneEntry(e) {
+  const theme = activityTheme(e.activityType);
   return {
-    id: typeof e.id === 'string' ? e.id : '',
-    title: e.title,
-    kind: race ? 'race' : 'event',
-    stamp: race ? 'RACE' : 'EVENT',
-    stampClass: race ? 'fit-event__stamp--race' : 'fit-event__stamp--event',
-    emoji: race ? '🏁' : '📍',
-    day: fmt(t.start, { day: 'numeric' }),
-    month: fmt(t.start, { month: 'short', year: 'numeric' }),
-    date: dayStamp(t.start),
-    time: t.allDay ? '' : hm(t.start),
-    when: countdown(t.start, t.end, t.allDay, now),
-    location: typeof e.location === 'string' ? e.location : '',
-    description: typeof e.description === 'string' ? e.description : '',
-    dateTime: t.start.toISOString(),
-    allDay: t.allDay,
+    start: e.startTime,
+    title: e.title || typeLabel(e.activityType),
+    href: `${ACTIVITY_HREF}/${encodeURIComponent(e.slug)}`,
+    typeClass: theme.typeClass,
+    typeKey: theme.typeKey,
   };
 }
 
-/** Monday (site-local noon) of the week containing `now`. @param {Date} now */
-function weekMonday(now) {
-  const dow = (dayIndex(now) + 3) % 7; // 1970-01-01 was a Thursday → Monday = 0
-  return localDay(now, -dow);
-}
-
 /**
- * This week, Monday to Sunday, from both calendars and the record:
- * a day is **active** when a session was actually logged on it (index
- * activities), whatever was planned; still-to-come entries from the Fitness
- * Regular and Fitness Events calendars show as **planned**; a past day with
- * neither is a rest day. Races from the Events calendar are marked.
- * @param {{ e: any, t: {start: Date, end: Date, allDay: boolean} }[]} upcoming  both calendars, not yet ended
- * @param {any[]} activities  index entries
- * @param {Date} now
- */
-export function weekStrip(upcoming, activities, now) {
-  const monday = weekMonday(now);
-  const todayKey = ymd(now);
-  const days = [];
-  for (let i = 0; i < WEEK_DAYS; i++) {
-    const d = new Date(monday.getTime() + i * 86_400_000);
-    const key = ymd(d);
-    const done = (activities || [])
-      .map((e) => ({ e, t: parse(e?.startTime) }))
-      .filter((x) => x.t && typeof x.e.slug === 'string' && ymd(/** @type {Date} */ (x.t)) === key)
-      .sort((a, b) => /** @type {Date} */ (a.t).getTime() - /** @type {Date} */ (b.t).getTime())
-      .map(({ e, t }) => {
-        const theme = activityTheme(e.activityType);
-        return {
-          title: e.title || typeLabel(e.activityType),
-          time: hm(/** @type {Date} */ (t)),
-          href: `${ACTIVITY_HREF}/${encodeURIComponent(e.slug)}`,
-          typeClass: theme.typeClass,
-          typeKey: theme.typeKey,
-        };
-      });
-    const planned = upcoming
-      .filter(({ t }) => ymd(t.start) === key)
-      .sort((a, b) => a.t.start.getTime() - b.t.start.getTime())
-      .map(({ e, t }) => {
-        const race = e.calendar === 'events';
-        const typeKey = typeKeyOfTitle(e.title);
-        return {
-          title: e.title,
-          time: t.allDay ? '' : hm(t.start),
-          kind: race ? (e.kind === 'race' ? 'race' : 'event') : (e.kind === 'class' ? 'class' : 'session'),
-          isEvent: race,
-          typeClass: `fit-type--${typeKey}`,
-          location: typeof e.location === 'string' ? e.location : '',
-        };
-      });
-    const isToday = key === todayKey;
-    const isPast = key < todayKey;
-    const state = done.length ? 'active' : planned.length ? 'planned' : isPast || isToday ? 'rest' : 'open';
-    days.push({
-      key,
-      dow: fmt(d, { weekday: 'short' }).toUpperCase(),
-      num: fmt(d, { day: 'numeric' }),
-      label: fmt(d, { weekday: 'long', day: 'numeric', month: 'short' }).replace(',', ''),
-      isToday,
-      isPast,
-      done,
-      hasDone: done.length > 0,
-      planned,
-      hasPlanned: planned.length > 0,
-      state,
-      stateClass: `fit-week-strip__day--${state}`,
-      isRest: state === 'rest',
-      isOpen: state === 'open',
-      count: done.length + planned.length,
-    });
-  }
-  return days;
-}
-
-/**
- * The "on the calendar" block. Next up: the Fitness Events calendar only (races
- * and one-offs — the big things), or the hand-written list when the export is
- * missing. This week: see weekStrip.
+ * The "on the calendar" block at `now`, plus what the page needs to redo it:
+ * `html` (the baked section) and `data` (`{builtAt, source, events, done,
+ * eventsUrl}`, embedded as JSON). `done` keeps the sessions from the Monday a
+ * week before this one, so a page up to a week old still fills its strip.
  * @param {any} exported   events.json object or null
  * @param {any[]} handwritten  fitness.json events
  * @param {Date} now
  * @param {any[]} [activities] index entries, for the days already done
+ * @param {string} [eventsUrl] where the page fetches a fresh events.json ('' = never)
  */
-export function buildCalendar(exported, handwritten, now, activities = []) {
+export function buildCalendar(exported, handwritten, now, activities = [], eventsUrl = '') {
   const hasExport = Boolean(exported && Array.isArray(exported.events));
-  const upcoming = hasExport
-    ? exported.events
-      .map((/** @type {any} */ e) => ({ e, t: parseEntry(e) }))
-      .filter((/** @type {any} */ x) => x.t && x.t.end > now)
-      .sort((/** @type {any} */ a, /** @type {any} */ b) => a.t.start.getTime() - b.t.start.getTime())
-    : [];
-  const week = weekStrip(upcoming, activities, now);
-  const hasWeek = week.some((d) => d.count > 0);
-
-  let nextUp;
-  let source;
-  let meta;
-  if (hasExport) {
-    source = 'calendar';
-    meta = 'races & one-offs, the regular sessions, and what actually got done';
-    nextUp = upcoming
-      .filter(({ e }) => e.calendar === 'events')
-      .slice(0, NEXT_UP_COUNT)
-      .map(({ e, t }) => nextUpEntry(e, t, now));
-  } else {
-    const today = ymd(now);
-    nextUp = (Array.isArray(handwritten) ? handwritten : [])
-      .filter((e) => e && typeof e.title === 'string' && typeof e.date === 'string' && e.date >= today)
-      .sort((a, b) => a.date.localeCompare(b.date))
-      .slice(0, NEXT_UP_COUNT)
-      .map((e) => {
-        const start = parse(`${e.date}T00:00:00Z`) || now;
-        const end = new Date(start.getTime() + 86_400_000);
-        const race = /\brace\b/i.test(String(e.tag || ''));
-        return nextUpEntry({
-          id: '',
-          title: e.title,
-          kind: race ? 'race' : 'other',
-          location: '',
-          description: [e.tag, e.description].filter((x) => typeof x === 'string' && x).join(' — '),
-        }, { start, end, allDay: true }, now);
-      });
-    source = nextUp.length ? 'handwritten' : 'none';
-    meta = nextUp.length ? 'races & events, hand-written for now' : '';
-  }
-  return {
-    source,
-    meta,
-    nextUp,
-    hasNextUp: nextUp.length > 0,
-    week: hasWeek ? week : [],
-    hasWeek,
-    weekRange: hasWeek ? rangeLabel(weekMonday(now), new Date(weekMonday(now).getTime() + WEEK_DAYS * 86_400_000)) : '',
-    activeDays: week.filter((d) => d.hasDone).length,
-    hasAny: nextUp.length > 0 || hasWeek,
+  const since = ymd(new Date(weekMonday(now).getTime() - WEEK_DAYS * DAY_MS));
+  const done = (Array.isArray(activities) ? activities : [])
+    .filter((e) => e && typeof e.slug === 'string' && parse(e.startTime) && ymd(/** @type {Date} */ (parse(e.startTime))) >= since)
+    .map(doneEntry);
+  const data = {
+    builtAt: now.toISOString(),
+    source: hasExport ? 'calendar' : 'handwritten',
+    events: hasExport ? exported.events : handwrittenEvents(handwritten),
+    done,
+    eventsUrl,
   };
+  const model = calendarModel(data, now);
+  return { ...model, html: renderCalendar(model), data };
 }
+
+/** The calendar data as JSON safe inside a script element. @param {any} data */
+export function scriptJson(data) {
+  return JSON.stringify(data).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+}
+
+const CLOCK_SOURCE = new URL('./life-clock.mjs', import.meta.url);
 
 // ---------------------------------------------------------------------------
 // Assembly
@@ -903,7 +756,7 @@ export function buildCalendar(exported, handwritten, now, activities = []) {
  *   `events` is the hand-written list (fallback only); `calendar` the events.json object or null;
  *   `activities` the full activity files (their route points draw a card's picture when it has no photo).
  */
-export function buildLifeModel({ index, activities = [], roundups = [], events = [], calendar = null, unavailable = false, now = new Date() }) {
+export function buildLifeModel({ index, activities = [], roundups = [], events = [], calendar = null, unavailable = false, now = new Date(), eventsUrl = '' }) {
   const idx = index || { activities: [], roundups: [], profile: null, streaks: { currentWeeks: 0, longestWeeks: 0 } };
   const entries = Array.isArray(idx.activities) ? idx.activities.filter((e) => e && typeof e.slug === 'string') : [];
   const sorted = [...entries].sort(
@@ -929,7 +782,7 @@ export function buildLifeModel({ index, activities = [], roundups = [], events =
     roundupCount: summaries.length,
     hasRoundups: summaries.length > 0,
     stats: available ? buildStats(idx, roundups, activities) : null,
-    calendar: buildCalendar(calendar, events, now, available ? entries : []),
+    calendar: buildCalendar(calendar, events, now, available ? entries : [], eventsUrl),
   };
 }
 
@@ -957,7 +810,9 @@ export async function readEvents(file, logger) {
 
 /**
  * The Skier task. Must run after `fetchFitnessTask` and before page generation.
- * @param {{ eventsFile?: string, now?: Date }} [config]
+ * The page fetches a fresh events.json from the same bucket the build read, but
+ * only when the build read live data: a fixtures build stays a fixtures page.
+ * @param {{ eventsFile?: string, now?: Date, eventsUrl?: string }} [config]
  */
 export function fitnessLifeTask(config = {}) {
   return {
@@ -967,6 +822,9 @@ export function fitnessLifeTask(config = {}) {
     run: async (/** @type {any} */ cfg, /** @type {any} */ ctx) => {
       const g = ctx.globals || {};
       const events = await readEvents(cfg.eventsFile || DEFAULT_EVENTS_FILE, ctx.logger);
+      const live = g.fitnessSource === 'live' || g.fitnessSource === 'cache';
+      const eventsUrl = typeof cfg.eventsUrl === 'string' ? cfg.eventsUrl
+        : live ? `${resolveOptions(process.env).baseUrl}/events.json` : '';
       const fitnessLife = buildLifeModel({
         index: g.fitnessIndex,
         activities: Array.isArray(g.fitnessActivities) ? g.fitnessActivities : [],
@@ -975,13 +833,16 @@ export function fitnessLifeTask(config = {}) {
         calendar: g.fitnessEvents || null,
         unavailable: Boolean(g.fitnessUnavailable),
         now: cfg.now instanceof Date ? cfg.now : new Date(),
+        eventsUrl,
       });
+      fitnessLife.calendar.json = scriptJson(fitnessLife.calendar.data);
+      fitnessLife.clockJs = clientScript(await fs.readFile(CLOCK_SOURCE, 'utf8'));
       ctx.logger.info(
         `Life page: ${fitnessLife.activities.length} cards, week=${fitnessLife.week?.mode || 'none'}, ` +
         `roundup=${fitnessLife.roundup?.key || 'none'}, calendar=${fitnessLife.calendar.source} ` +
         `(${fitnessLife.calendar.nextUp.length} next up, ` +
         `${fitnessLife.calendar.week.reduce((a, d) => a + d.count, 0)} sessions this week, ` +
-        `${fitnessLife.calendar.activeDays} active)`,
+        `${fitnessLife.calendar.activeDays} active; page refetches events: ${eventsUrl ? 'yes' : 'no'})`,
       );
       return { fitnessLife };
     },

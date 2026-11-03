@@ -758,6 +758,9 @@
 }
 
 /* ─── On the calendar (S2.6): kickers + the week strip ──── */
+/* The calendar section's wrapper (S6: the page script re-renders inside it); no box of its own. */
+.fit-cal { display: contents; }
+
 .fit-cal__kicker {
   font-family: var(--f-mono);
   font-size: 11px;
