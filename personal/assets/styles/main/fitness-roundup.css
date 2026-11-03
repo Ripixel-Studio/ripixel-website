@@ -558,3 +558,13 @@ a.zine-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(
   .roundup-photo--featured { grid-column: span 1; grid-row: span 1; }
   .roundup-summary { font-size: 16px; padding: 14px 16px 14px 20px; }
 }
+
+/* Effort axis: HTML tick labels beside the strip. */
+.roundup-effort-wrap { --ink-muted: color-mix(in srgb, var(--ink) 72%, #fff); display: flex; gap: 6px; max-width: 460px; padding-top: 24px; }
+.roundup-effort-wrap--grid { max-width: 100%; }
+.roundup-effort-wrap .roundup-effort { flex: 1; min-width: 0; }
+.roundup-effort__yaxis { position: relative; flex: 0 0 4ch; font-family: var(--f-mono); font-size: 11px; line-height: 1; color: var(--ink-muted); }
+.roundup-effort-wrap--bars .roundup-effort__yaxis { flex-basis: 2ch; }
+.roundup-effort__yaxis ol { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; }
+.roundup-effort__yaxis li { position: absolute; right: 0; transform: translateY(-50%); white-space: nowrap; }
+.roundup-effort__ycap { position: absolute; top: -22px; left: 0; white-space: nowrap; }

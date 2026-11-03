@@ -7,6 +7,11 @@
   </div>
   <div class="fit-week__body">
     <figure class="fit-strip">
+      <div class="fit-strip__plot">
+      <div class="fit-strip__yaxis" aria-hidden="true">
+        <span class="fit-strip__ycap">{{yAxis.caption}}</span>
+        <ol>{{#each yAxis.ticks}}<li style="top:{{pct}}%">{{label}}</li>{{/each}}</ol>
+      </div>
       <svg class="fit-strip__svg" viewBox="0 0 280 72" role="img"
            aria-label="Effort by day, {{range}}: {{activeDays}} of 7 days active">
         <desc>{{#each days}}{{label}}: {{sessions}}, effort {{level}} of 4{{#unless @last}}; {{/unless}}{{/each}}</desc>
@@ -18,6 +23,7 @@
         <text class="fit-strip__day" x="{{textX}}" y="69" text-anchor="middle">{{letter}}</text>
         {{/each}}
       </svg>
+      </div>
       <figcaption class="fit-strip__caption">effort by day · {{activeDays}} of 7 active</figcaption>
     </figure>
     <dl class="fit-week__stats">

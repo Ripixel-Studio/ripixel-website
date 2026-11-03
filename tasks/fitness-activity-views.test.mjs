@@ -26,7 +26,6 @@ import {
   descriptionPreamble,
   sanitizeAiHtml,
   stripTags,
-  sparklinePath,
   routePath,
   hrZoneBars,
   groupStrengthSets,
@@ -132,23 +131,6 @@ describe('text helpers', () => {
 });
 
 describe('inline SVG maths', () => {
-  test('sparkline: fits the box, breaks on nulls, keeps the baseline', () => {
-    const p = sparklinePath([10, 20, null, 30], { w: 100, h: 50, pad: 0 });
-    assert.ok(p);
-    assert.equal(p.min, 10);
-    assert.equal(p.max, 30);
-    assert.match(p.d, /^M0,50 L33\.3,25 M100,0$/);
-    assert.match(p.area, /Z$/);
-    assert.equal(sparklinePath([5]), null);
-    assert.equal(sparklinePath([null, null]), null);
-    assert.equal(sparklinePath(/** @type {any} */ (undefined)), null);
-  });
-  test('sparkline: invert puts faster pace higher', () => {
-    const a = sparklinePath([100, 200], { w: 10, h: 10, pad: 0 });
-    const b = sparklinePath([100, 200], { w: 10, h: 10, pad: 0, invert: true });
-    assert.equal(a?.d, 'M0,10 L10,0');
-    assert.equal(b?.d, 'M0,0 L10,10');
-  });
   test('route: fits lat/lng into a box, longer side = size, first/last kept', () => {
     const r = routePath([[52.0, -1.0], [52.0, -0.5], [52.1, -0.5]], { size: 200, pad: 0 });
     assert.ok(r);
@@ -160,13 +142,16 @@ describe('inline SVG maths', () => {
     assert.equal(routePath([[0, 0], [0, 0]]), null);
     assert.equal(routePath([[52, -1]]), null);
   });
-  test('hr zones: Z1–Z5 only, widths scaled to the busiest zone', () => {
+  test('hr zones: Z1–Z5 only, heights scaled to a nice minutes axis', () => {
     const z = hrZoneBars([0, 0, 2, 5, 9, 4]);
     assert.ok(z);
     assert.equal(z.total, 20);
     assert.deepEqual(z.bars.map((b) => b.label), ['Z1', 'Z2', 'Z3', 'Z4', 'Z5']);
-    assert.equal(z.bars[3].w, 236);
-    assert.equal(z.bars[0].w, 0);
+    assert.equal(z.bars[0].h, 0);
+    assert.ok(z.bars[3].h > z.bars[2].h && z.bars[2].h > z.bars[1].h, 'taller bar, more minutes');
+    assert.equal(z.yLabel, 'min');
+    assert.deepEqual(z.yTicks.map((t) => t.label), ['10', '5', '0']);
+    assert.equal(z.yTicks[0].pct < z.yTicks.at(-1).pct, true, 'top tick is higher up');
     assert.equal(z.bars[4].pct, 20);
     assert.equal(hrZoneBars([0, 0, 0, 0, 0, 0]), null);
     const named = hrZoneBars([{ minutes: 9 }, { name: 'Zone 1 (Recovery)', minutes: 3, percentage: 50 }, { minutes: 3, percentage: 50 }, {}, {}, {}]);
@@ -299,7 +284,15 @@ describe('view model from the fixtures', () => {
     assert.ok(a.route && a.route.d.startsWith('M'));
     assert.equal(a.routeThumbnailUrl, '');
     assert.equal(a.photos.length, 1);
-    assert.equal(a.heroSpark?.label, 'heart rate · bpm');
+    assert.equal(a.heroSpark, undefined);
+    assert.equal(a.heroChart?.label, 'heart rate');
+    assert.equal(a.heroChart?.unit, 'bpm');
+    assert.ok(a.heroChart.yTicks.length >= 2);
+    const hr = a.modules.find((m) => m.key === 'heart-rate');
+    assert.equal(hr.chart.unit, 'bpm');
+    assert.match(hr.chart.xTicks.at(-1).label, /^\d+:\d{2}$/);
+    assert.equal(hr.chart.xTicks.at(-1).label, a.heroChart.xTicks.at(-1).label, 'x axis ends at the session length');
+    assert.equal(hr.sparkline, undefined);
     assert.deepEqual(a.modules.map((m) => m.key), ['heart-rate', 'zones', 'pace', 'cadence', 'elevation', 'effort', 'calories', 'training-load', 'best-efforts', 'pr-callout', 'streak', 'weather']);
     assert.equal(a.boosters?.count, 19);
     assert.deepEqual(a.footerChips, ['↗ Linked to Strava']);
@@ -367,7 +360,7 @@ describe('view model from the fixtures', () => {
     assert.equal(v.act.boosters, null);
     assert.equal(v.act.anchors[0].value, '8.00');
     assert.equal(v.act.anchors[2].value, '5:00');
-    assert.equal(v.act.heroSpark, null);
+    assert.equal(v.act.heroChart, null);
     assert.equal(v.act.hrZones, null);
   });
 });
@@ -412,7 +405,8 @@ describe('task', () => {
       assert.match(html, /<link rel="alternate" type="application\/atom\+xml" href="\/life\/feed\.xml"/);
       assert.doesNotMatch(html, /activity-head/);
       assert.match(html, /class="act-zones__bar"/);
-      assert.match(html, /class="act-sparkline__line"/);
+      assert.match(html, /class="chart__line"/);
+      assert.match(html, /class="act-zones__yaxis"/);
       assert.match(html, /class="act-map__svg"/);
       assert.match(html, /act-band--parkrun/);
       assert.match(html, /href="\/life"/);

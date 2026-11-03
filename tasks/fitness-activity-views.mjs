@@ -21,6 +21,7 @@
  */
 import path from 'node:path';
 import { athleteWords } from './fitness-words.mjs';
+import { lineChart, niceTicks, formatTick } from './chart-axes.mjs';
 import { buildHyroxHistory, buildRaceView, pbChase, eventUrl } from './fitness-hyrox.mjs';
 import { activityTheme, hybridRaceLabel } from './fitness-theme.mjs';
 import { calorieFigure } from './fitness-calories.mjs';
@@ -269,55 +270,6 @@ export function truncate(s, max) {
 
 // ---------------------------------------------------------------------------
 // SVG maths (inline SVG, no client JS)
-
-/**
- * Line + area path for a sparkline in a `w`×`h` box. `null`/non-finite
- * samples break the line (gaps), matching the contract's bucket-with-no-sample.
- * @param {Array<number|null|undefined>} values
- * @param {{ w?: number, h?: number, pad?: number, invert?: boolean }} [opts]
- * @returns {{ d: string, area: string, min: number, max: number, n: number, w: number, h: number } | null}
- */
-export function sparklinePath(values, opts = {}) {
-  const w = opts.w ?? 600;
-  const h = opts.h ?? 120;
-  const pad = opts.pad ?? 6;
-  if (!Array.isArray(values)) return null;
-  const valid = values.filter((v) => typeof v === 'number' && Number.isFinite(v));
-  if (valid.length < 2) return null;
-  const min = Math.min(...valid);
-  const max = Math.max(...valid);
-  const range = max - min || 1;
-  const n = values.length;
-  const stepX = n > 1 ? (w - pad * 2) / (n - 1) : 0;
-  const innerH = h - pad * 2;
-  const toY = (v) => {
-    const t = (v - min) / range;
-    const y = opts.invert ? pad + t * innerH : h - pad - t * innerH;
-    return y;
-  };
-  const segs = [];
-  let pen = false;
-  let firstX = null;
-  let lastX = null;
-  for (let i = 0; i < n; i++) {
-    const v = values[i];
-    if (typeof v !== 'number' || !Number.isFinite(v)) {
-      pen = false;
-      continue;
-    }
-    const x = +(pad + i * stepX).toFixed(1);
-    const y = +toY(v).toFixed(1);
-    segs.push(`${pen ? 'L' : 'M'}${x},${y}`);
-    pen = true;
-    if (firstX === null) firstX = x;
-    lastX = x;
-  }
-  const d = segs.join(' ');
-  // Area closes to the baseline across the span of drawn samples; gaps are
-  // bridged (it is a wash, not data).
-  const area = `${d.replace(/M/g, (m, i) => (i === 0 ? 'M' : 'L'))} L${lastX},${h - pad} L${firstX},${h - pad} Z`;
-  return { d, area, min, max, n, w, h };
-}
 
 /**
  * Route polyline from `[lat, lng]` pairs, equirectangular (lng scaled by
@@ -652,17 +604,16 @@ function cell(value, unit, label, extra = {}) {
  */
 export function buildModule(key, ctx) {
   const { en, series, has } = ctx;
-  const spark = (values, opts) => {
-    const p = sparklinePath(values, opts);
-    return p ? { d: p.d, area: p.area } : null;
-  };
+  const seconds = num(ctx.durationS) || num(ctx.entry?.durationSeconds);
+  const chart = (values, label, unit, decimals = 0) =>
+    lineChart(values, { label, unit, decimals, h: 120, x: { kind: 'clock', seconds } });
   switch (key) {
     case 'heart-rate': {
       const d = en.heartRate;
       if (!has('HEART_RATE_SUMMARY') || !d || num(d.avgBpm) <= 0) return null;
       const cells = [cell(d.minBpm, 'bpm', 'min'), cell(d.avgBpm, 'bpm', 'avg', { lead: true }), cell(d.maxBpm, 'bpm', 'max')];
       if (num(d.driftBpm) !== 0) cells.push(cell(`${d.driftBpm > 0 ? '+' : ''}${d.driftBpm}`, 'bpm', 'drift', { warn: !!d.driftWarning }));
-      return { key, title: 'Heart rate', cells, sparkline: spark(series.heartRate), sparkCaption: 'bpm over the session' };
+      return { key, title: 'Heart rate', cells, chart: chart(series.heartRate, 'Heart rate', 'bpm') };
     }
     case 'zones': {
       const d = en.heartRateZones;
@@ -685,7 +636,7 @@ export function buildModule(key, ctx) {
       const paceSeries = Array.isArray(series.speedMs) ? series.speedMs.map((v) => (num(v) > 0 ? 1000 / v : null)) : null;
       return {
         key, title: 'Pace', cells,
-        sparkline: paceSeries ? spark(paceSeries, { invert: true }) : null, sparkCaption: 'pace (faster is higher)',
+        chart: paceSeries ? chart(paceSeries.map((v) => (v == null ? null : v / 60)), 'Pace', 'min/km', 1) : null,
         bars: bars.length ? { rows: bars, hasHr: bars.some((b) => b.hr) } : null,
         note: num(d.paceDropPercent) > 0 ? `😓 ${Math.round(d.paceDropPercent)}% pace drop in the final quarter` : '',
       };
@@ -697,7 +648,7 @@ export function buildModule(key, ctx) {
       return {
         key, title: 'Speed',
         cells: [cell(fmtNumber(d.avgSpeedKmh, 1), 'km/h', 'avg', { lead: true }), cell(fmtNumber(d.maxSpeedKmh, 1), 'km/h', 'max')],
-        sparkline: kmh ? spark(kmh) : null, sparkCaption: 'km/h over the session',
+        chart: kmh ? chart(kmh, 'Speed', 'km/h', 1) : null,
       };
     }
     case 'cadence': {
@@ -707,7 +658,7 @@ export function buildModule(key, ctx) {
       return {
         key, title: 'Cadence',
         cells: [cell(Math.round(d.avgRpm), unit, 'avg', { lead: true }), cell(Math.round(d.maxRpm), unit, 'max')],
-        sparkline: spark(series.cadenceRpm), sparkCaption: `${unit} over the session`,
+        chart: chart(series.cadenceRpm, 'Cadence', unit),
       };
     }
     case 'elevation': {
@@ -715,7 +666,7 @@ export function buildModule(key, ctx) {
       if (!has('ELEVATION_SUMMARY') || !d || (num(d.totalGainM) === 0 && num(d.totalLossM) === 0)) return null;
       const cells = [cell(`↑ ${Math.round(num(d.totalGainM))}`, 'm', 'gain', { lead: true }), cell(`↓ ${Math.round(num(d.totalLossM))}`, 'm', 'loss')];
       if (num(d.maxAltitudeM) > 0) cells.push(cell(Math.round(d.maxAltitudeM), 'm', 'max altitude'));
-      return { key, title: 'Elevation', cells, sparkline: spark(series.altitudeM), sparkCaption: 'altitude profile', area: true };
+      return { key, title: 'Elevation', cells, chart: chart(series.altitudeM, 'Altitude', 'm') };
     }
     case 'power': {
       const d = en.power;
@@ -725,7 +676,7 @@ export function buildModule(key, ctx) {
       cells.push(cell(Math.round(num(d.maxWatts)), 'W', 'max'));
       if (num(d.kilojoules) > 0) cells.push(cell(Math.round(d.kilojoules), 'kJ', 'work'));
       if (num(d.intensityFactor) > 0) cells.push(cell(fmtNumber(d.intensityFactor, 2), '', 'intensity factor'));
-      return { key, title: 'Power', cells, sparkline: spark(series.powerW), sparkCaption: 'watts over the session' };
+      return { key, title: 'Power', cells, chart: chart(series.powerW, 'Power', 'W') };
     }
     case 'effort': {
       const d = en.effort;
@@ -836,7 +787,7 @@ export function buildModule(key, ctx) {
       return {
         key, title: 'Temperature',
         cells: [cell(`${fmtNumber(d.minC, 0)}°`, 'C', 'min'), cell(`${fmtNumber(d.avgC, 0)}°`, 'C', 'avg', { lead: true }), cell(`${fmtNumber(d.maxC, 0)}°`, 'C', 'max')],
-        sparkline: spark(series.temperatureC), sparkCaption: '°C over the session',
+        chart: chart(series.temperatureC, 'Temperature', '°C'),
       };
     }
     case 'hdrop': {
@@ -848,7 +799,7 @@ export function buildModule(key, ctx) {
       const cells = [cell(fmtNumber(d.totalFluidLossL, 2), 'L', 'fluid lost', { lead: true }), cell(fmtNumber(d.sweatRateLPerHr, 2), 'L/h', 'sweat rate'), cell(Math.round(num(d.totalSodiumMg)), 'mg', 'sodium'), cell(Math.round(score), '/100', `hdrop · ${band.toLowerCase()}`)];
       return {
         key, title: 'Sweat analysis', right: [d.bodyLocation ? titleCase(d.bodyLocation) : '', `hDrop ${band}`].filter(Boolean).join(' · '),
-        cells, sparkline: ts.length >= 2 ? spark(ts.map((p) => p.fluidLossCumulative)) : null, sparkCaption: 'cumulative fluid loss', area: true,
+        cells, chart: ts.length >= 2 ? lineChart(ts.map((p) => p.fluidLossCumulative), { label: 'Fluid lost, cumulative', unit: 'L', decimals: 1, h: 120, x: { kind: 'clock', seconds } }) : null,
       };
     }
     case 'spotify': {
@@ -887,10 +838,13 @@ export function buildModule(key, ctx) {
  *   either the enrichment's `zones[]` or the entry's `hrZoneMinutes` int array
  */
 export function hrZoneBars(zones) {
-  const rowH = 22;
-  const barX = 34;
-  const barMaxW = 236;
-  const labelX = 280;
+  const w = 340;
+  const plotH = 84;
+  const top = 6;
+  const base = top + plotH; // baseline y
+  const h = base + 18;      // room for the Z labels
+  const colW = w / 5;
+  const barW = 40;
   /** @type {{ i: number, name: string, minutes: number, pct: number }[]} */
   const rows = [];
   for (let i = 1; i <= 5; i++) {
@@ -899,25 +853,38 @@ export function hrZoneBars(zones) {
     else rows.push({ i, name: z?.name || `Zone ${i}`, minutes: num(z?.minutes), pct: num(z?.percentage) });
   }
   const total = rows.reduce((s, r) => s + r.minutes, 0);
-  const max = rows.reduce((m, r) => Math.max(m, r.minutes), 0) || 1;
+  const max = rows.reduce((m, r) => Math.max(m, r.minutes), 0);
   if (!total) return null;
+  // The axis tops out on a nice number at or above the busiest zone.
+  const ticks = niceTicks(0, max);
+  const hi = ticks[ticks.length - 1];
+  const decimals = ticks.every(Number.isInteger) ? 0 : 1;
+  const yOf = (v) => top + plotH - (v / hi) * plotH;
   return {
-    w: 340,
-    h: rowH * 5,
+    w,
+    h,
     total,
-    bars: rows.map((r, idx) => ({
-      label: `Z${r.i}`,
-      name: r.name,
-      minutes: r.minutes,
-      pct: r.pct || Math.round((r.minutes / total) * 100),
-      x: barX,
-      y: idx * rowH + 4,
-      w: Math.max(r.minutes > 0 ? 2 : 0, Math.round((r.minutes / max) * barMaxW)),
-      h: rowH - 8,
-      textY: idx * rowH + rowH / 2 + 4,
-      labelX,
-      opacity: (0.45 + (r.i - 1) * 0.1375).toFixed(2),
-    })),
+    base,
+    yLabel: 'min',
+    yTicks: [...ticks].reverse().map((t) => ({ label: formatTick(t, decimals), pct: Math.round((yOf(t) / h) * 10000) / 100 })),
+    bars: rows.map((r, idx) => {
+      const bh = r.minutes > 0 ? Math.max(2, Math.round((r.minutes / hi) * plotH)) : 0;
+      const cx = idx * colW + colW / 2;
+      return {
+        label: `Z${r.i}`,
+        name: r.name,
+        minutes: r.minutes,
+        pct: r.pct || Math.round((r.minutes / total) * 100),
+        x: Math.round(cx - barW / 2),
+        y: base - bh,
+        w: barW,
+        h: bh,
+        textX: cx,
+        textY: base + 13,
+        valueY: Math.max(9, base - bh - 4),
+        opacity: (0.45 + (r.i - 1) * 0.1375).toFixed(2),
+      };
+    }),
   };
 }
 
@@ -1135,19 +1102,16 @@ export function buildActivityView(file, index, opts = {}) {
     };
   }
 
-  // Hero sparkline: first of HR / power / speed in `series` (same preference as entry.sparkline.metric).
-  let heroSpark = null;
-  for (const [key, label, map] of [
-    ['heartRate', 'heart rate · bpm', (v) => v],
-    ['powerW', 'power · W', (v) => v],
-    ['speedMs', 'speed · km/h', (v) => (typeof v === 'number' ? v * 3.6 : null)],
+  // Hero chart: first of HR / power / speed in `series` (same preference as entry.sparkline.metric).
+  let heroChart = null;
+  for (const [key, label, unit, decimals, map] of [
+    ['heartRate', 'heart rate', 'bpm', 0, (v) => v],
+    ['powerW', 'power', 'W', 0, (v) => v],
+    ['speedMs', 'speed', 'km/h', 1, (v) => (typeof v === 'number' ? v * 3.6 : null)],
   ]) {
     if (Array.isArray(series[key])) {
-      const p = sparklinePath(series[key].map(map));
-      if (p) {
-        heroSpark = { d: p.d, area: p.area, label, min: fmtNumber(p.min, key === 'speedMs' ? 1 : 0), max: fmtNumber(p.max, key === 'speedMs' ? 1 : 0), duration: fmtClock(durationS) };
-        break;
-      }
+      heroChart = lineChart(series[key].map(map), { label, unit, decimals, h: 140, x: { kind: 'clock', seconds: durationS } });
+      if (heroChart) break;
     }
   }
 
@@ -1160,7 +1124,7 @@ export function buildActivityView(file, index, opts = {}) {
   // Grid modules in §4 order; the set list is its own partial but slots in order.
   const prNames = new Set(records.map((r) => parseRecordType(r.recordType).exercise));
   const setList = category === 'strength' || allSets.length ? groupStrengthSets(allSets, prNames) : null;
-  const ctx = { en, series, has, category, activityType, entry, activity, kmSplits: file?.kmSplits, records, calories: calorieInfo };
+  const ctx = { durationS, en, series, has, category, activityType, entry, activity, kmSplits: file?.kmSplits, records, calories: calorieInfo };
   const modules = [];
   for (const key of moduleOrderFor(category)) {
     if (key === 'zones') {
@@ -1270,7 +1234,7 @@ export function buildActivityView(file, index, opts = {}) {
       photos,
       route,
       routeThumbnailUrl,
-      heroSpark,
+      heroChart,
       hrZones,
       modules,
       footerChips,

@@ -144,16 +144,9 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
 .act-card__right { font-family: var(--f-mono); font-size: 11px; color: var(--ink); opacity: .65; text-align: right; }
 
 /* Hero sparkline */
-.act-spark .act-sparkline--tall { height: 120px; }
 
-/* ─── Sparkline (inline SVG) ───────────── */
-.act-sparkline { display: block; width: 100%; height: 64px; color: var(--ink); }
-.act-sparkline__line { stroke: currentColor; stroke-width: 2px; stroke-linejoin: round; stroke-linecap: round; }
-.act-sparkline__area { fill: var(--ink-section); opacity: .18; }
-.act-sparkline__base { stroke: rgba(23,19,17,.3); stroke-width: 1px; stroke-dasharray: 2 3; }
-.act-sparkline__caption {
-  font-family: var(--f-mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; opacity: .6; margin-top: 4px;
-}
+/* Line charts (partials/chart-line.html) sit flat inside an activity card, which already has the frame. */
+.act-card .chart { border: 0; box-shadow: none; background: transparent; padding: 0; }
 
 /* ─── Page bands ───────────────────────── */
 .act-band {
@@ -250,10 +243,18 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
 .act-note--warn { color: var(--ink-red); opacity: 1; font-weight: 700; }
 
 /* HR zone bars (SVG) */
-.act-zones { display: block; width: 100%; height: auto; color: var(--ink); }
-.act-zones__label { font-family: var(--f-mono); font-size: 11px; font-weight: 700; fill: var(--ink); }
+.act-zones-wrap { --ink-muted: color-mix(in srgb, var(--ink) 72%, #fff); }
+.act-zones__plot { display: grid; grid-template-columns: 4ch minmax(0, 1fr); column-gap: 6px; }
+.act-zones__yaxis { position: relative; font-family: var(--f-mono); font-size: 11px; line-height: 1; color: var(--ink-muted); }
+.act-zones__yaxis ol { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; }
+.act-zones__yaxis li { position: absolute; right: 0; transform: translateY(-50%); white-space: nowrap; }
+.act-zones__ycap { position: absolute; top: -14px; right: 0; }
+.act-zones { display: block; width: 100%; height: auto; color: var(--ink); margin-top: 14px; }
+.act-zones__yaxis { margin-top: 14px; }
+.act-zones__base { stroke: var(--paper-2); stroke-width: 1px; }
+.act-zones__label { font-family: var(--f-mono); font-size: 11px; font-weight: 700; fill: var(--ink-muted); }
 .act-zones__bar { fill: var(--ink-section); }
-.act-zones__value { font-family: var(--f-mono); font-size: 10px; fill: var(--ink); }
+.act-zones__value { font-family: var(--f-mono); font-size: 10px; fill: var(--ink-muted); }
 .act-zones__legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-family: var(--f-mono); font-size: 10px; opacity: .6; }
 
 /* Horizontal bar rows (pace splits, goals) */
