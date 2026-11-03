@@ -149,16 +149,21 @@
         </div>
       </a>
 
-      <a class="section-card section-card--fitness" href="/life/fitness">
+      <a class="section-card section-card--fitness" href="/life">
         <div class="section-card__inner">
           <div class="section-card__top">
-            <span class="section-card__num">△ FITNESS</span>
+            <span class="section-card__num">△ LIFE</span>
             <span class="section-card__glyph">△</span>
           </div>
-          <div class="section-card__name">fitness.</div>
-          <div class="section-card__blurb">My runs, rides, and workouts, with the maps, splits, and personal bests behind each one.</div>
+          <div class="section-card__name">life.</div>
+          <div class="section-card__blurb">{{lifeBlurb}}</div>
           <div class="section-card__latest">
-            <span><span class="section-card__latest-ink">see my training →</span></span>
+            {{#if lifeLatest}}
+            <span><span class="section-card__latest-ink">latest →</span> {{lifeLatest}}</span>
+            <span class="section-card__latest-date">{{lifeLatestDate}}</span>
+            {{else}}
+            <span><span class="section-card__latest-ink">open the hub →</span></span>
+            {{/if}}
           </div>
         </div>
       </a>

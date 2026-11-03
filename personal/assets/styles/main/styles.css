@@ -1706,8 +1706,8 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
   font-size: 13px;
   line-height: 1.65;
   color: var(--ink);
-  margin-top: 10px;
-  max-width: 680px;
+  margin-top: 0;
+  max-width: 70ch;
 }
 
 .role-card__tags {
@@ -1790,6 +1790,14 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
 }
 
 .role-card__body p { margin: 0 0 0.9em; }
+/* Desktop: identity (badge, company, title, note) on the left, prose and tags on the right,
+   so a full-width card uses its width. Prose stays at a readable 70ch. */
+.role-card__head { min-width: 0; }
+.role-card__main { min-width: 0; }
+@media (min-width: 900px) {
+  .role-card__inner { grid-template-columns: minmax(280px, 2fr) 3fr; gap: 20px 36px; align-items: start; }
+  .role-card__main { border-left: 2px dashed var(--ink); padding-left: 28px; }
+}
 .role-card__body p:last-child { margin-bottom: 0; }
 .role-card__title { overflow-wrap: anywhere; }
 .role-card__company { overflow-wrap: anywhere; }
@@ -1815,6 +1823,8 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
   white-space: nowrap;
 }
 
+.work-salary__table td:nth-child(3) { text-align: left; white-space: normal; }
+.work-salary__table th:nth-child(3) { text-align: left; }
 .work-salary__table th:first-child { text-align: left; white-space: normal; font-weight: 700; }
 .work-salary__table thead th { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; background: var(--paper); }
 .work-salary__table th small { display: block; font-weight: 400; opacity: 0.7; }

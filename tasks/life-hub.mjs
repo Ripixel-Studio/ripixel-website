@@ -505,6 +505,21 @@ export function lifeInsights(idx) {
   return out;
 }
 
+/**
+ * The homepage "life." card: blurb from the hub's section titles, footer from the newest outing.
+ * @param {{cards: {title: string}[], outings: {title: string, sawLabel?: string}[]}} hub
+ */
+export function homeLifeGlobals(hub) {
+  const names = (hub?.cards || []).map((c) => String(c.title).toLowerCase());
+  const list = names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}` : names.join('');
+  const o = hub?.outings?.[0];
+  return {
+    lifeBlurb: `James, by the numbers${list ? `: ${list}` : ''}, all gathered automatically.`,
+    lifeLatest: o && o.title ? o.title : '',
+    lifeLatestDate: o && o.title ? o.sawLabel || '' : '',
+  };
+}
+
 export function lifeHubTask(config = {}) {
   return {
     name: 'life-hub',
@@ -520,7 +535,7 @@ export function lifeHubTask(config = {}) {
       );
       const lifeHub = buildHub(idx, g.fitnessLife, now);
       ctx.logger.info(`Life hub: ${lifeHub.cards.filter((c) => !c.empty).length}/${lifeHub.cards.length} sections have data`);
-      return { lifeHub, lifeSections, lifePersonal: personalBits(idx?.facts), lifeFacts: lifeFacts(idx?.facts),
+      return { lifeHub, ...homeLifeGlobals(lifeHub), lifeSections, lifePersonal: personalBits(idx?.facts), lifeFacts: lifeFacts(idx?.facts),
         lifeInsights: lifeInsights(idx),
         // the homepage's "latest project" line and the "built <year>" badges
         fitglueStartedYear: fitglueStarted(idx),

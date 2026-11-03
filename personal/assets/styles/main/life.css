@@ -245,8 +245,10 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
   margin-bottom: 22px;
 }
 
+.life-head .page-hero__section-label { text-transform: uppercase; }
+.life-head__main { flex: 1 1 auto; }
 .life-head__h1 {
-  font-size: clamp(72px, 13vw, 170px);
+  font-size: clamp(56px, 9vw, 120px);
   text-transform: uppercase;
   flex: 1 1 auto;
 }
