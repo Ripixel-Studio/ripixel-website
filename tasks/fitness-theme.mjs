@@ -80,24 +80,7 @@ export function activityTheme(activityType) {
   };
 }
 
-/**
- * A planned calendar entry's family, guessed from its title (the calendars
- * carry no activity type). Unmatched → 'other'.
- * @param {unknown} title
- * @returns {TypeKey}
- */
-export function typeKeyOfTitle(title) {
-  const t = String(title || '').toLowerCase();
-  if (/hyrox|crossfit|hybrid/.test(t)) return 'crossfit';
-  if (/pilates|yoga|flexibility|stretch/.test(t)) return 'yoga';
-  if (/strength|\bpt\b|weights|gym|lift/.test(t)) return 'strength';
-  if (/\brun|parkrun|10k|5k|marathon/.test(t)) return 'run';
-  if (/ride|cycl|spin|sportive|bike/.test(t)) return 'ride';
-  if (/swim/.test(t)) return 'swim';
-  if (/hiit|erg|circuit/.test(t)) return 'hiit';
-  if (/walk|hike/.test(t)) return 'hike';
-  return 'other';
-}
+export { typeKeyOfTitle } from './life-clock.mjs';
 
 /** Hybrid race brands, as a title or the export's `race` names them (F5.5). */
 const HYBRID_RACES = /** @type {[RegExp, string][]} */ ([

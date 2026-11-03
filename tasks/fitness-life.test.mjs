@@ -9,6 +9,7 @@ import { loadFitnessData } from './fitness-fetch.mjs';
 import {
   buildLifeModel, buildWeek, buildCard, buildPr, buildRoundupTeaser, buildCalendar, countdown,
   effortLevelOf, fitnessLifeTask, km, clock, duration, rangeLabel, stripDays, buildPbBoard, cardPicture,
+  scriptJson, handwrittenEvents,
 } from './fitness-life.mjs';
 import { latestRecords, recordLabel } from './fitness-records.mjs';
 
@@ -470,7 +471,30 @@ describe('on the calendar', () => {
     assert.equal(c.hasAny, true);
   });
 
-  test('no export and nothing hand-written upcoming → nothing', () => {
+  test('baked data: done sessions from last week\'s Monday on, pre-themed; JSON safe in a script element', () => {
+    const now = new Date('2026-10-28T16:00:00Z'); // Wed; this week Mon 26 Oct, so from Mon 19 Oct
+    const acts = [
+      { slug: 'in', title: '</script><b>', activityType: 'ACTIVITY_TYPE_RUN', startTime: '2026-10-19T07:00:00Z' },
+      { slug: 'old', title: 'too old', activityType: 'ACTIVITY_TYPE_RUN', startTime: '2026-10-18T07:00:00Z' },
+      { slug: 'no-time', title: 'x', activityType: 'ACTIVITY_TYPE_RUN' },
+    ];
+    const c = buildCalendar(ex([]), [], now, acts, 'https://example.test/events.json');
+    assert.deepEqual(c.data.done.map((x) => x.href), ['/life/activity/in']);
+    assert.equal(c.data.done[0].typeClass, 'fit-type--run');
+    assert.equal(c.data.eventsUrl, 'https://example.test/events.json');
+    const json = scriptJson(c.data);
+    assert.equal(json.includes('</'), false);
+    assert.equal(JSON.parse(json).done[0].title, '</script><b>');
+  });
+
+  test('hand-written events become export-shaped entries', () => {
+    assert.deepEqual(handwrittenEvents([{ date: '2026-11-01', title: 'Sooner', tag: 'Race • 5km', description: 'PB attempt' }, { title: 'no date' }]), [{
+      id: '', calendar: 'events', title: 'Sooner', start: '2026-11-01T00:00:00.000Z', end: '2026-11-02T00:00:00.000Z',
+      allDay: true, kind: 'race', location: '', description: 'Race • 5km — PB attempt',
+    }]);
+  });
+
+    test('no export and nothing hand-written upcoming → nothing', () => {
     const c = buildCalendar(undefined, [{ date: '2026-01-01', title: 'past' }], NOW);
     assert.equal(c.source, 'none');
     assert.equal(c.hasAny, false);
@@ -517,8 +541,26 @@ describe('model + task', () => {
     assert.equal(out.fitnessLife.calendar.nextUp.length, 5);
     assert.match(
       logs.join('\n'),
-      /Life page: 3 cards, week=roundup, roundup=week-42-2026, calendar=calendar \(5 next up, 1 sessions this week, 0 active\)/,
+      /Life page: 3 cards, week=roundup, roundup=week-42-2026, calendar=calendar \(5 next up, 1 sessions this week, 0 active; page refetches events: no\)/,
     );
+    // S6: the page carries the baked section, its data and the clock script
+    const cal = out.fitnessLife.calendar;
+    assert.match(cal.html, /fit-event__when" datetime="2026-10-27T12:10:00.000Z">in 2 days</);
+    assert.equal(cal.data.builtAt, NOW.toISOString());
+    assert.equal(cal.data.eventsUrl, '', 'a fixtures build never fetches live events');
+    assert.equal(JSON.parse(cal.json).events.length, d.events.events.length);
+    assert.match(out.fitnessLife.clockJs, /^\(function \(\) \{/);
+    assert.match(out.fitnessLife.clockJs, /bootLife\(document, window\);\n\}\)\(\);$/);
+  });
+
+  test('a live build points the page at the bucket\'s events.json', async () => {
+    const task = fitnessLifeTask({ eventsFile: path.join(REPO, 'nope.json'), now: NOW });
+    const out = await task.run(task.config, {
+      globals: { fitnessIndex: null, fitnessUnavailable: true, fitnessSource: 'live' },
+      logger: { info() {}, warn() {}, error() {}, debug() {} },
+    });
+    assert.equal(out.fitnessLife.calendar.data.eventsUrl,
+      'https://storage.googleapis.com/fitglue-server-prod-showcase-assets/site/james/events.json');
   });
 
   test('a missing events file is a warning, not a failure', async () => {
