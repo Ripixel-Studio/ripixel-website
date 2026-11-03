@@ -21,7 +21,7 @@
  */
 import path from 'node:path';
 import { athleteWords } from './fitness-words.mjs';
-import { lineChart, niceTicks, formatTick } from './chart-axes.mjs';
+import { lineChart, niceTicks, formatTick, SECOND_MULTS } from './chart-axes.mjs';
 import { buildHyroxHistory, buildRaceView, pbChase, eventUrl } from './fitness-hyrox.mjs';
 import { activityTheme, hybridRaceLabel } from './fitness-theme.mjs';
 import { calorieFigure } from './fitness-calories.mjs';
@@ -636,7 +636,7 @@ export function buildModule(key, ctx) {
       const paceSeries = Array.isArray(series.speedMs) ? series.speedMs.map((v) => (num(v) > 0 ? 1000 / v : null)) : null;
       return {
         key, title: 'Pace', cells,
-        chart: paceSeries ? chart(paceSeries.map((v) => (v == null ? null : v / 60)), 'Pace', 'min/km', 1) : null,
+        chart: paceSeries ? lineChart(paceSeries, { label: 'Pace', unit: '/km', h: 120, x: { kind: 'clock', seconds }, invert: true, fmt: fmtPace, mults: SECOND_MULTS }) : null,
         bars: bars.length ? { rows: bars, hasHr: bars.some((b) => b.hr) } : null,
         note: num(d.paceDropPercent) > 0 ? `😓 ${Math.round(d.paceDropPercent)}% pace drop in the final quarter` : '',
       };

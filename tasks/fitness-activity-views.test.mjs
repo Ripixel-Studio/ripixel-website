@@ -293,6 +293,11 @@ describe('view model from the fixtures', () => {
     assert.match(hr.chart.xTicks.at(-1).label, /^\d+:\d{2}$/);
     assert.equal(hr.chart.xTicks.at(-1).label, a.heroChart.xTicks.at(-1).label, 'x axis ends at the session length');
     assert.equal(hr.sparkline, undefined);
+    const pace = a.modules.find((m) => m.key === 'pace').chart;
+    assert.equal(pace.unit, '/km');
+    assert.ok(pace.yTicks.every((t) => /^\d+:\d{2}$/.test(t.label)), 'pace ticks are m:ss');
+    assert.match(pace.end.label, /^\d+:\d{2}$/);
+    assert.ok(+pace.yTicks[0].label.split(':')[0] <= +pace.yTicks.at(-1).label.split(':')[0], 'fastest pace on top');
     assert.deepEqual(a.modules.map((m) => m.key), ['heart-rate', 'zones', 'pace', 'cadence', 'elevation', 'effort', 'calories', 'training-load', 'best-efforts', 'pr-callout', 'streak', 'weather']);
     assert.equal(a.boosters?.count, 19);
     assert.deepEqual(a.footerChips, ['↗ Linked to Strava']);

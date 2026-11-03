@@ -4,7 +4,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { niceTicks, formatTick, lineChart } from './chart-axes.mjs';
+import { niceTicks, formatTick, lineChart, SECOND_MULTS } from './chart-axes.mjs';
 
 const WEEKS = ['2026-10-05', '2026-10-12', '2026-10-19', '2026-10-26', '2026-11-02'];
 const weeks = (n) => ({ kind: /** @type {const} */ ('weeks'), weeks: WEEKS.slice(0, n) });
@@ -109,5 +109,30 @@ describe('lineChart', () => {
     const m = lineChart([81, 80, null, 79], { ...opts(4), x: weeks(4) });
     assert.ok(m);
     assert.equal(m.summary, 'Weight in kg, 4 weeks: 81 to 79');
+  });
+
+  test('invert: low values on top, ticks ascending down the axis', () => {
+    const clock = { kind: 'clock', seconds: 60 };
+    const up = lineChart([300, 360], { label: 'v', unit: 'u', x: clock });
+    const inv = lineChart([300, 360], { label: 'v', unit: 'u', x: clock, invert: true });
+    assert.ok(up && inv);
+    const ys = (m) => [...m.d.matchAll(/,([\d.]+)/g)].map((x) => +x[1]);
+    assert.ok(ys(up)[0] > ys(up)[1], 'a rising series rises');
+    assert.ok(ys(inv)[0] < ys(inv)[1], 'inverted: the larger value is lower');
+    const labels = inv.yTicks.map((t) => +t.label);
+    assert.deepEqual(labels, [...labels].sort((a, b) => a - b), 'smallest at the top');
+    assert.equal(inv.yTicks[0].pct, 0);
+    assert.equal(inv.yTicks.at(-1).pct, 100);
+  });
+
+  test('fmt and mults: pace ticks and end label read as m:ss on 10/15/30 s steps', () => {
+    const pace = (v) => `${Math.floor(v / 60)}:${String(Math.round(v % 60)).padStart(2, '0')}`;
+    const m = lineChart([312, 330, 301, 345], { label: 'Pace', unit: '/km', x: { kind: 'clock', seconds: 1200 }, invert: true, fmt: pace, mults: SECOND_MULTS });
+    assert.ok(m);
+    assert.deepEqual(m.yTicks.map((t) => t.label), ['5:00', '5:30', '6:00']);
+    assert.equal(m.end.label, '5:45');
+    assert.equal(m.summary, 'Pace in /km, over 20:00: 5:12 to 5:45');
+    // The fastest sample (301 s) sits higher than the slowest (345 s).
+    assert.ok(m.end.y > 0 && m.yTicks[0].label === '5:00');
   });
 });
