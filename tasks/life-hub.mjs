@@ -74,6 +74,8 @@ const row = (/** @type {string} */ label, /** @type {string} */ value, unit = ''
 function headlineOf(h) {
   if (!h || typeof h !== 'object' || h.value == null) return null;
   const v = num(h.value);
+  // A duration in minutes reads as hours and minutes ("7h 24m"), as the section's own rows do.
+  if (v != null && String(h.unit || '') === 'min') return { value: hm(v), unit: '', label: String(h.label || '') };
   return { value: v == null ? String(h.value) : (Number.isInteger(v) ? group(v) : one(v)), unit: String(h.unit || ''), label: String(h.label || '') };
 }
 

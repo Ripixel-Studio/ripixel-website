@@ -25,14 +25,7 @@
     {{#each stats}}
     <section class="life-period">
       <h2 class="life-period__label">{{label}}</h2>
-      <div class="stat-strip life-stats">
-        {{#each items}}
-        <div class="stat-strip__item">
-          <div class="stat-strip__num">{{value}}{{#if unit}}<small class="fit-stats__unit">{{unit}}</small>{{/if}}</div>
-          <div class="stat-strip__label">{{label}}</div>
-        </div>
-        {{/each}}
-      </div>
+      {{> life-stats items}}
     </section>
     {{/each}}
     <h2 class="fit-header">worth <span>talking about</span>.</h2>

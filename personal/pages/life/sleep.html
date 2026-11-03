@@ -23,15 +23,7 @@
     {{> life-empty}}
     {{else}}
     {{#if stats.length}}
-    <div class="stat-strip life-stats">
-      {{#each stats}}
-      <div class="stat-strip__item">
-        <div class="stat-strip__num">{{value}}{{#if unit}}<small class="fit-stats__unit">{{unit}}</small>{{/if}}</div>
-        <div class="stat-strip__label">{{label}}</div>
-        {{#if sub}}<div class="fit-stats__sub">{{sub}}</div>{{/if}}
-      </div>
-      {{/each}}
-    </div>
+    {{> life-stats stats}}
     {{/if}}
     {{#if charts.length}}
     <h2 class="fit-header">the <span>trend</span>.</h2>

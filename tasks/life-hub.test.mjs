@@ -169,3 +169,10 @@ test('hub notes: the latest thing or the next number per section', () => {
   const empty = buildHub(null, null, now);
   assert.ok(empty.cards.every((c) => c.note === null));
 });
+
+test('a headline in minutes reads as hours and minutes', () => {
+  assert.deepEqual(buildSection('sleep', fixture.sections.sleep, now).headline, { value: '7h 24m', unit: '', label: 'average night, last 30 days' });
+  const hub = buildHub(fixture, fitnessLife, now);
+  assert.equal(hub.cards.find((c) => c.name === 'sleep')?.headline?.value, '7h 24m');
+  assert.equal(buildSection('sleep', { staleDays: 0, headline: { value: 60, unit: 'min', label: 'x' } }, now).headline?.value, '1h 00m');
+});

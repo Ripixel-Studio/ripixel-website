@@ -23,49 +23,13 @@
     {{> life-empty}}
     {{else}}
     {{#if stats.length}}
-    <div class="stat-strip life-stats">
-      {{#each stats}}
-      <div class="stat-strip__item">
-        <div class="stat-strip__num">{{value}}{{#if unit}}<small class="fit-stats__unit">{{unit}}</small>{{/if}}</div>
-        <div class="stat-strip__label">{{label}}</div>
-        {{#if sub}}<div class="fit-stats__sub">{{sub}}</div>{{/if}}
-      </div>
-      {{/each}}
-    </div>
+    {{> life-stats stats}}
     {{/if}}
     <div class="life-columns">
-    {{#if mostPlayed.length}}
-    <section class="life-list-block">
-      <h2 class="life-period__label">Most played</h2>
-      <ol class="life-list">
-        {{#each mostPlayed}}<li class="life-list__item"><span class="life-list__name">{{name}}</span>{{#if hours}}<span class="life-list__value">{{hours}}<small>h</small></span>{{/if}}</li>{{/each}}
-      </ol>
-    </section>
-    {{/if}}
-    {{#if recent.length}}
-    <section class="life-list-block">
-      <h2 class="life-period__label">Recently played</h2>
-      <ol class="life-list">
-        {{#each recent}}<li class="life-list__item"><span class="life-list__name">{{name}}</span>{{#if hours}}<span class="life-list__value">{{hours}}<small>h</small></span>{{/if}}</li>{{/each}}
-      </ol>
-    </section>
-    {{/if}}
-    {{#if serious.length}}
-    <section class="life-list-block">
-      <h2 class="life-period__label">Serious</h2>
-      <ol class="life-list">
-        {{#each serious}}<li class="life-list__item"><span class="life-list__name">{{name}}</span>{{#if hours}}<span class="life-list__value">{{hours}}<small>h</small></span>{{/if}}</li>{{/each}}
-      </ol>
-    </section>
-    {{/if}}
-    {{#if silly.length}}
-    <section class="life-list-block">
-      <h2 class="life-period__label">Silly</h2>
-      <ol class="life-list">
-        {{#each silly}}<li class="life-list__item"><span class="life-list__name">{{name}}</span>{{#if hours}}<span class="life-list__value">{{hours}}<small>h</small></span>{{/if}}</li>{{/each}}
-      </ol>
-    </section>
-    {{/if}}
+    {{> life-list title="Most played" items=mostPlayed}}
+    {{> life-list title="Recently played" items=recent}}
+    {{> life-list title="Serious" items=serious}}
+    {{> life-list title="Silly" items=silly}}
     </div>
     {{/if}}
     {{/with}}
