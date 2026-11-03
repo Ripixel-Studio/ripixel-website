@@ -107,15 +107,25 @@ function sortedNotables(list) {
     .map((x) => notableView(x.n));
 }
 
-/** @param {any} sec */
+/** Non-empty: a non-null scalar, a non-empty string/array, or an object with a non-empty value. @param {any} v @returns {boolean} */
+function filled(v) {
+  if (v == null) return false;
+  if (Array.isArray(v)) return v.some(filled);
+  if (typeof v === 'object') return Object.values(v).some(filled);
+  if (typeof v === 'string') return v.trim() !== '';
+  return true;
+}
+
+/**
+ * A section has data when its headline OR anything else beyond the bookkeeping
+ * keys (lists, totals, single figures) is non-empty. A null headline with a
+ * populated list (games: mostPlayed, serious, backlog...) is still data.
+ * @param {any} sec
+ */
 function hasData(sec) {
   if (!sec || typeof sec !== 'object' || Array.isArray(sec)) return false;
   if (sec.headline && sec.headline.value != null) return true;
-  return ['latest', 'weekly', 'notable', 'projects', 'mostPlayed', 'recent', 'totals', 'avgMinutes30', 'avgKcal30', 'current']
-    .some((k) => {
-      const v = sec[k];
-      return Array.isArray(v) ? v.length > 0 : v != null && typeof v !== 'object' ? true : v != null && Object.keys(v).length > 0;
-    });
+  return Object.entries(sec).some(([k, v]) => k !== 'updated' && k !== 'staleDays' && k !== 'headline' && filled(v));
 }
 
 /** @param {any[]} weekly @param {string} key */

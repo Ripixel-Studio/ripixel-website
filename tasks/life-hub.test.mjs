@@ -176,3 +176,14 @@ test('a headline in minutes reads as hours and minutes', () => {
   assert.equal(hub.cards.find((c) => c.name === 'sleep')?.headline?.value, '7h 24m');
   assert.equal(buildSection('sleep', { staleDays: 0, headline: { value: 60, unit: 'min', label: 'x' } }, now).headline?.value, '1h 00m');
 });
+
+test('a section with lists but a null headline has data', () => {
+  const games = { updated: '2026-11-03', staleDays: 0, headline: null, hoursYear: null, mostPlayed: [{ name: 'Revolution Idle', hours: 783 }], recent: [], serious: 'Revolution Idle', backlog: 74 };
+  const v = buildSection('games', games);
+  assert.equal(v.empty, false);
+  assert.equal(v.headline, null);
+  assert.equal(v.mostPlayed[0].name, 'Revolution Idle');
+  assert.equal(buildSection('games', { headline: null, backlog: 3 }).empty, false);
+  assert.equal(buildSection('reading', { headline: null, totals: { year: { books: 0 } } }).empty, false);
+  assert.equal(buildSection('games', { updated: '2026-11-03', staleDays: 2, headline: null, mostPlayed: [], recent: [], achievements: {}, serious: '' }).empty, true);
+});
