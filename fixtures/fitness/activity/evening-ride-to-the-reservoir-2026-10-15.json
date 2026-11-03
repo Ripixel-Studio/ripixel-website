@@ -64,7 +64,6 @@
       "ENRICHER_PROVIDER_LOCATION_NAMING",
       "ENRICHER_PROVIDER_WEATHER",
       "ENRICHER_PROVIDER_ROUTE_THUMBNAIL",
-      "ENRICHER_PROVIDER_AI_BANNER",
       "ENRICHER_PROVIDER_AI_COMPANION",
       "ENRICHER_PROVIDER_SOURCE_LINK"
     ],
@@ -167,11 +166,6 @@
         "html": "<p>An unhurried 32 km out along the Trent with one real climb in the middle — the <b>540 W</b> spike on the reservoir road says it was taken seriously. Average 26.6 km/h with the wind helping home.</p>",
         "model": "gemini-2.5-flash",
         "generatedAt": "2026-10-15T19:02:30Z"
-      },
-      "aiBanner": {
-        "imageUrl": "https://assets.fitglue.tech/act_01JA6R8D4HT2/banner.png",
-        "promptHash": "7c1f0a9e",
-        "generatorVersion": "v3"
       },
       "cadence": {
         "avgRpm": 84,

@@ -30,7 +30,6 @@ import {
   hrZoneBars,
   groupStrengthSets,
   setChip,
-  boosterTimeline,
   parseRecordType,
   topPR,
   prValue,
@@ -194,16 +193,28 @@ describe('strength set list', () => {
   });
 });
 
-describe('boosters and PRs', () => {
-  test('timeline keeps canonical order, unknown names last', () => {
-    const t = boosterTimeline(['ENRICHER_PROVIDER_WEATHER', 'ENRICHER_PROVIDER_SOMETHING_ELSE', 'ENRICHER_PROVIDER_AI_BANNER', 'ENRICHER_PROVIDER_LOGIC_GATE']);
-    assert.ok(t);
-    assert.equal(t.count, 4);
-    assert.deepEqual(t.items.map((i) => i.name), ['AI Banner', 'Logic Gate', 'Weather', 'Something Else']);
-    assert.equal(t.items[1].sub, '✓ ran · no visual output');
-    assert.equal(t.items[2].sub, '✓ ran');
-    assert.equal(boosterTimeline([]), null);
-  });
+describe('no vestigial showcase stats', () => {
+  const slugs = ['colwick-parkrun-2026-10-17', 'evening-ride-to-the-reservoir-2026-10-15', 'push-day-2026-10-13'];
+  /** @param {any} o @param {string} p @param {string[]} hits */
+  function walk(o, p, hits) {
+    if (Array.isArray(o)) o.forEach((x, i) => walk(x, `${p}[${i}]`, hits));
+    else if (o && typeof o === 'object') for (const [k, v] of Object.entries(o)) {
+      if (/booster|destination|banner/i.test(k)) hits.push(`${p}.${k}`);
+      walk(v, `${p}.${k}`, hits);
+    }
+  }
+  for (const slug of slugs) {
+    test(`${slug}: no booster/destination/banner keys, no "pushed to" stat`, async () => {
+      const v = buildActivityView(await fixture(slug), await fixtureIndex());
+      const hits = [];
+      walk(v.act, 'act', hits);
+      assert.deepEqual(hits, []);
+      assert.ok(!v.act.extraStats.some((s) => s.subtext === 'pushed to'));
+    });
+  }
+});
+
+describe('PRs', () => {
   test('record types', () => {
     assert.deepEqual(parseRecordType('Bench Press (Barbell)_1rm'), { label: 'Bench Press (Barbell)', exercise: 'Bench Press (Barbell)', prType: '1RM', isStrength: true });
     assert.equal(parseRecordType('5k').prType, '');
@@ -272,7 +283,6 @@ describe('view model from the fixtures', () => {
     assert.equal(a.source, 'Strava');
     assert.equal(a.dateStamp, 'SAT 17 OCT 2026');
     assert.equal(a.prCount, 1);
-    assert.equal(a.destinationCount, 3);
     assert.equal(a.locationName, 'COLWICK PARK, NOTTINGHAM');
     assert.equal(a.parkrun?.finishTime, '19:52');
     assert.equal(a.parkrun?.position, '#23');
@@ -299,7 +309,6 @@ describe('view model from the fixtures', () => {
     assert.match(pace.end.label, /^\d+:\d{2}$/);
     assert.ok(+pace.yTicks[0].label.split(':')[0] <= +pace.yTicks.at(-1).label.split(':')[0], 'fastest pace on top');
     assert.deepEqual(a.modules.map((m) => m.key), ['heart-rate', 'zones', 'pace', 'cadence', 'elevation', 'effort', 'calories', 'training-load', 'best-efforts', 'pr-callout', 'streak', 'weather']);
-    assert.equal(a.boosters?.count, 19);
     assert.deepEqual(a.footerChips, ['↗ Linked to Strava']);
     assert.equal(a.ogImage, a.photos[0]);
     assert.equal(v.description, a.description);
@@ -311,12 +320,12 @@ describe('view model from the fixtures', () => {
     assert.equal(v.publishedTime, '2026-10-17T08:00:00Z');
     assert.equal(v.atomFeed, '/life/feed.xml');
   });
-  test('a rendered OG card (S2.5) beats banner and photo for og:image; a non-URL is ignored', async () => {
+  test('a rendered OG card (S2.5) beats the photo for og:image; a non-URL is ignored', async () => {
     const index = await fixtureIndex();
     const ride = await fixture('evening-ride-to-the-reservoir-2026-10-15');
     const card = 'https://james.ripixel.co.uk/life/og/activity/evening-ride-to-the-reservoir-2026-10-15.png';
     assert.equal(buildActivityView(ride, index, { ogCard: card }).ogImage, card);
-    assert.match(buildActivityView(ride, index, { ogCard: 'life/og/x.png' }).ogImage, /banner\.png$/);
+    assert.equal(buildActivityView(ride, index, { ogCard: 'life/og/x.png' }).ogImage, '');
   });
   test('photos are gated by profile.showPhotoGallery', async () => {
     const index = await fixtureIndex();
@@ -326,11 +335,9 @@ describe('view model from the fixtures', () => {
     assert.equal(v.act.bgPhotoUrl, '');
     assert.equal(v.act.ogImage, '');
   });
-  test('ride: banner, speed not pace, milestone, recovery/temperature tail', async () => {
+  test('ride: speed not pace, milestone, recovery/temperature tail', async () => {
     const v = buildActivityView(await fixture('evening-ride-to-the-reservoir-2026-10-15'), await fixtureIndex());
     const a = v.act;
-    assert.match(a.bannerUrl, /banner\.png$/);
-    assert.equal(a.ogImage, a.bannerUrl);
     assert.equal(a.anchors[2].label, 'avg speed');
     assert.equal(a.milestone?.toGoKm, '187.7');
     assert.equal(a.milestone?.crossedKm, '');
@@ -353,16 +360,13 @@ describe('view model from the fixtures', () => {
     assert.equal(setList.exercises[0].isPR, true);
     assert.equal(a.prBand?.label, 'BENCH PRESS (BARBELL)');
     assert.equal(a.prBand?.sub, '1RM · NEW PERSONAL RECORD · +1 MORE RECORD BELOW');
-    assert.equal(a.boostersDidNotRun, false);
   });
   test('metadata-only activity (enrichments null, activityData null) still renders a page', () => {
     const v = buildActivityView(
       { slug: 'old-one-2025-05-01', category: 'cardio-distance', activity: { title: 'Old one', activityType: 'ACTIVITY_TYPE_RUN', source: 'SOURCE_STRAVA', startTime: '2025-05-01T07:00:00Z', activityData: null, enrichments: null, appliedEnrichments: [], tags: [], photoUrls: [] }, entry: { distanceMeters: 8000, durationSeconds: 2400, hrZoneMinutes: [], photoUrls: [] }, series: {}, routePoints: [] },
       { profile: { showPhotoGallery: true } },
     );
-    assert.equal(v.act.boostersDidNotRun, true);
     assert.deepEqual(v.act.modules, []);
-    assert.equal(v.act.boosters, null);
     assert.equal(v.act.anchors[0].value, '8.00');
     assert.equal(v.act.anchors[2].value, '5:00');
     assert.equal(v.act.heroChart, null);
@@ -430,8 +434,12 @@ describe('task', () => {
       assert.match(html, /<noscript><a class="share__open" href="\/life\/share\/activity\/c\/story-photo-1\.jpg" download="c-story\.jpg">/);
       assert.match(html, /<dialog class="share__dialog" id="share-dialog" aria-labelledby="share-dialog-title">/);
       const ride = await fs.readFile(path.join(tmp, 'life', 'activity', 'evening-ride-to-the-reservoir-2026-10-15', 'index.html'), 'utf8');
-      assert.match(ride, /<meta property="og:image" content="https:\/\/[^"]*\/banner\.png"/, 'no card for this slug → the AI banner');
+      assert.match(ride, /<meta property="og:image" content="https:\/\/james\.ripixel\.co\.uk\/card_[a-z]+\.png"/, 'no card, no photo → the section card');
       assert.doesNotMatch(ride, /data-share/, 'no share entry → no button');
+      for (const slug of ['colwick-parkrun-2026-10-17', 'evening-ride-to-the-reservoir-2026-10-15', 'push-day-2026-10-13']) {
+        const page = await fs.readFile(path.join(tmp, 'life', 'activity', slug, 'index.html'), 'utf8');
+        assert.doesNotMatch(page, /DESTINATION|BOOSTER|booster sequence|AI banner/, slug + ': no showcase stats or banner');
+      }
       const strength = await fs.readFile(path.join(tmp, 'life', 'activity', 'push-day-2026-10-13', 'index.html'), 'utf8');
       assert.match(strength, /class="exercise-item exercise-strength"/, 'exercise-item needs the eq helper');
       assert.match(strength, /4×8 × 80kg/);

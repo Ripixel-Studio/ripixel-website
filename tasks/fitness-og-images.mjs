@@ -419,7 +419,7 @@ export function fitnessOgImagesTask(config = {}) {
         ctx.logger.info(`Share cards: ${r.images} images for ${r.total} pages (${r.full} in all three shapes) — ${r.rendered} rendered, ${r.cached} from cache, ${r.failed} failed, ${r.dropped} without their photo; ${(r.ms / 1000).toFixed(1)} s`);
         return { fitnessOgImages: r.urls, fitnessShareCards: r.cards };
       } catch (e) {
-        ctx.logger.warn(`Share cards unavailable, pages fall back to banner/photo/card_life.png: ${errMsg(e)}`);
+        ctx.logger.warn(`Share cards unavailable, pages fall back to photo/card_life.png: ${errMsg(e)}`);
         return empty;
       }
     },

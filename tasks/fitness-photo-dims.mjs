@@ -28,15 +28,13 @@ const DEFAULT_TIMEOUT_MS = 15_000;
 /** @typedef {{ w: number, h: number }} Dims */
 
 /**
- * The pictures a /life page leads with: each activity's AI banner and first photo.
+ * The pictures a /life page leads with: each activity's first photo.
  * @param {any[]} activities  fitnessActivities
  * @returns {string[]}
  */
 export function heroImageUrls(activities) {
   const urls = new Set();
   for (const file of Array.isArray(activities) ? activities : []) {
-    const banner = file?.activity?.enrichments?.aiBanner?.imageUrl;
-    if (typeof banner === 'string' && /^https:\/\//.test(banner)) urls.add(banner);
     const first = Array.isArray(file?.activity?.photoUrls) ? file.activity.photoUrls[0] : '';
     if (typeof first === 'string' && /^https:\/\//.test(first)) urls.add(first);
   }

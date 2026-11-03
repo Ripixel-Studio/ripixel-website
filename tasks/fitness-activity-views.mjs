@@ -308,88 +308,9 @@ export function routePath(points, opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// Enrichment registry (copied from fitglue-web BoosterTimeline.tsx + format.ts,
-// not imported — the contract says to carry the table).
+// Enricher names arrive as ENRICHER_PROVIDER_<NAME>.
 
 const P = 'ENRICHER_PROVIDER_';
-
-export const ENRICHER_ORDER = [
-  'AI_BANNER', 'AI_COMPANION', 'ROUTE_THUMBNAIL',
-  'CONDITION_MATCHER', 'ACTIVITY_FILTER', 'LOGIC_GATE', 'TYPE_MAPPER', 'AI_ACTIVITY_TYPE', 'AUTO_INCREMENT', 'SOURCE_LINK',
-  'PARKRUN', 'HYBRID_RACE_TAGGER', 'RUNNING_DYNAMICS',
-  'FITBIT_HEART_RATE', 'FIT_FILE_HEART_RATE', 'HEART_RATE_SUMMARY', 'HEART_RATE_ZONES', 'PACE_SUMMARY', 'SPEED_SUMMARY',
-  'CADENCE_SUMMARY', 'POWER_SUMMARY', 'ELEVATION_SUMMARY', 'EFFORT_SCORE', 'CALORIES_BURNED', 'TRAINING_LOAD', 'WORKOUT_SUMMARY',
-  'MUSCLE_HEATMAP', 'MUSCLE_HEATMAP_IMAGE',
-  'PERSONAL_RECORDS', 'DISTANCE_MILESTONES', 'GOAL_TRACKER',
-  'RECOVERY_ADVISOR', 'STREAK_TRACKER', 'INTERVALS', 'LOCATION_NAMING', 'WEATHER',
-  'SPOTIFY_TRACKS',
-  'USER_INPUT', 'MANUAL_WORKOUT_ENTRY', 'PHOTO_UPLOAD', 'VIRTUAL_GPS',
-].map((k) => P + k);
-
-const TYPED_OUTPUT = new Set([
-  'HEART_RATE_SUMMARY', 'HEART_RATE_ZONES', 'PACE_SUMMARY', 'SPEED_SUMMARY', 'CADENCE_SUMMARY', 'POWER_SUMMARY',
-  'ELEVATION_SUMMARY', 'EFFORT_SCORE', 'CALORIES_BURNED', 'TRAINING_LOAD', 'WORKOUT_SUMMARY', 'RECOVERY_ADVISOR',
-  'STREAK_TRACKER', 'WEATHER', 'INTERVALS', 'RUNNING_DYNAMICS', 'MUSCLE_HEATMAP', 'MUSCLE_HEATMAP_IMAGE', 'PARKRUN',
-  'HYBRID_RACE_TAGGER', 'PERSONAL_RECORDS', 'DISTANCE_MILESTONES', 'GOAL_TRACKER', 'SPOTIFY_TRACKS', 'AI_COMPANION',
-  'AI_BANNER', 'ROUTE_THUMBNAIL',
-].map((k) => P + k));
-
-const ENRICHER_INFO = /** @type {Record<string, { icon: string, name: string }>} */ ({
-  FITBIT_HEART_RATE: { icon: '❤️', name: 'Fitbit Heart Rate' },
-  WORKOUT_SUMMARY: { icon: '📋', name: 'Workout Summary' },
-  MUSCLE_HEATMAP: { icon: '🔥', name: 'Muscle Heatmap' },
-  AI_COMPANION: { icon: '🤖', name: 'AI Companion' },
-  HEART_RATE_SUMMARY: { icon: '💓', name: 'Heart Rate Summary' },
-  PACE_SUMMARY: { icon: '⚡', name: 'Pace Summary' },
-  CADENCE_SUMMARY: { icon: '🦶', name: 'Cadence Summary' },
-  POWER_SUMMARY: { icon: '💪', name: 'Power Summary' },
-  SPEED_SUMMARY: { icon: '🚀', name: 'Speed Summary' },
-  PERSONAL_RECORDS: { icon: '🏆', name: 'Personal Records' },
-  TRAINING_LOAD: { icon: '📊', name: 'Training Load' },
-  WEATHER: { icon: '🌤️', name: 'Weather' },
-  ELEVATION_SUMMARY: { icon: '⛰️', name: 'Elevation Summary' },
-  LOCATION_NAMING: { icon: '📍', name: 'Location Naming' },
-  MUSCLE_HEATMAP_IMAGE: { icon: '🔥', name: 'Muscle Heatmap Image' },
-  ROUTE_THUMBNAIL: { icon: '🗺️', name: 'Route Thumbnail' },
-  AI_BANNER: { icon: '🎨', name: 'AI Banner' },
-  HEART_RATE_ZONES: { icon: '❤️‍🔥', name: 'Heart Rate Zones' },
-  CALORIES_BURNED: { icon: '🔥', name: 'Calories Burned' },
-  GOAL_TRACKER: { icon: '🎯', name: 'Goal Tracker' },
-  STREAK_TRACKER: { icon: '🔥', name: 'Streak Tracker' },
-  DISTANCE_MILESTONES: { icon: '🏅', name: 'Distance Milestones' },
-  RECOVERY_ADVISOR: { icon: '🛌', name: 'Recovery Advisor' },
-  EFFORT_SCORE: { icon: '💯', name: 'Effort Score' },
-  INTERVALS: { icon: '⏱️', name: 'Intervals' },
-  RUNNING_DYNAMICS: { icon: '🏃', name: 'Running Dynamics' },
-  HYBRID_RACE_TAGGER: { icon: '🏁', name: 'Hybrid Race Tagger' },
-  PARKRUN: { icon: '🏃', name: 'Parkrun Results' },
-  SOURCE_LINK: { icon: '🔗', name: 'Source Link' },
-});
-
-/** @param {string} key */
-export function enricherInfo(key) {
-  const short = String(key ?? '').replace(P, '');
-  return ENRICHER_INFO[short] ?? { icon: '✨', name: titleCase(short) || 'Booster' };
-}
-
-/**
- * "⚡ Booster Sequence · N ran": applied enrichers in canonical order,
- * unknown names last as-is.
- * @param {string[]|undefined} applied
- */
-export function boosterTimeline(applied) {
-  const list = Array.isArray(applied) ? applied.filter((k) => typeof k === 'string') : [];
-  if (!list.length) return null;
-  const set = new Set(list);
-  const known = ENRICHER_ORDER.filter((k) => set.has(k));
-  const unknown = list.filter((k) => !ENRICHER_ORDER.includes(k));
-  const items = [...known, ...unknown].map((k) => {
-    const info = enricherInfo(k);
-    const typed = TYPED_OUTPUT.has(k);
-    return { key: k, icon: info.icon, name: info.name, typed, sub: typed ? '✓ ran' : '✓ ran · no visual output' };
-  });
-  return { count: list.length, items };
-}
 
 // ---------------------------------------------------------------------------
 // Personal records (prFormat.ts, copied)
@@ -995,7 +916,7 @@ export function heroLayout(dims) {
  * @param {any} index    `fitnessIndex`
  * @param {{ siteUrl?: string, ogCard?: string, share?: any, hyrox?: import('./fitness-hyrox.mjs').HyroxHistory|null, photoDims?: Record<string, { w: number, h: number }> }} [opts]
  *   `ogCard` is the rendered OG card URL from tasks/fitness-og-images.mjs; when set it is the og:image,
- *   else banner → first photo → section card. `hyrox` is buildHyroxHistory(fitnessActivities), for PBs
+ *   else first photo → section card. `hyrox` is buildHyroxHistory(fitnessActivities), for PBs
  *   per division, race weekends and the PB chase. `photoDims` (fitnessPhotoDims) lays the hero out by the
  *   picture's shape. `share` is the page's Share-button entry (fitnessShareCards.activity[slug], F5.4).
  */
@@ -1041,10 +962,7 @@ export function buildActivityView(file, index, opts = {}) {
   const prCount = records.length + (race ? race.prCount : 0);
   const icon = typeIcon(activityType);
   const title = String(activity.title ?? entry.title ?? 'Activity');
-  const bannerUrl = en.aiBanner?.imageUrl && /^https:\/\//.test(en.aiBanner.imageUrl) ? en.aiBanner.imageUrl : '';
   const locationName = String(en.location?.locationName ?? entry.locationName ?? '');
-  const boosterCount = applied.length;
-  const destinationCount = num(entry.destinationCount);
 
   // Pre-grid pieces
   const aiSummaryHtml = has('AI_COMPANION') ? sanitizeAiHtml(en.aiSummary?.html) : '';
@@ -1150,7 +1068,6 @@ export function buildActivityView(file, index, opts = {}) {
   if (category === 'strength' && reps > 0 && !race) extraStats.push({ value: fmtNumber(reps), unit: '', label: 'reps' });
   if (category === 'strength' && avgBpm > 0 && !race) extraStats.push({ value: avgBpm, unit: 'bpm', label: 'avg hr' });
   if (typeof entry.tempC === 'number') extraStats.push({ value: `${Math.round(entry.tempC)}°`, unit: 'C', label: entry.weatherDescription ? String(entry.weatherDescription).toLowerCase() : 'temperature' });
-  if (destinationCount > 0) extraStats.push({ value: destinationCount, unit: '', label: `destination${destinationCount === 1 ? '' : 's'}`, subtext: 'pushed to' });
 
   // Race-day context, the event weekend it belongs to, and the PB progression.
   const eventGroup = race ? history?.eventBySlug.get(slug) : undefined;
@@ -1180,7 +1097,7 @@ export function buildActivityView(file, index, opts = {}) {
   const gallery = photos.map((src, i) => ({ src, id: `photo-${i + 1}`, n: i + 1, prev: `#photo-${i === 0 ? photos.length : i}`, next: `#photo-${i + 2 > photos.length ? 1 : i + 2}`, total: photos.length }));
 
   const ogDescription = truncate(description || stripTags(aiSummaryHtml) || `${typeLabel(activityType).toLowerCase()} · ${fmtDateShort(activity.startTime ?? entry.startTime)}`, 200);
-  const ogImage = (opts.ogCard && /^https?:\/\//.test(opts.ogCard) ? opts.ogCard : '') || bannerUrl || photos[0] || '';
+  const ogImage = (opts.ogCard && /^https?:\/\//.test(opts.ogCard) ? opts.ogCard : '') || photos[0] || '';
   const canonical = siteUrl ? `${siteUrl}${activityUrl(slug)}` : '';
 
   return {
@@ -1208,14 +1125,9 @@ export function buildActivityView(file, index, opts = {}) {
       dateStamp: fmtDateStamp(activity.startTime ?? entry.startTime),
       dateIso: activity.startTime ?? entry.startTime ?? '',
       prCount,
-      bannerUrl,
-      bgPhotoUrl: !bannerUrl && photos[0] ? photos[0] : '',
-      ...heroLayout(opts.photoDims?.[bannerUrl || photos[0] || '']),
+      bgPhotoUrl: photos[0] || '',
+      ...heroLayout(opts.photoDims?.[photos[0] || '']),
       owner: String(activity.ownerDisplayName ?? index?.profile?.displayName ?? 'James').toUpperCase(),
-      boosterCount,
-      boosterWord: boosterCount === 1 ? 'BOOSTER' : 'BOOSTERS',
-      destinationCount,
-      destinationWord: destinationCount === 1 ? 'DESTINATION' : 'DESTINATIONS',
       locationName: locationName.toUpperCase(),
       anchors: race ? raceAnchors(race, avgBpm) : anchorStats({ category, distanceM, durationS, avgBpm, maxBpm, calories, pace: num(en.pace?.avgPaceSecondsPerKm), speedKmh: num(en.speed?.avgSpeedKmh), sets, volumeKg, prCount, icon }),
       extraStats,
@@ -1238,8 +1150,6 @@ export function buildActivityView(file, index, opts = {}) {
       hrZones,
       modules,
       footerChips,
-      boosters: boosterTimeline(applied),
-      boostersDidNotRun: enrichmentsMissing,
       ogImage,
       ogDescription,
       share: opts.share || null,
