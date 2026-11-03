@@ -219,13 +219,12 @@
           "current": false
         }
       ],
-      "education": {
-        "institution": "University of Sheffield",
-        "subject": "Computer Science",
-        "completed": false,
-        "from": null,
-        "to": null
-      }
+      "highlights": [
+        {"label": "Placeholder keynote", "detail": "Invented talk about sample widgets", "year": "2018", "url": "https://example.com/keynote"},
+        {"label": "Fixture certificate", "detail": null, "year": "2021", "url": null},
+        {"label": "Made-up library", "detail": "A toy package nobody needs", "year": null, "url": "https://example.com/lib"},
+        {"label": "Bare highlight", "detail": null, "year": null, "url": null}
+      ]
     }
   }
 }

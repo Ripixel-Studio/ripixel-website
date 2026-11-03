@@ -101,6 +101,12 @@ describe('corrections', () => {
     assert.match(/** @type {string} */ (pages.get('index.html')), /site est\. 2019/);
   });
 
+  test('the corporate bridge says established 2026', () => {
+    const html = /** @type {string} */ (pages.get('index.html'));
+    assert.match(html, /ESTABLISHED 2026 · NOTTINGHAM, UK/);
+    assert.ok(!/NOTTINGHAM, UK/.test(html.replace(/ESTABLISHED 2026 · NOTTINGHAM, UK/g, '')));
+  });
+
   test('no minimalist', () => {
     assert.deepEqual(hits(/minimalis/i), []);
   });

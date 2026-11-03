@@ -1,13 +1,13 @@
 // @ts-check
 /**
  * The /work page (LH3.7): data only. `buildWorkView` shapes the export's `work`
- * section (stats, roles newest first, the tech roster, education, and an optional
+ * section (stats, roles newest first, the tech roster, career highlights, and an optional
  * salary table) into what the template loops over. No HTML strings here.
  *
  * Global set by `workViewTask()`: `workView`, or `null` without a work section.
  */
 
-const INKS = ['blue', 'green', 'magenta', 'orange', 'yellow'];
+const INKS = ['blue', 'green', 'magenta', 'orange', 'yellow', 'purple', 'red'];
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const int = (/** @type {unknown} */ n) => (typeof n === 'number' && Number.isFinite(n) ? n : null);
@@ -41,28 +41,36 @@ function buildStats(stats) {
 }
 
 /**
- * Salary rows ({id, gbp, delta, deltaPct}, newest first), matched to roles by id.
- * Null when there are none: the table is not drawn.
+ * Salary rows ({id, startGbp, endGbp|null, delta, deltaPct}, newest first), matched to
+ * roles by id. `delta` is this role's start minus the previous role's end: the move into
+ * the job. Null when there are none: the table is not drawn.
  * @param {any} salary @param {any[]} roles
  */
 function buildSalary(salary, roles) {
   if (!Array.isArray(salary) || !salary.length) return null;
   const byId = new Map(roles.map((r) => [r.id, r]));
+  const sign = (/** @type {number} */ n) => (n > 0 ? '+' : n < 0 ? '−' : '');
   const rows = salary
-    .filter((s) => s && typeof s === 'object' && int(s.gbp) != null)
+    .filter((s) => s && typeof s === 'object' && int(s.startGbp) != null)
     .map((s) => {
       const r = byId.get(s.id);
+      const start = /** @type {number} */ (int(s.startGbp));
+      const end = int(s.endGbp);
       const d = int(s.delta);
       const p = int(s.deltaPct);
       const dir = d == null || d === 0 ? 'flat' : d > 0 ? 'up' : 'down';
+      const pct = p == null ? '' : ` (${sign(p)}${Math.abs(Math.round(p * 10) / 10)}%)`;
       return {
         id: String(s.id || ''),
         role: r ? `${r.company}, ${r.title}` : '',
         company: r ? r.company : '',
         title: r ? r.title : '',
-        salary: gbp(s.gbp),
-        delta: d == null ? '' : (d > 0 ? '+' : d < 0 ? '−' : '') + gbp(d),
-        deltaPct: p == null ? '' : (p > 0 ? '+' : p < 0 ? '−' : '') + Math.abs(Math.round(p * 10) / 10) + '%',
+        start: gbp(start),
+        end: end == null ? '' : gbp(end),
+        salary: end == null || end === start ? gbp(start) : `${gbp(start)} → ${gbp(end)}`,
+        move: d == null ? '' : `${sign(d)}${gbp(d)}${pct}`,
+        delta: d == null ? '' : sign(d) + gbp(d),
+        deltaPct: p == null ? '' : sign(p) + Math.abs(Math.round(p * 10) / 10) + '%',
         dir,
       };
     })
@@ -71,8 +79,31 @@ function buildSalary(salary, roles) {
 }
 
 /**
+ * Career highlights ({label, detail|null, year|null, url|null}). Null when missing or
+ * empty: the callout is not drawn. Only a label is required; a link must be https.
+ * @param {any} highlights
+ */
+function buildHighlights(highlights) {
+  if (!Array.isArray(highlights)) return null;
+  const rows = highlights
+    .filter((h) => h && typeof h === 'object' && str(h.label))
+    .map((h, i) => {
+      const url = str(h.url);
+      const year = str(h.year);
+      return {
+        n: pad3(i + 1),
+        label: str(h.label),
+        detail: str(h.detail),
+        year: /^\d{4}$/.test(year) ? year : '',
+        url: /^https:\/\//.test(url) ? url : '',
+      };
+    });
+  return rows.length ? rows : null;
+}
+
+/**
  * @param {any} work the export's `sections.work`
- * @returns {{stats: {num:string,label:string}[], roles: any[], roster: any[], education: any, salary: any[]|null, updated: string, staleLabel: string} | null}
+ * @returns {{stats: {num:string,label:string}[], roles: any[], roster: any[], highlights: any[]|null, salary: any[]|null, updated: string, staleLabel: string} | null}
  */
 export function buildWorkView(work) {
   if (!work || typeof work !== 'object' || !Array.isArray(work.roles)) return null;
@@ -107,22 +138,13 @@ export function buildWorkView(work) {
   const roster = (Array.isArray(work.roster) ? work.roster : [])
     .filter((t) => t && str(t.name))
     .map((t) => ({ name: str(t.name), current: !!t.current, mark: t.current ? '★' : '☆' }));
-  const e = work.education && typeof work.education === 'object' ? work.education : null;
-  const education = e && str(e.institution)
-    ? {
-        institution: str(e.institution),
-        subject: str(e.subject),
-        completed: e.completed === true,
-        status: e.completed === true ? 'completed' : 'studied, not completed',
-        years: [e.from ?? e.start, e.to ?? e.end].filter((y) => y != null && y !== '').join(' — '),
-      }
-    : null;
+  const highlights = buildHighlights(work.highlights);
   const stale = int(work.staleDays);
   return {
     stats: buildStats(work.stats),
     roles,
     roster,
-    education,
+    highlights,
     salary: buildSalary(work.salary, rows),
     updated: str(work.updated),
     staleLabel: stale != null && stale >= 2 ? `last updated ${Math.floor(stale)} days ago` : '',

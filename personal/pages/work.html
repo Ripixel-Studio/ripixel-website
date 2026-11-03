@@ -38,6 +38,25 @@
       {{/each}}
     </div>
 
+    {{#if workView.highlights}}
+    <!-- Career highlights: the standout sheet -->
+    <section class="work-highlights" aria-labelledby="work-highlights-h">
+      <h2 class="work-highlights__title" id="work-highlights-h"><span>career highlights</span></h2>
+      <ol class="work-highlights__list">
+        {{#each workView.highlights}}
+        <li class="work-highlights__item">
+          <span class="work-highlights__n" aria-hidden="true">{{n}}</span>
+          <div class="work-highlights__text">
+            <strong class="work-highlights__label">{{#if url}}<a href="{{url}}" rel="noopener">{{label}} ↗</a>{{else}}{{label}}{{/if}}</strong>
+            {{#if year}}<span class="work-highlights__year">{{year}}</span>{{/if}}
+            {{#if detail}}<span class="work-highlights__detail">{{detail}}</span>{{/if}}
+          </div>
+        </li>
+        {{/each}}
+      </ol>
+    </section>
+    {{/if}}
+
     <!-- Roles, newest first -->
     <ol class="work-roles">
       {{#each workView.roles}}
@@ -75,15 +94,14 @@
       <div class="work-salary__scroll">
         <table class="work-salary__table">
           <thead>
-            <tr><th scope="col">role</th><th scope="col">salary</th><th scope="col">change</th><th scope="col">%</th></tr>
+            <tr><th scope="col">role</th><th scope="col">pay, start → end</th><th scope="col">the move into this job</th></tr>
           </thead>
           <tbody>
             {{#each workView.salary}}
             <tr class="work-salary__row work-salary__row--{{dir}}">
               <th scope="row">{{company}}<small>{{title}}</small></th>
               <td>{{salary}}</td>
-              <td>{{delta}}</td>
-              <td>{{deltaPct}}</td>
+              <td>{{#if move}}{{move}}{{else}}—{{/if}}</td>
             </tr>
             {{/each}}
           </tbody>
@@ -92,7 +110,7 @@
     </section>
     {{/if}}
 
-    <!-- Tech roster + education -->
+    <!-- Tech roster -->
     <div class="work-lower">
       {{#if workView.roster.length}}
       <div>
@@ -102,20 +120,6 @@
           {{#each workView.roster}}
           <div class="tech-item"><span>{{name}}</span><span class="tech-item__status" title="{{#if current}}using now{{else}}not lately{{/if}}">{{mark}}</span></div>
           {{/each}}
-        </div>
-      </div>
-      {{/if}}
-
-      {{#if workView.education}}
-      <div class="work-extras">
-        <div class="extras-card">
-          <div class="extras-card__inner">
-            <div class="extras-card__title">+ SCHOOLING</div>
-            <div class="extras-card__body">
-              I studied {{workView.education.subject}} at the {{workView.education.institution}}, {{#if workView.education.completed}}and finished it{{else}}and didn't finish it{{/if}}.<br>
-              <span class="work-edu__status">{{workView.education.status}}{{#if workView.education.years}} · {{workView.education.years}}{{/if}}</span>
-            </div>
-          </div>
         </div>
       </div>
       {{/if}}

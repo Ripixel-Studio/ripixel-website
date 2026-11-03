@@ -219,7 +219,7 @@ export const tasks = [
     lifeHeatmapTask(), // LH3.5 `lifeHeatmapView`: {viewBox, paths, count} or null; drawn on /life/fitness
     fitnessPhotoDimsTask(), // F5.5 `fitnessPhotoDims`: hero photo sizes (portrait beside the title, else full width); before the view tasks
     fitnessLifeTask(), // S2.2 `fitnessLife` for /life (rendered by generate-pages below)
-    workViewTask(), // LH3.7 `workView`: stats, roles, roster, education, optional salary (rendered by work.html)
+    workViewTask(), // LH3.7 `workView`: stats, roles, roster, highlights, optional salary (rendered by work.html)
     lifeHubTask(), // LH3.4 `lifeHub`, `lifeSections`, `lifePersonal`, `lifeFacts` (data only)
     // F5.4 share cards — /life/share/<kind>/<id>/<shape>-<background>.(jpg|png) via sharp, cached in .cache/og;
     // the Landscape card is the OG image. Runs BEFORE the view tasks: they read `fitnessOgImages` (og:image)
