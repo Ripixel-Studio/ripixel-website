@@ -74,7 +74,7 @@ export function buildEventView(event, history, index, opts = {}) {
       partner: race?.partner || '',
       words: view.act.description,
       avgHr: view.act.anchors.find((a) => a.label === 'avg hr')?.value || '',
-      photo: view.act.bgPhotoUrl || view.act.bannerUrl || '',
+      photo: view.act.bgPhotoUrl || '',
       race,
       photos: view.act.photos,
       location: view.act.locationName,

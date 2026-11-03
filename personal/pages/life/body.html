@@ -16,21 +16,78 @@
       <line x1="9" y1="0" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/>
     </svg>
 
-    {{!-- Body: weight, body fat, resting heart rate and HRV (lifeSections.body). --}}
+    {{!-- Body (R2c.2): one page for measures, sleep, food and movement (lifeSections.body).
+          A block the export does not have is null and leaves no heading behind. Averages and
+          splits only: no bedtimes, no wake times, no single day's food. --}}
     {{#with section}}
-    {{> life-section-head}}
+    {{> life-section-head snapTop="MEASURED" snapAccent="AND WEIGHED"}}
     {{#if empty}}
     {{> life-empty}}
     {{else}}
-    {{#if stats.length}}
-    {{> life-stats stats}}
+
+    {{#if measures.stats.length}}
+    <section class="life-block life-block--measures" aria-labelledby="body-measures">
+      <h2 class="fit-header" id="body-measures">what I <span>measure</span>.</h2>
+      {{> life-stats measures.stats}}
+      {{#if measures.charts.length}}
+      <div class="life-charts">{{#each measures.charts}}{{> chart-line}}{{/each}}</div>
+      {{/if}}
+      {{#if measurements}}
+      <div class="life-measurements">
+        <h3 class="life-period__label">Tape and scale, since the first reading</h3>
+        <ul class="life-measurements__list">
+          {{#each measurements.rows}}
+          <li class="life-measurements__row">
+            <span class="life-measurements__name">{{label}}</span>
+            <span class="life-measurements__now">{{value}}{{#if unit}}<small>{{unit}}</small>{{/if}}</span>
+            {{#if change}}<span class="life-measurements__change">{{change}}{{#if unit}} {{unit}}{{/if}}</span>{{/if}}
+            {{#if since}}<span class="life-measurements__since">since {{since}}</span>{{/if}}
+          </li>
+          {{/each}}
+        </ul>
+        {{#if measurements.charts.length}}
+        <div class="life-charts">{{#each measurements.charts}}{{> chart-line}}{{/each}}</div>
+        {{/if}}
+      </div>
+      {{/if}}
+    </section>
     {{/if}}
-    {{#if charts.length}}
-    <h2 class="fit-header">the <span>trend</span>.</h2>
-    <div class="life-charts">
-      {{#each charts}}{{> life-chart}}{{/each}}
-    </div>
+
+    {{#if sleep}}
+    <section class="life-block life-block--sleep" aria-labelledby="body-sleep">
+      <h2 class="fit-header" id="body-sleep">how I <span>sleep</span>.</h2>
+      {{#if sleep.stats.length}}{{> life-stats sleep.stats}}{{/if}}
+      {{#if sleep.stages}}{{> life-split items=sleep.stages label="An average night, last 30 nights" kind="sleep"}}{{/if}}
+      {{#if sleep.charts.length}}
+      <div class="life-charts life-charts--wide">{{#each sleep.charts}}{{> chart-line}}{{/each}}</div>
+      {{/if}}
+    </section>
     {{/if}}
+
+    {{#if food}}
+    <section class="life-block life-block--food" aria-labelledby="body-food">
+      <h2 class="fit-header" id="body-food">the <span>food</span>, averaged.</h2>
+      {{#if food.split}}{{> life-split items=food.split label="Where the calories come from, last 30 days" kind="food"}}{{/if}}
+      {{#if food.stats.length}}
+      <p class="life-block__note">A day, averaged over the last 30 days.</p>
+      {{> life-stats food.stats}}
+      {{/if}}
+      {{#if food.charts.length}}
+      <div class="life-charts">{{#each food.charts}}{{> chart-line}}{{/each}}</div>
+      {{/if}}
+    </section>
+    {{/if}}
+
+    {{#if movement}}
+    <section class="life-block life-block--movement" aria-labelledby="body-movement">
+      <h2 class="fit-header" id="body-movement">keep <span>moving</span>.</h2>
+      {{#if movement.stats.length}}{{> life-stats movement.stats}}{{/if}}
+      {{#if movement.charts.length}}
+      <div class="life-charts">{{#each movement.charts}}{{> chart-line}}{{/each}}</div>
+      {{/if}}
+    </section>
+    {{/if}}
+
     {{/if}}
     {{/with}}
 

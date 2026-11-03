@@ -19,9 +19,12 @@
     <!-- The hub (LH3.6): lifeHub.cards, one entry per section, in SECTION_ORDER. Every number
          and title is from the life export or the fitness export; this page only loops. -->
     <header class="life-hub__hero">
+      <div class="page-hero__section-label">· LIFE · THE HUB ·</div>
       <h1 class="page-hero__h1 life-hub__h1">James, by the <span>numbers</span>.</h1>
       <p class="fit-hero__strap life-hub__strap">{{lifeHub.cards.length}} bits of my life, counted by a computer so I don't have to.</p>
     </header>
+
+    {{> did-you-know items=(first lifeInsights) rotate=false}}
 
     <ol class="life-index">
       {{#each lifeHub.cards}}

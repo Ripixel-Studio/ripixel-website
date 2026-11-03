@@ -173,7 +173,7 @@ under its published path, keyed by a hash of its SVG, its background URLs and
 changed; photos are fetched once into `.cache/og/photos/`. A cold build renders ~2,100 cards
 in about two minutes; a warm one copies them in under a second. A photo that cannot be
 fetched drops that background (`FITNESS_SHARE_PHOTOS=off`, or the fixtures source, skips the
-network), a page with no card falls back to its AI banner → first photo → `card_life.png`,
+network), a page with no card falls back to first photo → `card_life.png`,
 and the build carries on.
 
 The **Share** button (`personal/partials/share-button.html`, `fitness-share.css`) is on

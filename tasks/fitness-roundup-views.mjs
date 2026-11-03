@@ -327,7 +327,11 @@ export function buildEffortStrip(type, days) {
       };
     });
     const width = days.length * (cw + gap) - gap;
-    return { kind: 'bars', width, height: maxH + labelH, vx: 0, vw: width, cells, labels: [] };
+    const height = maxH + labelH;
+    // Bars sit on y = maxH; a level-L bar reaches the tick at the same height.
+    const tickPct = (level) => Math.round(((level === 0 ? maxH - base : maxH - (base + (maxH - base) * (level / 4))) / height) * 10000) / 100;
+    const yAxis = { caption: 'effort, 0–4', ticks: [4, 2, 0].map((l) => ({ label: String(l), pct: tickPct(l) })) };
+    return { kind: 'bars', width, height, vx: 0, vw: width, cells, labels: [], yAxis };
   }
 
   const cell = type === 'year' ? 11 : 18;
@@ -349,12 +353,14 @@ export function buildEffortStrip(type, days) {
       level: d.level, title: cellTitle(d),
     });
   });
-  if (type === 'month') {
-    DOW_SHORT.forEach((t, r) => labels.push({ x: -8, y: top + r * (cell + gap) + cell - 4, text: t.slice(0, 1), anchor: 'end' }));
-  }
   const width = (col + 1) * (cell + gap) - gap;
-  const pad = type === 'month' ? 14 : 0;
-  return { kind: 'grid', width, height: top + 7 * (cell + gap) - gap, vx: -pad, vw: width + pad, cells, labels };
+  const height = top + 7 * (cell + gap) - gap;
+  // The grid's rows are weekdays (its shade is the effort, keyed by the legend below it).
+  const yAxis = {
+    caption: 'day',
+    ticks: [0, 2, 4, 6].map((r) => ({ label: DOW_SHORT[r].slice(0, 1) + DOW_SHORT[r].slice(1).toLowerCase(), pct: Math.round(((top + r * (cell + gap) + cell / 2) / height) * 10000) / 100 })),
+  };
+  return { kind: 'grid', width, height, vx: 0, vw: width, cells, labels, yAxis };
 }
 
 // ---------------------------------------------------------------------------

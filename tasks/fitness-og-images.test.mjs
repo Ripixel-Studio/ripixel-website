@@ -279,8 +279,8 @@ describe('rendering', () => {
       const host = await photoHost();
       const opts = { ...data, now: NOW, outDir: path.join(tmp, 'out'), cacheDir: path.join(tmp, 'cache'), siteUrl: 'https://james.ripixel.co.uk/', fetchImpl: host.fetchImpl };
       const first = await renderFitnessCards(opts);
-      // parkrun, roundup: its photo + colour; ride: its AI banner + colour; push day: colour only — × 3 shapes
-      assert.deepEqual({ rendered: first.rendered, cached: first.cached, failed: first.failed, images: first.images }, { rendered: 27, cached: 0, failed: 0, images: 27 });
+      // parkrun, roundup: its photo + colour; ride: colour only; push day: colour only — × 3 shapes
+      assert.deepEqual({ rendered: first.rendered, cached: first.cached, failed: first.failed, images: first.images }, { rendered: 24, cached: 0, failed: 0, images: 24 });
       assert.equal(first.urls.activity['colwick-parkrun-2026-10-17'], 'https://james.ripixel.co.uk/life/share/activity/colwick-parkrun-2026-10-17/landscape-photo-1.jpg');
       assert.equal(first.urls.roundup['week-42-2026'], 'https://james.ripixel.co.uk/life/share/roundup/week-42-2026/landscape-photo-1.jpg');
       assert.equal(first.urls.activity['push-day-2026-10-13'], 'https://james.ripixel.co.uk/life/share/activity/push-day-2026-10-13/landscape-ink.png');
@@ -288,7 +288,7 @@ describe('rendering', () => {
       assert.deepEqual(entry.shapes.map((s) => `${s.shape}:${s.variants.map((v) => v.id).join('/')}`), ['story:photo-1/ink', 'square:photo-1/ink', 'landscape:photo-1/ink']);
       assert.equal(entry.shapes[0].variants[0].file, 'colwick-parkrun-2026-10-17-story.jpg');
       assert.equal(entry.shapes[0].variants[1].file, 'colwick-parkrun-2026-10-17-story-ink.png');
-      assert.equal(host.hits.length, 2, 'two distinct pictures (the parkrun photo, also the roundup\'s; the ride banner), each fetched once');
+      assert.equal(host.hits.length, 1, 'two distinct pictures (the parkrun photo, also the roundup\'s), each fetched once');
 
       const sharp = await getSharp();
       const story = await sharp(path.join(tmp, 'out', 'activity', 'colwick-parkrun-2026-10-17', 'story-photo-1.jpg')).metadata();
@@ -315,8 +315,8 @@ describe('rendering', () => {
 
       await fs.rm(path.join(tmp, 'out'), { recursive: true, force: true });
       const second = await renderFitnessCards(opts);
-      assert.deepEqual({ rendered: second.rendered, cached: second.cached }, { rendered: 0, cached: 27 });
-      assert.equal(host.hits.length, 2, 'a cached card needs no photo');
+      assert.deepEqual({ rendered: second.rendered, cached: second.cached }, { rendered: 0, cached: 24 });
+      assert.equal(host.hits.length, 1, 'a cached card needs no photo');
       assert.equal(second.manifest.find((c) => c.slug === 'colwick-parkrun-2026-10-17')?.hash, pk.hash, 'stable hash');
     } finally {
       await fs.rm(tmp, { recursive: true, force: true });

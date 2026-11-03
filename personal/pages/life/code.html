@@ -18,7 +18,7 @@
 
     {{!-- Code: GitHub activity, languages over time, projects by first commit (lifeSections.code). --}}
     {{#with section}}
-    {{> life-section-head}}
+    {{> life-section-head snapTop="PUSHED" snapAccent="TO MAIN"}}
     {{#if empty}}
     {{> life-empty}}
     {{else}}
@@ -27,9 +27,9 @@
       {{#each languagesNow}}<span class="life-chip">{{this}}</span>{{/each}}
     </p>
     {{/if}}
-    {{#if commits.path}}
+    {{#if commits}}
     <div class="life-charts life-charts--wide">
-      {{> life-chart label="Commits" path=commits.path per="month by month"}}
+      {{> chart-line commits}}
     </div>
     {{/if}}
     {{#if languagesByYear.length}}

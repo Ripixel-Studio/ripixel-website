@@ -9,8 +9,6 @@
 /* ─── Section inks: one per section, from the zine's own palette ─ */
 .life-ink--fitness   { --life-ink: var(--ink-purple); }
 .life-ink--body      { --life-ink: var(--ink-red); }
-.life-ink--sleep     { --life-ink: var(--ink-blue); }
-.life-ink--food      { --life-ink: var(--ink-orange); }
 .life-ink--games     { --life-ink: var(--ink-magenta); }
 .life-ink--code      { --life-ink: var(--ink-green); }
 .life-ink--watching  { --life-ink: var(--ink-red); }
@@ -247,8 +245,10 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
   margin-bottom: 22px;
 }
 
+.life-head .page-hero__section-label { text-transform: uppercase; }
+.life-head__main { flex: 1 1 auto; }
 .life-head__h1 {
-  font-size: clamp(72px, 13vw, 170px);
+  font-size: clamp(56px, 9vw, 120px);
   text-transform: uppercase;
   flex: 1 1 auto;
 }
@@ -297,6 +297,7 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
 /* ─── Section pages: numbers by period ───── */
 .stat-strip.life-stats { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); row-gap: 10px; }
 .stat-strip.life-stats .stat-strip__num { font-size: 48px; overflow-wrap: anywhere; }
+.stat-strip.life-stats .stat-strip__num small { overflow-wrap: normal; white-space: nowrap; }
 
 .life-period { margin-top: 18px; }
 
@@ -316,37 +317,233 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
   margin-bottom: 26px;
 }
 
-.life-chart {
+/* ─── Line charts with axes (partials/chart-line.html, tasks/chart-axes.mjs) ── */
+.chart {
+  --ink-muted: color-mix(in srgb, var(--ink) 72%, #fff);
+  --chart-grid: var(--paper-2);
+  --chart-h: 140px;
   background: #fff;
   border: 2px solid var(--ink);
-  box-shadow: 5px 5px 0 var(--life-ink);
-  padding: 12px 14px 14px;
+  box-shadow: 5px 5px 0 var(--life-ink, var(--ink-section));
+  padding: 12px 14px 10px;
+  margin: 0;
+  min-width: 0;
 }
 
-.life-chart__label {
+.chart__label {
+  font-family: var(--f-mono);
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.chart__label span { font-weight: 400; color: var(--ink-muted); }
+
+.chart__plot {
+  display: grid;
+  grid-template-columns: 3.5ch minmax(0, 1fr);
+  grid-template-rows: var(--chart-h) auto;
+  column-gap: 8px;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  line-height: 1;
+  color: var(--ink-muted);
+}
+
+.chart__y,
+.chart__x {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chart__y { grid-area: 1 / 1; }
+.chart__y li {
+  position: absolute;
+  right: 0;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+.chart__x { grid-area: 2 / 2; height: 1.6em; margin-top: 6px; }
+.chart__x li {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.chart__x li:first-child { transform: none; }
+.chart__x li:last-child:not(:first-child) { transform: translateX(-100%); }
+
+.chart__svg {
+  grid-area: 1 / 2;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.chart__grid {
+  stroke: var(--chart-grid);
+  stroke-width: 1;
+}
+
+.chart__area {
+  fill: var(--life-ink, var(--ink-section));
+  opacity: 0.12;
+}
+
+.chart__line {
+  fill: none;
+  stroke: var(--life-ink, var(--ink-section));
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.chart__mark { grid-area: 1 / 2; position: relative; pointer-events: none; }
+.chart__end {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: var(--life-ink, var(--ink-section));
+  box-shadow: 0 0 0 2px #fff;
+}
+.chart__end b {
+  position: absolute;
+  right: 6px;
+  bottom: 8px;
+  font-weight: 700;
+  color: var(--ink);
+  background: #fff;
+  padding: 1px 3px;
+  white-space: nowrap;
+}
+
+/* ─── /life/body: four blocks, one ink each (R2c.2) ─ */
+.life-block { --ink-section: var(--life-ink); margin-bottom: 8px; }
+.life-block--measures { --life-ink: var(--ink-red); }
+.life-block--sleep    { --life-ink: var(--ink-blue); }
+.life-block--food     { --life-ink: var(--ink-orange); }
+.life-block--movement { --life-ink: var(--ink-green); }
+
+.life-block .life-stats { margin-bottom: 22px; }
+.life-block .stat-strip.life-stats { grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); }
+.life-block .stat-strip.life-stats .stat-strip__num { overflow-wrap: normal; }
+
+.life-block__note {
+  margin: 0 0 8px;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: color-mix(in srgb, var(--ink) 72%, #fff);
+}
+
+/* The split: a share of a whole as one fat bar, the page's loud bit. Segments step the
+   block's ink from full to pale (direct labels carry identity, not colour); 2px paper
+   gaps between them; parts under 12% hang their label below the bar. */
+.life-split { margin: 0 0 30px; }
+
+.life-split__label {
   font-family: var(--f-mono);
   font-size: 13px;
   font-weight: 700;
   margin-bottom: 8px;
 }
 
-.life-chart__label span { font-weight: 400; opacity: 0.7; }
-
-.life-chart__svg {
-  display: block;
-  width: 100%;
-  height: 96px;
-  overflow: visible;
+.life-split__bar {
+  display: flex;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-height: 92px;
+  background: #fff;
+  border: 2px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+  transform: rotate(-0.6deg);
 }
 
-.life-chart__svg path {
-  fill: none;
-  stroke: var(--life-ink);
-  stroke-width: 3;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-  vector-effect: non-scaling-stroke;
+.life-split__part {
+  position: relative;
+  flex: 0 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 8px 10px;
+  background: var(--life-ink);
+  color: #fff;
 }
+.life-split__part:nth-child(2) { background: color-mix(in srgb, var(--life-ink) 62%, #fff); color: var(--ink); }
+.life-split__part:nth-child(3) { background: color-mix(in srgb, var(--life-ink) 34%, #fff); color: var(--ink); }
+.life-split__part:nth-child(4) { background: color-mix(in srgb, var(--life-ink) 14%, #fff); color: var(--ink); }
+
+.life-split__pct {
+  font-family: var(--f-disp);
+  font-weight: 400;
+  font-size: clamp(34px, 6vw, 60px);
+  line-height: 0.9;
+}
+.life-split__pct small { font-size: 0.45em; margin-left: 2px; }
+
+.life-split__name {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.life-split__part--narrow { padding: 0; }
+.life-split__part--narrow .life-split__pct,
+.life-split__part--narrow .life-split__name {
+  position: absolute;
+  right: 0;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.life-split__part--narrow .life-split__pct { top: calc(100% + 12px); font-size: 28px; }
+.life-split__part--narrow .life-split__name { top: calc(100% + 42px); }
+.life-split:has(.life-split__part--narrow) { margin-bottom: 84px; }
+
+/* Renpho: tape and scale, each with its change since the first reading. */
+.life-measurements { margin-top: 6px; }
+
+.life-measurements__list {
+  list-style: none;
+  margin: 0 0 22px;
+  padding: 0;
+  border-top: 2px solid var(--ink);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  column-gap: 28px;
+}
+
+.life-measurements__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  padding: 9px 0;
+  border-bottom: 1.5px dashed rgba(23,19,17,0.4);
+  font-family: var(--f-mono);
+  font-size: 13px;
+}
+
+.life-measurements__name { flex: 1 1 auto; font-weight: 700; }
+.life-measurements__now { font-family: var(--f-disp); font-size: 26px; line-height: 1; }
+.life-measurements__now small { font-family: var(--f-mono); font-size: 12px; margin-left: 3px; }
+.life-measurements__change {
+  padding: 1px 6px;
+  background: var(--ink-yellow);
+  border: 1.5px solid var(--ink);
+  font-weight: 700;
+}
+.life-measurements__since { flex-basis: 100%; font-size: 11px; color: color-mix(in srgb, var(--ink) 72%, #fff); }
 
 /* ─── Section pages: lists ──────────────── */
 .life-notables,
@@ -617,3 +814,47 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
 .roundup-life__by { color: var(--life-ink); overflow-wrap: anywhere; }
 .roundup-life__meta { flex-basis: 100%; font-size: 12px; opacity: 0.75; }
 .roundup-life__meta b { font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* Did you know? (R2c.4): a loud zine sticker. The items share one grid cell, so the strip is as
+   tall as its longest sentence and rotating never shifts the layout; hidden items stay in flow
+   but invisible. */
+.did-you-know {
+  position: relative;
+  margin: 28px 0 26px;
+  padding: 26px 20px 16px;
+  background: var(--ink-yellow);
+  color: var(--ink);
+  border: 3px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+  transform: rotate(-0.8deg);
+}
+.did-you-know__kicker {
+  position: absolute;
+  top: -14px;
+  left: 14px;
+  margin: 0;
+  padding: 3px 12px;
+  background: var(--ink);
+  color: var(--ink-yellow);
+  font-family: var(--f-disp);
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transform: rotate(1.5deg);
+}
+.did-you-know__list { display: grid; margin: 0; padding: 0; list-style: none; }
+.did-you-know__item,
+.did-you-know__item[hidden] { grid-area: 1 / 1; display: block; }
+.did-you-know__item[hidden] { visibility: hidden; }
+.did-you-know__item a {
+  color: var(--ink);
+  font-family: var(--f-disp);
+  font-size: clamp(22px, 4.2vw, 36px);
+  line-height: 1.12;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.did-you-know__item a:hover,
+.did-you-know__item a:focus-visible { text-decoration: underline; text-decoration-thickness: 3px; }
+.did-you-know__item a:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.life-hub .did-you-know { margin-top: 8px; }

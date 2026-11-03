@@ -327,7 +327,7 @@ export const tasks = [
                         case 'projects':  return "Shall we take a look at some projects I've done?";
                         case 'changelog': return 'What changes have happened to this site?';
                         case 'home':      return "I'm James King, and I make things for the web";
-                        case 'life':      return 'James King, by the numbers: fitness, body, sleep, food, games, code, watching, listening and reading.';
+                        case 'life':      return 'James King, by the numbers: fitness, body (sleep, food and movement too), games, code, watching, listening and reading.';
                         default:          return vars.description || '';
                     }
                 })(),
@@ -337,6 +337,18 @@ export const tasks = [
             };
         },
     }),
+
+    {
+        // Round 2 folded /life/sleep and /life/food into /life/body (no redirects, spec §1).
+        // The build never cleans public/personal, so a checkout that built them before
+        // would keep deploying them; remove the old outputs.
+        name: 'Remove retired life pages',
+        run: async () => {
+            for (const rel of ['life/sleep.html', 'life/food.html']) {
+                fs.rmSync(`./public/personal/${rel}`, { force: true });
+            }
+        }
+    },
 
     // Generate sitemap.xml
     generateSitemapTask({

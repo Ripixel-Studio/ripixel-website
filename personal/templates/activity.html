@@ -47,23 +47,15 @@
     {{/stat-grid}}
     {{/if}}
 
-    {{#if heroSpark}}
-    <section class="act-card act-spark" aria-label="Session sparkline">
+    {{#if heroChart}}
+    <section class="act-card act-spark" aria-label="Session chart">
       <div class="act-card__inner">
-        <div class="act-card__head">
-          <span class="act-card__title">· {{heroSpark.label}} ·</span>
-          <span class="act-card__right">{{heroSpark.min}} → {{heroSpark.max}} · {{heroSpark.duration}}</span>
-        </div>
-        {{> activity-sparkline heroSpark tall=true}}
+        {{> chart-line heroChart}}
       </div>
     </section>
     {{/if}}
 
     {{> activity-bands}}
-
-    {{#if boostersDidNotRun}}
-    <div class="act-noboost"><span class="stamp">⚙ boosters didn't run on this activity</span></div>
-    {{/if}}
 
     {{> activity-pregrid}}
 
@@ -81,7 +73,6 @@
         {{/if}}
       </main>
       <aside class="act-aside">
-        {{> activity-boosters}}
         <a class="act-aside__back" href="/life/fitness">← all activity</a>
       </aside>
     </div>

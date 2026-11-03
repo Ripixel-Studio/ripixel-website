@@ -29,13 +29,13 @@ describe('hero photo sizes (F5.5)', () => {
     assert.deepEqual(await dimsFromBytes(await jpeg(40, 30, 6)), { w: 30, h: 40 }, 'stored landscape, shown portrait');
     assert.equal(await dimsFromBytes(Buffer.from('not an image')), null);
   });
-  test('hero pictures: the AI banner and the first photo, https only', () => {
+  test('hero pictures: the first photo, https only', () => {
     const urls = heroImageUrls([
       { activity: { enrichments: { aiBanner: { imageUrl: 'https://x.test/b.png' } }, photoUrls: ['https://x.test/1.jpg', 'https://x.test/2.jpg'] } },
       { activity: { photoUrls: ['http://x.test/insecure.jpg'] } },
       {},
     ]);
-    assert.deepEqual(urls, ['https://x.test/b.png', 'https://x.test/1.jpg']);
+    assert.deepEqual(urls, ['https://x.test/1.jpg']);
   });
   test('probes with a Range request, caches by URL, offline reads the cache only', async () => {
     const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'dims-'));

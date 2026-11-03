@@ -1,0 +1,16 @@
+{{!-- One line chart with axes. Context: a ChartModel from tasks/chart-axes.mjs lineChart():
+      d/area are SVG path data in a w×h box; yTicks/xTicks carry {label, pct}; end is the latest
+      value's direct label (percent of the plot). --}}
+<figure class="chart">
+  <figcaption class="chart__label">{{label}}{{#if unit}} <span>{{unit}}</span>{{/if}}</figcaption>
+  <div class="chart__plot">
+    <ol class="chart__y" aria-hidden="true">{{#each yTicks}}<li style="top:{{pct}}%">{{label}}</li>{{/each}}</ol>
+    <svg class="chart__svg" viewBox="0 0 {{w}} {{h}}" preserveAspectRatio="none" role="img" aria-label="{{summary}}">
+      {{#each yTicks}}<line class="chart__grid" x1="0" x2="100%" y1="{{pct}}%" y2="{{pct}}%" vector-effect="non-scaling-stroke"/>{{/each}}
+      <path class="chart__area" d="{{area}}"/>
+      <path class="chart__line" d="{{d}}" vector-effect="non-scaling-stroke"/>
+    </svg>
+    {{#if end}}<div class="chart__mark" aria-hidden="true"><span class="chart__end" style="left:{{end.x}}%;top:{{end.y}}%"><b>{{end.label}}</b></span></div>{{/if}}
+    <ol class="chart__x" aria-hidden="true">{{#each xTicks}}<li style="left:{{pct}}%">{{label}}</li>{{/each}}</ol>
+  </div>
+</figure>

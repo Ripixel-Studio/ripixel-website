@@ -1,6 +1,0 @@
-<!-- Context: one chart {label, path} (+ optional per="month by month"); `path` is SVG path data
-     from the view model (sparkPath, 240 x 48), drawn as is -->
-<figure class="life-chart">
-  <figcaption class="life-chart__label">{{label}} <span>{{#if per}}{{per}}{{else}}week by week{{/if}}</span></figcaption>
-  <svg class="life-chart__svg" viewBox="0 -4 240 56" preserveAspectRatio="none" role="img" aria-label="{{label}}, {{#if per}}{{per}}{{else}}week by week{{/if}}"><path d="{{path}}"/></svg>
-</figure>

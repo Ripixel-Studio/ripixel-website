@@ -1,0 +1,9 @@
+{{!-- One 100 % bar: a share of a whole, not a time series, so no axes. Context:
+      {items: [{key, label, pct, narrow}], label, kind}. Each part is a list item with its own
+      label, so the bar reads as a list without the colours. --}}
+<figure class="life-split life-split--{{kind}}">
+  <figcaption class="life-split__label">{{label}}</figcaption>
+  <ol class="life-split__bar">
+    {{#each items}}<li class="life-split__part life-split__part--{{key}}{{#if narrow}} life-split__part--narrow{{/if}}" style="flex-basis:{{pct}}%"><b class="life-split__pct">{{pct}}<small>%</small></b> <span class="life-split__name">{{label}}</span></li>{{/each}}
+  </ol>
+</figure>

@@ -60,10 +60,6 @@ body.page-activity .masthead { --ink-section: #7C3AED; }
   position: relative; z-index: 2; display: block; width: 100%; height: 100%;
   object-fit: contain; filter: saturate(.92) contrast(1.04);
 }
-.act-hero__art-stamp {
-  position: absolute; right: 14px; bottom: 12px; z-index: 3;
-  background: var(--paper); color: var(--ink); transform: rotate(-3deg);
-}
 .act-hero__body { position: relative; padding: 20px 24px 22px; }
 
 /* Hero by picture shape (F5.5). The art box carries the picture's own aspect-ratio
@@ -87,7 +83,6 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
 .act-stamp--source { color: var(--ink); }
 .act-stamp--date   { color: var(--ink); opacity: .7; }
 .act-stamp--pr     { color: var(--ink-orange); transform: rotate(1.2deg); }
-.act-stamp--dest   { color: var(--ink-blue); }
 .act-stamp--pb     { color: var(--ink-green); margin-left: 6px; font-size: 9px; }
 .act-band .stamp   { mix-blend-mode: normal; opacity: 1; background: var(--paper); box-shadow: none; filter: none; }
 
@@ -144,16 +139,9 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
 .act-card__right { font-family: var(--f-mono); font-size: 11px; color: var(--ink); opacity: .65; text-align: right; }
 
 /* Hero sparkline */
-.act-spark .act-sparkline--tall { height: 120px; }
 
-/* ─── Sparkline (inline SVG) ───────────── */
-.act-sparkline { display: block; width: 100%; height: 64px; color: var(--ink); }
-.act-sparkline__line { stroke: currentColor; stroke-width: 2px; stroke-linejoin: round; stroke-linecap: round; }
-.act-sparkline__area { fill: var(--ink-section); opacity: .18; }
-.act-sparkline__base { stroke: rgba(23,19,17,.3); stroke-width: 1px; stroke-dasharray: 2 3; }
-.act-sparkline__caption {
-  font-family: var(--f-mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; opacity: .6; margin-top: 4px;
-}
+/* Line charts (partials/chart-line.html) sit flat inside an activity card, which already has the frame. */
+.act-card .chart { border: 0; box-shadow: none; background: transparent; padding: 0; }
 
 /* ─── Page bands ───────────────────────── */
 .act-band {
@@ -178,8 +166,6 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
   font-family: var(--f-mono); font-size: 12px; background: var(--paper); color: var(--ink); padding: 2px 8px;
 }
 
-.act-noboost { margin-bottom: 18px; }
-.act-noboost .stamp { color: var(--ink-red); background: #fff; }
 
 /* ─── Pre-grid ─────────────────────────── */
 .act-hybrid__segs { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -250,10 +236,18 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
 .act-note--warn { color: var(--ink-red); opacity: 1; font-weight: 700; }
 
 /* HR zone bars (SVG) */
-.act-zones { display: block; width: 100%; height: auto; color: var(--ink); }
-.act-zones__label { font-family: var(--f-mono); font-size: 11px; font-weight: 700; fill: var(--ink); }
+.act-zones-wrap { --ink-muted: color-mix(in srgb, var(--ink) 72%, #fff); }
+.act-zones__plot { display: grid; grid-template-columns: 4ch minmax(0, 1fr); column-gap: 6px; }
+.act-zones__yaxis { position: relative; font-family: var(--f-mono); font-size: 11px; line-height: 1; color: var(--ink-muted); }
+.act-zones__yaxis ol { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; }
+.act-zones__yaxis li { position: absolute; right: 0; transform: translateY(-50%); white-space: nowrap; }
+.act-zones__ycap { position: absolute; top: -14px; right: 0; }
+.act-zones { display: block; width: 100%; height: auto; color: var(--ink); margin-top: 14px; }
+.act-zones__yaxis { margin-top: 14px; }
+.act-zones__base { stroke: var(--paper-2); stroke-width: 1px; }
+.act-zones__label { font-family: var(--f-mono); font-size: 11px; font-weight: 700; fill: var(--ink-muted); }
 .act-zones__bar { fill: var(--ink-section); }
-.act-zones__value { font-family: var(--f-mono); font-size: 10px; fill: var(--ink); }
+.act-zones__value { font-family: var(--f-mono); font-size: 10px; fill: var(--ink-muted); }
 .act-zones__legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-family: var(--f-mono); font-size: 10px; opacity: .6; }
 
 /* Horizontal bar rows (pace splits, goals) */
@@ -323,15 +317,6 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
 
 .act-footer-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
 
-/* ─── Booster timeline (aside) ─────────── */
-.act-boosters__count { font-family: var(--f-mono); font-size: 11px; color: var(--ink-section); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 8px; }
-.act-boosters__list { list-style: none; display: grid; gap: 6px; position: relative; }
-.act-booster { display: grid; grid-template-columns: 12px 1fr; column-gap: 8px; font-family: var(--f-mono); font-size: 12px; line-height: 1.4; }
-.act-booster__dot { width: 10px; height: 10px; margin-top: 4px; border: 1.5px solid var(--ink); background: var(--ink-section); }
-.act-booster--silent .act-booster__dot { background: #fff; }
-.act-booster__name { grid-column: 2; }
-.act-booster--silent .act-booster__name { opacity: .7; }
-.act-booster__sub { grid-column: 2; font-size: 10px; opacity: .55; }
 .act-aside__back { display: inline-block; margin-top: 4px; font-family: var(--f-mono); font-size: 12px; color: var(--ink-section); border-bottom: 1px solid var(--ink-section); }
 
 /* ─── Responsive ───────────────────────── */
@@ -576,3 +561,5 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
 .ev-compare__v { position: relative; font-weight: 700; margin-right: 8px; }
 .ev-compare__hr { position: relative; margin-right: 8px; opacity: .8; }
 .ev-compare__table .act-race__delta { position: relative; }
+.act-hero__credit a { color: var(--ink-section); text-decoration: underline; text-underline-offset: 3px; }
+.act-hero__credit a:hover, .act-hero__credit a:focus-visible { text-decoration-thickness: 2px; }

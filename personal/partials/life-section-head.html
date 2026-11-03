@@ -3,7 +3,10 @@
   <a href="/life">life</a> / {{name}}
 </nav>
 <header class="life-head">
-  <h1 class="page-hero__h1 life-head__h1">{{title}}.</h1>
+  <div class="life-head__main">
+    <div class="page-hero__section-label">· {{name}} ·</div>
+    <h1 class="page-hero__h1 life-head__h1">{{#if snapTop}}{{snapTop}}<br><span>{{snapAccent}}.</span>{{else}}{{title}}.{{/if}}</h1>
+  </div>
   {{#if headline}}
   <p class="life-head__headline">
     <span class="life-head__num">{{headline.value}}{{#if headline.unit}}<small>{{headline.unit}}</small>{{/if}}</span>

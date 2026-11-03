@@ -26,12 +26,10 @@ import {
   descriptionPreamble,
   sanitizeAiHtml,
   stripTags,
-  sparklinePath,
   routePath,
   hrZoneBars,
   groupStrengthSets,
   setChip,
-  boosterTimeline,
   parseRecordType,
   topPR,
   prValue,
@@ -132,23 +130,6 @@ describe('text helpers', () => {
 });
 
 describe('inline SVG maths', () => {
-  test('sparkline: fits the box, breaks on nulls, keeps the baseline', () => {
-    const p = sparklinePath([10, 20, null, 30], { w: 100, h: 50, pad: 0 });
-    assert.ok(p);
-    assert.equal(p.min, 10);
-    assert.equal(p.max, 30);
-    assert.match(p.d, /^M0,50 L33\.3,25 M100,0$/);
-    assert.match(p.area, /Z$/);
-    assert.equal(sparklinePath([5]), null);
-    assert.equal(sparklinePath([null, null]), null);
-    assert.equal(sparklinePath(/** @type {any} */ (undefined)), null);
-  });
-  test('sparkline: invert puts faster pace higher', () => {
-    const a = sparklinePath([100, 200], { w: 10, h: 10, pad: 0 });
-    const b = sparklinePath([100, 200], { w: 10, h: 10, pad: 0, invert: true });
-    assert.equal(a?.d, 'M0,10 L10,0');
-    assert.equal(b?.d, 'M0,0 L10,10');
-  });
   test('route: fits lat/lng into a box, longer side = size, first/last kept', () => {
     const r = routePath([[52.0, -1.0], [52.0, -0.5], [52.1, -0.5]], { size: 200, pad: 0 });
     assert.ok(r);
@@ -160,13 +141,16 @@ describe('inline SVG maths', () => {
     assert.equal(routePath([[0, 0], [0, 0]]), null);
     assert.equal(routePath([[52, -1]]), null);
   });
-  test('hr zones: Z1–Z5 only, widths scaled to the busiest zone', () => {
+  test('hr zones: Z1–Z5 only, heights scaled to a nice minutes axis', () => {
     const z = hrZoneBars([0, 0, 2, 5, 9, 4]);
     assert.ok(z);
     assert.equal(z.total, 20);
     assert.deepEqual(z.bars.map((b) => b.label), ['Z1', 'Z2', 'Z3', 'Z4', 'Z5']);
-    assert.equal(z.bars[3].w, 236);
-    assert.equal(z.bars[0].w, 0);
+    assert.equal(z.bars[0].h, 0);
+    assert.ok(z.bars[3].h > z.bars[2].h && z.bars[2].h > z.bars[1].h, 'taller bar, more minutes');
+    assert.equal(z.yLabel, 'min');
+    assert.deepEqual(z.yTicks.map((t) => t.label), ['10', '5', '0']);
+    assert.equal(z.yTicks[0].pct < z.yTicks.at(-1).pct, true, 'top tick is higher up');
     assert.equal(z.bars[4].pct, 20);
     assert.equal(hrZoneBars([0, 0, 0, 0, 0, 0]), null);
     const named = hrZoneBars([{ minutes: 9 }, { name: 'Zone 1 (Recovery)', minutes: 3, percentage: 50 }, { minutes: 3, percentage: 50 }, {}, {}, {}]);
@@ -209,16 +193,28 @@ describe('strength set list', () => {
   });
 });
 
-describe('boosters and PRs', () => {
-  test('timeline keeps canonical order, unknown names last', () => {
-    const t = boosterTimeline(['ENRICHER_PROVIDER_WEATHER', 'ENRICHER_PROVIDER_SOMETHING_ELSE', 'ENRICHER_PROVIDER_AI_BANNER', 'ENRICHER_PROVIDER_LOGIC_GATE']);
-    assert.ok(t);
-    assert.equal(t.count, 4);
-    assert.deepEqual(t.items.map((i) => i.name), ['AI Banner', 'Logic Gate', 'Weather', 'Something Else']);
-    assert.equal(t.items[1].sub, '✓ ran · no visual output');
-    assert.equal(t.items[2].sub, '✓ ran');
-    assert.equal(boosterTimeline([]), null);
-  });
+describe('no vestigial showcase stats', () => {
+  const slugs = ['colwick-parkrun-2026-10-17', 'evening-ride-to-the-reservoir-2026-10-15', 'push-day-2026-10-13'];
+  /** @param {any} o @param {string} p @param {string[]} hits */
+  function walk(o, p, hits) {
+    if (Array.isArray(o)) o.forEach((x, i) => walk(x, `${p}[${i}]`, hits));
+    else if (o && typeof o === 'object') for (const [k, v] of Object.entries(o)) {
+      if (/booster|destination|banner/i.test(k)) hits.push(`${p}.${k}`);
+      walk(v, `${p}.${k}`, hits);
+    }
+  }
+  for (const slug of slugs) {
+    test(`${slug}: no booster/destination/banner keys, no "pushed to" stat`, async () => {
+      const v = buildActivityView(await fixture(slug), await fixtureIndex());
+      const hits = [];
+      walk(v.act, 'act', hits);
+      assert.deepEqual(hits, []);
+      assert.ok(!v.act.extraStats.some((s) => s.subtext === 'pushed to'));
+    });
+  }
+});
+
+describe('PRs', () => {
   test('record types', () => {
     assert.deepEqual(parseRecordType('Bench Press (Barbell)_1rm'), { label: 'Bench Press (Barbell)', exercise: 'Bench Press (Barbell)', prType: '1RM', isStrength: true });
     assert.equal(parseRecordType('5k').prType, '');
@@ -287,7 +283,6 @@ describe('view model from the fixtures', () => {
     assert.equal(a.source, 'Strava');
     assert.equal(a.dateStamp, 'SAT 17 OCT 2026');
     assert.equal(a.prCount, 1);
-    assert.equal(a.destinationCount, 3);
     assert.equal(a.locationName, 'COLWICK PARK, NOTTINGHAM');
     assert.equal(a.parkrun?.finishTime, '19:52');
     assert.equal(a.parkrun?.position, '#23');
@@ -299,9 +294,21 @@ describe('view model from the fixtures', () => {
     assert.ok(a.route && a.route.d.startsWith('M'));
     assert.equal(a.routeThumbnailUrl, '');
     assert.equal(a.photos.length, 1);
-    assert.equal(a.heroSpark?.label, 'heart rate · bpm');
+    assert.equal(a.heroSpark, undefined);
+    assert.equal(a.heroChart?.label, 'heart rate');
+    assert.equal(a.heroChart?.unit, 'bpm');
+    assert.ok(a.heroChart.yTicks.length >= 2);
+    const hr = a.modules.find((m) => m.key === 'heart-rate');
+    assert.equal(hr.chart.unit, 'bpm');
+    assert.match(hr.chart.xTicks.at(-1).label, /^\d+:\d{2}$/);
+    assert.equal(hr.chart.xTicks.at(-1).label, a.heroChart.xTicks.at(-1).label, 'x axis ends at the session length');
+    assert.equal(hr.sparkline, undefined);
+    const pace = a.modules.find((m) => m.key === 'pace').chart;
+    assert.equal(pace.unit, '/km');
+    assert.ok(pace.yTicks.every((t) => /^\d+:\d{2}$/.test(t.label)), 'pace ticks are m:ss');
+    assert.match(pace.end.label, /^\d+:\d{2}$/);
+    assert.ok(+pace.yTicks[0].label.split(':')[0] <= +pace.yTicks.at(-1).label.split(':')[0], 'fastest pace on top');
     assert.deepEqual(a.modules.map((m) => m.key), ['heart-rate', 'zones', 'pace', 'cadence', 'elevation', 'effort', 'calories', 'training-load', 'best-efforts', 'pr-callout', 'streak', 'weather']);
-    assert.equal(a.boosters?.count, 19);
     assert.deepEqual(a.footerChips, ['↗ Linked to Strava']);
     assert.equal(a.ogImage, a.photos[0]);
     assert.equal(v.description, a.description);
@@ -313,12 +320,12 @@ describe('view model from the fixtures', () => {
     assert.equal(v.publishedTime, '2026-10-17T08:00:00Z');
     assert.equal(v.atomFeed, '/life/feed.xml');
   });
-  test('a rendered OG card (S2.5) beats banner and photo for og:image; a non-URL is ignored', async () => {
+  test('a rendered OG card (S2.5) beats the photo for og:image; a non-URL is ignored', async () => {
     const index = await fixtureIndex();
     const ride = await fixture('evening-ride-to-the-reservoir-2026-10-15');
     const card = 'https://james.ripixel.co.uk/life/og/activity/evening-ride-to-the-reservoir-2026-10-15.png';
     assert.equal(buildActivityView(ride, index, { ogCard: card }).ogImage, card);
-    assert.match(buildActivityView(ride, index, { ogCard: 'life/og/x.png' }).ogImage, /banner\.png$/);
+    assert.equal(buildActivityView(ride, index, { ogCard: 'life/og/x.png' }).ogImage, '');
   });
   test('photos are gated by profile.showPhotoGallery', async () => {
     const index = await fixtureIndex();
@@ -328,11 +335,9 @@ describe('view model from the fixtures', () => {
     assert.equal(v.act.bgPhotoUrl, '');
     assert.equal(v.act.ogImage, '');
   });
-  test('ride: banner, speed not pace, milestone, recovery/temperature tail', async () => {
+  test('ride: speed not pace, milestone, recovery/temperature tail', async () => {
     const v = buildActivityView(await fixture('evening-ride-to-the-reservoir-2026-10-15'), await fixtureIndex());
     const a = v.act;
-    assert.match(a.bannerUrl, /banner\.png$/);
-    assert.equal(a.ogImage, a.bannerUrl);
     assert.equal(a.anchors[2].label, 'avg speed');
     assert.equal(a.milestone?.toGoKm, '187.7');
     assert.equal(a.milestone?.crossedKm, '');
@@ -355,19 +360,16 @@ describe('view model from the fixtures', () => {
     assert.equal(setList.exercises[0].isPR, true);
     assert.equal(a.prBand?.label, 'BENCH PRESS (BARBELL)');
     assert.equal(a.prBand?.sub, '1RM · NEW PERSONAL RECORD · +1 MORE RECORD BELOW');
-    assert.equal(a.boostersDidNotRun, false);
   });
   test('metadata-only activity (enrichments null, activityData null) still renders a page', () => {
     const v = buildActivityView(
       { slug: 'old-one-2025-05-01', category: 'cardio-distance', activity: { title: 'Old one', activityType: 'ACTIVITY_TYPE_RUN', source: 'SOURCE_STRAVA', startTime: '2025-05-01T07:00:00Z', activityData: null, enrichments: null, appliedEnrichments: [], tags: [], photoUrls: [] }, entry: { distanceMeters: 8000, durationSeconds: 2400, hrZoneMinutes: [], photoUrls: [] }, series: {}, routePoints: [] },
       { profile: { showPhotoGallery: true } },
     );
-    assert.equal(v.act.boostersDidNotRun, true);
     assert.deepEqual(v.act.modules, []);
-    assert.equal(v.act.boosters, null);
     assert.equal(v.act.anchors[0].value, '8.00');
     assert.equal(v.act.anchors[2].value, '5:00');
-    assert.equal(v.act.heroSpark, null);
+    assert.equal(v.act.heroChart, null);
     assert.equal(v.act.hrZones, null);
   });
 });
@@ -412,7 +414,8 @@ describe('task', () => {
       assert.match(html, /<link rel="alternate" type="application\/atom\+xml" href="\/life\/feed\.xml"/);
       assert.doesNotMatch(html, /activity-head/);
       assert.match(html, /class="act-zones__bar"/);
-      assert.match(html, /class="act-sparkline__line"/);
+      assert.match(html, /class="chart__line"/);
+      assert.match(html, /class="act-zones__yaxis"/);
       assert.match(html, /class="act-map__svg"/);
       assert.match(html, /act-band--parkrun/);
       assert.match(html, /href="\/life"/);
@@ -431,8 +434,12 @@ describe('task', () => {
       assert.match(html, /<noscript><a class="share__open" href="\/life\/share\/activity\/c\/story-photo-1\.jpg" download="c-story\.jpg">/);
       assert.match(html, /<dialog class="share__dialog" id="share-dialog" aria-labelledby="share-dialog-title">/);
       const ride = await fs.readFile(path.join(tmp, 'life', 'activity', 'evening-ride-to-the-reservoir-2026-10-15', 'index.html'), 'utf8');
-      assert.match(ride, /<meta property="og:image" content="https:\/\/[^"]*\/banner\.png"/, 'no card for this slug → the AI banner');
+      assert.match(ride, /<meta property="og:image" content="https:\/\/james\.ripixel\.co\.uk\/card_[a-z]+\.png"/, 'no card, no photo → the section card');
       assert.doesNotMatch(ride, /data-share/, 'no share entry → no button');
+      for (const slug of ['colwick-parkrun-2026-10-17', 'evening-ride-to-the-reservoir-2026-10-15', 'push-day-2026-10-13']) {
+        const page = await fs.readFile(path.join(tmp, 'life', 'activity', slug, 'index.html'), 'utf8');
+        assert.doesNotMatch(page, /DESTINATION|BOOSTER|booster sequence|AI banner/, slug + ': no showcase stats or banner');
+      }
       const strength = await fs.readFile(path.join(tmp, 'life', 'activity', 'push-day-2026-10-13', 'index.html'), 'utf8');
       assert.match(strength, /class="exercise-item exercise-strength"/, 'exercise-item needs the eq helper');
       assert.match(strength, /4×8 × 80kg/);
@@ -477,5 +484,28 @@ describe('calories, the type chip and the type ink (F5.5)', async () => {
   test('an activity page takes its type ink', () => {
     const v = buildActivityView({ slug: 'r', activity: { title: 'Run', activityType: 'ACTIVITY_TYPE_RUN', startTime: '2026-01-01T09:00:00Z' }, entry: {} }, {});
     assert.equal(v.act.typeClass, 'fit-type--run');
+  });
+});
+
+describe('Strava and Hevy links (C4)', () => {
+  test('links from export', async () => {
+    const index = await fixtureIndex();
+    const v = buildActivityView(await fixture('push-day-2026-10-13'), index, {});
+    assert.deepEqual(v.act.links, [
+      { key: 'strava', label: 'Strava', url: 'https://www.strava.com/activities/100000000002' },
+      { key: 'hevy', label: 'Hevy', url: 'https://hevy.com/workout/0f3c9e2a-0000-4000-8000-000000000001' },
+    ]);
+    const ride = buildActivityView(await fixture('evening-ride-to-the-reservoir-2026-10-15'), index, {});
+    assert.deepEqual(ride.act.links, []);
+  });
+  test('links validated', async () => {
+    const index = await fixtureIndex();
+    const base = await fixture('push-day-2026-10-13');
+    const links = (l) => buildActivityView({ ...base, links: l }, index, {}).act.links;
+    assert.deepEqual(links({ strava: 'javascript:alert(1)' }), []);
+    assert.deepEqual(links({ strava: 'https://www.strava.com/athletes/1' }), []);
+    assert.deepEqual(links({ hevy: 'https://hevy.com/workout/abc"><script>' }), []);
+    assert.deepEqual(links(undefined), []);
+    assert.deepEqual(links('x'), []);
   });
 });

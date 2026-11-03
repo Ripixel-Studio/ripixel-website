@@ -18,8 +18,8 @@
 
     <div class="page-hero">
       <div class="page-hero__left">
-        <div class="page-hero__section-label">· THE WORK RECORD ·</div>
-        <h1 class="page-hero__h1">WORK<span>.</span></h1>
+        <div class="page-hero__section-label">· WORK · THE RECORD ·</div>
+        <h1 class="page-hero__h1">NINE TO<br><span>FIVE-ISH.</span></h1>
         <p class="work-strap">where I've worked, what I built there, and what I use now.</p>
       </div>
     </div>
@@ -63,6 +63,7 @@
       <li class="work-roles__item">
         <article class="role-card role-card--{{ink}}{{#if current}} role-card--current{{/if}}" id="{{id}}">
           <div class="role-card__inner">
+            <div class="role-card__head">
             <div class="role-card__badge">
               <span class="role-card__num">{{#if current}}NOW · {{/if}}{{badge}}</span>
               <span class="role-card__period">{{period}}</span>
@@ -71,6 +72,8 @@
             <div class="role-card__company">{{companyUpper}}<span class="role-card__company-dot">.</span></div>
             <div class="role-card__title">{{title}}{{#if team}} · {{team}}{{/if}}</div>
             {{#if note}}<div class="role-card__note">{{note}}</div>{{/if}}
+            </div>
+            <div class="role-card__main">
             {{#if paragraphs.length}}
             <div class="role-card__body">
               {{#each paragraphs}}<p>{{this}}</p>{{/each}}
@@ -81,6 +84,7 @@
               {{#each tech}}<span class="role-card__tag">#{{this}}</span>{{/each}}
             </div>
             {{/if}}
+            </div>
           </div>
         </article>
       </li>

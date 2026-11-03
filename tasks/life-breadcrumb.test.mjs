@@ -21,7 +21,7 @@ const sources = [
 test('every life sub-page source links its crumb to /life', () => {
   for (const f of sources) {
     const html = fs.readFileSync(f, 'utf8');
-    if (html.includes('{{> life-section-head}}')) continue; // covered by the partial
+    if (html.includes('{{> life-section-head')) continue; // covered by the partial
     const crumb = html.match(CRUMB)?.[1] ?? html.match(/<nav class="act-crumb"[^>]*>([\s\S]*?)<\/nav>/)?.[1];
     assert.ok(crumb, `${path.basename(f)} has a breadcrumb`);
     assert.match(crumb, /<a [^>]*href="\/life"/, `${path.basename(f)} crumb links to /life`);

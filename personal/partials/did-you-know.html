@@ -1,0 +1,32 @@
+{{#if items.length}}
+<section class="did-you-know" aria-label="Did you know?">
+  <p class="did-you-know__kicker">did you know?</p>
+  <ul class="did-you-know__list">
+    {{#each items}}
+    <li class="did-you-know__item"{{#unless @first}} hidden{{/unless}}><a href="{{href}}">{{text}}</a></li>
+    {{/each}}
+  </ul>
+  {{#if rotate}}
+  <script>
+    (function () {
+      var root = document.currentScript.parentNode;
+      var items = root.querySelectorAll('.did-you-know__item');
+      if (items.length < 2 || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var i = 0, paused = false;
+      function pause() { paused = true; }
+      function resume() { paused = false; }
+      root.addEventListener('mouseenter', pause);
+      root.addEventListener('mouseleave', resume);
+      root.addEventListener('focusin', pause);
+      root.addEventListener('focusout', resume);
+      setInterval(function () {
+        if (paused) return;
+        items[i].hidden = true;
+        i = (i + 1) % items.length;
+        items[i].hidden = false;
+      }, 8000);
+    })();
+  </script>
+  {{/if}}
+</section>
+{{/if}}

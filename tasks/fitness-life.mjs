@@ -182,7 +182,13 @@ export function effortLevelOf(e) {
 }
 
 const DAY_LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-const STRIP = { colW: 40, barW: 28, baseY: 56, unit: 12, pad: 6 };
+const STRIP = { colW: 40, barW: 28, baseY: 56, unit: 12, pad: 6, vbH: 72 };
+
+/** Effort axis beside the strip: 0, 2 and 4 at the height a bar of that level reaches (percent of the viewBox). */
+export const STRIP_AXIS = {
+  caption: 'effort, 0–4',
+  ticks: [4, 2, 0].map((level) => ({ label: String(level), pct: Math.round(((STRIP.baseY - level * STRIP.unit) / STRIP.vbH) * 10000) / 100 })),
+};
 
 /**
  * Seven strip bars for [start, start+7d). `levels` maps YYYY-MM-DD → {level, count}.
@@ -286,6 +292,7 @@ export function buildWeek(index, roundupFiles, now) {
         range: rangeLabel(start, end),
         href: `${ROUNDUP_HREF}/${encodeURIComponent(r.periodKey || weekly.key)}`,
         days,
+        yAxis: STRIP_AXIS,
         activeDays: days.filter((d) => d.count > 0).length,
         stats: weekStats({
           sessions: Number(r.totalActivities) || 0,
@@ -333,6 +340,7 @@ export function buildWeek(index, roundupFiles, now) {
     range: rangeLabel(startNoon, endExcl),
     href: null,
     days,
+    yAxis: STRIP_AXIS,
     activeDays: days.filter((x) => x.count > 0).length,
     stats: weekStats(tot),
   };

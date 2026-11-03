@@ -51,10 +51,9 @@ export function parkrunHistory(activities) {
     .sort((a, b) => a.date - b.date);
 }
 
-/** The photos a card may sit on: the activity's own (https, first three), else its AI banner. @param {any} act */
+/** The photos a card may sit on: the activity's own (https, first three). @param {any} act */
 function photosOf(act) {
   const list = (act.photos || []).map(httpsUrl).filter(Boolean);
-  if (!list.length && httpsUrl(act.bannerUrl)) list.push(act.bannerUrl);
   return list.slice(0, 3);
 }
 

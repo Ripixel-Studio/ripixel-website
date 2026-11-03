@@ -3,7 +3,7 @@
 //
 // The /life URL inventory (LH3.6). /life became the hub and the zine moved to
 // /life/fitness; every URL that existed before still builds, and the hub links
-// all nine sections. Builds the /life pages from the committed fixtures into a
+// all seven sections (round 2 merged sleep and food into body). Builds the /life pages from the committed fixtures into a
 // temp dir with the same Skier builtins the site uses (lifePageTasks plus a
 // personal-pages generatePagesTask), so it never races life-links.test.mjs,
 // which builds the whole site into public/personal.
@@ -127,8 +127,50 @@ describe('/life URL inventory', () => {
   test('a section page has its chart, its numbers and its own title', async () => {
     const html = await read('life/body.html');
     assert.match(html, /<title>[^<]*body/i);
-    assert.match(html, /<path d="M0 [^"]+"/);
+    assert.match(html, /<path class="chart__line" d="M[^"]+"/);
     assert.match(html, /80\.1/);
+  });
+
+  test('sleep and food live on /life/body now, with no pages (and no redirects) of their own', async () => {
+    assert.equal(await exists('life/sleep.html'), false);
+    assert.equal(await exists('life/food.html'), false);
+    assert.ok(await exists('life/body.html'));
+    const html = await read('life/body.html');
+    const heads = [...html.matchAll(/<h2 class="fit-header"[^>]*>([\s\S]*?)<\/h2>/g)].map((m) => m[1].replace(/<[^>]+>/g, ''));
+    for (const want of [/measure/i, /sleep/i, /food/i, /moving/i]) assert.ok(heads.some((h) => want.test(h)), `${want} in ${heads.join(' | ')}`);
+    assert.match(html, /class="life-split[^"]*"/);
+    assert.doesNotMatch(html.slice(html.indexOf('<body')), /\b\d{1,2}:\d{2}\b/, 'no clock time (bedtimes, wake times) on the page');
+    const hub = await read('life.html');
+    assert.doesNotMatch(hub, /href="\/life\/(sleep|food)"/);
+    const firebase = JSON.parse(await fs.readFile(path.join(REPO, 'firebase.json'), 'utf8'));
+    assert.doesNotMatch(JSON.stringify(firebase), /life\/(sleep|food)/);
+  });
+
+  test('a block with no data renders nothing, not an empty box', async () => {
+    const o2 = await fs.mkdtemp(path.join(os.tmpdir(), 'life-urls-partial-'));
+    try {
+      const idx = structuredClone(g.lifeIndex);
+      Object.assign(idx.sections.body, { movement: null, measurements: null, sleep: null });
+      await build(o2, { lifeIndex: idx });
+      const html = await fs.readFile(path.join(o2, 'life', 'body.html'), 'utf8');
+      assert.doesNotMatch(html, /moving|life-measurements|life-split--sleep/i);
+      assert.match(html, /food/i);
+    } finally {
+      await fs.rm(o2, { recursive: true, force: true });
+    }
+  });
+
+  test('the homepage carries the did-you-know strip, first item visible; the hub shows one', async () => {
+    const home = await read('index.html');
+    assert.match(home, /class="did-you-know"/);
+    const lis = home.match(/<li[^>]*class="did-you-know__item"[^>]*>/g) || [];
+    assert.ok(lis.length >= 2);
+    assert.doesNotMatch(lis[0], /hidden/);
+    assert.match(lis[1], /hidden/);
+    assert.match(home, /prefers-reduced-motion: reduce/);
+    const hub = await read('life.html');
+    assert.equal((hub.match(/class="did-you-know__item"/g) || []).length, 1);
+    assert.doesNotMatch(hub, /prefers-reduced-motion: reduce/);
   });
 
   test('the old zine links point at /life/fitness', async () => {
@@ -138,6 +180,17 @@ describe('/life URL inventory', () => {
 });
 
 describe('/life without a life export', () => {
+  test('no insights, no strip', async () => {
+    const out = await fs.mkdtemp(path.join(os.tmpdir(), 'life-urls-noins-'));
+    try {
+      await build(out, { lifeIndex: null, lifeHeatmap: null });
+      assert.doesNotMatch(await fs.readFile(path.join(out, 'index.html'), 'utf8'), /did-you-know/);
+      assert.doesNotMatch(await fs.readFile(path.join(out, 'life.html'), 'utf8'), /did-you-know/);
+    } finally {
+      await fs.rm(out, { recursive: true, force: true });
+    }
+  });
+
   test('the hub and every section say plainly that nothing has come through', async () => {
     const out = await fs.mkdtemp(path.join(os.tmpdir(), 'life-urls-empty-'));
     try {

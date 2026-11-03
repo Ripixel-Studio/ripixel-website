@@ -1012,3 +1012,12 @@
   .fit-filter { font-size: 11px; padding: 4px 8px; }
   .fit-month__title { font-size: 28px; }
 }
+
+/* Effort axis: HTML tick labels beside the strip (percent of the viewBox height, as chart-line does). */
+.fit-strip { --ink-muted: color-mix(in srgb, var(--ink) 72%, #fff); }
+.fit-strip__plot { display: flex; gap: 6px; max-width: 340px; padding-top: 24px; }
+.fit-strip__plot .fit-strip__svg { flex: 1; min-width: 0; }
+.fit-strip__yaxis { position: relative; flex: 0 0 2ch; font-family: var(--f-mono); font-size: 11px; line-height: 1; color: var(--ink-muted); }
+.fit-strip__yaxis ol { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; }
+.fit-strip__yaxis li { position: absolute; right: 0; transform: translateY(-50%); }
+.fit-strip__ycap { position: absolute; top: -22px; left: 0; white-space: nowrap; }
