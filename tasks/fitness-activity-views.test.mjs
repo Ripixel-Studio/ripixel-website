@@ -486,3 +486,26 @@ describe('calories, the type chip and the type ink (F5.5)', async () => {
     assert.equal(v.act.typeClass, 'fit-type--run');
   });
 });
+
+describe('Strava and Hevy links (C4)', () => {
+  test('links from export', async () => {
+    const index = await fixtureIndex();
+    const v = buildActivityView(await fixture('push-day-2026-10-13'), index, {});
+    assert.deepEqual(v.act.links, [
+      { key: 'strava', label: 'Strava', url: 'https://www.strava.com/activities/100000000002' },
+      { key: 'hevy', label: 'Hevy', url: 'https://hevy.com/workout/0f3c9e2a-0000-4000-8000-000000000001' },
+    ]);
+    const ride = buildActivityView(await fixture('evening-ride-to-the-reservoir-2026-10-15'), index, {});
+    assert.deepEqual(ride.act.links, []);
+  });
+  test('links validated', async () => {
+    const index = await fixtureIndex();
+    const base = await fixture('push-day-2026-10-13');
+    const links = (l) => buildActivityView({ ...base, links: l }, index, {}).act.links;
+    assert.deepEqual(links({ strava: 'javascript:alert(1)' }), []);
+    assert.deepEqual(links({ strava: 'https://www.strava.com/athletes/1' }), []);
+    assert.deepEqual(links({ hevy: 'https://hevy.com/workout/abc"><script>' }), []);
+    assert.deepEqual(links(undefined), []);
+    assert.deepEqual(links('x'), []);
+  });
+});

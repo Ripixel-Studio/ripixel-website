@@ -561,3 +561,5 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
 .ev-compare__v { position: relative; font-weight: 700; margin-right: 8px; }
 .ev-compare__hr { position: relative; margin-right: 8px; opacity: .8; }
 .ev-compare__table .act-race__delta { position: relative; }
+.act-hero__credit a { color: var(--ink-section); text-decoration: underline; text-underline-offset: 3px; }
+.act-hero__credit a:hover, .act-hero__credit a:focus-visible { text-decoration-thickness: 2px; }

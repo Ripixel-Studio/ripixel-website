@@ -31,6 +31,22 @@ export const ACTIVITY_BASE_PATH = '/life/activity';
 /** Where the fitness Atom feed is written (kept as a literal: tasks/fitness-feed-items.mjs imports this module). */
 export const FITNESS_FEED_PATH = '/life/feed.xml';
 
+const LINK_RULES = [
+  { key: 'strava', label: 'Strava', re: /^https:\/\/www\.strava\.com\/activities\/\d+$/ },
+  { key: 'hevy', label: 'Hevy', re: /^https:\/\/hevy\.com\/workout\/[A-Za-z0-9-]+$/ },
+];
+
+/**
+ * C4 `links` ({strava?, hevy?}) → `[{key, label, url}]`, Strava first. A URL is kept only when it
+ * matches its service's exact pattern (the export is data, never trusted into an href).
+ * @param {unknown} links
+ */
+export function buildLinks(links) {
+  if (!links || typeof links !== 'object') return [];
+  const src = /** @type {Record<string, unknown>} */ (links);
+  return LINK_RULES.flatMap(({ key, label, re }) => (typeof src[key] === 'string' && re.test(src[key]) ? [{ key, label, url: src[key] }] : []));
+}
+
 /** Same shape the fetch task accepts; slugs become file names. */
 const SAFE_SLUG = /^[A-Za-z0-9][A-Za-z0-9._-]{0,200}$/;
 
@@ -1129,6 +1145,7 @@ export function buildActivityView(file, index, opts = {}) {
       ...heroLayout(opts.photoDims?.[photos[0] || '']),
       owner: String(activity.ownerDisplayName ?? index?.profile?.displayName ?? 'James').toUpperCase(),
       locationName: locationName.toUpperCase(),
+      links: buildLinks(file?.links),
       anchors: race ? raceAnchors(race, avgBpm) : anchorStats({ category, distanceM, durationS, avgBpm, maxBpm, calories, pace: num(en.pace?.avgPaceSecondsPerKm), speedKmh: num(en.speed?.avgSpeedKmh), sets, volumeKg, prCount, icon }),
       extraStats,
       parkrun,

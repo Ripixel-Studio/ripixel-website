@@ -28,7 +28,7 @@
     <h1 class="act-hero__title">{{title}}<span class="act-hero__dot">.</span></h1>
 
     <div class="act-hero__credit">
-      by <b>{{owner}}</b>{{#if race.partner}} &amp; <b>{{race.partner}}</b>{{/if}}{{#if locationName}} · 🌍 {{locationName}}{{/if}}
+      by <b>{{owner}}</b>{{#if race.partner}} &amp; <b>{{race.partner}}</b>{{/if}}{{#if locationName}} · 🌍 {{locationName}}{{/if}}{{#each links}} · on <a href="{{url}}" rel="noopener external">{{label}} ↗</a>{{/each}}
     </div>
   </div>
 </header>
