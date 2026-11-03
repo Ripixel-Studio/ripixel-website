@@ -185,7 +185,7 @@ export function buildSection(name, sec, now = new Date(), outingNotables = []) {
       };
     case 'games': {
       const a = sec.achievements || {};
-      const names = (/** @type {any} */ l) => (Array.isArray(l) ? l : []).map((g) => (typeof g === 'string' ? { name: g, hours: null } : { name: String(g?.name || ''), hours: num(g?.hours) })).filter((g) => g.name);
+      const names = (/** @type {any} */ l) => (Array.isArray(l) ? l : typeof l === 'string' && l ? [l] : []).map((g) => (typeof g === 'string' ? { name: g, hours: null } : { name: String(g?.name || ''), hours: num(g?.hours) })).filter((g) => g.name);
       return {
         ...view,
         stats: [
@@ -209,7 +209,7 @@ export function buildSection(name, sec, now = new Date(), outingNotables = []) {
         languagesByYear: Object.keys(byYear).sort().map((y) => ({
           year: y,
           languages: Object.entries(byYear[y] || {}).sort((a, b) => Number(b[1]) - Number(a[1]))
-            .map(([lang, share]) => ({ name: lang, pct: Math.round(Number(share) * 100) })),
+            .map(([lang, share]) => ({ name: lang, pct: Math.round(Number(share) * 10) / 10 })),
         })),
         commits: { months: (Array.isArray(sec.commitsByMonth) ? sec.commitsByMonth : []).map((m) => ({ month: String(m?.month || ''), n: num(m?.n) ?? 0 })),
           path: sparkPath((Array.isArray(sec.commitsByMonth) ? sec.commitsByMonth : []).map((m) => num(m?.n) ?? 0), 240, 48) },

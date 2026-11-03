@@ -123,3 +123,25 @@ test('task sets globals', async () => {
   assert.equal(none.lifeHub.cards.every((c) => c.empty), true);
   assert.deepEqual(none.lifePersonal, []);
 });
+
+test('export shapes: language shares are percentages, serious/silly are strings', () => {
+  const c = buildSection('code', fixture.sections.code, now);
+  const y25 = c.languagesByYear.find((y) => y.year === '2025');
+  assert.deepEqual(y25.languages, [{ name: 'Python', pct: 55 }, { name: 'JavaScript', pct: 45 }]);
+  assert.ok(c.languagesByYear.every((y) => y.languages.every((l) => l.pct <= 100)));
+  assert.equal(c.languagesByYear[1].languages[0].pct, 60.5);
+  assert.equal(typeof fixture.sections.games.serious, 'string');
+  const g = buildSection('games', fixture.sections.games, now);
+  assert.deepEqual(g.serious, [{ name: 'Fixture Quest', hours: null }]);
+  assert.deepEqual(g.silly, [{ name: 'Sample Tactics', hours: null }]);
+  const none = buildSection('games', { ...fixture.sections.games, serious: null, silly: null }, now);
+  assert.deepEqual(none.serious, []);
+  // an array is tolerated too
+  assert.equal(buildSection('games', { ...fixture.sections.games, serious: ['A'] }, now).serious[0].name, 'A');
+});
+
+test('partial totals: absent fields do not become zero rows from nowhere', () => {
+  const w = buildSection('watching', { staleDays: 0, headline: { value: 1, unit: '', label: 'x' }, notable: [], totals: { year: { films: 3 }, month: {} } }, now);
+  assert.equal(w.stats.length, 1);
+  assert.equal(w.stats[0].items[0].value, '3');
+});
