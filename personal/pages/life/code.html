@@ -27,9 +27,9 @@
       {{#each languagesNow}}<span class="life-chip">{{this}}</span>{{/each}}
     </p>
     {{/if}}
-    {{#if commits.path}}
+    {{#if commits}}
     <div class="life-charts life-charts--wide">
-      {{> life-chart label="Commits" path=commits.path per="month by month"}}
+      {{> chart-line commits}}
     </div>
     {{/if}}
     {{#if languagesByYear.length}}

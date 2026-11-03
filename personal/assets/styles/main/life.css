@@ -9,8 +9,6 @@
 /* ─── Section inks: one per section, from the zine's own palette ─ */
 .life-ink--fitness   { --life-ink: var(--ink-purple); }
 .life-ink--body      { --life-ink: var(--ink-red); }
-.life-ink--sleep     { --life-ink: var(--ink-blue); }
-.life-ink--food      { --life-ink: var(--ink-orange); }
 .life-ink--games     { --life-ink: var(--ink-magenta); }
 .life-ink--code      { --life-ink: var(--ink-green); }
 .life-ink--watching  { --life-ink: var(--ink-red); }
@@ -297,6 +295,7 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
 /* ─── Section pages: numbers by period ───── */
 .stat-strip.life-stats { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); row-gap: 10px; }
 .stat-strip.life-stats .stat-strip__num { font-size: 48px; overflow-wrap: anywhere; }
+.stat-strip.life-stats .stat-strip__num small { overflow-wrap: normal; white-space: nowrap; }
 
 .life-period { margin-top: 18px; }
 
@@ -314,38 +313,6 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 22px;
   margin-bottom: 26px;
-}
-
-.life-chart {
-  background: #fff;
-  border: 2px solid var(--ink);
-  box-shadow: 5px 5px 0 var(--life-ink);
-  padding: 12px 14px 14px;
-}
-
-.life-chart__label {
-  font-family: var(--f-mono);
-  font-size: 13px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.life-chart__label span { font-weight: 400; opacity: 0.7; }
-
-.life-chart__svg {
-  display: block;
-  width: 100%;
-  height: 96px;
-  overflow: visible;
-}
-
-.life-chart__svg path {
-  fill: none;
-  stroke: var(--life-ink);
-  stroke-width: 3;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-  vector-effect: non-scaling-stroke;
 }
 
 /* ─── Line charts with axes (partials/chart-line.html, tasks/chart-axes.mjs) ── */
@@ -453,6 +420,128 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
   padding: 1px 3px;
   white-space: nowrap;
 }
+
+/* ─── /life/body: four blocks, one ink each (R2c.2) ─ */
+.life-block { --ink-section: var(--life-ink); margin-bottom: 8px; }
+.life-block--measures { --life-ink: var(--ink-red); }
+.life-block--sleep    { --life-ink: var(--ink-blue); }
+.life-block--food     { --life-ink: var(--ink-orange); }
+.life-block--movement { --life-ink: var(--ink-green); }
+
+.life-block .life-stats { margin-bottom: 22px; }
+.life-block .stat-strip.life-stats { grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); }
+.life-block .stat-strip.life-stats .stat-strip__num { overflow-wrap: normal; }
+
+.life-block__note {
+  margin: 0 0 8px;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: color-mix(in srgb, var(--ink) 72%, #fff);
+}
+
+/* The split: a share of a whole as one fat bar, the page's loud bit. Segments step the
+   block's ink from full to pale (direct labels carry identity, not colour); 2px paper
+   gaps between them; parts under 12% hang their label below the bar. */
+.life-split { margin: 0 0 30px; }
+
+.life-split__label {
+  font-family: var(--f-mono);
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.life-split__bar {
+  display: flex;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-height: 92px;
+  background: #fff;
+  border: 2px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+  transform: rotate(-0.6deg);
+}
+
+.life-split__part {
+  position: relative;
+  flex: 0 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 8px 10px;
+  background: var(--life-ink);
+  color: #fff;
+}
+.life-split__part:nth-child(2) { background: color-mix(in srgb, var(--life-ink) 62%, #fff); color: var(--ink); }
+.life-split__part:nth-child(3) { background: color-mix(in srgb, var(--life-ink) 34%, #fff); color: var(--ink); }
+.life-split__part:nth-child(4) { background: color-mix(in srgb, var(--life-ink) 14%, #fff); color: var(--ink); }
+
+.life-split__pct {
+  font-family: var(--f-disp);
+  font-weight: 400;
+  font-size: clamp(34px, 6vw, 60px);
+  line-height: 0.9;
+}
+.life-split__pct small { font-size: 0.45em; margin-left: 2px; }
+
+.life-split__name {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.life-split__part--narrow { padding: 0; }
+.life-split__part--narrow .life-split__pct,
+.life-split__part--narrow .life-split__name {
+  position: absolute;
+  right: 0;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.life-split__part--narrow .life-split__pct { top: calc(100% + 12px); font-size: 28px; }
+.life-split__part--narrow .life-split__name { top: calc(100% + 42px); }
+.life-split:has(.life-split__part--narrow) { margin-bottom: 84px; }
+
+/* Renpho: tape and scale, each with its change since the first reading. */
+.life-measurements { margin-top: 6px; }
+
+.life-measurements__list {
+  list-style: none;
+  margin: 0 0 22px;
+  padding: 0;
+  border-top: 2px solid var(--ink);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  column-gap: 28px;
+}
+
+.life-measurements__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  padding: 9px 0;
+  border-bottom: 1.5px dashed rgba(23,19,17,0.4);
+  font-family: var(--f-mono);
+  font-size: 13px;
+}
+
+.life-measurements__name { flex: 1 1 auto; font-weight: 700; }
+.life-measurements__now { font-family: var(--f-disp); font-size: 26px; line-height: 1; }
+.life-measurements__now small { font-family: var(--f-mono); font-size: 12px; margin-left: 3px; }
+.life-measurements__change {
+  padding: 1px 6px;
+  background: var(--ink-yellow);
+  border: 1.5px solid var(--ink);
+  font-weight: 700;
+}
+.life-measurements__since { flex-basis: 100%; font-size: 11px; color: color-mix(in srgb, var(--ink) 72%, #fff); }
 
 /* ─── Section pages: lists ──────────────── */
 .life-notables,

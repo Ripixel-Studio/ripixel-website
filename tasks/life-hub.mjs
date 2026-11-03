@@ -1,9 +1,10 @@
 // @ts-check
 /**
- * The /life hub, its nine section pages and the personal bits (LH3.4): data only.
+ * The /life hub, its seven section pages and the personal bits (LH3.4, R2c.2): data only.
  * Pure functions shape `lifeIndex` (the public life export) and `fitnessLife`
  * into view models; the templates only loop and test. No HTML strings here.
- * The only computed strings are SVG path data (`sparkPath`), as `routePath()` is.
+ * The only computed strings are chart models from `chart-axes.mjs` (SVG path
+ * data and tick labels).
  *
  * Globals set by `lifeHubTask()`:
  *   lifeHub       { cards[{name, href, title, headline, latest, note, staleLabel, empty}], outings[] }
@@ -16,12 +17,14 @@
  * `work.salary` exists in the export (ruling F9).
  */
 
-export const SECTION_ORDER = ['fitness', 'body', 'sleep', 'food', 'games', 'code', 'watching', 'listening', 'reading'];
+import { lineChart } from './chart-axes.mjs';
+
+export const SECTION_ORDER = ['fitness', 'body', 'games', 'code', 'watching', 'listening', 'reading'];
 /** @param {string} name */
 export const SECTION_HREF = (name) => '/life/' + name;
 
 const TITLES = {
-  fitness: 'Fitness', body: 'Body', sleep: 'Sleep', food: 'Food', games: 'Games',
+  fitness: 'Fitness', body: 'Body', games: 'Games',
   code: 'Code', watching: 'Watching', listening: 'Listening', reading: 'Reading',
 };
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -43,25 +46,6 @@ export function monthLabel(month) {
 export function sawLabel(month) {
   const label = monthLabel(month);
   return label ? `saw in ${label}` : '';
-}
-
-/**
- * An SVG path `d` through the values, scaled into w x h. '' for fewer than 2 numbers.
- * @param {number[]} values @param {number} w @param {number} h
- */
-export function sparkPath(values, w, h) {
-  const v = (Array.isArray(values) ? values : []).filter((x) => typeof x === 'number' && Number.isFinite(x));
-  if (v.length < 2) return '';
-  const lo = Math.min(...v);
-  const hi = Math.max(...v);
-  const span = hi - lo || 1;
-  return v
-    .map((y, i) => {
-      const px = (i / (v.length - 1)) * w;
-      const py = hi === lo ? h / 2 : h - ((y - lo) / span) * h;
-      return `${i ? 'L' : 'M'}${+px.toFixed(1)} ${+py.toFixed(1)}`;
-    })
-    .join(' ');
 }
 
 const num = (/** @type {unknown} */ n) => (typeof n === 'number' && Number.isFinite(n) ? n : null);
@@ -134,8 +118,151 @@ function hasData(sec) {
   return Object.entries(sec).some(([k, v]) => k !== 'updated' && k !== 'staleDays' && k !== 'headline' && filled(v));
 }
 
-/** @param {any[]} weekly @param {string} key */
-const series = (weekly, key) => (Array.isArray(weekly) ? weekly : []).map((w) => num(w?.[key])).filter((x) => x != null);
+/** One weekly column, gaps kept as null (the chart breaks its line there). @param {any[]} weekly @param {string} key */
+const column = (weekly, key) => (Array.isArray(weekly) ? weekly : []).map((w) => num(w?.[key]));
+
+/** A weekly line chart (axes from chart-axes.mjs), or null with fewer than 2 values. */
+function weeklyChart(/** @type {any[]} */ weekly, /** @type {string} */ key, /** @type {string} */ label, /** @type {string} */ unit, decimals = 0, scale = 1) {
+  const rows = Array.isArray(weekly) ? weekly.filter((w) => w && typeof w === 'object') : [];
+  const values = column(rows, key).map((v) => (v == null ? null : v / scale));
+  return lineChart(values, { label, unit, decimals, x: { kind: 'weeks', weeks: rows.map((w) => String(w.week || '')) } });
+}
+
+/** A stat row, or false when the number is missing (no zeros from nowhere). */
+const stat = (/** @type {string} */ label, /** @type {unknown} */ v, /** @type {(n: number) => string} */ fmt, unit = '') => (num(v) != null ? row(label, fmt(/** @type {number} */ (v)), unit) : false);
+
+/** A block view, or null when it has nothing to show. @param {any} v */
+const block = (v) => (v.stats.length || v.charts.length ? v : null);
+
+/** One 100 % bar from whole-number shares; null without at least two positive parts. */
+function shares(/** @type {any} */ src, /** @type {[string, string, string][]} */ parts) {
+  if (!src || typeof src !== 'object') return null;
+  const out = parts.map(([key, field, label]) => ({ key, label, pct: num(src[field]) }))
+    .filter((p) => p.pct != null && p.pct > 0)
+    .map((p) => ({ ...p, pct: Math.round(/** @type {number} */ (p.pct)), narrow: /** @type {number} */ (p.pct) < 12 }));
+  return out.length >= 2 ? out : null;
+}
+
+const MEASURE_LABELS = /** @type {Record<string, string>} */ ({
+  waistCm: 'Waist', chestCm: 'Chest', hipsCm: 'Hips', neckCm: 'Neck', shoulderCm: 'Shoulders',
+  armLCm: 'Left arm', armRCm: 'Right arm', thighLCm: 'Left thigh', thighRCm: 'Right thigh', calfLCm: 'Left calf', calfRCm: 'Right calf',
+  muscleKg: 'Muscle mass', waterPct: 'Body water', boneKg: 'Bone mass', visceral: 'Visceral fat', bmrKcal: 'BMR',
+  metabolicAge: 'Metabolic age', subcutaneousPct: 'Subcutaneous fat', skeletalMusclePct: 'Skeletal muscle', proteinPct: 'Protein',
+});
+
+/** `armRCm` → `Arm r`: a readable label for a measure this site has not named yet. */
+const humanKey = (/** @type {string} */ k) => {
+  const t = k.replace(/(Cm|Kg|Pct|Kcal)$/, '').replace(/([A-Z])/g, ' $1').trim().toLowerCase();
+  return t ? t[0].toUpperCase() + t.slice(1) : k;
+};
+
+/** Signed change with a real minus: `+0.7`, `−2.5`, `0`. */
+const signed = (/** @type {number} */ n, /** @type {number} */ d) => {
+  const r = Number(n.toFixed(d));
+  return r === 0 ? '0' : `${r > 0 ? '+' : '−'}${Math.abs(r).toFixed(d)}`;
+};
+
+/** `2026-08-11` → `11 Aug 2026`. */
+const dayLabel = (/** @type {unknown} */ iso) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso ?? ''));
+  return m ? `${+m[3]} ${MONTHS[+m[2] - 1]} ${m[1]}` : '';
+};
+
+/** The Renpho block: tape and scale measures, each with change since its first reading. */
+function measurementsView(/** @type {any} */ m) {
+  if (!m || typeof m !== 'object') return null;
+  const list = [...(Array.isArray(m.tape) ? m.tape : []), ...(Array.isArray(m.scale) ? m.scale : [])]
+    .filter((x) => x && typeof x.key === 'string' && num(x.latest?.value) != null);
+  const rows = [];
+  const charts = [];
+  for (const x of list) {
+    const label = MEASURE_LABELS[x.key] || humanKey(x.key);
+    const unit = String(x.unit || '');
+    const d = Number.isInteger(x.latest.value) && (num(x.first?.value) == null || Number.isInteger(x.first.value)) ? 0 : 1;
+    rows.push({
+      key: x.key, label, unit, value: d ? one(x.latest.value) : group(x.latest.value),
+      change: num(x.change) != null ? signed(x.change, d) : '',
+      since: dayLabel(x.first?.date),
+    });
+    const c = weeklyChart(x.weekly, 'value', label, unit, d);
+    if (c) charts.push(c);
+  }
+  return rows.length ? { rows, charts } : null;
+}
+
+/** The merged /life/body view (R2c.2): measures, sleep, food, movement, and Renpho measurements. */
+function bodyView(/** @type {any} */ sec) {
+  const l = sec.latest || {};
+  const weekly = Array.isArray(sec.weekly) ? sec.weekly : [];
+  const measures = {
+    stats: [
+      stat('Weight', l.weightKg, one, 'kg'),
+      stat('Body fat', l.bodyFatPct, one, '%'),
+      stat('BMI', l.bmi, one),
+      stat('Lean mass', l.leanMassKg, one, 'kg'),
+      stat('Resting heart rate', l.restingHr, group, 'bpm'),
+      stat('HRV', l.hrvMs, group, 'ms'),
+      stat('VO₂ max', l.vo2Max, one, 'ml/kg/min'),
+      stat('SpO₂', l.spo2Pct, one, '%'),
+      stat('Breathing rate', l.breathsPerMin, one, '/min'),
+    ].filter(Boolean),
+    charts: [
+      weeklyChart(weekly, 'weightKg', 'Weight', 'kg', 1),
+      weeklyChart(weekly, 'bodyFatPct', 'Body fat', '%', 1),
+      weeklyChart(weekly, 'restingHr', 'Resting heart rate', 'bpm'),
+      weeklyChart(weekly, 'hrvMs', 'HRV', 'ms'),
+      weeklyChart(weekly, 'vo2Max', 'VO₂ max', 'ml/kg/min', 1),
+      weeklyChart(weekly, 'spo2Pct', 'SpO₂', '%', 1),
+      weeklyChart(weekly, 'breathsPerMin', 'Breathing rate', 'breaths/min', 1),
+    ].filter(Boolean),
+  };
+
+  const s = sec.sleep && typeof sec.sleep === 'object' ? sec.sleep : null;
+  const sleep = s && block({
+    stats: [
+      stat('Last 30 nights', s.avgMinutes30, hm),
+      stat('Last 90 nights', s.avgMinutes90, hm),
+      stat('Consistency', s.consistencyMinutes, (n) => `±${group(n)}`, 'min'),
+      s.best?.date && num(s.best.minutes) != null && { ...row('Best night', hm(s.best.minutes)), sub: String(s.best.date) },
+      s.worst?.date && num(s.worst.minutes) != null && { ...row('Shortest night', hm(s.worst.minutes)), sub: String(s.worst.date) },
+    ].filter(Boolean),
+    charts: [weeklyChart(s.weekly, 'avgMinutes', 'Sleep, weekly average', 'h', 1, 60)].filter(Boolean),
+    stages: shares(s.stages30, [['deep', 'deepPct', 'Deep'], ['light', 'lightPct', 'Light'], ['rem', 'remPct', 'REM'], ['wake', 'wakePct', 'Awake']]),
+  });
+
+  const f = sec.food && typeof sec.food === 'object' ? sec.food : null;
+  const food = f && block({
+    stats: [
+      stat('Protein per kg', f.proteinPerKg30, one, 'g/kg'),
+      stat('Energy', f.avgKcal30, group, 'kcal'),
+      stat('Protein', f.avgProteinG30, group, 'g'),
+      stat('Carbs', f.avgCarbsG30, group, 'g'),
+      stat('Fat', f.avgFatG30, group, 'g'),
+      stat('Fibre', f.avgFibreG30, group, 'g'),
+      stat('Logging streak', f.loggedStreakDays, group, 'days'),
+      stat('Protein target streak', f.proteinStreakDays, group, 'days'),
+    ].filter(Boolean),
+    charts: [
+      weeklyChart(f.weekly, 'avgKcal', 'Energy, daily average', 'kcal'),
+      weeklyChart(f.weekly, 'avgProteinG', 'Protein, daily average', 'g'),
+    ].filter(Boolean),
+    split: shares(f.split30, [['protein', 'proteinPct', 'Protein'], ['carbs', 'carbsPct', 'Carbs'], ['fat', 'fatPct', 'Fat']]),
+  });
+
+  const mv = sec.movement && typeof sec.movement === 'object' ? sec.movement : null;
+  const movement = mv && block({
+    stats: [
+      stat('Steps a day', mv.avgSteps30, group),
+      stat('Active zone minutes a week', mv.avgAzmWeek4, group, 'min'),
+    ].filter(Boolean),
+    charts: [
+      weeklyChart(mv.weekly, 'avgSteps', 'Steps, daily average', 'steps'),
+      weeklyChart(mv.weekly, 'azmMinutes', 'Active zone minutes', 'min'),
+    ].filter(Boolean),
+  });
+
+  return { measures, sleep: sleep || null, food: food || null, movement: movement || null, measurements: measurementsView(sec.measurements) };
+}
 
 /** @param {any} sec @param {any[]} outings notables of the matching outing kind */
 function mediaView(sec, outings) {
@@ -163,50 +290,8 @@ export function buildSection(name, sec, now = new Date(), outingNotables = []) {
   const view = { ...base, staleLabel: staleLabel(sec.staleDays), updated: String(sec.updated || ''), empty: false, headline: headlineOf(sec.headline) ?? fallbackHeadline(name, sec), latest: /** @type {any} */ (null) };
   const weekly = sec.weekly;
   switch (name) {
-    case 'body': {
-      const l = sec.latest || {};
-      return {
-        ...view,
-        stats: [
-          num(l.weightKg) != null && row('Weight', one(l.weightKg), 'kg'),
-          num(l.bodyFatPct) != null && row('Body fat', one(l.bodyFatPct), '%'),
-          num(l.restingHr) != null && row('Resting heart rate', group(l.restingHr), 'bpm'),
-          num(l.hrvMs) != null && row('HRV', group(l.hrvMs), 'ms'),
-        ].filter(Boolean),
-        charts: [
-          { key: 'weight', label: 'Weight', path: sparkPath(series(weekly, 'weightKg'), 240, 48) },
-          { key: 'bodyFat', label: 'Body fat', path: sparkPath(series(weekly, 'bodyFatPct'), 240, 48) },
-          { key: 'restingHr', label: 'Resting heart rate', path: sparkPath(series(weekly, 'restingHr'), 240, 48) },
-          { key: 'hrv', label: 'HRV', path: sparkPath(series(weekly, 'hrvMs'), 240, 48) },
-        ].filter((c) => c.path),
-      };
-    }
-    case 'sleep':
-      return {
-        ...view,
-        stats: [
-          num(sec.avgMinutes30) != null && row('Last 30 nights', hm(sec.avgMinutes30)),
-          num(sec.avgMinutes90) != null && row('Last 90 nights', hm(sec.avgMinutes90)),
-          num(sec.consistencyMinutes) != null && row('Consistency', `±${group(sec.consistencyMinutes)}`, 'min'),
-          sec.best?.date && num(sec.best.minutes) != null && { ...row('Best night', hm(sec.best.minutes)), sub: String(sec.best.date) },
-          sec.worst?.date && num(sec.worst.minutes) != null && { ...row('Shortest night', hm(sec.worst.minutes)), sub: String(sec.worst.date) },
-        ].filter(Boolean),
-        charts: [{ key: 'sleep', label: 'Weekly average', path: sparkPath(series(weekly, 'avgMinutes'), 240, 48) }].filter((c) => c.path),
-      };
-    case 'food':
-      return {
-        ...view,
-        stats: [
-          num(sec.avgKcal30) != null && row('Energy, 30-day average', group(sec.avgKcal30), 'kcal'),
-          num(sec.avgProteinG30) != null && row('Protein, 30-day average', group(sec.avgProteinG30), 'g'),
-          num(sec.loggedStreakDays) != null && row('Logging streak', group(sec.loggedStreakDays), 'days'),
-          num(sec.proteinStreakDays) != null && row('Protein target streak', group(sec.proteinStreakDays), 'days'),
-        ].filter(Boolean),
-        charts: [
-          { key: 'kcal', label: 'Energy', path: sparkPath(series(weekly, 'avgKcal'), 240, 48) },
-          { key: 'protein', label: 'Protein', path: sparkPath(series(weekly, 'avgProteinG'), 240, 48) },
-        ].filter((c) => c.path),
-      };
+    case 'body':
+      return { ...view, ...bodyView(sec) };
     case 'games': {
       const a = sec.achievements || {};
       const names = (/** @type {any} */ l) => (Array.isArray(l) ? l : typeof l === 'string' && l ? [l] : []).map((g) => (typeof g === 'string' ? { name: g, hours: null } : { name: String(g?.name || ''), hours: num(g?.hours) })).filter((g) => g.name);
@@ -235,8 +320,10 @@ export function buildSection(name, sec, now = new Date(), outingNotables = []) {
           languages: Object.entries(byYear[y] || {}).sort((a, b) => Number(b[1]) - Number(a[1]))
             .map(([lang, share]) => ({ name: lang, pct: Math.round(Number(share) * 10) / 10 })),
         })),
-        commits: { months: (Array.isArray(sec.commitsByMonth) ? sec.commitsByMonth : []).map((m) => ({ month: String(m?.month || ''), n: num(m?.n) ?? 0 })),
-          path: sparkPath((Array.isArray(sec.commitsByMonth) ? sec.commitsByMonth : []).map((m) => num(m?.n) ?? 0), 240, 48) },
+        commits: (() => {
+          const months = (Array.isArray(sec.commitsByMonth) ? sec.commitsByMonth : []).filter((m) => m && typeof m === 'object');
+          return lineChart(months.map((m) => num(m.n) ?? 0), { label: 'Commits', unit: 'a month', x: { kind: 'months', months: months.map((m) => String(m.month || '')) } });
+        })(),
       };
     }
     case 'watching': {
@@ -279,15 +366,17 @@ export function buildSection(name, sec, now = new Date(), outingNotables = []) {
  */
 export function hubNote(name, v) {
   if (!v || v.empty) return null;
+  // body keeps its rows in blocks; the sleep average is named as the hub note reads it
+  const rows = name === 'body'
+    ? [...(v.sleep?.stats || []).map((/** @type {any} */ r) => (r.label === 'Last 30 nights' ? { ...r, label: 'Sleep, last 30 nights' } : r)), ...(v.measures?.stats || [])]
+    : (Array.isArray(v.stats) ? v.stats : []);
   const stat = (/** @type {string} */ label) => {
-    const r = (Array.isArray(v.stats) ? v.stats : []).find((x) => x && x.label === label);
+    const r = rows.find((/** @type {any} */ x) => x && x.label === label);
     return r ? { label: r.label, value: r.unit ? `${r.value}${r.unit === '%' ? '' : ' '}${r.unit}` : String(r.value), href: '' } : null;
   };
   const latest = (/** @type {any} */ n) => (n && n.title ? { label: 'Latest', value: n.by ? `${n.title}, ${n.by}` : n.title, href: '' } : null);
   switch (name) {
-    case 'body': return stat('Body fat') || stat('Resting heart rate');
-    case 'sleep': return stat('Best night');
-    case 'food': return stat('Energy, 30-day average');
+    case 'body': return stat('Sleep, last 30 nights') || stat('Body fat') || stat('Resting heart rate');
     case 'games': return v.recent?.[0] ? { label: 'Recently', value: v.recent[0].name, href: '' } : null;
     case 'code': {
       const p = [...(v.projects || [])].sort((a, b) => b.started.localeCompare(a.started))[0];

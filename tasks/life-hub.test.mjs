@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {
-  SECTION_ORDER, SECTION_HREF, staleLabel, sparkPath, sawLabel, monthLabel, hubNote, buildSection, buildHub, personalBits, lifeFacts, lifeHubTask,
+  SECTION_ORDER, SECTION_HREF, staleLabel, sawLabel, monthLabel, hubNote, buildSection, buildHub, personalBits, lifeFacts, lifeHubTask,
 } from './life-hub.mjs';
 import { runSkierTasks } from './skier-test-runner.mjs';
 
@@ -23,7 +23,7 @@ test('hub without life export', () => {
   const hub = buildHub(null, fitnessLife, now);
   assert.equal(hub.cards[0].empty, false);
   assert.equal(hub.cards[0].headline.value, '120');
-  assert.equal(hub.cards.slice(1).length, 8);
+  assert.equal(hub.cards.slice(1).length, 6);
   assert.ok(hub.cards.slice(1).every((c) => c.empty && c.headline === null && c.latest === null));
   assert.deepEqual(hub.outings, []);
 });
@@ -35,7 +35,7 @@ test('stale label, and a stale section keeps its numbers', () => {
   const v = buildSection('reading', fixture.sections.reading, now);
   assert.equal(v.staleLabel, 'last updated 4 days ago');
   assert.equal(v.headline.value, '9');
-  assert.equal(buildSection('sleep', fixture.sections.sleep, now).staleLabel, '');
+  assert.equal(buildSection('body', fixture.sections.body, now).staleLabel, '');
 });
 
 test('latest notable is newest', () => {
@@ -98,16 +98,9 @@ test('empty section has no numbers', () => {
   }
 });
 
-test('sparkPath', () => {
-  assert.equal(sparkPath([1], 10, 10), '');
-  assert.equal(sparkPath([], 10, 10), '');
-  assert.equal(sparkPath([0, 10], 100, 20), 'M0 20 L100 0');
-  assert.match(sparkPath([5, 5, 5], 10, 10), /^M0 5 L5 5 L10 5$/);
-});
-
 test('section views from the fixture', () => {
-  assert.equal(buildSection('body', fixture.sections.body, now).stats[0].value, '80.1');
-  assert.equal(buildSection('sleep', fixture.sections.sleep, now).stats[0].value, '7h 24m');
+  assert.equal(buildSection('body', fixture.sections.body, now).measures.stats[0].value, '80.1');
+  assert.equal(buildSection('body', fixture.sections.body, now).sleep.stats[0].value, '7h 24m');
   assert.equal(buildSection('code', fixture.sections.code, now).projects[1].url, '');
   assert.equal(buildSection('games', fixture.sections.games, now).stats[2].value, '120 / 300');
   assert.equal(buildSection('reading', fixture.sections.reading, now).current[0].percent, 40);
@@ -115,7 +108,7 @@ test('section views from the fixture', () => {
 
 test('task sets globals', async () => {
   const g = await runSkierTasks([lifeHubTask()], { lifeIndex: fixture, fitnessLife });
-  assert.equal(g.lifeHub.cards.length, 9);
+  assert.equal(g.lifeHub.cards.length, 7);
   assert.deepEqual(Object.keys(g.lifeSections), SECTION_ORDER.slice(1));
   assert.ok(g.lifePersonal.length === 0 || Array.isArray(g.lifePersonal));
   assert.equal(g.lifeFacts['fx.films'], 42);
@@ -157,9 +150,9 @@ test('hub notes: the latest thing or the next number per section', () => {
   const hub = buildHub(fixture, { ...fitnessLife, activities: [{ title: 'Invented Run', href: '/life/activity/invented-run' }] }, now);
   const notes = Object.fromEntries(hub.cards.map((c) => [c.name, c.note]));
   assert.deepEqual(notes.fitness, { label: 'Latest session', value: 'Invented Run', href: '/life/activity/invented-run' });
-  assert.deepEqual(notes.body, { label: 'Body fat', value: '17.2%', href: '' });
-  assert.deepEqual(notes.sleep, { label: 'Best night', value: '8h 30m', href: '' });
-  assert.equal(notes.food.value, '2,450 kcal');
+  assert.deepEqual(notes.body, { label: 'Sleep, last 30 nights', value: '7h 24m', href: '' });
+  const noSleep = buildSection('body', { ...fixture.sections.body, sleep: null }, now);
+  assert.deepEqual(hubNote('body', noSleep), { label: 'Body fat', value: '17.2%', href: '' });
   assert.equal(notes.games.value, 'Sample Tactics');
   assert.deepEqual(notes.code, { label: 'Newest project', value: 'sample-tool', href: '' });
   assert.equal(notes.watching.value, 'The Invented Harbour');
@@ -171,10 +164,9 @@ test('hub notes: the latest thing or the next number per section', () => {
 });
 
 test('a headline in minutes reads as hours and minutes', () => {
-  assert.deepEqual(buildSection('sleep', fixture.sections.sleep, now).headline, { value: '7h 24m', unit: '', label: 'average night, last 30 days' });
-  const hub = buildHub(fixture, fitnessLife, now);
-  assert.equal(hub.cards.find((c) => c.name === 'sleep')?.headline?.value, '7h 24m');
-  assert.equal(buildSection('sleep', { staleDays: 0, headline: { value: 60, unit: 'min', label: 'x' } }, now).headline?.value, '1h 00m');
+  const sec = { staleDays: 0, headline: { value: 444, unit: 'min', label: 'average night, last 30 days' } };
+  assert.deepEqual(buildSection('body', sec, now).headline, { value: '7h 24m', unit: '', label: 'average night, last 30 days' });
+  assert.equal(buildSection('body', { staleDays: 0, headline: { value: 60, unit: 'min', label: 'x' } }, now).headline?.value, '1h 00m');
 });
 
 test('a section with lists but a null headline has data', () => {
@@ -204,4 +196,86 @@ test('silly is dropped when it equals serious (small print and games view)', () 
   assert.deepEqual(g.serious, [{ name: 'Idle Fixture', hours: null }]);
   const differ = buildSection('games', { serious: 'A Game', silly: 'B Game' }, new Date('2026-11-01T00:00:00Z'));
   assert.equal(differ.silly.length, 1);
+});
+
+// ─── Round 2: one /life/body, seven sections (R2c.2) ───
+
+test('seven sections', () => {
+  const order = ['fitness', 'body', 'games', 'code', 'watching', 'listening', 'reading'];
+  assert.deepEqual(SECTION_ORDER, order);
+  assert.deepEqual(buildHub(fixture, fitnessLife, now).cards.map((c) => c.name), order);
+});
+
+test('body blocks', () => {
+  const b = buildSection('body', fixture.sections.body, now);
+  assert.ok(b.measures.charts.length >= 4, `measures charts: ${b.measures.charts.length}`);
+  assert.equal(b.sleep.stages.length, 4);
+  assert.deepEqual(b.sleep.stages.map((s) => s.label), ['Deep', 'Light', 'REM', 'Awake']);
+  assert.equal(b.food.split.reduce((n, s) => n + s.pct, 0), 100);
+  assert.equal(b.movement.charts.length, 2);
+  // every chart is an axes model (chart-axes lineChart), never a bare path
+  for (const c of [...b.measures.charts, ...b.sleep.charts, ...b.food.charts, ...b.movement.charts]) {
+    assert.ok(c.d && c.yTicks.length >= 2 && c.xTicks.length >= 2, c.label);
+    assert.doesNotMatch(c.d, /NaN/);
+  }
+  const sleepChart = b.sleep.charts[0];
+  assert.equal(sleepChart.unit, 'h');
+  assert.equal(sleepChart.xTicks[0].label, '4 May');
+  assert.deepEqual(b.movement.charts.map((c) => c.unit), ['steps', 'min']);
+  assert.ok(b.food.stats.some((r) => r.label === 'Protein per kg' && r.value === '1.8' && r.unit === 'g/kg'));
+  assert.deepEqual(b.food.stats.map((r) => r.label).slice(1, 6), ['Energy', 'Protein', 'Carbs', 'Fat', 'Fibre']);
+  // VO₂ max is null all the way down: no row, no chart, no zero
+  assert.ok(!b.measures.stats.some((r) => /VO/.test(r.label)));
+  assert.ok(!b.measures.charts.some((c) => /VO/.test(c.label)));
+  // height-derived figures come from the export, never typed here
+  assert.ok(b.measures.stats.some((r) => r.label === 'BMI' && r.value === '25.3'));
+  // Renpho: change since the first measurement, signed
+  const waist = b.measurements.rows.find((r) => r.label === 'Waist');
+  assert.deepEqual({ value: waist.value, unit: waist.unit, change: waist.change }, { value: '84.0', unit: 'cm', change: '−2.5' });
+  assert.ok(b.measurements.charts.length >= 1);
+});
+
+test('a metric the device does report shows up', () => {
+  const sec = structuredClone(fixture.sections.body);
+  sec.latest.vo2Max = 47.2;
+  sec.weekly.forEach((w, i) => { w.vo2Max = 45 + i / 10; });
+  const b = buildSection('body', sec, now);
+  assert.ok(b.measures.stats.some((r) => r.label === 'VO₂ max' && r.value === '47.2'));
+  assert.ok(b.measures.charts.some((c) => c.label === 'VO₂ max'));
+});
+
+test('partial body', () => {
+  const b = buildSection('body', { ...fixture.sections.body, movement: null, sleep: null, measurements: null }, now);
+  assert.equal(b.movement, null);
+  assert.equal(b.sleep, null);
+  assert.equal(b.measurements, null);
+  assert.ok(b.measures.stats.length > 0 && b.measures.charts.length > 0);
+  assert.ok(b.food);
+  // a block with nothing in it is null, not an empty box
+  const hollow = buildSection('body', { ...fixture.sections.body, food: { avgKcal30: null, split30: null, weekly: [] }, movement: { avgSteps30: null, weekly: [] } }, now);
+  assert.equal(hollow.food, null);
+  assert.equal(hollow.movement, null);
+  // a block's split/stages are null when absent, the rest stays
+  const noSplit = buildSection('body', { ...fixture.sections.body, food: { ...fixture.sections.body.food, split30: null } }, now);
+  assert.equal(noSplit.food.split, null);
+  assert.ok(noSplit.food.stats.length > 0);
+});
+
+test('old-shape export', async () => {
+  const old = { sections: { sleep: fixture.sections.body.sleep, food: fixture.sections.body.food, body: { latest: { weightKg: 80 }, weekly: [] } } };
+  const b = buildSection('body', old.sections.body, now);
+  assert.equal(b.measures.stats.length, 1);
+  assert.equal(b.sleep, null);
+  assert.equal(b.food, null);
+  assert.equal(b.movement, null);
+  const g = await runSkierTasks([lifeHubTask()], { lifeIndex: old, fitnessLife });
+  assert.ok(!('sleep' in g.lifeSections));
+  assert.ok(!('food' in g.lifeSections));
+  assert.equal(g.lifeHub.cards.length, 7);
+});
+
+test('code commits chart has axes', () => {
+  const c = buildSection('code', fixture.sections.code, now);
+  assert.equal(c.commits.label, 'Commits');
+  assert.deepEqual(c.commits.xTicks.map((t) => t.label), ['Sep ’26', 'Oct ’26']);
 });

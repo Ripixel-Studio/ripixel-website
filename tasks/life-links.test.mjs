@@ -65,6 +65,13 @@ describe('built personal site has no trailing-slash internal links', () => {
     await fs.access(path.join(OUT, 'life', 'roundups.html'));
   }, { timeout: 120_000 });
 
+  test('the retired /life/sleep and /life/food pages are gone from the build output', async () => {
+    for (const rel of ['life/sleep.html', 'life/food.html']) {
+      assert.equal(await fs.access(path.join(OUT, rel)).then(() => true, () => false), false, rel);
+    }
+    assert.ok(await fs.access(path.join(OUT, 'life', 'body.html')).then(() => true, () => false));
+  });
+
   test('fixture build has the /life pages this scan is for', async () => {
     const files = await walk(OUT);
     assert.ok(files.some((f) => /life\/activity\/[^/]+\/index\.html$/.test(f)), 'an activity page');
