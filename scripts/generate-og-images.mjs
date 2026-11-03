@@ -132,7 +132,7 @@ export function cardShell({ ink, pill, bigGlyph = '', inner }) {
   <!-- URL footer -->
   <text x="56" y="594"
     font-family="${MONO}"
-    font-size="17" fill="${INK}" opacity="0.45">james.ripixel.co.uk — a zine, by james king · est. 2015</text>
+    font-size="17" fill="${INK}" opacity="0.45">james.ripixel.co.uk — a zine, by james king</text>
 
   <!-- Ink dot cluster (top right, registration marks) -->
   <circle cx="1148" cy="50" r="7"   fill="${ink}"/>

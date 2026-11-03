@@ -28,7 +28,7 @@
       </div>
       {{#if fitnessLife.stats}}
       <div class="page-hero__aside fit-hero__aside">
-        <div class="page-hero__aside-scribble">{{#if fitnessLife.stats.subtitle}}({{fitnessLife.stats.subtitle}}){{else}}(every session, on the record){{/if}}</div>
+        <div class="page-hero__aside-scribble">{{#if fitnessLife.stats.whatIDo.length}}({{#each fitnessLife.stats.whatIDo}}{{#if @index}} · {{/if}}{{this}}{{/each}}){{else}}(every session, on the record){{/if}}</div>
         <div class="page-hero__aside-box">
           {{#if fitnessLife.stats.bio}}{{fitnessLife.stats.bio}}<br>{{/if}}
           <b>ON THE RECORD SINCE {{fitnessLife.stats.since}}</b>

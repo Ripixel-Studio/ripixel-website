@@ -362,6 +362,18 @@ export function lifeFacts(facts) {
   return Object.fromEntries((Array.isArray(facts) ? facts : []).filter(isPublic).map((f) => [f.key, f.value]));
 }
 
+/**
+ * FitGlue's first-commit date, from the export: the `code.project.fitglue.started` fact,
+ * else the `code.projects` row named fitglue. Empty when neither is there.
+ * @param {any} idx the life index
+ */
+export function fitglueStarted(idx) {
+  const fact = (Array.isArray(idx?.facts) ? idx.facts : []).filter(isPublic).find((f) => f.key === 'code.project.fitglue.started');
+  const row = (Array.isArray(idx?.sections?.code?.projects) ? idx.sections.code.projects : []).find((p) => /^fitglue$/i.test(String(p?.name || '')));
+  const m = /^(\d{4})-\d{2}-\d{2}/.exec(String(fact?.value || row?.started || ''));
+  return m ? m[1] : '';
+}
+
 export function lifeHubTask(config = {}) {
   return {
     name: 'life-hub',
@@ -377,7 +389,11 @@ export function lifeHubTask(config = {}) {
       );
       const lifeHub = buildHub(idx, g.fitnessLife, now);
       ctx.logger.info(`Life hub: ${lifeHub.cards.filter((c) => !c.empty).length}/${lifeHub.cards.length} sections have data`);
-      return { lifeHub, lifeSections, lifePersonal: personalBits(idx?.facts), lifeFacts: lifeFacts(idx?.facts) };
+      return { lifeHub, lifeSections, lifePersonal: personalBits(idx?.facts), lifeFacts: lifeFacts(idx?.facts),
+        // the homepage's "latest project" line and the "built <year>" badges
+        fitglueStartedYear: fitglueStarted(idx),
+        latestProjectDate: fitglueStarted(idx) ? `${fitglueStarted(idx)} → present` : '',
+      };
     },
   };
 }

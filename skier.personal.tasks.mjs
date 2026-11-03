@@ -200,7 +200,6 @@ export const tasks = [
             cacheHash,
             // Homepage static data
             latestProject:     'FitGlue',
-            latestProjectDate: '2024 → present',
         },
         valuesFn: (/** @type {any} */ globals) => {
             const match = globals.changelogHtml && /** @type {string} */ (globals.changelogHtml).match(/v(\d+\.\d+\.\d+)/i);

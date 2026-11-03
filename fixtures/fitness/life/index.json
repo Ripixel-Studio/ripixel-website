@@ -6,7 +6,9 @@
     {"key": "fx.streak", "label": "Logging streak", "value": 12, "unit": "days", "tone": "neutral"},
     {"key": "personal.height", "label": "Height", "value": 180, "unit": "cm", "tone": "neutral"},
     {"key": "personal.likes", "label": "Likes", "value": ["invented cola", "sample toast"], "tone": "fun"},
-    {"key": "personal.boardgames", "label": "Board games", "value": "keen, rarely wins", "tone": "fun"}
+    {"key": "personal.boardgames", "label": "Board games", "value": "keen, rarely wins", "tone": "fun"},
+    {"key": "site.started_year", "label": "Site started", "value": 2019, "unit": "", "tone": "neutral"},
+    {"key": "code.project.fitglue.started", "label": "FitGlue started", "value": "2023-05-14", "unit": "", "tone": "neutral"}
   ],
   "sections": {
     "body": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value": 80.1, "unit": "kg", "label": "weight"},

@@ -99,6 +99,28 @@ export function typeLabel(t) {
   return String(t || '').replace(/^ACTIVITY_TYPE_/, '').replace(/_/g, ' ') || 'ACTIVITY';
 }
 
+/**
+ * What I do, from what I have actually done: the activity types with at least `min`
+ * sessions in the last `days`, most sessions first, at most 5, as title-cased labels.
+ * Replaces FitGlue's hand-set `profile.subtitle`, which went stale.
+ * @param {any[]} activities index entries ({activityType, startTime})
+ * @param {Date} now
+ * @param {number} [days] @param {number} [min]
+ * @returns {string[]}
+ */
+export function whatIDo(activities, now, days = 90, min = 2) {
+  const from = now.getTime() - days * 86_400_000;
+  /** @type {Map<string, number>} */
+  const counts = new Map();
+  for (const e of Array.isArray(activities) ? activities : []) {
+    const t = Date.parse(e?.startTime);
+    if (!Number.isFinite(t) || t < from || t > now.getTime()) continue;
+    const label = typeLabel(e.activityType).toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+    counts.set(label, (counts.get(label) || 0) + 1);
+  }
+  return [...counts].filter(([, n]) => n >= min).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 5).map(([l]) => l);
+}
+
 /** `SOURCE_PARKRUN_RESULTS` → `Parkrun Results` @param {string|undefined} s */
 export function sourceLabel(s) {
   return String(s || '').replace(/^SOURCE_/, '').toLowerCase().replace(/_/g, ' ')
@@ -581,7 +603,7 @@ export function buildPbBoard(prs, hyrox = []) {
  * @param {any} index @param {any[]} [roundupFiles] every roundup file: their prsAchieved fill in the PB wall
  * @param {any[]} [activityFiles] every activity file: the Hyrox races give the wall its per-division PBs
  */
-export function buildStats(index, roundupFiles = [], activityFiles = []) {
+export function buildStats(index, roundupFiles = [], activityFiles = [], now = new Date()) {
   const p = index?.profile || {};
   const streaks = index?.streaks || { currentWeeks: 0, longestWeeks: 0 };
   const sh = p.streakHistory || null;
@@ -654,7 +676,7 @@ export function buildStats(index, roundupFiles = [], activityFiles = []) {
     hasPrs: prGroups.length > 0,
     since: since ? monthYear(since) : '',
     lastActive: last ? longDate(last) : '',
-    subtitle: typeof p.subtitle === 'string' ? p.subtitle : '',
+    whatIDo: whatIDo(index?.activities || [], now),
     bio: typeof p.bio === 'string' ? p.bio : '',
   };
 }
@@ -781,7 +803,7 @@ export function buildLifeModel({ index, activities = [], roundups = [], events =
     roundupsHref: ROUNDUPS_HREF,
     roundupCount: summaries.length,
     hasRoundups: summaries.length > 0,
-    stats: available ? buildStats(idx, roundups, activities) : null,
+    stats: available ? buildStats(idx, roundups, activities, now) : null,
     calendar: buildCalendar(calendar, events, now, available ? entries : [], eventsUrl),
   };
 }
