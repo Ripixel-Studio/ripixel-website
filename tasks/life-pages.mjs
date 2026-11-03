@@ -9,6 +9,8 @@
  *   fitnessRoundupPages   → life/roundup/<key>.html          (generateDataPagesTask)
  *   fitnessRoundupsIndex  → life/roundups.html               (generatePagesTask, personal/pages/life/)
  *   fitnessSessionsPage   → life/sessions.html               (generatePagesTask, personal/pages/life/)
+ *   fitnessLife, lifeHeatmapView → life/fitness.html         (generatePagesTask, personal/pages/life/)
+ *   lifeSections[name]    → life/<name>.html                 (generatePagesTask, one page per section)
  *   fitnessFeedItems      → life/feed.xml                    (generateFeedTask, Atom only)
  *   fitnessEventPages     → life/event/<slug>/index.html     (generateDataPagesTask)
  *
@@ -63,12 +65,34 @@ export function lifePageTasks({
       outPath: (/** @type {any} */ page) => roundupOutPath(page.roundup.key),
     }),
 
-    // /life/roundups and /life/sessions — the pages in personal/pages/life/, each with its own view model
+    // /life/roundups, /life/sessions, /life/fitness and the eight section pages — the pages in
+    // personal/pages/life/, each with its own view model
     generatePagesTask({
       pagesDir,
       partialsDir,
       outDir: `${outDir}/life`,
-      additionalVarsFn: ({ currentPage, fitnessRoundupsIndex, fitnessSessionsPage }) => {
+      helpers: templateHelpers,
+      additionalVarsFn: ({ currentPage, fitnessRoundupsIndex, fitnessSessionsPage, lifeSections }) => {
+        if (currentPage === 'fitness') {
+          return {
+            page: 'life',
+            subpage: '| fitness',
+            description: 'Running, riding and lifting: every session, the roundups, the records and the routes.',
+            canonical: `${site}/life/fitness`,
+            atomFeed: FEED_PATH,
+          };
+        }
+        const section = /** @type {Record<string, any>} */ (lifeSections || {})[currentPage];
+        if (section) {
+          const title = String(section.title || currentPage).toLowerCase();
+          return {
+            page: 'life',
+            subpage: `| ${title}`,
+            description: `James King, by the numbers: ${title}.`,
+            canonical: `${site}/life/${currentPage}`,
+            section,
+          };
+        }
         /** @type {Record<string, unknown>} */
         const views = { roundups: fitnessRoundupsIndex, sessions: fitnessSessionsPage };
         return /** @type {Record<string, unknown>} */ (views[currentPage] ?? {});

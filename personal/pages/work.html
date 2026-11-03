@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+{{> head}}
+
+<body class="page-work" data-page="work">
+  <div class="paper-wash" aria-hidden="true"></div>
+  <div class="paper-dot" aria-hidden="true"></div>
+
+  {{> masthead}}
+
+  <div class="zine-content work-page">
+
+    <svg class="reg-mark" style="position:absolute;top:4px;left:6px" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+      <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <line x1="0" y1="9" x2="18" y2="9" stroke="currentColor" stroke-width="1.2"/>
+      <line x1="9" y1="0" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/>
+    </svg>
+
+    <div class="page-hero">
+      <div class="page-hero__left">
+        <div class="page-hero__section-label">· THE WORK RECORD ·</div>
+        <h1 class="page-hero__h1">WORK<span>.</span></h1>
+        <p class="work-strap">where I've worked, what I built there, and what I use now.</p>
+      </div>
+    </div>
+
+    {{#if workView}}
+
+    {{#if workView.staleLabel}}<p class="life-stale">{{workView.staleLabel}}</p>{{/if}}
+
+    <!-- Stats strip -->
+    <div class="stat-strip work-stats">
+      {{#each workView.stats}}
+      <div class="stat-strip__item">
+        <div class="stat-strip__num">{{num}}</div>
+        <div class="stat-strip__label">{{label}}</div>
+      </div>
+      {{/each}}
+    </div>
+
+    <!-- Roles, newest first -->
+    <ol class="work-roles">
+      {{#each workView.roles}}
+      <li class="work-roles__item">
+        <article class="role-card role-card--{{ink}}{{#if current}} role-card--current{{/if}}" id="{{id}}">
+          <div class="role-card__inner">
+            <div class="role-card__badge">
+              <span class="role-card__num">{{#if current}}NOW · {{/if}}{{badge}}</span>
+              <span class="role-card__period">{{period}}</span>
+              {{#if contract}}<span class="role-card__kind">contract</span>{{/if}}
+            </div>
+            <div class="role-card__company">{{companyUpper}}<span class="role-card__company-dot">.</span></div>
+            <div class="role-card__title">{{title}}{{#if team}} · {{team}}{{/if}}</div>
+            {{#if note}}<div class="role-card__note">{{note}}</div>{{/if}}
+            {{#if paragraphs.length}}
+            <div class="role-card__body">
+              {{#each paragraphs}}<p>{{this}}</p>{{/each}}
+            </div>
+            {{/if}}
+            {{#if tech.length}}
+            <div class="role-card__tags">
+              {{#each tech}}<span class="role-card__tag">#{{this}}</span>{{/each}}
+            </div>
+            {{/if}}
+          </div>
+        </article>
+      </li>
+      {{/each}}
+    </ol>
+
+    {{#if workView.salary}}
+    <!-- Pay, only when James has confirmed it -->
+    <section class="work-salary" aria-labelledby="work-salary-h">
+      <h2 class="tech-roster__heading" id="work-salary-h">the <span>pay</span>.</h2>
+      <div class="work-salary__scroll">
+        <table class="work-salary__table">
+          <thead>
+            <tr><th scope="col">role</th><th scope="col">salary</th><th scope="col">change</th><th scope="col">%</th></tr>
+          </thead>
+          <tbody>
+            {{#each workView.salary}}
+            <tr class="work-salary__row work-salary__row--{{dir}}">
+              <th scope="row">{{company}}<small>{{title}}</small></th>
+              <td>{{salary}}</td>
+              <td>{{delta}}</td>
+              <td>{{deltaPct}}</td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {{/if}}
+
+    <!-- Tech roster + education -->
+    <div class="work-lower">
+      {{#if workView.roster.length}}
+      <div>
+        <div class="tech-roster__heading">the full tech <span>roster</span>.</div>
+        <div class="tech-roster__hint">★ = using it now · ☆ = not lately</div>
+        <div class="tech-grid">
+          {{#each workView.roster}}
+          <div class="tech-item"><span>{{name}}</span><span class="tech-item__status" title="{{#if current}}using now{{else}}not lately{{/if}}">{{mark}}</span></div>
+          {{/each}}
+        </div>
+      </div>
+      {{/if}}
+
+      {{#if workView.education}}
+      <div class="work-extras">
+        <div class="extras-card">
+          <div class="extras-card__inner">
+            <div class="extras-card__title">+ SCHOOLING</div>
+            <div class="extras-card__body">
+              I studied {{workView.education.subject}} at the {{workView.education.institution}}, {{#if workView.education.completed}}and finished it{{else}}and didn't finish it{{/if}}.<br>
+              <span class="work-edu__status">{{workView.education.status}}{{#if workView.education.years}} · {{workView.education.years}}{{/if}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{/if}}
+    </div>
+
+    {{else}}
+    <div class="life-empty">The work record isn't available right now. Check back soon.</div>
+    {{/if}}
+
+  </div>
+
+  {{> footer}}
+
+  <div class="paper-grain" aria-hidden="true"></div>
+</body>
+</html>

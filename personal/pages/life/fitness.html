@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+{{> head}}
+
+<body class="page-life life-ink--fitness" data-page="life">
+  <div class="paper-wash" aria-hidden="true"></div>
+  <div class="paper-dot" aria-hidden="true"></div>
+
+  {{> masthead}}
+
+  <div class="zine-content fit-page">
+
+    <svg class="reg-mark" style="position:absolute;top:6px;left:6px" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+      <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <line x1="0" y1="9" x2="18" y2="9" stroke="currentColor" stroke-width="1.2"/>
+      <line x1="9" y1="0" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/>
+    </svg>
+
+    <nav class="thought-breadcrumb" aria-label="Breadcrumb">
+      <a href="/life">life</a> / fitness
+    </nav>
+
+    <!-- Masthead + strapline -->
+    <div class="page-hero fit-hero">
+      <div class="page-hero__left">
+        <h1 class="page-hero__h1 fit-hero__h1">FITNESS.</h1>
+        <div class="fit-hero__strap">running, riding &amp; generally trying to stay alive.</div>
+      </div>
+      {{#if fitnessLife.stats}}
+      <div class="page-hero__aside fit-hero__aside">
+        <div class="page-hero__aside-scribble">{{#if fitnessLife.stats.whatIDo.length}}({{#each fitnessLife.stats.whatIDo}}{{#if @index}} · {{/if}}{{this}}{{/each}}){{else}}(every session, on the record){{/if}}</div>
+        <div class="page-hero__aside-box">
+          {{#if fitnessLife.stats.bio}}{{fitnessLife.stats.bio}}<br>{{/if}}
+          <b>ON THE RECORD SINCE {{fitnessLife.stats.since}}</b>
+          {{#if fitnessLife.stats.lastActive}}<br>last out: {{fitnessLife.stats.lastActive}}{{/if}}
+        </div>
+      </div>
+      {{/if}}
+    </div>
+
+    {{#if fitnessUnavailable}}
+    <div class="fit-unavailable">
+      ⚠ fitness data unavailable — this build could not reach the showcase export, so the activity feed is empty. check back later.
+    </div>
+    {{/if}}
+
+    {{#if fitnessLife.available}}
+
+    <!-- 1. This week -->
+    {{#if fitnessLife.week}}
+    <h2 class="fit-header">the week <span>that was</span>.</h2>
+    {{> fitness-week fitnessLife.week}}
+    {{/if}}
+
+    <!-- 2. Latest sessions -->
+    <div class="fit-header-row">
+      <h2 class="fit-header">latest <span>sessions</span>.</h2>
+      <a class="fit-header-row__meta fit-header-row__link" href="{{fitnessLife.sessionsHref}}">all {{fitnessLife.activityCount}} sessions →</a>
+    </div>
+    <div class="fit-cards">
+      {{#each fitnessLife.activities}}
+      {{> fitness-activity-card}}
+      {{/each}}
+    </div>
+    <a class="fit-more" href="{{fitnessLife.sessionsHref}}">every session on the record, filterable by type →</a>
+
+    <!-- 3. Latest roundup -->
+    {{#if fitnessLife.roundup}}
+    <h2 class="fit-header">the <span>roundup</span>.</h2>
+    {{> fitness-roundup-teaser fitnessLife.roundup roundupsHref=fitnessLife.roundupsHref}}
+    {{/if}}
+
+    <!-- 4. Totals, streaks, PBs -->
+    {{#if fitnessLife.stats}}
+    <h2 class="fit-header">by the <span>numbers</span>.</h2>
+    {{> fitness-stats fitnessLife.stats}}
+    {{/if}}
+
+    <!-- 5. Every route on one sheet (LH3.5 lifeHeatmapView; ends near home already trimmed) -->
+    {{#if lifeHeatmapView}}
+    <h2 class="fit-header">every <span>route</span>.</h2>
+    {{> life-heatmap lifeHeatmapView}}
+    {{/if}}
+
+    {{/if}}
+
+    <!-- 6. On the calendar: the Fitness Events / Fitness Regular calendars (events.json),
+         else the hand-written list; empty when nothing is upcoming or logged this week.
+         Baked with the build's clock (what a reader without JS sees); the script below
+         (tasks/life-clock.mjs, inlined) redoes it with the reader's clock and a fresh
+         events.json, so "in X days", today and the week are right whenever it is read. -->
+    <div class="fit-cal" data-life-calendar>
+{{{fitnessLife.calendar.html}}}
+    </div>
+    <script type="application/json" id="life-calendar-data">{{{fitnessLife.calendar.json}}}</script>
+    <script>{{{fitnessLife.clockJs}}}</script>
+
+  </div>
+
+  {{> footer}}
+
+  <div class="paper-grain" aria-hidden="true"></div>
+</body>
+</html>

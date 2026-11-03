@@ -1,0 +1,10 @@
+<!-- Context: an array of rows {label, value, unit, sub?} (a lifeSections view's stats, or one period's items) -->
+<div class="stat-strip life-stats">
+  {{#each this}}
+  <div class="stat-strip__item">
+    <div class="stat-strip__num">{{value}}{{#if unit}}<small class="fit-stats__unit">{{unit}}</small>{{/if}}</div>
+    <div class="stat-strip__label">{{label}}</div>
+    {{#if sub}}<div class="fit-stats__sub">{{sub}}</div>{{/if}}
+  </div>
+  {{/each}}
+</div>

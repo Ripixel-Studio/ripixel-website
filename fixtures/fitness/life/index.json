@@ -1,0 +1,231 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-03T06:00:00+00:00",
+  "facts": [
+    {"key": "fx.films", "label": "Films this year", "value": 42, "unit": "films", "tone": "good"},
+    {"key": "fx.streak", "label": "Logging streak", "value": 12, "unit": "days", "tone": "neutral"},
+    {"key": "personal.height", "label": "Height", "value": 180, "unit": "cm", "tone": "neutral"},
+    {"key": "personal.likes", "label": "Likes", "value": ["invented cola", "sample toast"], "tone": "fun"},
+    {"key": "personal.boardgames", "label": "Board games", "value": "keen, rarely wins", "tone": "fun"},
+    {"key": "site.started_year", "label": "Site started", "value": 2019, "unit": "", "tone": "neutral"},
+    {"key": "code.project.fitglue_server.started", "label": "fitglue-server started", "value": "2023-05-14", "unit": "", "tone": "neutral"},
+    {"key": "code.project.fitglue_web.started", "label": "fitglue-web started", "value": "2023-06-02", "unit": "", "tone": "neutral"}
+  ],
+  "sections": {
+    "body": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value": 80.1, "unit": "kg", "label": "weight"},
+      "latest": {"weightKg": 80.1, "bodyFatPct": 17.2, "restingHr": 52, "hrvMs": 68},
+      "weekly": [{"week": "2026-10-19", "weightKg": 80.4, "bodyFatPct": 17.4, "restingHr": 53, "hrvMs": 66}, {"week": "2026-10-26", "weightKg": 80.1, "bodyFatPct": 17.2, "restingHr": 52, "hrvMs": 68}]},
+    "sleep": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value": 444, "unit": "min", "label": "average night, last 30 days"},
+      "avgMinutes30": 444, "avgMinutes90": 438, "consistencyMinutes": 31,
+      "best": {"date": "2026-10-12", "minutes": 510}, "worst": {"date": "2026-10-20", "minutes": 330},
+      "weekly": [{"week": "2026-10-19", "avgMinutes": 440}, {"week": "2026-10-26", "avgMinutes": 448}]},
+    "food": {"updated": "2026-11-01", "staleDays": 2, "headline": {"value": 148, "unit": "g", "label": "protein a day, last 30 days"},
+      "avgKcal30": 2450, "avgProteinG30": 148, "loggedStreakDays": 12, "proteinStreakDays": 5,
+      "weekly": [{"week": "2026-10-19", "avgKcal": 2400, "avgProteinG": 145}, {"week": "2026-10-26", "avgKcal": 2480, "avgProteinG": 150}]},
+    "games": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value": 31, "unit": "h", "label": "played this year"},
+      "hoursTotal": 640, "hoursYear": 31,
+      "mostPlayed": [{"name": "Fixture Quest", "hours": 210}, {"name": "Placeholder Racers", "hours": 95}],
+      "recent": [{"name": "Sample Tactics", "hours": 6}],
+      "achievements": {"unlocked": 120, "total": 300}, "backlog": 14,
+      "serious": "Fixture Quest", "silly": "Sample Tactics"},
+    "code": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value": 154, "unit": "", "label": "commits this year"},
+      "projects": [{"name": "example-site", "started": "2024-03-14", "languages": ["JavaScript", "CSS"], "url": "https://example.test/example-site"},
+                   {"name": "fitglue-web", "started": "2023-06-02", "languages": ["TypeScript"], "url": null},
+                   {"name": "fitglue-server", "started": "2023-05-14", "languages": ["Go"], "url": null},
+                   {"name": "sample-tool", "started": "2025-08-02", "languages": ["Python"], "url": null}],
+      "languagesByYear": {"2025": {"Python": 55.0, "JavaScript": 45.0}, "2026": {"JavaScript": 60.5, "Python": 39.5}},
+      "commitsByMonth": [{"month": "2026-09", "n": 70}, {"month": "2026-10", "n": 84}],
+      "languagesNow": ["JavaScript", "Python"]},
+    "watching": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value": 42, "unit": "", "label": "films watched this year"},
+      "notable": [{"key": "a1b2c3d4e5", "kind": "film", "title": "The Invented Harbour", "by": null, "season": null, "year": 2024, "provider": "Fixture Cinema", "month": "2026-10", "reason": "Rewatched twice", "poster": null}],
+      "totals": {"month": {"films": 4, "episodes": 9, "videos": 6, "hours": 18}, "year": {"films": 42, "episodes": 160, "videos": 90, "hours": 310}},
+      "years": {"2026": [{"key": "a1b2c3d4e5", "kind": "film", "title": "The Invented Harbour", "by": null, "season": null, "year": 2024, "provider": "Fixture Cinema", "month": "2026-10", "reason": "Rewatched twice", "poster": null}]}},
+    "listening": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value": 3400, "unit": "", "label": "tracks this year"},
+      "notable": [{"key": "f6e5d4c3b2", "kind": "album", "title": "Sample Echoes", "by": "The Placeholders", "season": null, "year": 2025, "provider": "Fixture Music", "month": "2026-10", "reason": "On repeat", "poster": null}],
+      "totals": {"month": {"tracks": 310, "podcastEpisodes": 12, "audiobookHours": 6}, "year": {"tracks": 3400, "podcastEpisodes": 120, "audiobookHours": 52}},
+      "years": {"2026": [{"key": "f6e5d4c3b2", "kind": "album", "title": "Sample Echoes", "by": "The Placeholders", "season": null, "year": 2025, "provider": "Fixture Music", "month": "2026-10", "reason": "On repeat", "poster": null}]}},
+    "reading": {"updated": "2026-10-30", "staleDays": 4, "headline": {"value": 9, "unit": "", "label": "books finished this year"},
+      "notable": [{"key": "0a9b8c7d6e", "kind": "book", "title": "A Made-Up Almanac", "by": "Ada Example", "season": null, "year": 2023, "provider": "Fixture Books", "month": "2026-10", "reason": "Finished", "poster": null}],
+      "totals": {"month": {"books": 1, "pages": 320}, "year": {"books": 9, "pages": 2900}},
+      "years": {"2026": [{"key": "0a9b8c7d6e", "kind": "book", "title": "A Made-Up Almanac", "by": "Ada Example", "season": null, "year": 2023, "provider": "Fixture Books", "month": "2026-10", "reason": "Finished", "poster": null}]},
+      "current": [{"title": "Another Invented Volume", "by": "Sam Sample", "progress": 0.4}]},
+    "outings": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value": 3, "unit": "", "label": "outings this year"},
+      "notable": [{"key": "1122334455", "kind": "gig", "title": "Sample Band Live", "by": null, "season": null, "year": 2026, "provider": null, "month": "2026-10", "reason": "Gig", "poster": null}],
+      "years": {"2026": [{"key": "1122334455", "kind": "gig", "title": "Sample Band Live", "by": null, "season": null, "year": 2026, "provider": null, "month": "2026-10", "reason": "Gig", "poster": null}]}},
+    "work": {
+      "updated": "2026-11-03",
+      "staleDays": 0,
+      "stats": {
+        "yearsShipping": 11,
+        "employers": 4,
+        "contracting": 1,
+        "technologies": 11
+      },
+      "roles": [
+        {
+          "id": "fx-role-7",
+          "company": "Monzo",
+          "title": "Senior staff software engineer",
+          "team": "Borrowing",
+          "from": "2023-05",
+          "to": null,
+          "kind": "employment",
+          "body": "Fixture text: looking after a lending product team. Invented for the build.",
+          "tech": [
+            "go",
+            "typescript",
+            "kubernetes"
+          ],
+          "period": "may 2023 — present"
+        },
+        {
+          "id": "fx-role-6",
+          "company": "Deliveroo",
+          "title": "Staff software engineer",
+          "team": "Care",
+          "from": "2022-07",
+          "to": "2023-05",
+          "kind": "employment",
+          "body": "Fixture text: a bigger remit across several teams.\n\nA second invented paragraph.",
+          "tech": [
+            "typescript",
+            "scala",
+            "go"
+          ],
+          "period": "jul 2022 — may 2023"
+        },
+        {
+          "id": "fx-role-5",
+          "company": "Deliveroo",
+          "title": "Senior software engineer",
+          "team": "Care",
+          "from": "2020-12",
+          "to": "2022-06",
+          "kind": "employment",
+          "body": "Fixture text: services front and back.",
+          "tech": [
+            "typescript",
+            "scala",
+            "react"
+          ],
+          "period": "dec 2020 — jun 2022"
+        },
+        {
+          "id": "fx-role-4",
+          "company": "DVELP",
+          "title": "Senior software engineer",
+          "note": "acting head of engineering for the last six months",
+          "from": "2019-06",
+          "to": "2020-11",
+          "kind": "employment",
+          "body": "Fixture text: client delivery.",
+          "tech": [
+            "typescript",
+            "node",
+            "twilio flex"
+          ],
+          "period": "jun 2019 — nov 2020"
+        },
+        {
+          "id": "fx-role-3",
+          "company": "Example Contracting",
+          "title": "Contract software engineer",
+          "from": "2019-02",
+          "to": "2019-05",
+          "kind": "contract",
+          "body": "Fixture text: a short contract.",
+          "tech": [
+            "typescript",
+            "gatsby"
+          ],
+          "period": "feb 2019 — may 2019"
+        },
+        {
+          "id": "fx-role-2",
+          "company": "Sky Betting & Gaming",
+          "title": "Senior software engineer",
+          "team": "Vegas",
+          "from": "2017-11",
+          "to": "2019-01",
+          "kind": "employment",
+          "body": "Fixture text: promoted and planning more.",
+          "tech": [
+            "typescript",
+            "react",
+            "php"
+          ],
+          "period": "nov 2017 — jan 2019"
+        },
+        {
+          "id": "fx-role-1",
+          "company": "Sky Betting & Gaming",
+          "title": "Software engineer",
+          "team": "Vegas",
+          "from": "2015-11",
+          "to": "2017-10",
+          "kind": "employment",
+          "body": "Fixture text: a first full-time job.",
+          "tech": [
+            "javascript",
+            "php",
+            "symfony"
+          ],
+          "period": "nov 2015 — oct 2017"
+        }
+      ],
+      "roster": [
+        {
+          "name": "go",
+          "current": true
+        },
+        {
+          "name": "typescript",
+          "current": true
+        },
+        {
+          "name": "kubernetes",
+          "current": true
+        },
+        {
+          "name": "scala",
+          "current": false
+        },
+        {
+          "name": "react",
+          "current": false
+        },
+        {
+          "name": "node",
+          "current": false
+        },
+        {
+          "name": "twilio flex",
+          "current": false
+        },
+        {
+          "name": "gatsby",
+          "current": false
+        },
+        {
+          "name": "php",
+          "current": false
+        },
+        {
+          "name": "javascript",
+          "current": false
+        },
+        {
+          "name": "symfony",
+          "current": false
+        }
+      ],
+      "education": {
+        "institution": "University of Sheffield",
+        "subject": "Computer Science",
+        "completed": false,
+        "from": null,
+        "to": null
+      }
+    }
+  }
+}

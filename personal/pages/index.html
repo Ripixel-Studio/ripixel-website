@@ -25,7 +25,7 @@
           <span class="issue-header__hello">HELLO!</span>
           <span style="margin-left:14px">— a zine, by james king.</span>
         </div>
-        <div class="issue-header__byline">software engineer · web app creator · nottinghamshire, uk · est. 2015</div>
+        <div class="issue-header__byline">software engineer · web app creator · nottinghamshire, uk{{#if lifeFacts.[site.started_year]}} · site est. {{lifeFacts.[site.started_year]}}{{/if}}</div>
       </div>
     </div>
 
@@ -39,8 +39,8 @@
 
         <div class="home-intro">
           <span class="home-intro__hi">HI,</span>
-          i'm james king, and i make things for the web. fan of minimalist
-          designs that get you the info with the minimum of fuss — and big,
+          i'm james king, and i make things for the web. fan of designs
+          that get you the info with the minimum of fuss — and big,
           bold, oh-my-gosh-that's-so-bright colours. you've found my zine.
           turn the page.
         </div>
@@ -89,7 +89,7 @@
         <!-- Postcard -->
         <div class="postcard">
           <div class="postcard__label">POSTCARD · TO YOU</div>
-          dear reader — this is the bit where i waffle about minimalism &amp; then build something deeply over-engineered. enjoy.
+          dear reader — this is the bit where i waffle about keeping things simple &amp; then build something deeply over-engineered. enjoy.
           <div class="postcard__sig">— j.</div>
         </div>
       </div>
@@ -112,7 +112,7 @@
           <div class="section-card__blurb">Things I've built — from automation platforms to a static site generator nobody asked for.</div>
           <div class="section-card__latest">
             <span><span class="section-card__latest-ink">latest →</span> {{latestProject}}</span>
-            <span class="section-card__latest-date">{{latestProjectDate}}</span>
+            {{#if latestProjectDate}}<span class="section-card__latest-date">{{latestProjectDate}}</span>{{/if}}
           </div>
         </div>
       </a>
@@ -132,14 +132,14 @@
         </div>
       </a>
 
-      <a class="section-card section-card--profile" href="/profile">
+      <a class="section-card section-card--work" href="/work">
         <div class="section-card__inner">
           <div class="section-card__top">
-            <span class="section-card__num">◉ PROFILE</span>
+            <span class="section-card__num">◉ WORK</span>
             <span class="section-card__glyph">◉</span>
           </div>
-          <div class="section-card__name">profile.</div>
-          <div class="section-card__blurb">Career history (Monzo, Deliveroo, Sky, &amp; co.) &amp; a long list of technologies.</div>
+          <div class="section-card__name">work.</div>
+          <div class="section-card__blurb">{{workBlurb}}</div>
           <div class="section-card__latest">
             <span><span class="section-card__latest-ink">latest →</span> {{latestRole}}</span>
             <span class="section-card__latest-date">{{latestRoleDate}}</span>
@@ -171,7 +171,7 @@
         <div class="press-featured__inner">
           <div class="press-featured__badge">
             <span class="press-featured__tag">◆ FEATURED PROJECT</span>
-            <span class="press-featured__meta">built 2024 · still shipping</span>
+            <span class="press-featured__meta">{{#if fitglueStartedYear}}built {{fitglueStartedYear}} · {{/if}}still shipping</span>
           </div>
           <div class="press-featured__title">
             FIT<span>GLUE</span>.
@@ -210,7 +210,7 @@
           <div class="press-card__title">{{latestRole}}<span style="color:var(--ink-blue)">.</span></div>
           <div class="press-card__role">{{latestRoleTitle}}</div>
           <div class="press-card__body">{{latestRoleBlurb}}</div>
-          <div class="press-card__link"><a href="/profile">full cv →</a></div>
+          <div class="press-card__link"><a href="/work">the work record →</a></div>
         </div>
       </article>
     </div>

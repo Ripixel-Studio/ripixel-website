@@ -1,0 +1,589 @@
+/* =========================================
+   /life HUB + SECTION PAGES (LH3.6)
+   "James, by the numbers": the hub is a contents page, one numbered entry per
+   section; each section page is the same zine vocabulary as /life/fitness
+   (Anton heads, mono labels, ink borders, hard offset shadows, paper wash).
+   Bundled with the rest of styles/main; class selectors only.
+   ========================================= */
+
+/* ─── Section inks: one per section, from the zine's own palette ─ */
+.life-ink--fitness   { --life-ink: var(--ink-purple); }
+.life-ink--body      { --life-ink: var(--ink-red); }
+.life-ink--sleep     { --life-ink: var(--ink-blue); }
+.life-ink--food      { --life-ink: var(--ink-orange); }
+.life-ink--games     { --life-ink: var(--ink-magenta); }
+.life-ink--code      { --life-ink: var(--ink-green); }
+.life-ink--watching  { --life-ink: var(--ink-red); }
+.life-ink--listening { --life-ink: var(--ink-blue); }
+.life-ink--reading   { --life-ink: var(--ink-orange); }
+
+/* A section page takes its ink for the wash, the dots and the header accents too. */
+body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
+
+/* ─── Shared: stale sticker, empty box, chips ─ */
+.life-stale {
+  display: inline-block;
+  margin: 6px 0 0;
+  padding: 3px 9px;
+  background: var(--ink-yellow);
+  border: 2px solid var(--ink);
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  transform: rotate(-1.5deg);
+}
+
+.life-empty {
+  margin: 14px 0 24px;
+  padding: 14px 18px;
+  max-width: 640px;
+  background: #fff;
+  border: 2px dashed var(--ink);
+  font-family: var(--f-mono);
+  font-size: 13px;
+}
+
+.life-chip {
+  display: inline-block;
+  margin: 2px 4px 2px 0;
+  padding: 0 7px;
+  background: #fff;
+  border: 1.5px solid var(--ink);
+  font-family: var(--f-mono);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+/* ─── The hub: hero ─────────────────────── */
+.life-hub__hero { margin: 4px 0 26px; }
+
+.life-hub__h1 {
+  font-size: clamp(58px, 10.5vw, 150px);
+  line-height: 0.9;
+}
+
+.life-hub__h1 span { margin-top: 6px; }
+
+.life-hub__strap { font-size: 14px; }
+
+/* ─── The hub: the contents page ─────────── */
+.life-index {
+  counter-reset: life-entry;
+  border-top: 3px solid var(--ink);
+  margin-bottom: 30px;
+}
+
+.life-index__entry {
+  counter-increment: life-entry;
+  display: grid;
+  grid-template-columns: 4.6rem minmax(9rem, 1fr) minmax(15rem, 1.6fr) minmax(13rem, 1.3fr);
+  grid-template-areas: "no name stat notes";
+  align-items: baseline;
+  column-gap: 22px;
+  padding: 16px 0 14px;
+  border-bottom: 2px solid var(--ink);
+  position: relative;
+}
+
+.life-index__entry::before {
+  grid-area: no;
+  content: counter(life-entry, decimal-leading-zero);
+  font-family: var(--f-disp);
+  font-size: 52px;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--ink);
+}
+
+.life-index__name {
+  grid-area: name;
+  font-family: var(--f-disp);
+  font-weight: 400;
+  font-size: 46px;
+  line-height: 1;
+}
+
+.life-index__name a {
+  display: inline-block;
+  padding: 0 6px;
+  margin-left: -6px;
+  border-bottom: 4px solid var(--life-ink);
+}
+
+.life-index__name a:hover {
+  background: var(--life-ink);
+  color: var(--paper);
+}
+
+.life-index__name a::after { content: '.'; }
+
+.life-index__stat {
+  grid-area: stat;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 12px;
+}
+
+.life-index__num {
+  font-family: var(--f-disp);
+  font-size: 76px;
+  line-height: 0.95;
+  color: var(--life-ink);
+  text-shadow: 3px 3px 0 var(--ink);
+  white-space: nowrap;
+}
+
+.life-index__num small {
+  font-family: var(--f-mono);
+  font-size: 15px;
+  margin-left: 4px;
+  color: var(--ink);
+  text-shadow: none;
+}
+
+.life-index__label {
+  font-family: var(--f-scrib);
+  font-size: 26px;
+  line-height: 1.05;
+  color: var(--ink);
+}
+
+.life-index__none {
+  font-family: var(--f-mono);
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.life-index__entry--empty .life-index__name a { border-bottom-style: dashed; }
+
+.life-index__notes {
+  grid-area: notes;
+  align-self: center;
+  font-family: var(--f-mono);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.life-index__note + .life-index__note { margin-top: 6px; }
+
+.life-index__note-label {
+  display: block;
+  font-weight: 700;
+  color: var(--life-ink);
+}
+
+.life-index__note a {
+  text-decoration: underline;
+  text-decoration-color: var(--life-ink);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.life-index__note a:hover { background: var(--paper-3); }
+
+/* ─── The hub: outings and the small print ─ */
+.life-saw { margin-bottom: 22px; }
+
+.life-saw__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  padding: 8px 0;
+  border-bottom: 1.5px dashed rgba(23,19,17,0.4);
+}
+
+.life-saw__when {
+  font-family: var(--f-mono);
+  font-size: 12px;
+}
+
+.life-personal {
+  margin: 34px 0 20px;
+  max-width: 720px;
+  padding: 16px 20px 18px;
+  background: var(--paper-4);
+  border: 2px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+  transform: rotate(-0.6deg);
+}
+
+.life-personal__title {
+  font-family: var(--f-disp);
+  font-weight: 400;
+  font-size: 34px;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.life-personal__row {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: 12px;
+  padding: 5px 0;
+  border-top: 1.5px dashed rgba(23,19,17,0.33);
+}
+
+.life-personal__row dt {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.life-personal__row dd {
+  font-family: 'Special Elite', var(--f-mono);
+  font-size: 15px;
+}
+
+/* ─── Section pages: head ───────────────── */
+.life-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px 28px;
+  margin-bottom: 22px;
+}
+
+.life-head__h1 {
+  font-size: clamp(72px, 13vw, 170px);
+  text-transform: uppercase;
+  flex: 1 1 auto;
+}
+
+.life-head__headline {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 16px 12px;
+  background: var(--paper-4);
+  border: 2px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--life-ink);
+  max-width: 340px;
+}
+
+.life-head__num {
+  font-family: var(--f-disp);
+  font-size: 64px;
+  line-height: 0.95;
+  color: var(--life-ink);
+  text-shadow: 3px 3px 0 var(--ink);
+}
+
+.life-head__num small {
+  font-family: var(--f-mono);
+  font-size: 14px;
+  margin-left: 4px;
+  color: var(--ink);
+  text-shadow: none;
+}
+
+.life-head__label {
+  font-family: var(--f-scrib);
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.life-head__updated {
+  flex-basis: 100%;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.life-head .life-stale { flex-basis: auto; }
+
+/* ─── Section pages: numbers by period ───── */
+.stat-strip.life-stats { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); row-gap: 10px; }
+.stat-strip.life-stats .stat-strip__num { font-size: 48px; overflow-wrap: anywhere; }
+
+.life-period { margin-top: 18px; }
+
+.life-period__label {
+  font-family: var(--f-disp);
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+/* ─── Section pages: charts ─────────────── */
+.life-charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 22px;
+  margin-bottom: 26px;
+}
+
+.life-chart {
+  background: #fff;
+  border: 2px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--life-ink);
+  padding: 12px 14px 14px;
+}
+
+.life-chart__label {
+  font-family: var(--f-mono);
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.life-chart__label span { font-weight: 400; opacity: 0.7; }
+
+.life-chart__svg {
+  display: block;
+  width: 100%;
+  height: 96px;
+  overflow: visible;
+}
+
+.life-chart__svg path {
+  fill: none;
+  stroke: var(--life-ink);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* ─── Section pages: lists ──────────────── */
+.life-notables,
+.life-projects,
+.life-current { margin-bottom: 26px; border-top: 2px solid var(--ink); }
+
+.life-notable,
+.life-project,
+.life-current__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 14px;
+  padding: 10px 0;
+  border-bottom: 1.5px dashed rgba(23,19,17,0.4);
+}
+
+.life-notable__title {
+  font-family: var(--f-disp);
+  font-size: 28px;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
+.life-notable__title small {
+  font-family: var(--f-mono);
+  font-size: 12px;
+}
+
+.life-notable__title a {
+  border-bottom: 3px solid var(--life-ink);
+}
+
+.life-notable__title a:hover { background: var(--paper-3); }
+
+.life-notable__by {
+  font-family: var(--f-mono);
+  font-size: 13px;
+}
+
+.life-notable__why {
+  font-family: var(--f-scrib);
+  font-size: 22px;
+  line-height: 1;
+  color: var(--life-ink);
+}
+
+.life-notable__when {
+  margin-left: auto;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.life-year { margin-bottom: 8px; }
+
+.life-year__label {
+  font-family: var(--f-disp);
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--ink);
+  margin-bottom: 4px;
+}
+
+.life-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 22px 30px;
+  margin: 10px 0 26px;
+}
+
+.life-list {
+  counter-reset: life-list;
+  border-top: 2px solid var(--ink);
+}
+
+.life-list__item {
+  counter-increment: life-list;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1.5px dashed rgba(23,19,17,0.4);
+  font-family: var(--f-mono);
+  font-size: 14px;
+}
+
+.life-list__item::before {
+  content: counter(life-list);
+  font-family: var(--f-disp);
+  font-size: 20px;
+  color: var(--life-ink);
+  min-width: 1.4em;
+}
+
+.life-list__name { flex: 1; overflow-wrap: anywhere; }
+
+.life-list__value {
+  font-family: var(--f-disp);
+  font-size: 22px;
+}
+
+.life-list__value small { font-family: var(--f-mono); font-size: 11px; margin-left: 2px; }
+
+/* reading now */
+.life-progress {
+  flex: 1 1 140px;
+  max-width: 260px;
+  height: 12px;
+  background: #fff;
+  border: 2px solid var(--ink);
+  position: relative;
+}
+
+.life-progress__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--life-ink);
+}
+
+/* code: languages now, languages by year, projects */
+.life-langs-now {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.life-langs-now .life-period__label { margin: 0 8px 0 0; }
+
+.life-charts--wide { grid-template-columns: 1fr; }
+
+.life-langs { margin-bottom: 26px; }
+
+.life-langs__year {
+  display: grid;
+  grid-template-columns: 4rem 1fr;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.life-langs__label {
+  font-family: var(--f-disp);
+  font-size: 24px;
+}
+
+.life-langs__bar {
+  display: flex;
+  min-width: 0;
+  border: 2px solid var(--ink);
+  background: #fff;
+}
+
+.life-langs__part {
+  min-width: 0;
+  padding: 3px 8px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--life-ink);
+  color: #fff;
+}
+
+.life-langs__part:nth-child(2n) { background: var(--paper-3); color: var(--ink); }
+.life-langs__part:nth-child(3n) { background: var(--ink); color: var(--paper); }
+.life-langs__part + .life-langs__part { border-left: 2px solid var(--ink); }
+
+.life-project__langs { flex-basis: 100%; }
+
+/* ─── /life/fitness: every route on one sheet ─ */
+.life-heatmap {
+  margin: 0 0 26px;
+  padding: 16px;
+  background: #fff;
+  border: 2px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.life-heatmap__map {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 520px;
+}
+
+.life-heatmap__map path {
+  fill: none;
+  stroke: var(--ink-section);
+  stroke-width: 2.5;
+  stroke-opacity: 0.45;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  mix-blend-mode: multiply;
+}
+
+.life-heatmap__caption {
+  margin-top: 10px;
+  font-family: var(--f-mono);
+  font-size: 12px;
+}
+
+/* ─── Responsive ───────────────────────── */
+@media (max-width: 1000px) {
+  .life-index__entry {
+    grid-template-columns: 4.2rem minmax(0, 1fr) minmax(0, 1.4fr);
+    grid-template-areas:
+      "no name stat"
+      ". notes notes";
+    row-gap: 8px;
+  }
+}
+
+@media (max-width: 720px) {
+  .life-index__entry {
+    grid-template-columns: 3.2rem minmax(0, 1fr);
+    grid-template-areas:
+      "no name"
+      "stat stat"
+      "notes notes";
+  }
+  .life-index__entry::before { font-size: 40px; }
+  .life-index__name { font-size: 40px; }
+  .life-index__num { font-size: 60px; }
+  .life-head__headline { max-width: none; flex: 1 1 100%; }
+  .life-head__num { font-size: 52px; }
+  .stat-strip.life-stats .stat-strip__num { font-size: 40px; }
+  .life-personal { transform: none; box-shadow: 4px 4px 0 var(--ink); }
+  .life-personal__row { grid-template-columns: 1fr; gap: 0; }
+  .life-notable__when { margin-left: 0; flex-basis: 100%; }
+}
+
+/* No animation here: hover only swaps colours, so reduced motion needs nothing extra. */

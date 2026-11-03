@@ -1,0 +1,9 @@
+<!-- Context: {title, items: [{name, hours}]} — a numbered list (games: most played, recent, serious, silly) -->
+{{#if items.length}}
+<section class="life-list-block">
+  <h2 class="life-period__label">{{title}}</h2>
+  <ol class="life-list">
+    {{#each items}}<li class="life-list__item"><span class="life-list__name">{{name}}</span>{{#if hours}}<span class="life-list__value">{{hours}}<small>h</small></span>{{/if}}</li>{{/each}}
+  </ol>
+</section>
+{{/if}}

@@ -70,8 +70,8 @@ describe('loadFitnessData', () => {
     assert.equal(r.roundups[0].key, 'week-42-2026');
     assert.equal(r.index.siteSlug, 'james');
 
-    // index + 3 activities + 1 roundup + events.json
-    assert.equal(calls.length, 6);
+    // index + 3 activities + 1 roundup + events.json + life/index.json + life/heatmap.json
+    assert.equal(calls.length, 8);
     assert.equal(r.events.events.length, 15);
     assert.equal(r.events.events[2].title, "Hyrox Birmingham - Open Men's Doubles");
     assert.equal(calls[0].url, `${BASE}/index.json`);
@@ -80,6 +80,8 @@ describe('loadFitnessData', () => {
     assert.ok(cached.includes('.meta.json'));
     assert.ok((await fs.readdir(path.join(cacheDir, 'activity'))).includes('push-day-2026-10-13.json'));
     assert.ok(cached.includes('events.json'));
+    assert.ok((await fs.readdir(path.join(cacheDir, 'life'))).includes('index.json'));
+    assert.ok((await fs.readdir(path.join(cacheDir, 'life'))).includes('heatmap.json'));
   });
 
   test('a missing or malformed events.json is not fatal: fitnessEvents is null', async () => {
@@ -113,7 +115,7 @@ describe('loadFitnessData', () => {
     assert.equal(r.source, 'live');
     assert.equal(r.activities.length, 3);
     const conditional = second.calls.filter((c) => c.headers['if-none-match'] === '"v1"');
-    assert.equal(conditional.length, 5); // every file except index.json
+    assert.equal(conditional.length, 7); // every file except index.json
   });
 
   test('live failure falls back to the cache', async () => {
@@ -182,8 +184,78 @@ describe('loadFitnessData', () => {
   });
 });
 
+describe('life docs', () => {
+  const opts = () => ({ env, baseUrl: BASE, cacheDir, fixturesDir: path.join(tmp, 'nope') });
+
+  test('life index read from fixtures', async () => {
+    const r = await loadFitnessData({ env, source: 'fixtures', fixturesDir: FIXTURES, cacheDir });
+    assert.ok(r.lifeIndex.sections.watching);
+    assert.ok(r.lifeIndex.sections.work);
+    assert.ok(r.lifeHeatmap.segments.length > 0);
+  });
+
+  test('life docs optional: no life/ dir gives null and fitness is unchanged', async () => {
+    const dir = path.join(tmp, 'src');
+    await fs.cp(FIXTURES, dir, { recursive: true });
+    await fs.rm(path.join(dir, 'life'), { recursive: true });
+    const r = await loadFitnessData({ env, source: 'fixtures', fixturesDir: dir, cacheDir });
+    assert.equal(r.lifeIndex, null);
+    assert.equal(r.lifeHeatmap, null);
+    assert.equal(r.unavailable, false);
+    assert.equal(r.activities.length, 3);
+    assert.equal(r.roundups.length, 1);
+    assert.equal(r.events.events.length, 15);
+  });
+
+  test('invalid life doc ignored with one warning', async () => {
+    const dir = path.join(tmp, 'src');
+    await fs.cp(FIXTURES, dir, { recursive: true });
+    const doc = JSON.parse(await fs.readFile(path.join(dir, 'life', 'index.json'), 'utf8'));
+    doc.schemaVersion = 2;
+    await fs.writeFile(path.join(dir, 'life', 'index.json'), JSON.stringify(doc));
+    /** @type {string[]} */
+    const warns = [];
+    const logger = { info() {}, warn: (m) => warns.push(m), error() {}, debug() {} };
+    const r = await loadFitnessData({ env, source: 'fixtures', fixturesDir: dir, cacheDir, logger });
+    assert.equal(r.lifeIndex, null);
+    assert.ok(r.lifeHeatmap);
+    assert.equal(warns.length, 1);
+  });
+
+  test('a malformed heatmap is ignored', async () => {
+    const dir = path.join(tmp, 'src');
+    await fs.cp(FIXTURES, dir, { recursive: true });
+    await fs.writeFile(path.join(dir, 'life', 'heatmap.json'), '{"segments":[[[1,"x"]]]}');
+    const r = await loadFitnessData({ env, source: 'fixtures', fixturesDir: dir, cacheDir });
+    assert.equal(r.lifeHeatmap, null);
+    assert.ok(r.lifeIndex);
+  });
+
+  test('live 404 falls back to cache', async () => {
+    await loadFitnessData({ ...opts(), fetchImpl: fakeFetch().impl });
+    // a bucket without life/ yet: every life request 404s
+    const dir = path.join(tmp, 'nolife');
+    await fs.cp(FIXTURES, dir, { recursive: true });
+    await fs.rm(path.join(dir, 'life'), { recursive: true });
+    const r = await loadFitnessData({ ...opts(), fetchImpl: fakeFetch({ dir }).impl });
+    assert.equal(r.source, 'live');
+    assert.ok(r.lifeIndex.sections.watching);
+    assert.ok(r.lifeHeatmap.segments.length > 0);
+  });
+
+  test('live 404 with no cache gives null, not a failure', async () => {
+    const dir = path.join(tmp, 'nolife');
+    await fs.cp(FIXTURES, dir, { recursive: true });
+    await fs.rm(path.join(dir, 'life'), { recursive: true });
+    const r = await loadFitnessData({ ...opts(), fetchImpl: fakeFetch({ dir }).impl });
+    assert.equal(r.source, 'live');
+    assert.equal(r.lifeIndex, null);
+    assert.equal(r.lifeHeatmap, null);
+  });
+});
+
 describe('fetchFitnessTask', () => {
-  test('returns exactly the six globals and logs the source', async () => {
+  test('returns exactly the eight globals and logs the source', async () => {
     const task = fetchFitnessTask({ env: { FITNESS_DATA_SOURCE: 'fixtures' }, fixturesDir: FIXTURES, cacheDir });
     /** @type {string[]} */
     const infos = [];
@@ -191,7 +263,10 @@ describe('fetchFitnessTask', () => {
     const out = await task.run(task.config, ctx);
     assert.deepEqual(Object.keys(out).sort(), [
       'fitnessActivities', 'fitnessEvents', 'fitnessIndex', 'fitnessRoundups', 'fitnessSource', 'fitnessUnavailable',
+      'lifeHeatmap', 'lifeIndex',
     ]);
+    assert.ok(out.lifeIndex.sections.watching);
+    assert.ok(out.lifeHeatmap.segments.length > 0);
     assert.equal(out.fitnessEvents.events.length, 15);
     assert.equal(out.fitnessSource, 'fixtures');
     assert.equal(out.fitnessUnavailable, false);

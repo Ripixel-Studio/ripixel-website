@@ -10,6 +10,8 @@
  *   <base>/activity/<showcaseId>.json
  *   <base>/roundup/<periodKey>.json
  *   <base>/events.json          (S2.6: the Fitness calendars, written by the box)
+ *   <base>/life/index.json      (life hub export, plan 2; schema in jarvis docs/domains/lifehub.md)
+ *   <base>/life/heatmap.json    (trimmed route segments, plan 3 Task 2)
  *
  * Source order is live → cache → fixtures → empty, unless FITNESS_DATA_SOURCE
  * forces one. The build never fails because of fitness data: the worst case is
@@ -22,6 +24,8 @@
  *   fitnessEvents       the events.json object ({generatedAt, events[]}) or null when
  *                       the source has none — the life page then falls back to the
  *                       hand-written list
+ *   lifeIndex           the validated life/index.json or null (optional, like events)
+ *   lifeHeatmap         the validated life/heatmap.json or null
  *   fitnessUnavailable  boolean
  *   fitnessSource       'live' | 'cache' | 'fixtures' | 'none'
  */
@@ -60,6 +64,8 @@ const SAFE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,200}$/;
  * @property {any[]} activities
  * @property {any[]} roundups
  * @property {any|null} events
+ * @property {any|null} lifeIndex
+ * @property {any|null} lifeHeatmap
  * @property {Source|'none'} source
  * @property {boolean} unavailable
  * @property {string[]} notes   one line per source tried and why it was passed over
@@ -141,6 +147,37 @@ export function validateEvents(doc) {
 }
 
 /**
+ * life/index.json is optional: a wrong schemaVersion or no sections object counts as absent.
+ * @param {any} doc @param {Logger} [logger]
+ */
+export function validateLife(doc, logger = silentLogger) {
+  if (doc && typeof doc === 'object' && doc.schemaVersion === 1 && doc.sections &&
+      typeof doc.sections === 'object' && !Array.isArray(doc.sections)) return doc;
+  logger.warn('life/index.json ignored: expected schemaVersion 1 and a sections object');
+  return null;
+}
+
+/**
+ * life/heatmap.json is optional: segments must be arrays of [number, number] points.
+ * @param {any} doc @param {Logger} [logger]
+ */
+export function validateHeatmap(doc, logger = silentLogger) {
+  const ok =
+    doc && typeof doc === 'object' && Array.isArray(doc.segments) &&
+    doc.segments.every(
+      (/** @type {any} */ seg) =>
+        Array.isArray(seg) &&
+        seg.every(
+          (/** @type {any} */ p) =>
+            Array.isArray(p) && p.length === 2 && p.every((/** @type {any} */ n) => typeof n === 'number' && Number.isFinite(n)),
+        ),
+    );
+  if (ok) return doc;
+  logger.warn('life/heatmap.json ignored: segments must be arrays of [number, number]');
+  return null;
+}
+
+/**
  * Ids listed in the index, filtered to ones that are safe to use as paths.
  * @param {any[]} list
  * @param {string} field
@@ -196,7 +233,7 @@ async function pool(items, limit, fn) {
 // Readers. Each returns { index, activityFiles, roundupFiles } or throws when
 // the source is unusable (no index). Missing individual files are skipped.
 
-/** @typedef {{ index: any, activityFiles: Map<string, any>, roundupFiles: Map<string, any>, events: any|null }} RawSet */
+/** @typedef {{ index: any, activityFiles: Map<string, any>, roundupFiles: Map<string, any>, events: any|null, lifeIndex?: any|null, lifeHeatmap?: any|null }} RawSet */
 
 /**
  * @param {string} dir
@@ -227,7 +264,24 @@ export async function readFromDir(dir, logger = silentLogger) {
   } catch (e) {
     logger.debug(`events.json unreadable in ${dir}: ${errMsg(e)}; no calendar`);
   }
-  return { index, activityFiles, roundupFiles, events };
+  const lifeIndex = await readOptional(path.join(dir, 'life', 'index.json'), validateLife, logger);
+  const lifeHeatmap = await readOptional(path.join(dir, 'life', 'heatmap.json'), validateHeatmap, logger);
+  return { index, activityFiles, roundupFiles, events, lifeIndex, lifeHeatmap };
+}
+
+/**
+ * Read an optional doc: a missing file is silent (debug), an invalid one warns once.
+ * @param {string} file @param {(d: any, l: Logger) => any} validate @param {Logger} logger
+ */
+async function readOptional(file, validate, logger) {
+  let doc;
+  try {
+    doc = await readJson(file);
+  } catch (e) {
+    logger.debug(`${file} unreadable: ${errMsg(e)}; skipped`);
+    return null;
+  }
+  return validate(doc, logger);
 }
 
 /**
@@ -348,6 +402,11 @@ export async function readLive(opts) {
 
   // The calendar export is not listed in the index; same lenient path (cache on 304 or failure).
   const events = validateEvents(await getFileLenient('events.json'));
+  // Likewise the life docs: live, else cached, else null; validated after the fetch.
+  const lifeRaw = await getFileLenient('life/index.json');
+  const lifeIndex = lifeRaw === undefined ? null : validateLife(lifeRaw, logger);
+  const heatRaw = await getFileLenient('life/heatmap.json');
+  const lifeHeatmap = heatRaw === undefined ? null : validateHeatmap(heatRaw, logger);
 
   const activityFiles = new Map();
   const roundupFiles = new Map();
@@ -362,7 +421,7 @@ export async function readLive(opts) {
   logger.debug(
     `live: ${stats.fetched} fetched, ${stats.reused} reused from cache, ${stats.failed} failed`,
   );
-  return { index, activityFiles, roundupFiles, events, ...stats };
+  return { index, activityFiles, roundupFiles, events, lifeIndex, lifeHeatmap, ...stats };
 }
 
 // ---------------------------------------------------------------------------
@@ -380,7 +439,7 @@ function ts(iso) {
  * @param {RawSet} raw
  */
 export function assemble(raw) {
-  const { index, activityFiles, roundupFiles, events = null } = raw;
+  const { index, activityFiles, roundupFiles, events = null, lifeIndex = null, lifeHeatmap = null } = raw;
   const activities = [];
   for (const entry of index.activities) {
     const file = entry && activityFiles.get(entry.slug);
@@ -404,7 +463,7 @@ export function assemble(raw) {
       ts(b.roundup?.periodStart) - ts(a.roundup?.periodStart),
   );
 
-  return { index, activities, roundups, events };
+  return { index, activities, roundups, events, lifeIndex, lifeHeatmap };
 }
 
 /** @param {unknown} e */
@@ -431,8 +490,8 @@ export async function loadFitnessData(options = {}) {
       if (source === 'live') raw = await readLive(opts);
       else if (source === 'cache') raw = await readFromDir(opts.cacheDir, logger);
       else raw = await readFromDir(opts.fixturesDir, logger);
-      const { index, activities, roundups, events } = assemble(raw);
-      return { index, activities, roundups, events, source, unavailable: false, notes };
+      const { index, activities, roundups, events, lifeIndex, lifeHeatmap } = assemble(raw);
+      return { index, activities, roundups, events, lifeIndex, lifeHeatmap, source, unavailable: false, notes };
     } catch (e) {
       const where =
         source === 'live' ? opts.baseUrl : source === 'cache' ? opts.cacheDir : opts.fixturesDir;
@@ -446,6 +505,8 @@ export async function loadFitnessData(options = {}) {
     activities: [],
     roundups: [],
     events: null,
+    lifeIndex: null,
+    lifeHeatmap: null,
     source: 'none',
     unavailable: true,
     notes,
@@ -475,6 +536,8 @@ export function fetchFitnessTask(config = {}) {
           activities: [],
           roundups: [],
           events: null,
+          lifeIndex: null,
+          lifeHeatmap: null,
           source: 'none',
           unavailable: true,
           notes: [errMsg(e)],
@@ -493,6 +556,8 @@ export function fetchFitnessTask(config = {}) {
         fitnessActivities: data.activities,
         fitnessRoundups: data.roundups,
         fitnessEvents: data.events,
+        lifeIndex: data.lifeIndex,
+        lifeHeatmap: data.lifeHeatmap,
         fitnessUnavailable: data.unavailable,
         fitnessSource: data.source,
       };

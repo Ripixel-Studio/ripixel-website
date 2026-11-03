@@ -48,7 +48,7 @@ export const PAGES = [
   { id: 'home',      label: 'HELLO!',      glyph: '☼', ink: '#F25B1C', desc: 'software engineer · web app creator · nottinghamshire, uk' },
   { id: 'projects',  label: 'PROJECTS.',   glyph: '◆', ink: '#D32E84', desc: 'things built, shipped, and occasionally abandoned.' },
   { id: 'thoughts',  label: 'THOUGHTS.',   glyph: '◇', ink: '#0F8A56', desc: 'ramblings, how-to guides & the occasional hot take.' },
-  { id: 'profile',   label: 'PROFILE.',    glyph: '◉', ink: '#2148C0', desc: 'career history, tech stack, and a very long meeting history.' },
+  { id: 'work',      label: 'WORK.',       glyph: '◉', ink: '#2148C0', desc: 'where I have worked, what I built, and what I use now.' },
   { id: 'life',      label: 'FITNESS.',    glyph: '△', ink: FITNESS_INK, desc: 'running, riding & generally trying to stay alive.' },
   { id: 'changelog', label: 'CHANGELOG.',  glyph: '◎', ink: '#F25B1C', desc: "what's changed on this site." },
   { id: '404',       label: '404.',        glyph: '×', ink: '#B7261F', desc: '(oh bollocks.)' },
@@ -132,7 +132,7 @@ export function cardShell({ ink, pill, bigGlyph = '', inner }) {
   <!-- URL footer -->
   <text x="56" y="594"
     font-family="${MONO}"
-    font-size="17" fill="${INK}" opacity="0.45">james.ripixel.co.uk — a zine, by james king · est. 2015</text>
+    font-size="17" fill="${INK}" opacity="0.45">james.ripixel.co.uk — a zine, by james king</text>
 
   <!-- Ink dot cluster (top right, registration marks) -->
   <circle cx="1148" cy="50" r="7"   fill="${ink}"/>

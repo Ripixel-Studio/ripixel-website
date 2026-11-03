@@ -24,7 +24,10 @@ import { fitnessSessionsViewTask } from './tasks/fitness-sessions.mjs';
 import { fitnessEventViewsTask } from './tasks/fitness-event-views.mjs';
 import { fitnessPhotoDimsTask } from './tasks/fitness-photo-dims.mjs';
 import { fitnessFeedItemsTask, FEED_PATH as FITNESS_FEED_PATH } from './tasks/fitness-feed-items.mjs';
-import { lifePageTasks } from './tasks/life-pages.mjs';
+import { lifeHubTask } from './tasks/life-hub.mjs';
+import { workViewTask } from './tasks/work-view.mjs';
+import { lifeHeatmapTask } from './tasks/life-heatmap.mjs';
+import { lifePageTasks, templateHelpers } from './tasks/life-pages.mjs';
 
 const SITE_URL = 'https://james.ripixel.co.uk';
 
@@ -197,11 +200,6 @@ export const tasks = [
             cacheHash,
             // Homepage static data
             latestProject:     'FitGlue',
-            latestProjectDate: '2024 → present',
-            latestRole:        'Monzo',
-            latestRoleDate:    'may 2023 → now',
-            latestRoleTitle:   'senior staff engineer (director)',
-            latestRoleBlurb:   'In the Borrowing collective, looking after the Flex team. Fast growth, brilliant people, ambitious targets.',
         },
         valuesFn: (/** @type {any} */ globals) => {
             const match = globals.changelogHtml && /** @type {string} */ (globals.changelogHtml).match(/v(\d+\.\d+\.\d+)/i);
@@ -218,8 +216,11 @@ export const tasks = [
     // Sets fitnessIndex, fitnessActivities, fitnessRoundups, fitnessUnavailable, fitnessSource.
     // Env: FITNESS_DATA_BASE (URL), FITNESS_DATA_SOURCE=live|cache|fixtures. See README "Fitness data".
     fetchFitnessTask(),
+    lifeHeatmapTask(), // LH3.5 `lifeHeatmapView`: {viewBox, paths, count} or null; drawn on /life/fitness
     fitnessPhotoDimsTask(), // F5.5 `fitnessPhotoDims`: hero photo sizes (portrait beside the title, else full width); before the view tasks
     fitnessLifeTask(), // S2.2 `fitnessLife` for /life (rendered by generate-pages below)
+    workViewTask(), // LH3.7 `workView`: stats, roles, roster, education, optional salary (rendered by work.html)
+    lifeHubTask(), // LH3.4 `lifeHub`, `lifeSections`, `lifePersonal`, `lifeFacts` (data only)
     // F5.4 share cards — /life/share/<kind>/<id>/<shape>-<background>.(jpg|png) via sharp, cached in .cache/og;
     // the Landscape card is the OG image. Runs BEFORE the view tasks: they read `fitnessOgImages` (og:image)
     // and `fitnessShareCards` (the Share button).
@@ -308,6 +309,7 @@ export const tasks = [
         pagesDir: './personal/pages',
         partialsDir: './personal/partials',
         outDir: './public/personal',
+        helpers: templateHelpers, // `eq` for the /life hub's per-section notes
         additionalVarsFn: ({ currentPage, rightNow, ...vars }) => {
             /** @type {Record<string, string>} */
             const pageMapping = {
@@ -321,16 +323,17 @@ export const tasks = [
                 description: (() => {
                     switch (page) {
                         case 'thoughts':  return 'A peak inside my brain you ask? Reader, beware...';
-                        case 'profile':   return `So who am I? I'm James King, a Software Engineer from Nottinghamshire.`;
+                        case 'work':      return 'Where James King has worked, the roles and the technologies, from the export.';
                         case 'projects':  return "Shall we take a look at some projects I've done?";
                         case 'changelog': return 'What changes have happened to this site?';
                         case 'home':      return "I'm James King, and I make things for the web";
-                        case 'life':      return "What's going on in my life? Fitness, media, and upcoming events.";
+                        case 'life':      return 'James King, by the numbers: fitness, body, sleep, food, games, code, watching, listening and reading.';
                         default:          return vars.description || '';
                     }
                 })(),
                 rightNow: rightNow || null,
                 atomFeed: page === 'life' ? FITNESS_FEED_PATH : undefined,
+                canonical: page === 'life' ? `${SITE_URL}/life` : vars.canonical,
             };
         },
     }),
