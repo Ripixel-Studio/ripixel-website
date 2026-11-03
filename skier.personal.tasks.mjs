@@ -24,6 +24,7 @@ import { fitnessSessionsViewTask } from './tasks/fitness-sessions.mjs';
 import { fitnessEventViewsTask } from './tasks/fitness-event-views.mjs';
 import { fitnessPhotoDimsTask } from './tasks/fitness-photo-dims.mjs';
 import { fitnessFeedItemsTask, FEED_PATH as FITNESS_FEED_PATH } from './tasks/fitness-feed-items.mjs';
+import { lifeHubTask } from './tasks/life-hub.mjs';
 import { lifePageTasks } from './tasks/life-pages.mjs';
 
 const SITE_URL = 'https://james.ripixel.co.uk';
@@ -220,6 +221,7 @@ export const tasks = [
     fetchFitnessTask(),
     fitnessPhotoDimsTask(), // F5.5 `fitnessPhotoDims`: hero photo sizes (portrait beside the title, else full width); before the view tasks
     fitnessLifeTask(), // S2.2 `fitnessLife` for /life (rendered by generate-pages below)
+    lifeHubTask(), // LH3.4 `lifeHub`, `lifeSections`, `lifePersonal`, `lifeFacts` (data only)
     // F5.4 share cards — /life/share/<kind>/<id>/<shape>-<background>.(jpg|png) via sharp, cached in .cache/og;
     // the Landscape card is the OG image. Runs BEFORE the view tasks: they read `fitnessOgImages` (og:image)
     // and `fitnessShareCards` (the Share button).
