@@ -341,3 +341,78 @@ export function stackedShare(byYear, opts = { top: 5 }) {
     summary,
   };
 }
+
+/** An hour of the day as `6am`, `12pm`, `12am`. @param {number} h */
+export function hourLabel(h) {
+  const x = ((Math.round(h) % 24) + 24) % 24;
+  return `${x % 12 === 0 ? 12 : x % 12}${x < 12 ? 'am' : 'pm'}`;
+}
+
+/**
+ * @typedef {{ label: string, title: string, left: number, width: number, y: number, h: number, merged: boolean }} ClockBar
+ * @typedef {{ bars: ClockBar[], yTicks: Tick[], xTicks: Tick[], summary: string, label: string, unit: string,
+ *   rows: { label: string, value: string }[] }} ClockModel
+ */
+
+/**
+ * The model for a 24-hour column chart (games, time of day). `hours` holds 24 values (hours played
+ * in that clock hour); `null` hours are covered by `merged`, one wide bar drawn at the per-hour
+ * average of its total so its area is the time played, labelled as a whole (weekday daytime is
+ * never shown hour by hour). `max` shares a y scale between charts. Null when nothing was played.
+ * @param {Array<number|null|undefined>} hours
+ * @param {{ label: string, unit?: string, max?: number,
+ *   merged?: { from: number, to: number, total: number, label: string } | null }} opts
+ * @returns {ClockModel | null}
+ */
+export function clockBars(hours, opts) {
+  if (!Array.isArray(hours) || hours.length !== 24) return null;
+  const fin = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0;
+  const m = opts?.merged && fin(opts.merged.total) && opts.merged.to > opts.merged.from ? opts.merged : null;
+  const span = m ? m.to - m.from : 0;
+  const avg = m ? m.total / span : 0;
+  const peak = Math.max(0, ...hours.filter(fin), avg);
+  if (!(peak > 0) && !(m && m.total > 0)) return null;
+  const top = Math.max(peak, fin(opts?.max) ? /** @type {number} */ (opts.max) : 0);
+  const ticks = niceTicks(0, top, 3);
+  const hi = ticks[ticks.length - 1];
+  const step = ticks.length > 1 ? clean(ticks[1] - ticks[0]) : 1;
+  const dec = stepDecimals(step);
+  const yOf = (v) => pc(100 - (v / hi) * 100);
+  const slot = 100 / 24;
+  const fmt = (v) => (v >= 10 ? String(Math.round(v)) : (Math.round(v * 10) / 10).toString());
+  /** @type {ClockBar[]} */
+  const bars = [];
+  /** @type {{ label: string, value: string }[]} */
+  const rows = [];
+  for (let h = 0; h < 24; h++) {
+    if (m && h >= m.from && h < m.to) {
+      if (h === m.from) {
+        const y = yOf(avg);
+        bars.push({ label: m.label, title: `${m.label}, ${hourLabel(m.from)} to ${hourLabel(m.to)}: ${fmt(m.total)} h in all`,
+          left: pc(h * slot + slot * 0.12), width: pc(span * slot - slot * 0.24), y, h: pc(100 - y), merged: true });
+        rows.push({ label: `${hourLabel(m.from)}–${hourLabel(m.to)}`, value: `${fmt(m.total)} h (${m.label})` });
+      }
+      continue;
+    }
+    const v = fin(hours[h]) ? /** @type {number} */ (hours[h]) : 0;
+    const y = yOf(v);
+    bars.push({ label: hourLabel(h), title: `${hourLabel(h)}: ${fmt(v)} h`, left: pc(h * slot + slot * 0.12),
+      width: pc(slot * 0.76), y, h: pc(100 - y), merged: false });
+    rows.push({ label: hourLabel(h), value: `${fmt(v)} h` });
+  }
+  const xTicks = [0, 6, 12, 18].filter((h) => !(m && h > m.from && h < m.to))
+    .map((h) => ({ label: hourLabel(h), pct: pc(h * slot) }));
+  if (m) xTicks.push({ label: m.label, pct: pc((m.from + span / 2) * slot) });
+  xTicks.sort((a, b) => a.pct - b.pct);
+  const best = bars.filter((b) => !b.merged).reduce((a, b) => (b.h > a.h ? b : a), bars[0]);
+  const label = String(opts?.label ?? '');
+  return {
+    bars,
+    yTicks: [...ticks].reverse().map((t) => ({ label: formatTick(t, dec), pct: yOf(t) })),
+    xTicks,
+    summary: `${label}, hours played by hour of day${m ? `, ${m.label} shown as one block` : ''}; busiest hour ${best.label}`,
+    label,
+    unit: String(opts?.unit ?? 'hours'),
+    rows,
+  };
+}

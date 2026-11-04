@@ -1,0 +1,18 @@
+{{!-- A 24-hour column chart with axes (games, time of day). Context: a ClockModel from tasks/chart-axes.mjs
+      clockBars(): bars carry {label, title, left, width, y, h, merged} in percent of the plot; a merged bar is
+      one blurred block (weekday daytime), drawn hatched; the details twin carries every value. --}}
+<figure class="chart chart--bars">
+  <figcaption class="chart__label">{{label}}{{#if unit}} <span>{{unit}}</span>{{/if}}</figcaption>
+  <div class="chart__plot">
+    <ol class="chart__y" aria-hidden="true">{{#each yTicks}}<li style="top:{{pct}}%">{{label}}</li>{{/each}}</ol>
+    <svg class="chart__svg" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="{{summary}}">
+      {{#each yTicks}}<line class="chart__grid" x1="0" x2="100" y1="{{pct}}" y2="{{pct}}" vector-effect="non-scaling-stroke"/>{{/each}}
+      {{#each bars}}<rect class="chart__bar{{#if merged}} chart__bar--merged{{/if}}" x="{{left}}" width="{{width}}" y="{{y}}" height="{{h}}"><title>{{title}}</title></rect>{{/each}}
+    </svg>
+    <ol class="chart__x" aria-hidden="true">{{#each xTicks}}<li style="left:{{pct}}%">{{label}}</li>{{/each}}</ol>
+  </div>
+  <details class="chart__table">
+    <summary>the numbers</summary>
+    <ul>{{#each rows}}<li><b>{{label}}</b> <span>{{value}}</span></li>{{/each}}</ul>
+  </details>
+</figure>

@@ -424,6 +424,21 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
   white-space: nowrap;
 }
 
+/* ─── Hour columns (partials/chart-bars.html, chart-axes.mjs clockBars): one ink; the merged
+   weekday-daytime block is hatched so it never reads as one hour ─ */
+.chart--bars { --chart-h: 150px; }
+.chart--bars .chart__x li,
+.chart--bars .chart__x li:first-child,
+.chart--bars .chart__x li:last-child:not(:first-child) { transform: translateX(-50%); }
+.chart--bars .chart__x li:first-child { transform: none; }
+.chart__bar { fill: var(--life-ink, var(--ink-section)); }
+.chart__bar--merged { fill: color-mix(in srgb, var(--life-ink, var(--ink-section)) 45%, #fff); stroke: var(--life-ink, var(--ink-section)); stroke-width: 1; stroke-dasharray: 3 2; }
+.games-note { margin: -14px 0 26px; font-family: var(--f-mono); font-size: 12px; color: color-mix(in srgb, var(--ink) 72%, #fff); }
+.games-months { list-style: none; margin: 0; padding: 0; font-family: var(--f-mono); font-size: 13px; }
+.games-months__item { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; padding: 5px 0; border-bottom: 1px dashed var(--paper-2); }
+.games-months__month { min-width: 9ch; color: color-mix(in srgb, var(--ink) 72%, #fff); }
+.games-months__item small, .games-done__game small { color: color-mix(in srgb, var(--ink) 65%, #fff); font-weight: 400; }
+
 /* ─── Stacked-share columns (partials/chart-stack.html, chart-axes.mjs stackedShare, R2e.5) ─
    Series tokens: five site inks nudged into the categorical band (validated with the dataviz
    validate_palette.js, light on #fff and dark on --ink: all checks pass) plus a de-emphasis

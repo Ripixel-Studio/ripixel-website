@@ -236,3 +236,22 @@ describe('stackedShare', () => {
     for (const c of [...m.years, ...m.gaps]) assert.ok(c.left >= 0 && c.left + c.width <= 100.01, JSON.stringify(c));
   });
 });
+
+test('clockBars: 24 columns, merged block at its per-hour average, labels', async () => {
+  const { clockBars, hourLabel } = await import('./chart-axes.mjs');
+  assert.equal(hourLabel(0), '12am');
+  assert.equal(hourLabel(12), '12pm');
+  assert.equal(hourLabel(21), '9pm');
+  const hours = Array.from({ length: 24 }, (_, h) => (h >= 9 && h < 17 ? null : h === 21 ? 4 : 1));
+  const m = clockBars(hours, { label: 'Weekdays', merged: { from: 9, to: 17, total: 8, label: 'daytime' } });
+  assert.ok(m);
+  assert.equal(m.bars.length, 17);
+  const block = m.bars.find((b) => b.merged);
+  const one = m.bars.find((b) => b.label === '12am');
+  assert.equal(block.h, one.h, '8 h over 8 hours draws as 1 h a hour');
+  assert.ok(block.width > one.width * 7);
+  assert.equal(m.yTicks[m.yTicks.length - 1].label, '0');
+  assert.match(m.summary, /busiest hour 9pm/);
+  assert.equal(clockBars(Array(24).fill(0), { label: 'x' }), null);
+  assert.equal(clockBars([1, 2], { label: 'x' }), null);
+});
