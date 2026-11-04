@@ -30,7 +30,7 @@ test('image hero: https or a site path, lazy, with alt', () => {
   assert.deepEqual(heroView({ type: 'image', src: 'https://cdn.example.com/a.jpg', alt: 'Space Farm' }, 'Games'),
     { type: 'image', image: true, src: 'https://cdn.example.com/a.jpg', alt: 'Space Farm' });
   assert.equal(heroView({ type: 'image', src: '/card_life.png' }, 'Games')?.alt, 'Games');
-  for (const src of ['http://x.example/a.jpg', 'javascript:alert(1)', '//evil.example/a.jpg', 'https://x.example/a b.jpg', '', null]) {
+  for (const src of ['http://x.example/a.jpg', 'javascript:alert(1)', '//evil.example/a.jpg', '/\\evil.example/x.png', '/a\\b.png', 'https://x.example\\@evil.example/a.png', 'https://x.example/a b.jpg', '', null]) {
     assert.equal(heroView({ type: 'image', src, alt: 'x' }), null, String(src));
   }
 });
@@ -48,6 +48,10 @@ test('spark hero: week labels on the shared line chart, compact', () => {
   // out of order and junk labels: sorted, dropped
   const mixed = heroView({ type: 'spark', points: [['2026-W45', 3], ['nope', 9], ['2026-W44', 2]], label: 'x', unit: '' });
   assert.match(/** @type {any} */ (mixed).chart.summary, /2 weeks: 2 to 3$/);
+  // across a 53-week year end, in the export's "YYYY-Www" form
+  const ny = /** @type {any} */ (heroView({ type: 'spark', points: [['2026-W52', 1], ['2026-W53', 2], ['2027-W01', 3], ['2027-W02', 2.5]], label: 'x', unit: 'kg' })).chart;
+  assert.deepEqual(ny.xTicks.map((/** @type {any} */ t) => t.label), ['21 Dec', '28 Dec', '11 Jan']);
+  assert.equal(ny.end.label, '2.5');
   assert.equal(heroView({ type: 'spark', points: [['2026-W45', 3]] }), null);
   assert.equal(heroView({ type: 'spark', points: 'x' }), null);
 });
@@ -123,6 +127,8 @@ test('a row without a usable hero drops to a slim row', () => {
   assert.deepEqual(cards.map((c) => [c.name, c.size, c.side]), [['games', 'sm', ''], ['code', 'md', ''], ['reading', 'sm', '']]);
   assert.equal(cards[2].href, '/life/reading');
   assert.equal(cards[2].caption, '');
+  assert.equal(cards[0].caption, '', 'a rejected hero leaves no orphan caption');
+  assert.equal(cards[1].caption, 'z');
 });
 
 test('a caption is plain text, and an over-long one is dropped', () => {

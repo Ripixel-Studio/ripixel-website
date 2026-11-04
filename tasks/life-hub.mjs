@@ -608,8 +608,8 @@ const heroNumber = (v) => {
 /** `Sci-fi` → `sci-fi`: a class-safe key for a bar. @param {string} s */
 const slugKey = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'part';
 
-/** An image source the page may load: https, or a path on this site. @param {unknown} src */
-const safeSrc = (src) => (typeof src === 'string' && (/^https:\/\/[^\s"'<>]+$/.test(src) || /^\/(?!\/)[^\s"'<>]*$/.test(src)) ? src : '');
+/** An image source the page may load: https, or a path on this site. No backslashes: browsers read `\` as `/`, so `/\evil.example` would be protocol-relative. @param {unknown} src */
+const safeSrc = (src) => (typeof src === 'string' && (/^https:\/\/[^\s"'<>\\]+$/.test(src) || /^\/(?![\/\\])[^\s"'<>\\]*$/.test(src)) ? src : '');
 
 /**
  * One C8 hero as a view, or null when it cannot be drawn honestly (unknown type, missing or
@@ -696,7 +696,7 @@ export function heroCards(lifeIndex, cards, now = new Date()) {
       side: size === 'lg' ? (lg++ % 2 ? 'right' : 'left') : '',
       headline: card.empty ? null : card.headline || null,
       staleLabel: String(card.staleLabel || ''),
-      caption: captionOf(r.hero?.caption),
+      caption: hero ? captionOf(r.hero?.caption) : '', // no orphan caption for a rejected hero
       hero,
     });
   }
