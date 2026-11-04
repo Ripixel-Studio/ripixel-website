@@ -19,7 +19,7 @@
  * `work.salary` exists in the export (ruling F9).
  */
 
-import { lineChart, stackedShare } from './chart-axes.mjs';
+import { lineChart, stackedShare, clockBars } from './chart-axes.mjs';
 import { cleanPoints } from './route-map.mjs';
 
 export const SECTION_ORDER = ['fitness', 'body', 'games', 'code', 'watching', 'listening', 'reading'];
@@ -68,7 +68,7 @@ function headlineOf(h) {
 
 /** A section whose export gives no headline still leads with its own figure where it has one. @param {string} name @param {any} sec */
 function fallbackHeadline(name, sec) {
-  if (name === 'games' && num(sec.hoursTotal) != null) return { value: group(num(sec.hoursTotal)), unit: 'h', label: 'played, all time' };
+  if (name === 'games' && num(sec.hoursTotal) != null) return { value: group(num(/** @type {number} */ (sec.hoursTotal))), unit: 'h', label: 'played, all time' };
   return null;
 }
 
@@ -337,6 +337,89 @@ function leagueView(lg) {
   };
 }
 
+/** Hours with an h: one decimal under 10, whole above. @param {number} h */
+const hoursText = (h) => `${h < 10 ? one(h) : group(h)}h`;
+
+const BAND_LABELS = /** @type {Record<string, string>} */ ({
+  daytime: 'Daytime, 9am–5pm', evening: 'Evening, 5pm–10pm', late: 'Late, 10pm–2am', small: 'Small hours, 2am–9am',
+});
+
+/**
+ * Time of day: weekday and weekend columns on one shared scale; weekday 9am–5pm is one
+ * "daytime" block, never hour by hour. Null without any play. @param {any} c
+ */
+function clockView(c) {
+  if (!c || typeof c !== 'object') return null;
+  const arr = (/** @type {any} */ a) => (Array.isArray(a) && a.length === 24 ? a.map((v) => num(v)) : null);
+  const wd = arr(c.weekday), we = arr(c.weekend);
+  if (!wd && !we) return null;
+  const day = num(c.weekdayDaytime) ?? 0;
+  const max = Math.max(0, ...[...(wd || []), ...(we || [])].filter((v) => v != null).map(Number), day / 8);
+  const weekday = wd ? clockBars(wd, { label: 'Weekdays', unit: 'hours played, by hour', max, merged: { from: 9, to: 17, total: day, label: 'daytime' } }) : null;
+  const weekend = we ? clockBars(we, { label: 'Weekends', unit: 'hours played, by hour', max }) : null;
+  if (!weekday && !weekend) return null;
+  const parts = [];
+  if (monthLabel(c.leagueSince)) parts.push(`League from every match since ${monthLabel(c.leagueSince)}`);
+  if (dayLabel(c.steamSince)) parts.push(`Steam sampled hourly since ${dayLabel(c.steamSince)}`);
+  return { charts: [weekday, weekend].filter(Boolean), note: parts.join('; ') };
+}
+
+/** Cumulative hours this year, week by week (League + Steam since tracking). @param {any[]} weeks @param {any} year */
+function yearChart(weeks, year) {
+  const rows = (Array.isArray(weeks) ? weeks : []).filter((w) => w && typeof w === 'object' && /^\d{4}-\d{2}-\d{2}$/.test(String(w.week)));
+  const chart = lineChart(rows.map((w) => num(w.total)), { label: 'This year, cumulative', unit: 'hours', x: { kind: 'weeks', weeks: rows.map((w) => String(w.week)) } });
+  if (!chart) return null;
+  const since = dayLabel(year?.steamSince);
+  return { chart, note: since ? `League from every match; Steam counted from ${since}, when tracking began` : 'League from every match; Steam not counted (no day-by-day history yet)' };
+}
+
+/** The fun numbers, each a row; null without any. @param {any} f */
+function funView(f) {
+  if (!f || typeof f !== 'object') return null;
+  const facts = [];
+  const s = f.longestSession;
+  if (s && num(s.games) && num(s.hours) != null) {
+    facts.push({ label: 'Longest session', value: `${group(s.games)} games`, sub: `${hoursText(s.hours)} back to back, ${num(s.wins) ?? 0} won${dayLabel(s.day) ? ` · ${dayLabel(s.day)}` : ''}` });
+  }
+  const b = f.biggestDay;
+  if (b && num(b.hours) != null && dayLabel(b.day)) facts.push({ label: 'Biggest League day', value: hoursText(b.hours), sub: `${group(num(b.games) ?? 0)} games · ${dayLabel(b.day)}` });
+  const g = f.longestGame;
+  if (g && num(g.minutes)) facts.push({ label: 'Longest game', value: `${group(g.minutes)} min`, sub: `${championName(g.champion)}, ${g.won ? 'won' : 'lost'}${dayLabel(g.day) ? ` · ${dayLabel(g.day)}` : ''}` });
+  const modes = (Array.isArray(f.modes) ? f.modes : []).filter((m) => m && m.mode && num(m.games));
+  const total = modes.reduce((t, m) => t + m.games, 0);
+  const champs = (Array.isArray(f.championByMonth) ? f.championByMonth : []).filter((c) => c && c.champion && monthLabel(c.month) && num(c.games))
+    .map((c) => ({ month: monthLabel(c.month), champion: championName(c.champion), games: group(c.games), of: num(c.of) != null ? group(c.of) : '' }))
+    .reverse();
+  const bands = (Array.isArray(f.winByBand) ? f.winByBand : []).filter((x) => x && BAND_LABELS[x.band] && num(x.games))
+    .map((x) => ({ label: BAND_LABELS[x.band], games: group(x.games), winRate: num(x.winRate), pct: Math.max(0, Math.min(100, num(x.winRate) ?? 0)) }));
+  const view = {
+    facts,
+    modes: modes.map((m) => ({ mode: String(m.mode), games: group(m.games), hours: num(m.hours) != null ? hoursText(m.hours) : '', pct: total ? Math.round((m.games / total) * 100) : 0 })),
+    champs, bands,
+  };
+  return facts.length || view.modes.length || champs.length || bands.length ? view : null;
+}
+
+/** The headline numbers: League this year, Steam's fortnight, all time (with what it covers). @param {any} sec */
+function gamesStats(sec) {
+  const y = sec.year && typeof sec.year === 'object' ? sec.year : {};
+  const at = sec.allTime && typeof sec.allTime === 'object' ? sec.allTime : null;
+  const lgSince = monthLabel(at?.leagueSince);
+  const all = num(sec.hoursTotal) != null ? {
+    ...row('All time', group(/** @type {number} */ (num(sec.hoursTotal))), 'h'),
+    sub: at ? `Steam lifetime ${group(num(at.steam) ?? 0)}h + League ${group(num(at.league) ?? 0)}h${lgSince ? ` since ${lgSince}` : ''}` : '',
+  } : false;
+  const steamYear = num(y.steamSinceTracking) != null && dayLabel(y.steamSince) ? `Steam since ${dayLabel(y.steamSince)}: ${hoursText(y.steamSinceTracking)}` : '';
+  return [
+    num(y.league) != null ? { ...row('League this year', group(y.league), 'h'), sub: [num(y.leagueGames) != null ? `${group(y.leagueGames)} games` : '', steamYear].filter(Boolean).join(' · ') } : false,
+    num(sec.steam2Weeks) != null ? { ...row('Steam, last 2 weeks', hours(sec.steam2Weeks), 'h'), sub: "Steam's own two-week figure" } : false,
+    all,
+    // 0 means not counted yet (no multiplayer flags collected), not "never online"
+    num(sec.multiplayerHours) ? row('Multiplayer', group(sec.multiplayerHours), 'h') : false,
+    stat('Backlog', sec.backlog, group, 'games'),
+  ].filter(Boolean);
+}
+
 /** /life/games from C6: the cover wall, League, recently played, the rarest achievements. @param {any} sec */
 function gamesView(sec) {
   const a = sec.achievements && typeof sec.achievements === 'object' ? sec.achievements : {};
@@ -348,13 +431,10 @@ function gamesView(sec) {
     ink: i % 5,
   }));
   return {
-    stats: [
-      stat('This year', sec.hoursYear, group, 'h'),
-      stat('All time', sec.hoursTotal, group, 'h'),
-      // 0 means not counted yet (no multiplayer flags collected), not "never online"
-      num(sec.multiplayerHours) ? row('Multiplayer', group(sec.multiplayerHours), 'h') : false,
-      stat('Backlog', sec.backlog, group, 'games'),
-    ].filter(Boolean),
+    stats: gamesStats(sec),
+    clock: clockView(sec.clock),
+    yearChart: yearChart(sec.yearWeeks, sec.year),
+    fun: funView(sec.fun),
     wall,
     league: leagueView(sec.league),
     recent: list(sec.recent).filter((g) => g.name).map((g) => ({ name: String(g.name), hours: num(g.hours) != null ? hours(g.hours) : '', art: safeArt(g.art) })),

@@ -16,8 +16,9 @@
       <line x1="9" y1="0" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/>
     </svg>
 
-    {{!-- Games (C6, lifeSections.games): League first and biggest, the cover wall, then recently
-          played, the rarest achievements and completion. --}}
+    {{!-- Games (C6, lifeSections.games): League first and biggest, the headline numbers, the year by
+          week, time of day (weekday daytime blurred to one block), the League numbers, the cover wall,
+          then recently played, the rarest achievements and completion. --}}
     {{#with section}}
     {{> life-section-head snapTop="BUTTON" snapAccent="MASHING"}}
     {{#if empty}}
@@ -28,6 +29,60 @@
     {{/if}}
     {{#if stats.length}}
     {{> life-stats stats}}
+    {{/if}}
+    {{#if yearChart}}
+    <h2 class="fit-header">the <span>year so far</span>.</h2>
+    <div class="life-charts life-charts--wide">{{> chart-line yearChart.chart}}</div>
+    <p class="games-note">{{yearChart.note}}</p>
+    {{/if}}
+    {{#if clock}}
+    <h2 class="fit-header">when I <span>play</span>.</h2>
+    <div class="life-charts">{{#each clock.charts}}{{> chart-bars}}{{/each}}</div>
+    {{#if clock.note}}<p class="games-note">{{clock.note}}. Weekday 9am–5pm is one block.</p>{{/if}}
+    {{/if}}
+    {{#if fun}}
+    <h2 class="fit-header">the <span>League numbers</span>.</h2>
+    {{#if fun.facts.length}}{{> life-stats fun.facts}}{{/if}}
+    <div class="life-columns games-fun">
+      {{#if fun.bands.length}}
+      <section class="life-list-block">
+        <h2 class="life-period__label">Win rate by time of day</h2>
+        <ol class="games-done">
+          {{#each fun.bands}}
+          <li class="games-done__item">
+            <span class="games-done__game">{{label}} <small>{{games}} games</small></span>
+            <span class="life-progress" role="img" aria-label="{{#if winRate}}{{winRate}}% won{{else}}no games{{/if}}"><span class="life-progress__fill" style="width: {{pct}}%"></span></span>
+            <span class="games-done__pct">{{#if winRate}}{{winRate}}%{{else}}–{{/if}}</span>
+          </li>
+          {{/each}}
+        </ol>
+      </section>
+      {{/if}}
+      {{#if fun.modes.length}}
+      <section class="life-list-block">
+        <h2 class="life-period__label">Games by mode</h2>
+        <ol class="games-done">
+          {{#each fun.modes}}
+          <li class="games-done__item">
+            <span class="games-done__game">{{mode}} <small>{{hours}}</small></span>
+            <span class="life-progress" role="img" aria-label="{{pct}}% of games"><span class="life-progress__fill" style="width: {{pct}}%"></span></span>
+            <span class="games-done__pct">{{games}}</span>
+          </li>
+          {{/each}}
+        </ol>
+      </section>
+      {{/if}}
+      {{#if fun.champs.length}}
+      <section class="life-list-block">
+        <h2 class="life-period__label">Champion of the month</h2>
+        <ol class="games-months">
+          {{#each fun.champs}}
+          <li class="games-months__item"><span class="games-months__month">{{month}}</span> <b>{{champion}}</b> <small>{{games}} of {{of}} games</small></li>
+          {{/each}}
+        </ol>
+      </section>
+      {{/if}}
+    </div>
     {{/if}}
     {{#if wall.length}}
     <h2 class="fit-header">the <span>cover wall</span>.</h2>

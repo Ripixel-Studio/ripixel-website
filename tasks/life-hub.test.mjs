@@ -108,7 +108,7 @@ test('section views from the fixture', () => {
   assert.equal(buildSection('body', fixture.sections.body, now).measures.stats[0].value, '80.1');
   assert.equal(buildSection('body', fixture.sections.body, now).sleep.stats[0].value, '7h 24m');
   assert.equal(buildSection('code', fixture.sections.code, now).active[1].url, '');
-  assert.deepEqual(buildSection('games', fixture.sections.games, now).stats.map((r) => r.label), ['This year', 'All time', 'Multiplayer', 'Backlog']);
+  assert.deepEqual(buildSection('games', fixture.sections.games, now).stats.map((r) => r.label), ['League this year', 'Steam, last 2 weeks', 'All time', 'Multiplayer', 'Backlog']);
   assert.equal(buildSection('reading', fixture.sections.reading, now).current[0].percent, 40);
 });
 
@@ -479,4 +479,53 @@ test('old export: projects without status are active, and the page renders', asy
   } finally {
     await fs.rm(tmp, { recursive: true, force: true });
   }
+});
+
+// ─── games: honest year, time of day, the year by week, the League numbers ───
+
+test('games stats say what each number covers', () => {
+  const g = buildSection('games', fixture.sections.games, now);
+  const by = Object.fromEntries(g.stats.map((r) => [r.label, r]));
+  assert.equal(by['League this year'].value, '148');
+  assert.match(by['League this year'].sub, /231 games/);
+  assert.match(by['League this year'].sub, /Steam since 20 Oct 2026: 9\.5h/);
+  assert.equal(by['All time'].sub, 'Steam lifetime 1,228h + League 612h since Mar 2019');
+  assert.equal(by['Steam, last 2 weeks'].value, '6.5');
+  assert.ok(!('This year' in by), 'no blended year total');
+});
+
+test('games time of day: weekday daytime is one block, shared scale', () => {
+  const g = buildSection('games', fixture.sections.games, now);
+  const [wd, we] = g.clock.charts;
+  assert.equal(wd.label, 'Weekdays');
+  assert.equal(we.label, 'Weekends');
+  const merged = wd.bars.filter((b) => b.merged);
+  assert.equal(merged.length, 1);
+  assert.equal(wd.bars.length, 24 - 8 + 1);
+  assert.ok(!wd.bars.some((b) => /^(9am|10am|11am|12pm|1pm|2pm|3pm|4pm)$/.test(b.label)), 'no daytime hour bars');
+  assert.match(merged[0].title, /daytime, 9am to 5pm: 6 h in all/);
+  assert.equal(we.bars.length, 24);
+  assert.deepEqual(wd.yTicks, we.yTicks, 'one scale for both');
+  assert.ok(wd.xTicks.some((t) => t.label === 'daytime'));
+  assert.match(g.clock.note, /since Mar 2019/);
+});
+
+test('games year chart is cumulative and labelled', () => {
+  const g = buildSection('games', fixture.sections.games, now);
+  assert.ok(g.yearChart.chart.d.startsWith('M'));
+  assert.equal(g.yearChart.chart.xTicks[0].label, '1 Jan');
+  assert.match(g.yearChart.note, /Steam counted from 20 Oct 2026/);
+});
+
+test('games fun numbers', () => {
+  const g = buildSection('games', fixture.sections.games, now);
+  assert.deepEqual(g.fun.facts.map((f) => f.label), ['Longest session', 'Biggest League day', 'Longest game']);
+  assert.equal(g.fun.facts[2].sub, 'Miss Fortune, won · 3 Jun 2026');
+  assert.equal(g.fun.champs[0].month, 'Nov 2026');
+  assert.equal(g.fun.modes[0].mode, 'ARAM');
+  assert.equal(g.fun.bands[0].label, 'Daytime, 9am–5pm');
+  const bare = buildSection('games', { ...fixture.sections.games, clock: null, yearWeeks: [], fun: null }, now);
+  assert.equal(bare.clock, null);
+  assert.equal(bare.yearChart, null);
+  assert.equal(bare.fun, null);
 });
