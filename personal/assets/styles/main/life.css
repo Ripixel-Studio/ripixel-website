@@ -14,6 +14,7 @@
 .life-ink--watching  { --life-ink: var(--ink-red); }
 .life-ink--listening { --life-ink: var(--ink-blue); }
 .life-ink--reading   { --life-ink: var(--ink-orange); }
+.life-ink--outings   { --life-ink: var(--ink-magenta); }
 
 /* A section page takes its ink for the wash, the dots and the header accents too. */
 body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
@@ -1208,3 +1209,241 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
 .did-you-know__item a:focus-visible { text-decoration: underline; text-decoration-thickness: 3px; }
 .did-you-know__item a:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 .life-hub .did-you-know { margin-top: 8px; }
+
+/* ─── The hero hub (C8) ─────────────────────
+   A zine spread: each section is a pasted-in card with one hero. lg cards take two thirds and
+   two rows and zig-zag left/right; md cards fill the gutter column; sm cards are slim strips.
+   Dense flow packs the strips into whatever the big cards leave. */
+.hub-grid {
+  list-style: none;
+  margin: 0 0 40px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-auto-flow: row dense;
+  gap: 28px 26px;
+}
+
+.hub-card {
+  position: relative;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 20px 16px;
+  background: #fff;
+  border: 2px solid var(--ink);
+  box-shadow: 7px 7px 0 var(--life-ink);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+.hub-card:hover { transform: translate(-2px, -2px); box-shadow: 10px 10px 0 var(--life-ink); }
+
+.hub-card--lg { grid-column: span 4; grid-row: span 2; padding: 22px 26px 20px; }
+.hub-card--lg.hub-card--right { grid-column: 3 / span 4; }
+.hub-card--md { grid-column: span 2; grid-row: span 2; }
+.hub-card--sm { grid-column: span 2; gap: 6px; padding: 12px 16px 12px; box-shadow: 5px 5px 0 var(--life-ink); }
+
+.hub-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 14px;
+}
+
+.hub-card__name {
+  font-family: var(--f-disp);
+  font-weight: 400;
+  font-size: 34px;
+  line-height: 1;
+}
+.hub-card--lg .hub-card__name { font-size: 54px; }
+.hub-card--sm .hub-card__name { font-size: 26px; }
+
+.hub-card__name a {
+  display: inline-block;
+  padding: 0 5px;
+  margin-left: -5px;
+  border-bottom: 4px solid var(--life-ink);
+}
+.hub-card__name a:hover { background: var(--life-ink); color: var(--paper); }
+.hub-card__name a::after { content: '.'; }
+
+.hub-card__stat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 8px;
+  min-width: 0;
+}
+.hub-card__num {
+  font-family: var(--f-disp);
+  font-size: 30px;
+  line-height: 1;
+  color: var(--life-ink);
+  white-space: nowrap;
+}
+.hub-card__num small { font-family: var(--f-mono); font-size: 12px; margin-left: 3px; color: var(--ink); }
+.hub-card__label { font-family: var(--f-mono); font-size: 12px; font-weight: 700; }
+.hub-card__none { font-family: var(--f-mono); font-size: 12px; opacity: 0.75; }
+
+.hub-hero {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* James's own line, in his handwriting. */
+.hub-card__caption {
+  font-family: var(--f-scrib);
+  font-size: 23px;
+  line-height: 1.1;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.hub-card--lg .hub-card__caption { font-size: 28px; max-width: 34ch; }
+.hub-card--sm .hub-card__caption { font-size: 20px; }
+
+.hub-card__foot {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+}
+.hub-card__foot .life-stale { margin: 0; }
+.hub-card__note { flex: 1 1 16rem; font-family: var(--f-mono); font-size: 12px; line-height: 1.5; }
+.hub-card__note a { text-decoration: underline; text-decoration-color: var(--life-ink); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.hub-card__note a:hover { background: var(--paper-3); }
+
+.hub-card__more {
+  margin-left: auto;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid var(--life-ink);
+}
+.hub-card__more:hover { background: var(--life-ink); color: #fff; }
+
+/* image: a polaroid taped in at an angle */
+.hub-hero__frame {
+  position: relative;
+  margin: 6px 4px 4px;
+  padding: 8px 8px 22px;
+  background: #fff;
+  border: 2px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--ink);
+  transform: rotate(-1.6deg);
+}
+.hub-card:nth-child(even) .hub-hero__frame { transform: rotate(1.3deg); }
+.hub-hero__frame::before {
+  content: '';
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  width: 84px;
+  height: 22px;
+  margin-left: -42px;
+  background: color-mix(in srgb, var(--ink-yellow) 78%, transparent);
+  border: 1px solid rgba(23,19,17,0.25);
+  transform: rotate(-3deg);
+}
+.hub-hero__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  background: var(--paper-2);
+}
+
+/* spark: the site's line chart, compact and unboxed */
+.hub-hero--spark .chart { --chart-h: 110px; border: 0; box-shadow: none; padding: 0; background: transparent; }
+.hub-card--lg .hub-hero--spark .chart { --chart-h: 190px; }
+
+/* stat: one enormous number */
+.hub-hero__stat { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.hub-hero__value {
+  font-family: var(--f-disp);
+  font-weight: 400;
+  font-size: clamp(76px, 9vw, 120px);
+  line-height: 0.85;
+  color: var(--life-ink);
+  text-shadow: 5px 5px 0 var(--ink);
+  overflow-wrap: anywhere;
+}
+.hub-card--lg .hub-hero__value { font-size: clamp(96px, 15vw, 210px); text-shadow: 7px 7px 0 var(--ink); }
+.hub-hero__value small { font-family: var(--f-mono); font-size: 16px; margin-left: 6px; text-shadow: none; color: var(--ink); }
+.hub-hero__what {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--ink-yellow);
+  border: 2px solid var(--ink);
+  font-family: var(--f-mono);
+  font-size: 13px;
+  font-weight: 700;
+  transform: rotate(-1.5deg);
+}
+
+/* route: the line alone on graph paper, no tiles */
+.hub-hero__route {
+  display: block;
+  position: relative;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(rgba(23,19,17,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23,19,17,0.07) 1px, transparent 1px);
+  background-size: 18px 18px;
+  border: 2px solid var(--ink);
+}
+.hub-hero__map { display: block; width: 100%; height: auto; max-height: 340px; }
+.hub-hero__line, .hub-hero__line-shadow { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.hub-hero__line { stroke: var(--life-ink); stroke-width: 4; }
+.hub-hero__line-shadow { stroke: var(--ink); stroke-width: 4; transform: translate(3px, 3px); opacity: 0.85; }
+.hub-hero__pin { stroke: var(--ink); stroke-width: 2; }
+.hub-hero__pin--start { fill: #fff; }
+.hub-hero__pin--end { fill: var(--ink-yellow); }
+.hub-hero__route-cta {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 2px 8px;
+  background: #fff;
+  border: 1.5px solid var(--ink);
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+a.hub-hero__route:hover .hub-hero__route-cta { background: var(--life-ink); color: #fff; }
+
+/* bars: the share split, with room for any narrow labels below */
+.hub-hero--bars .life-split { margin: 8px 6px 14px 0; }
+.hub-hero--bars .life-split__label:empty { display: none; }
+.hub-hero--bars .life-split__bar { min-height: 84px; }
+.hub-hero--bars .life-split__pct { font-size: clamp(26px, 2.6vw, 36px); }
+.hub-hero--bars .life-split__part { padding: 8px 7px; }
+.hub-hero--bars .life-split__name { white-space: normal; overflow-wrap: normal; text-transform: none; letter-spacing: 0; font-size: 12px; }
+
+@media (max-width: 1000px) {
+  .hub-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hub-card--lg, .hub-card--lg.hub-card--right { grid-column: span 2; grid-row: auto; }
+  .hub-card--md, .hub-card--sm { grid-column: span 1; grid-row: auto; }
+}
+
+@media (max-width: 640px) {
+  .hub-grid { grid-template-columns: minmax(0, 1fr); gap: 26px; }
+  .hub-card--lg, .hub-card--lg.hub-card--right, .hub-card--md, .hub-card--sm { grid-column: auto; }
+  .hub-card { box-shadow: 5px 5px 0 var(--life-ink); padding: 16px 16px 14px; }
+  .hub-card--lg .hub-card__name { font-size: 42px; }
+  .hub-card--lg .hub-card__caption { font-size: 24px; }
+  .hub-hero__frame { margin-inline: 2px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hub-card { transition: none; }
+  .hub-card:hover { transform: none; box-shadow: 7px 7px 0 var(--life-ink); }
+}

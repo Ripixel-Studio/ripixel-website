@@ -7,7 +7,8 @@
  * data and tick labels).
  *
  * Globals set by `lifeHubTask()`:
- *   lifeHub       { cards[{name, href, title, headline, latest, note, staleLabel, empty}], outings[] }
+ *   lifeHub       { cards[{name, href, title, headline, latest, note, staleLabel, empty}], outings[],
+ *                   hero[{name, title, size, side, href, headline, staleLabel, caption, hero}] (C8; [] → the old rows) }
  *   lifeSections  { [name]: view }
  *   lifePersonal  [{ key, label, value, tone }]
  *   lifeFacts     { [key]: value }
@@ -19,6 +20,7 @@
  */
 
 import { lineChart, stackedShare } from './chart-axes.mjs';
+import { cleanPoints } from './route-map.mjs';
 
 export const SECTION_ORDER = ['fitness', 'body', 'games', 'code', 'watching', 'listening', 'reading'];
 /** @param {string} name */
@@ -533,7 +535,169 @@ export function buildHub(lifeIndex, fitnessLife, now = new Date()) {
   return {
     cards,
     outings: sortedNotables(outs).map((n) => ({ ...n, sawLabel: sawLabel(n.month) })),
+    hero: heroCards(lifeIndex, cards, now),
   };
+}
+
+/* ─── The hero hub (C8): `hub.rows` → cards with one hero each ─────────────── */
+
+export const HERO_SIZES = ['lg', 'md', 'sm'];
+/** Activity pages live here (fitness-activity-views.mjs ACTIVITY_BASE_PATH; a literal to keep this module light). */
+const ACTIVITY_PATH = '/life/activity';
+const CAPTION_MAX = 240;
+
+/**
+ * Monday of an ISO week, `2026-W45` → `2026-11-02`; '' when unusable. The hub's spark points
+ * carry week labels while the rest of the export uses Monday dates.
+ * @param {unknown} label
+ */
+export function isoWeekMonday(label) {
+  const m = /^(\d{4})-W(\d{2})$/.exec(String(label ?? ''));
+  if (!m) return '';
+  const year = +m[1];
+  const week = +m[2];
+  if (week < 1 || week > 53) return '';
+  // Week 1 holds 4 January; its Monday is the start of the ISO year.
+  const jan4 = Date.UTC(year, 0, 4);
+  const dow = (new Date(jan4).getUTCDay() + 6) % 7; // Mon 0 … Sun 6
+  const monday = new Date(jan4 - dow * 864e5 + (week - 1) * 7 * 864e5);
+  // A year has a week 53 only when it ends on that week's Thursday or later.
+  if (week === 53 && isoWeekMonday(`${year + 1}-W01`) <= monday.toISOString().slice(0, 10)) return '';
+  return monday.toISOString().slice(0, 10);
+}
+
+/**
+ * A mini route: the published points projected (equirectangular, scaled by cos(lat)) into a
+ * w×h box, centred, with a margin. SVG path data plus the start and finish points. Null with
+ * fewer than 2 points.
+ * @param {any} points `[[lat, lng], …]` @param {number} [w] @param {number} [h]
+ */
+export function routeSketch(points, w = 320, h = 200) {
+  const pts = cleanPoints(points);
+  if (pts.length < 2) return null;
+  const k = Math.cos((pts.reduce((s, p) => s + p[0], 0) / pts.length) * Math.PI / 180);
+  const xy = pts.map(([lat, lng]) => [lng * k, -lat]);
+  const xs = xy.map((p) => p[0]);
+  const ys = xy.map((p) => p[1]);
+  const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+  const pad = 14;
+  const span = Math.max(x1 - x0, y1 - y0) || 1;
+  const scale = Math.min((w - 2 * pad) / (x1 - x0 || span), (h - 2 * pad) / (y1 - y0 || span));
+  const ox = (w - (x1 - x0) * scale) / 2;
+  const oy = (h - (y1 - y0) * scale) / 2;
+  const at = (/** @type {number[]} */ p) => ({ x: +(ox + (p[0] - x0) * scale).toFixed(1), y: +(oy + (p[1] - y0) * scale).toFixed(1) });
+  const drawn = xy.map(at);
+  return {
+    w, h,
+    d: drawn.map((p, i) => `${i ? 'L' : 'M'}${p.x},${p.y}`).join(' '),
+    start: drawn[0],
+    end: drawn[drawn.length - 1],
+  };
+}
+
+/** A section's display number: whole numbers grouped, others to one place, strings as given. @param {unknown} v */
+const heroNumber = (v) => {
+  const n = num(v);
+  if (n != null) return Number.isInteger(n) ? group(n) : one(n);
+  return typeof v === 'string' && v.trim() ? v.trim() : '';
+};
+
+/** `Sci-fi` → `sci-fi`: a class-safe key for a bar. @param {string} s */
+const slugKey = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'part';
+
+/** An image source the page may load: https, or a path on this site. No backslashes: browsers read `\` as `/`, so `/\evil.example` would be protocol-relative. @param {unknown} src */
+const safeSrc = (src) => (typeof src === 'string' && (/^https:\/\/[^\s"'<>\\]+$/.test(src) || /^\/(?![\/\\])[^\s"'<>\\]*$/.test(src)) ? src : '');
+
+/**
+ * One C8 hero as a view, or null when it cannot be drawn honestly (unknown type, missing or
+ * invalid fields). The caption is plain text; the template escapes it.
+ * @param {any} h @param {string} title the section title (image alt fallback)
+ */
+export function heroView(h, title = '') {
+  if (!h || typeof h !== 'object') return null;
+  switch (h.type) {
+    case 'image': {
+      const src = safeSrc(h.src);
+      if (!src) return null;
+      return { type: 'image', image: true, src, alt: String(h.alt || title || '').trim() };
+    }
+    case 'spark': {
+      const rows = (Array.isArray(h.points) ? h.points : [])
+        .filter((p) => Array.isArray(p) && isoWeekMonday(p[0]))
+        .sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+      const values = rows.map((p) => num(p[1]));
+      const decimals = values.some((v) => v != null && !Number.isInteger(v)) ? 1 : 0;
+      const chart = lineChart(values, {
+        label: String(h.label || title), unit: String(h.unit || ''), decimals, w: 320, h: 90,
+        x: { kind: 'weeks', weeks: rows.map((p) => isoWeekMonday(p[0])) },
+      });
+      return chart ? { type: 'spark', spark: true, chart } : null;
+    }
+    case 'stat': {
+      const value = heroNumber(h.value);
+      return value ? { type: 'stat', stat: true, value, unit: String(h.unit || ''), label: String(h.label || '') } : null;
+    }
+    case 'route': {
+      const sketch = routeSketch(h.points);
+      if (!sketch) return null;
+      const slug = typeof h.slug === 'string' && /^[a-z0-9][a-z0-9-]*$/.test(h.slug) ? h.slug : '';
+      return { type: 'route', route: true, ...sketch, href: slug ? `${ACTIVITY_PATH}/${slug}` : '' };
+    }
+    case 'bars': {
+      const items = (Array.isArray(h.items) ? h.items : [])
+        .map((it) => ({ label: String(it?.label || '').trim(), pct: num(it?.pct) }))
+        .filter((it) => it.label && it.pct != null && it.pct > 0)
+        .map((it) => ({ key: slugKey(it.label), label: it.label, pct: Math.round(/** @type {number} */ (it.pct)), narrow: /** @type {number} */ (it.pct) < 12 }));
+      return items.length ? { type: 'bars', bars: true, items } : null;
+    }
+    default:
+      return null;
+  }
+}
+
+/** @param {unknown} c */
+const captionOf = (c) => {
+  const t = typeof c === 'string' ? c.replace(/\s+/g, ' ').trim() : '';
+  return t && t.length <= CAPTION_MAX ? t : '';
+};
+
+/**
+ * The hero hub's cards from the export's `hub.rows`, in export order. Each keeps the section's
+ * own headline (the same figure as the old rows) and gains a hero; a row whose hero is missing
+ * or unusable drops to a slim (sm) row. The lg cards alternate sides, so the page zig-zags.
+ * [] with no usable `hub` (an older export), and the page falls back to the rows.
+ * @param {any} lifeIndex @param {any[]} cards the hub's section cards @param {Date} now
+ */
+export function heroCards(lifeIndex, cards, now = new Date()) {
+  const rows = Array.isArray(lifeIndex?.hub?.rows) ? lifeIndex.hub.rows : [];
+  const sections = lifeIndex?.sections && typeof lifeIndex.sections === 'object' ? lifeIndex.sections : {};
+  const byName = new Map((cards || []).map((c) => [c.name, c]));
+  const hasOutings = outingNotables(lifeIndex).length > 0;
+  const seen = new Set();
+  let lg = 0;
+  const out = [];
+  for (const r of rows) {
+    const name = typeof r?.section === 'string' && /^[a-z][a-z0-9-]*$/.test(r.section) ? r.section : '';
+    if (!name || seen.has(name)) continue;
+    seen.add(name);
+    const card = byName.get(name) || /** @type {any} */ (buildSection(name, sections[name], now));
+    const title = String(card.title || '') === name ? name[0].toUpperCase() + name.slice(1) : String(card.title);
+    const hero = heroView(r.hero, title);
+    let size = HERO_SIZES.includes(r.size) ? r.size : 'md';
+    if (!hero) size = 'sm';
+    // The hub row for outings points at the hub itself: send it to the outings list instead.
+    let href = typeof r.href === 'string' && /^\/(?!\/)/.test(r.href) ? r.href : SECTION_HREF(name);
+    if (href === '/life') href = name === 'outings' && hasOutings ? '#life-outings-title' : '';
+    out.push({
+      name, title, size, href,
+      side: size === 'lg' ? (lg++ % 2 ? 'right' : 'left') : '',
+      headline: card.empty ? null : card.headline || null,
+      staleLabel: String(card.staleLabel || ''),
+      caption: hero ? captionOf(r.hero?.caption) : '', // no orphan caption for a rejected hero
+      hero,
+    });
+  }
+  return out;
 }
 
 const BIT_LABELS = {
