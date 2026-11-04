@@ -896,6 +896,8 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
 /* phones: two columns and shorter rows, so six big tiles are not six screens */
 @container (max-width: 460px) {
   .games-wall { --cols: 2; --ratio: 0.85; }
+  /* the top twelve only: the rest of the wall (and its art) stays off a phone */
+  .games-tile:nth-child(n+13) { display: none; }
   .games-tile__art { object-position: 50% 20%; }
 }
 

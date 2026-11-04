@@ -289,6 +289,19 @@ const compact = (n) => (n >= 1e6 ? `${one(n / 1e6)}M` : n >= 1e3 ? `${Math.round
 /** Hours: one decimal under 10, whole above. @param {number} h */
 const hours = (h) => (h < 10 ? one(h) : group(h));
 
+/** Data Dragon ids whose display name is not just the id split at its capitals. */
+const CHAMPION_NAMES = /** @type {Record<string, string>} */ ({
+  MonkeyKing: 'Wukong', Chogath: "Cho'Gath", Kaisa: "Kai'Sa", Khazix: "Kha'Zix", KogMaw: "Kog'Maw", Velkoz: "Vel'Koz",
+  Belveth: "Bel'Veth", KSante: "K'Sante", RekSai: "Rek'Sai", DrMundo: 'Dr. Mundo', Nunu: 'Nunu & Willump',
+  Renata: 'Renata Glasc', Leblanc: 'LeBlanc', FiddleSticks: 'Fiddlesticks',
+});
+/** A champion's display name: the export's name as is, or an id ("MissFortune") made readable ("Miss Fortune"). @param {unknown} c */
+export function championName(c) {
+  const s = String(c ?? '').trim();
+  if (!s || /\s/.test(s)) return s;
+  return CHAMPION_NAMES[s] || s.replace(/([a-z])([A-Z])/g, '$1 $2');
+}
+
 /** `Gold II · 54 LP`; apex tiers have no division; '' unranked. @param {any} r */
 function rankLabel(r) {
   if (!r || typeof r !== 'object' || typeof r.tier !== 'string' || !r.tier) return '';
@@ -311,12 +324,12 @@ function leagueView(lg) {
     record: w != null && l != null ? `${group(w)}W ${group(l)}L` : '',
     seasonWinRate: w != null && l != null && w + l > 0 ? Math.round((w / (w + l)) * 100) : null,
     mains: (Array.isArray(lg.mains) ? lg.mains : []).filter((m) => m && m.champion).slice(0, 5).map((m) => ({
-      champion: String(m.champion), level: num(m.level), points: num(m.points) != null ? compact(m.points) : '', art: safeArt(m.splash),
+      champion: championName(m.champion), level: num(m.level), points: num(m.points) != null ? compact(m.points) : '', art: safeArt(m.splash),
     })),
     recent: num(rec.games) ? {
       games: num(rec.games), winRate: num(rec.winRate), kda: num(rec.kda) != null ? rec.kda.toFixed(2) : '',
       pool: (Array.isArray(rec.pool) ? rec.pool : []).filter((p) => p && p.champion)
-        .map((p) => ({ champion: String(p.champion), games: num(p.games) ?? 0, winRate: num(p.winRate) })),
+        .map((p) => ({ champion: championName(p.champion), games: num(p.games) ?? 0, winRate: num(p.winRate) })),
     } : null,
     lifetime: num(life.games) ? { games: group(life.games), hours: num(life.hours) != null ? group(life.hours) : '', sinceLabel: monthLabel(life.since) } : null,
   };

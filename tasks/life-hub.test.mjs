@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {
-  SECTION_ORDER, SECTION_HREF, staleLabel, sawLabel, monthLabel, hubNote, buildSection, buildHub, personalBits, lifeFacts, lifeHubTask, lifeInsights,
+  SECTION_ORDER, SECTION_HREF, staleLabel, sawLabel, monthLabel, hubNote, buildSection, buildHub, personalBits, lifeFacts, lifeHubTask, lifeInsights, championName,
 } from './life-hub.mjs';
 import { runSkierTasks } from './skier-test-runner.mjs';
 import { templateHelpers } from './life-pages.mjs';
@@ -380,3 +380,18 @@ test('no league', async () => {
     await fs.rm(tmp, { recursive: true, force: true });
   }
 }, { timeout: 60_000 });
+
+test('League champion names, not Data Dragon ids', () => {
+  assert.equal(championName('Miss Fortune'), 'Miss Fortune');
+  assert.equal(championName('MissFortune'), 'Miss Fortune');
+  assert.equal(championName('JarvanIV'), 'Jarvan IV');
+  assert.equal(championName('MonkeyKing'), 'Wukong');
+  assert.equal(championName('Khazix'), "Kha'Zix");
+  assert.equal(championName('Jhin'), 'Jhin');
+  const sec = structuredClone(fixture.sections.games);
+  sec.league.mains[0].champion = 'MissFortune';
+  sec.league.recent.pool[0].champion = 'TwistedFate';
+  const g = buildSection('games', sec, now);
+  assert.equal(g.league.mains[0].champion, 'Miss Fortune');
+  assert.equal(g.league.recent.pool[0].champion, 'Twisted Fate');
+});
