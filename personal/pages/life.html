@@ -79,17 +79,6 @@
     </ol>
     {{/if}}
 
-    {{#if lifeHub.outings.length}}
-    <section class="life-hub__outings" aria-labelledby="life-outings-title">
-      <h2 class="fit-header" id="life-outings-title">out and <span>about</span>.</h2>
-      <ul class="life-saw">
-        {{#each lifeHub.outings}}
-        <li class="life-saw__item"><span class="life-notable__title">{{title}}</span> <span class="life-saw__when">{{sawLabel}}</span></li>
-        {{/each}}
-      </ul>
-    </section>
-    {{/if}}
-
     {{#if lifePersonal.length}}
     {{> life-personal lifePersonal}}
     {{/if}}

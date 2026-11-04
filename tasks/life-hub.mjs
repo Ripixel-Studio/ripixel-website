@@ -1,13 +1,13 @@
 // @ts-check
 /**
- * The /life hub, its seven section pages and the personal bits (LH3.4, R2c.2): data only.
+ * The /life hub, its eight section pages and the personal bits (LH3.4, R2c.2): data only.
  * Pure functions shape `lifeIndex` (the public life export) and `fitnessLife`
  * into view models; the templates only loop and test. No HTML strings here.
  * The only computed strings are chart models from `chart-axes.mjs` (SVG path
  * data and tick labels).
  *
  * Globals set by `lifeHubTask()`:
- *   lifeHub       { cards[{name, href, title, headline, latest, note, staleLabel, empty}], outings[],
+ *   lifeHub       { cards[{name, href, title, headline, latest, note, staleLabel, empty}], live[],
  *                   hero[{name, title, size, side, href, headline, staleLabel, caption, hero}] (C8; [] → the old rows) }
  *   lifeSections  { [name]: view }
  *   lifePersonal  [{ key, label, value, tone }]
@@ -19,16 +19,16 @@
  * `work.salary` exists in the export (ruling F9).
  */
 
-import { lineChart, stackedShare, clockBars } from './chart-axes.mjs';
+import { lineChart, stackedShare, clockBars, columnBars } from './chart-axes.mjs';
 import { cleanPoints } from './route-map.mjs';
 
-export const SECTION_ORDER = ['fitness', 'body', 'games', 'code', 'watching', 'listening', 'reading'];
+export const SECTION_ORDER = ['fitness', 'body', 'games', 'code', 'watching', 'listening', 'reading', 'live'];
 /** @param {string} name */
 export const SECTION_HREF = (name) => '/life/' + name;
 
 const TITLES = {
   fitness: 'Fitness', body: 'Body', games: 'Games',
-  code: 'Code', watching: 'Watching', listening: 'Listening', reading: 'Reading',
+  code: 'Code', watching: 'Watching', listening: 'Listening', reading: 'Reading', live: 'Live',
 };
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -88,6 +88,7 @@ function notableView(n) {
     key: String(n.key || ''), kind: String(n.kind || ''), title: String(n.title || ''),
     by: n.by || '', season: n.season ?? '', year: n.year ?? '', provider: n.provider || '',
     month: String(n.month || ''), monthLabel: monthLabel(n.month), reason: String(n.reason || ''), poster: n.poster || '',
+    bigScreen: n.bigScreen === true,
   };
 }
 
@@ -450,6 +451,74 @@ function gamesView(sec) {
   };
 }
 
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const plural = (/** @type {number} */ n, /** @type {string} */ one_, /** @type {string} */ many) => `${group(n)} ${n === 1 ? one_ : many}`;
+/** Kind codes the box sends for live events -> plural words (anything else reads as "other"). */
+const LIVE_KINDS = /** @type {Record<string, [string, string]>} */ ({ gig: ['gig', 'gigs'], theatre: ['show', 'shows'], comedy: ['comedy night', 'comedy nights'], sport: ['match', 'matches'] });
+
+/**
+ * /life/live: every gig and live event seen, by year then month (month precision only, as the
+ * export holds it), per-year counts, a few computed stats and a per-year chart.
+ * @param {any[]} notables every live event, de-duplicated (liveNotables)
+ */
+function liveView(notables) {
+  const items = notables
+    .filter((n) => /^\d{4}-(0[1-9]|1[0-2])$/.test(String(n.month || '')))
+    .map((n) => ({ title: String(n.title), month: String(n.month), kind: LIVE_KINDS[String(n.kind)] ? String(n.kind) : 'other' }))
+    .sort((a, b) => b.month.localeCompare(a.month) || a.title.localeCompare(b.title));
+  if (!items.length) return null;
+  const kinds = [...new Set(items.map((i) => i.kind))];
+  const kindWord = (/** @type {string} */ k, /** @type {number} */ n) => (LIVE_KINDS[k] ? LIVE_KINDS[k][n === 1 ? 0 : 1] : n === 1 ? 'other event' : 'other events');
+  const monthIdx = (/** @type {string} */ m) => +m.slice(0, 4) * 12 + (+m.slice(5, 7) - 1);
+  const label = (/** @type {number} */ idx) => `${MONTH_NAMES[idx % 12]} ${Math.floor(idx / 12)}`;
+
+  /** @type {Map<string, number>} */
+  const perMonth = new Map();
+  for (const i of items) perMonth.set(i.month, (perMonth.get(i.month) || 0) + 1);
+  // busiest month: most events, the newest of equals
+  const busiest = /** @type {[string, number]} */ ([...perMonth.entries()].sort((a, b) => b[1] - a[1] || b[0].localeCompare(a[0]))[0]);
+  // longest gap: the most whole months in a row with nothing, between two events
+  const months = [...perMonth.keys()].map(monthIdx).sort((a, b) => a - b);
+  let gap = { n: 0, from: 0, to: 0 };
+  for (let k = 1; k < months.length; k++) {
+    const n = months[k] - months[k - 1] - 1;
+    if (n > gap.n) gap = { n, from: months[k - 1] + 1, to: months[k] - 1 };
+  }
+
+  const years = [...new Set(items.map((i) => i.month.slice(0, 4)))].sort((a, b) => b.localeCompare(a));
+  const yearRows = years.map((y) => {
+    const mine = items.filter((i) => i.month.startsWith(y));
+    const byMonth = [...new Set(mine.map((i) => i.month))].map((m) => ({
+      label: MONTH_NAMES[+m.slice(5, 7) - 1],
+      items: mine.filter((i) => i.month === m).map((i) => ({ title: i.title, kindLabel: kinds.length > 1 ? kindWord(i.kind, 1) : '' })),
+    }));
+    return { year: y, total: mine.length, countLabel: plural(mine.length, 'event', 'events'), months: byMonth };
+  });
+
+  // chart: one column per year, empty years in between kept as zeros
+  const first = +years[years.length - 1], last = +years[0];
+  const span = Array.from({ length: last - first + 1 }, (_, k) => String(first + k));
+  const charts = [
+    columnBars(span, span.map((y) => items.filter((i) => i.month.startsWith(y)).length), { label: 'Live events', unit: 'per year', noun: 'events' }),
+  ].filter(Boolean);
+
+  const stats = [
+    row('Seen live', group(items.length)),
+  ];
+  // with one event in every month there is no busiest one to name
+  if (busiest[1] > 1) stats.push(Object.assign(row('Busiest month', `${MONTHS[+busiest[0].slice(5, 7) - 1]} ${busiest[0].slice(0, 4)}`), { sub: plural(busiest[1], 'event', 'events') }));
+  if (gap.n > 0) {
+    stats.push(Object.assign(row('Longest gap', group(gap.n), gap.n === 1 ? 'month' : 'months'), { sub: gap.from === gap.to ? label(gap.from) : `${label(gap.from)} to ${label(gap.to)}` }));
+  }
+  const busyYear = [...yearRows].sort((a, b) => b.total - a.total || b.year.localeCompare(a.year))[0];
+  stats.push(Object.assign(row('Busiest year', busyYear.year), { sub: plural(busyYear.total, 'event', 'events') }));
+  if (kinds.length > 1) {
+    for (const k of kinds) stats.push(row(kindWord(k, 2)[0].toUpperCase() + kindWord(k, 2).slice(1), group(items.filter((i) => i.kind === k).length)));
+  }
+
+  return { total: items.length, stats, charts, yearRows };
+}
+
 /** @param {any} sec @param {any[]} outings notables of the matching outing kind */
 function mediaView(sec, outings) {
   const yearTotals = sec.totals?.year || {};
@@ -507,9 +576,9 @@ function codeView(sec) {
  * One section's page view. `sec` is the export's section, or the fitness card
  * source; a missing or empty one gives `empty: true` and no numbers at all.
  * @param {string} name @param {any} sec @param {Date} [now]
- * @param {any[]} [outingNotables] outings notables (cinema/gig split here)
+ * @param {any[]} [liveNotables] outings notables (cinema/gig split here)
  */
-export function buildSection(name, sec, now = new Date(), outingNotables = []) {
+export function buildSection(name, sec, now = new Date(), liveNotables = []) {
   const base = { name, href: SECTION_HREF(name), title: /** @type {any} */ (TITLES)[name] || name };
   if (!hasData(sec)) return { ...base, staleLabel: '', empty: true, headline: null, latest: null };
   const view = { ...base, staleLabel: staleLabel(sec.staleDays), updated: String(sec.updated || ''), empty: false, headline: headlineOf(sec.headline) ?? fallbackHeadline(name, sec), latest: /** @type {any} */ (null) };
@@ -522,18 +591,18 @@ export function buildSection(name, sec, now = new Date(), outingNotables = []) {
     case 'code':
       return { ...view, ...codeView(sec) };
     case 'watching': {
-      const m = mediaView(sec, outingNotables.filter((n) => n.kind === 'cinema'));
+      const m = mediaView(sec, []);
       const y = m.totals.year, mo = m.totals.month;
       return { ...view, ...m, latest: latestOf(sec.notable),
         stats: [
           ['This year', y], ['This month', mo],
         ].map(([label, t]) => /** @type {any} */ (t) && Object.keys(/** @type {any} */ (t)).length ? ({
           label, // "watched", never "finished"
-          items: [row('Films watched', group(num(t.films) ?? 0)), row('Episodes', group(num(t.episodes) ?? 0)), row('Videos', group(num(t.videos) ?? 0)), row('Hours', group(num(t.hours) ?? 0), 'h')],
+          items: [row('Films watched', group(num(t.films) ?? 0)), ...(num(t.cinema) != null ? [row('At the cinema', group(num(t.cinema) ?? 0))] : []), row('Episodes', group(num(t.episodes) ?? 0)), row('Videos', group(num(t.videos) ?? 0)), row('Hours', group(num(t.hours) ?? 0), 'h')],
         }) : null).filter(Boolean) };
     }
     case 'listening': {
-      const m = mediaView(sec, outingNotables.filter((n) => n.kind === 'gig'));
+      const m = mediaView(sec, liveNotables.filter((n) => n.kind === 'gig'));
       return { ...view, ...m, latest: latestOf(sec.notable),
         stats: [['This year', m.totals.year], ['This month', m.totals.month]].map(([label, t]) => /** @type {any} */ (t) && Object.keys(/** @type {any} */ (t)).length ? ({
           label,
@@ -548,6 +617,8 @@ export function buildSection(name, sec, now = new Date(), outingNotables = []) {
           label, items: [row('Books', group(num(t.books) ?? 0)), row('Pages', group(num(t.pages) ?? 0))],
         }) : null).filter(Boolean) };
     }
+    case 'live':
+      return { ...view, ...(liveView(liveNotables) || { total: 0, stats: [], charts: [], yearRows: [] }) };
     default:
       return view;
   }
@@ -592,8 +663,8 @@ export function hubNote(name, v) {
 }
 
 /** @param {any} lifeIndex */
-function outingNotables(lifeIndex) {
-  const o = lifeIndex?.sections?.outings;
+function liveNotables(lifeIndex) {
+  const o = lifeIndex?.sections?.live;
   // Outings keep month precision and are few: the list carries every year the export holds
   // (`years`), not only the last two months (`notable`), de-duplicated by key and month.
   const all = [...(Array.isArray(o?.notable) ? o.notable : []), ...Object.values(o?.years || {}).flatMap((l) => (Array.isArray(l) ? l : []))];
@@ -613,7 +684,7 @@ function outingNotables(lifeIndex) {
  */
 export function buildHub(lifeIndex, fitnessLife, now = new Date()) {
   const sections = lifeIndex?.sections && typeof lifeIndex.sections === 'object' ? lifeIndex.sections : {};
-  const outs = outingNotables(lifeIndex);
+  const outs = liveNotables(lifeIndex);
   const cards = SECTION_ORDER.map((name) => {
     if (name === 'fitness') {
       const first = fitnessLife?.stats?.strip?.[0];
@@ -630,7 +701,7 @@ export function buildHub(lifeIndex, fitnessLife, now = new Date()) {
   });
   return {
     cards,
-    outings: sortedNotables(outs).map((n) => ({ ...n, sawLabel: sawLabel(n.month) })),
+    live: sortedNotables(outs).map((n) => ({ ...n, sawLabel: sawLabel(n.month) })),
     hero: heroCards(lifeIndex, cards, now),
   };
 }
@@ -768,7 +839,6 @@ export function heroCards(lifeIndex, cards, now = new Date()) {
   const rows = Array.isArray(lifeIndex?.hub?.rows) ? lifeIndex.hub.rows : [];
   const sections = lifeIndex?.sections && typeof lifeIndex.sections === 'object' ? lifeIndex.sections : {};
   const byName = new Map((cards || []).map((c) => [c.name, c]));
-  const hasOutings = outingNotables(lifeIndex).length > 0;
   const seen = new Set();
   let lg = 0;
   const out = [];
@@ -781,9 +851,8 @@ export function heroCards(lifeIndex, cards, now = new Date()) {
     const hero = heroView(r.hero, title);
     let size = HERO_SIZES.includes(r.size) ? r.size : 'md';
     if (!hero) size = 'sm';
-    // The hub row for outings points at the hub itself: send it to the outings list instead.
     let href = typeof r.href === 'string' && /^\/(?!\/)/.test(r.href) ? r.href : SECTION_HREF(name);
-    if (href === '/life') href = name === 'outings' && hasOutings ? '#life-outings-title' : '';
+    if (href === '/life') href = SECTION_HREF(name); // an older export pointed the row at the hub itself (outings)
     // A stat hero that shows the card's own headline figure would print the same number twice:
     // keep the hero (it is the bigger one) and drop the small headline.
     let headline = card.empty ? null : card.headline || null;
@@ -867,7 +936,7 @@ export function lifeInsights(idx) {
   const out = [];
   for (const r of rows) {
     if (!r || typeof r.text !== 'string' || r.text.length < 1 || r.text.length > 160) continue;
-    const href = r.section === 'body' ? '/life/body' : r.section === 'fitness' ? '/life/fitness' : '/life';
+    const href = r.section === 'body' ? '/life/body' : r.section === 'fitness' ? '/life/fitness' : r.section === 'live' ? '/life/live' : '/life';
     out.push({ id: typeof r.id === 'string' ? r.id : String(out.length), text: r.text, href });
     if (out.length === 6) break;
   }
@@ -876,12 +945,12 @@ export function lifeInsights(idx) {
 
 /**
  * The homepage "life." card: blurb from the hub's section titles, footer from the newest outing.
- * @param {{cards: {title: string}[], outings: {title: string, sawLabel?: string}[]}} hub
+ * @param {{cards: {title: string}[], live: {title: string, sawLabel?: string}[]}} hub
  */
 export function homeLifeGlobals(hub) {
   const names = (hub?.cards || []).map((c) => String(c.title).toLowerCase());
   const list = names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}` : names.join('');
-  const o = hub?.outings?.[0];
+  const o = hub?.live?.[0];
   return {
     lifeBlurb: `James, by the numbers${list ? `: ${list}` : ''}, all gathered automatically.`,
     lifeLatest: o && o.title ? o.title : '',
@@ -898,7 +967,7 @@ export function lifeHubTask(config = {}) {
       const g = ctx.globals || {};
       const now = cfg.now instanceof Date ? cfg.now : new Date();
       const idx = g.lifeIndex || null;
-      const outs = outingNotables(idx);
+      const outs = liveNotables(idx);
       const lifeSections = Object.fromEntries(
         SECTION_ORDER.filter((n) => n !== 'fitness').map((n) => [n, buildSection(n, idx?.sections?.[n], now, outs)]),
       );

@@ -28,17 +28,17 @@ test('hub without life export', () => {
   const hub = buildHub(null, fitnessLife, now);
   assert.equal(hub.cards[0].empty, false);
   assert.equal(hub.cards[0].headline.value, '120');
-  assert.equal(hub.cards.slice(1).length, 6);
+  assert.equal(hub.cards.slice(1).length, 7);
   assert.ok(hub.cards.slice(1).every((c) => c.empty && c.headline === null && c.latest === null));
-  assert.deepEqual(hub.outings, []);
+  assert.deepEqual(hub.live, []);
 });
 
-test('the outings list carries every year, not only the last two months', () => {
+test('the live list carries every year, not only the last two months', () => {
   const old = { key: 'o1', kind: 'gig', title: 'Invented Old Act', month: '2023-05' };
-  const recent = { key: 'o2', kind: 'cinema', title: 'Invented Recent Film', month: '2026-10' };
-  const sec = { ...fixture.sections.outings, notable: [recent], years: { 2026: [recent], 2023: [old] } };
-  const hub = buildHub({ ...fixture, sections: { ...fixture.sections, outings: sec } }, fitnessLife, now);
-  assert.deepEqual(hub.outings.map((n) => n.title).sort(), ['Invented Old Act', 'Invented Recent Film']);
+  const recent = { key: 'o2', kind: 'gig', title: 'Invented Recent Film', month: '2026-10' };
+  const sec = { ...fixture.sections.live, notable: [recent], years: { 2026: [recent], 2023: [old] } };
+  const hub = buildHub({ ...fixture, sections: { ...fixture.sections, live: sec } }, fitnessLife, now);
+  assert.deepEqual(hub.live.map((n) => n.title).sort(), ['Invented Old Act', 'Invented Recent Film']);
 });
 
 test('stale label, and a stale section keeps its numbers', () => {
@@ -61,16 +61,17 @@ test('latest notable is newest', () => {
   assert.equal(v2.notable[0].title, 'Newer');
 });
 
-test('cinema joins watching, gigs join listening', () => {
-  const cinema = { key: 'c', kind: 'cinema', title: 'Invented Premiere', month: '2026-10' };
-  const gig = fixture.sections.outings.notable[0];
-  const hub = buildHub({ ...fixture, sections: { ...fixture.sections, outings: { ...fixture.sections.outings, notable: [gig, cinema] } } }, fitnessLife, now);
-  assert.equal(hub.outings.length, 2);
-  const outs = [gig, cinema];
-  const w = buildSection('watching', fixture.sections.watching, now, outs);
-  const l = buildSection('listening', fixture.sections.listening, now, outs);
-  assert.deepEqual(w.saw.map((s) => s.title), ['Invented Premiere']);
-  assert.equal(w.saw[0].sawLabel, 'saw in Oct 2026');
+test('gigs join listening, cinema films are watching rows with a big-screen flag', () => {
+  const gig = fixture.sections.live.notable[0];
+  const hub = buildHub({ ...fixture, sections: { ...fixture.sections, live: { ...fixture.sections.live, notable: [gig] } } }, fitnessLife, now);
+  assert.equal(hub.live.length, 1);
+  const film = { key: 'f', kind: 'film', title: 'Invented Premiere', month: '2026-10', bigScreen: true };
+  const w = buildSection('watching', { staleDays: 0, headline: { value: 1, unit: '', label: 'x' }, notable: [film],
+    totals: { year: { films: 3, cinema: 1, episodes: 0, videos: 0, hours: 5 }, month: {} } }, now, [gig]);
+  assert.equal(w.notable[0].bigScreen, true);
+  assert.equal(w.hasSaw, false);
+  assert.equal(w.stats[0].items.find((r) => r.label === 'At the cinema')?.value, '1');
+  const l = buildSection('listening', fixture.sections.listening, now, [gig]);
   assert.deepEqual(l.saw.map((s) => s.title), ['Sample Band Live']);
   assert.equal(sawLabel('2026-10'), 'saw in Oct 2026');
   assert.equal(sawLabel('nope'), '');
@@ -122,7 +123,7 @@ test('section views from the fixture', () => {
 
 test('task sets globals', async () => {
   const g = await runSkierTasks([lifeHubTask()], { lifeIndex: fixture, fitnessLife });
-  assert.equal(g.lifeHub.cards.length, 7);
+  assert.equal(g.lifeHub.cards.length, 8);
   assert.deepEqual(Object.keys(g.lifeSections), SECTION_ORDER.slice(1));
   assert.ok(g.lifePersonal.length === 0 || Array.isArray(g.lifePersonal));
   assert.equal(g.lifeFacts['fx.films'], 42);
@@ -187,8 +188,8 @@ test('games with a null headline leads with total hours', () => {
 
 // ─── Round 2: one /life/body, seven sections (R2c.2) ───
 
-test('seven sections', () => {
-  const order = ['fitness', 'body', 'games', 'code', 'watching', 'listening', 'reading'];
+test('eight sections', () => {
+  const order = ['fitness', 'body', 'games', 'code', 'watching', 'listening', 'reading', 'live'];
   assert.deepEqual(SECTION_ORDER, order);
   assert.deepEqual(buildHub(fixture, fitnessLife, now).cards.map((c) => c.name), order);
 });
@@ -274,7 +275,7 @@ test('old-shape export', async () => {
   const g = await runSkierTasks([lifeHubTask()], { lifeIndex: old, fitnessLife });
   assert.ok(!('sleep' in g.lifeSections));
   assert.ok(!('food' in g.lifeSections));
-  assert.equal(g.lifeHub.cards.length, 7);
+  assert.equal(g.lifeHub.cards.length, 8);
 });
 
 test('code commits chart has axes', () => {
@@ -554,4 +555,36 @@ test('games fun numbers', () => {
   assert.equal(bare.clock, null);
   assert.equal(bare.yearChart, null);
   assert.equal(bare.fun, null);
+});
+
+// ─── /life/live ───
+test('live view: counts, stats and chart from synthetic months', () => {
+  const n = (/** @type {string} */ title, /** @type {string} */ month) => ({ key: title, kind: 'gig', title, by: null, season: null, year: null, provider: null, month, reason: 'gig', poster: null });
+  const list = [n('Band A', '2024-03'), n('Band B', '2024-03'), n('Band C', '2024-07'), n('Band D', '2025-02'), n('Band E', '2026-05')];
+  const v = /** @type {any} */ (buildSection('live', { headline: { value: 1, unit: '', label: 'live events this year' }, notable: [list[4]] }, new Date('2026-06-01'), list));
+  assert.equal(v.total, 5);
+  const by = Object.fromEntries(v.stats.map((/** @type {any} */ r) => [r.label, r]));
+  assert.equal(by['Seen live'].value, '5');
+  assert.equal(by['Busiest month'].value, 'Mar 2024');
+  assert.equal(by['Busiest month'].sub, '2 events');
+  assert.equal(by['Longest gap'].value, '14'); // Mar 2025 .. Apr 2026
+  assert.equal(by['Longest gap'].sub, 'March 2025 to April 2026');
+  assert.equal(by['Busiest year'].value, '2024');
+  assert.deepEqual(v.yearRows.map((/** @type {any} */ y) => [y.year, y.total]), [['2026', 1], ['2025', 1], ['2024', 3]]);
+  assert.deepEqual(v.yearRows[2].months.map((/** @type {any} */ m) => m.label), ['July', 'March']);
+  assert.equal(v.yearRows[2].months[0].items[0].kindLabel, '', 'a single kind needs no tag');
+  assert.equal(v.charts.length, 1);
+  assert.deepEqual(v.charts[0].xTicks.map((/** @type {any} */ t) => t.label), ['2024', '2025', '2026']);
+  assert.ok(v.charts[0].yTicks.every((/** @type {any} */ t) => /^\d+$/.test(t.label)));
+  assert.doesNotMatch(JSON.stringify(v), /\d{4}-\d{2}-\d{2}/);
+  // a second kind adds a split and tags the rows
+  const mixed = /** @type {any} */ (buildSection('live', { headline: { value: 1, unit: '', label: 'x' } }, new Date('2026-06-01'), [...list, { ...n('Play A', '2026-01'), kind: 'theatre' }]));
+  assert.ok(mixed.stats.some((/** @type {any} */ r) => r.label === 'Shows' && r.value === '1'));
+  assert.equal(mixed.yearRows[0].months.at(-1).items[0].kindLabel, 'show');
+});
+
+test('live view: nothing seen is an empty list, not a crash', () => {
+  const v = /** @type {any} */ (buildSection('live', { headline: { value: 0, unit: '', label: 'live events this year' } }, new Date(), []));
+  assert.equal(v.total, 0);
+  assert.deepEqual(v.yearRows, []);
 });

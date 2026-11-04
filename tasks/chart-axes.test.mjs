@@ -4,7 +4,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { niceTicks, formatTick, lineChart, SECOND_MULTS, stackedShare } from './chart-axes.mjs';
+import { niceTicks, formatTick, lineChart, SECOND_MULTS, stackedShare, columnBars } from './chart-axes.mjs';
 
 const WEEKS = ['2026-10-05', '2026-10-12', '2026-10-19', '2026-10-26', '2026-11-02'];
 const weeks = (n) => ({ kind: /** @type {const} */ ('weeks'), weeks: WEEKS.slice(0, n) });
@@ -254,4 +254,20 @@ test('clockBars: 24 columns, merged block at its per-hour average, labels', asyn
   assert.match(m.summary, /busiest hour 9pm/);
   assert.equal(clockBars(Array(24).fill(0), { label: 'x' }), null);
   assert.equal(clockBars([1, 2], { label: 'x' }), null);
+});
+
+describe('columnBars', () => {
+  test('one labelled column per category with whole-number y ticks', () => {
+    const m = columnBars(['2024', '2025', '2026'], [2, 7, 0], { label: 'Films', unit: 'per year', noun: 'films' });
+    assert.ok(m);
+    assert.equal(m.bars.length, 3);
+    assert.deepEqual(m.xTicks.map((t) => t.label), ['2024', '2025', '2026']);
+    assert.ok(m.yTicks.every((t) => /^\d+$/.test(t.label)));
+    assert.equal(m.bars[1].title, '2025: 7 films');
+    assert.match(m.summary, /most in 2025 with 7/);
+  });
+  test('null when there is nothing to draw', () => {
+    assert.equal(columnBars(['2025'], [3], { label: 'x' }), null);
+    assert.equal(columnBars(['2024', '2025'], [0, 0], { label: 'x' }), null);
+  });
 });

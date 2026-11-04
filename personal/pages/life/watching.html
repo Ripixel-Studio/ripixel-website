@@ -34,14 +34,6 @@
     {{else}}
     <p class="life-empty">Nothing has made the list yet.</p>
     {{/if}}
-    {{#if hasSaw}}
-    <h2 class="fit-header">out and <span>about</span>.</h2>
-    <ul class="life-saw">
-      {{#each saw}}
-      <li class="life-saw__item"><span class="life-notable__title">{{title}}</span> <span class="life-saw__when">{{sawLabel}}</span></li>
-      {{/each}}
-    </ul>
-    {{/if}}
     {{#if yearList.length}}
     <h2 class="fit-header">year by <span>year</span>.</h2>
     {{#each yearList}}

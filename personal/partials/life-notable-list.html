@@ -2,7 +2,7 @@
 <ol class="life-notables">
   {{#each items}}
   <li class="life-notable">
-    <span class="life-notable__title">{{title}}{{#if season}} <small>season {{season}}</small>{{/if}}</span>
+    <span class="life-notable__title">{{title}}{{#if season}} <small>season {{season}}</small>{{/if}}{{#if bigScreen}} <span class="life-notable__big" title="seen at the cinema">big screen</span>{{/if}}</span>
     {{#if by}}<span class="life-notable__by">{{by}}</span>{{/if}}
     {{#if reason}}<span class="life-notable__why">{{reason}}</span>{{/if}}
     {{#if monthLabel}}<span class="life-notable__when">{{monthLabel}}</span>{{/if}}

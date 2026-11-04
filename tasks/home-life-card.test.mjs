@@ -17,7 +17,7 @@ import { runSkierTasks } from './skier-test-runner.mjs';
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 test('homeLifeGlobals: blurb lists the hub sections; footer falls back to nothing', () => {
-  const g = homeLifeGlobals({ cards: [{ title: 'Fitness' }, { title: 'Body' }, { title: 'Games' }], outings: [] });
+  const g = homeLifeGlobals({ cards: [{ title: 'Fitness' }, { title: 'Body' }, { title: 'Games' }], live: [] });
   assert.equal(g.lifeBlurb, 'James, by the numbers: fitness, body and games, all gathered automatically.');
   assert.equal(g.lifeLatest, '');
   assert.ok(!/fitglue/i.test(g.lifeBlurb));
@@ -43,7 +43,7 @@ test('built homepage: Life card links to /life, blurb has no FitGlue', async () 
     assert.equal(m[1], '/life');
     assert.ok(m[2].includes('>life.<'));
     assert.ok(m[2].includes('△ LIFE'));
-    assert.ok(m[2].includes('James, by the numbers: fitness, body, games, code, watching, listening and reading'));
+    assert.ok(m[2].includes('James, by the numbers: fitness, body, games, code, watching, listening, reading and live'));
     assert.ok(!/fitglue/i.test(m[2]));
     assert.equal((html.match(/class="section-card section-card--/g) || []).length, 4);
     assert.ok(html.includes('4 sections'));
