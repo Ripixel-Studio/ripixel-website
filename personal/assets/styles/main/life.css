@@ -1054,6 +1054,7 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
   .games-league__since { text-align: left; }
   .games-mains { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .games-main__name { font-size: 20px; }
+  .games-league__tier { font-size: clamp(32px, 9vw, 54px); text-shadow: 3px 3px 0 var(--life-ink); }
 }
 
 @media (prefers-reduced-motion: reduce) {
