@@ -696,6 +696,7 @@ export function heroCards(lifeIndex, cards, now = new Date()) {
       name, title, size, href,
       side: size === 'lg' ? (lg++ % 2 ? 'right' : 'left') : '',
       headline,
+      empty: !!card.empty, // no data: the template shows the empty note; a hidden duplicate headline shows nothing
       staleLabel: String(card.staleLabel || ''),
       caption: hero ? captionOf(r.hero?.caption) : '', // no orphan caption for a rejected hero
       hero,
