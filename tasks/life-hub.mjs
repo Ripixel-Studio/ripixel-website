@@ -504,8 +504,9 @@ function liveView(notables) {
 
   const stats = [
     row('Seen live', group(items.length)),
-    Object.assign(row('Busiest month', `${MONTHS[+busiest[0].slice(5, 7) - 1]} ${busiest[0].slice(0, 4)}`), { sub: plural(busiest[1], 'event', 'events') }),
   ];
+  // with one event in every month there is no busiest one to name
+  if (busiest[1] > 1) stats.push(Object.assign(row('Busiest month', `${MONTHS[+busiest[0].slice(5, 7) - 1]} ${busiest[0].slice(0, 4)}`), { sub: plural(busiest[1], 'event', 'events') }));
   if (gap.n > 0) {
     stats.push(Object.assign(row('Longest gap', group(gap.n), gap.n === 1 ? 'month' : 'months'), { sub: gap.from === gap.to ? label(gap.from) : `${label(gap.from)} to ${label(gap.to)}` }));
   }
