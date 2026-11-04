@@ -195,25 +195,25 @@ export function sourceLabel(source) {
 
 // Copied from fitglue-web src/showcase/utils/activityMeta.ts (ACTIVITY_TYPE_ICONS).
 export const ACTIVITY_ICONS = /** @type {Record<string, string>} */ ({
-  ACTIVITY_TYPE_RUN: '🏃', ACTIVITY_TYPE_TRAIL_RUN: '🏔️', ACTIVITY_TYPE_VIRTUAL_RUN: '🏃',
-  ACTIVITY_TYPE_WALK: '🚶', ACTIVITY_TYPE_HIKE: '🥾', ACTIVITY_TYPE_RIDE: '🚴',
-  ACTIVITY_TYPE_MOUNTAIN_BIKE_RIDE: '🚵', ACTIVITY_TYPE_GRAVEL_RIDE: '🚴', ACTIVITY_TYPE_EBIKE_RIDE: '⚡',
-  ACTIVITY_TYPE_EMOUNTAIN_BIKE_RIDE: '⚡', ACTIVITY_TYPE_VIRTUAL_RIDE: '🚴', ACTIVITY_TYPE_SWIM: '🏊',
-  ACTIVITY_TYPE_ROWING: '🚣', ACTIVITY_TYPE_VIRTUAL_ROW: '🚣', ACTIVITY_TYPE_KAYAKING: '🛶',
-  ACTIVITY_TYPE_STAND_UP_PADDLING: '🏄', ACTIVITY_TYPE_SURFING: '🏄', ACTIVITY_TYPE_WEIGHT_TRAINING: '🏋️',
-  ACTIVITY_TYPE_CROSSFIT: '🏋️', ACTIVITY_TYPE_HIGH_INTENSITY_INTERVAL_TRAINING: '⚡', ACTIVITY_TYPE_YOGA: '🧘',
-  ACTIVITY_TYPE_PILATES: '🧘', ACTIVITY_TYPE_ELLIPTICAL: '🔄', ACTIVITY_TYPE_STAIR_STEPPER: '🪜',
-  ACTIVITY_TYPE_ALPINE_SKI: '⛷️', ACTIVITY_TYPE_NORDIC_SKI: '🎿', ACTIVITY_TYPE_BACKCOUNTRY_SKI: '🎿',
-  ACTIVITY_TYPE_SNOWBOARD: '🏂', ACTIVITY_TYPE_SNOWSHOE: '🥾', ACTIVITY_TYPE_ROCK_CLIMBING: '🧗',
-  ACTIVITY_TYPE_GOLF: '⛳', ACTIVITY_TYPE_TENNIS: '🎾', ACTIVITY_TYPE_BADMINTON: '🏸',
-  ACTIVITY_TYPE_TABLE_TENNIS: '🏓', ACTIVITY_TYPE_SOCCER: '⚽', ACTIVITY_TYPE_PICKLEBALL: '🏓',
-  ACTIVITY_TYPE_SQUASH: '🎾', ACTIVITY_TYPE_RACQUETBALL: '🎾', ACTIVITY_TYPE_SAIL: '⛵',
-  ACTIVITY_TYPE_WINDSURF: '🪁', ACTIVITY_TYPE_KITESURF: '🪁', ACTIVITY_TYPE_WORKOUT: '🏃',
+  ACTIVITY_TYPE_RUN: 'RUN', ACTIVITY_TYPE_TRAIL_RUN: 'TRL', ACTIVITY_TYPE_VIRTUAL_RUN: 'RUN',
+  ACTIVITY_TYPE_WALK: 'WLK', ACTIVITY_TYPE_HIKE: 'HIK', ACTIVITY_TYPE_RIDE: 'RDE',
+  ACTIVITY_TYPE_MOUNTAIN_BIKE_RIDE: 'MTB', ACTIVITY_TYPE_GRAVEL_RIDE: 'RDE', ACTIVITY_TYPE_EBIKE_RIDE: 'RDE',
+  ACTIVITY_TYPE_EMOUNTAIN_BIKE_RIDE: 'MTB', ACTIVITY_TYPE_VIRTUAL_RIDE: 'RDE', ACTIVITY_TYPE_SWIM: 'SWM',
+  ACTIVITY_TYPE_ROWING: 'ROW', ACTIVITY_TYPE_VIRTUAL_ROW: 'ROW', ACTIVITY_TYPE_KAYAKING: 'PAD',
+  ACTIVITY_TYPE_STAND_UP_PADDLING: 'SRF', ACTIVITY_TYPE_SURFING: 'SRF', ACTIVITY_TYPE_WEIGHT_TRAINING: 'GYM',
+  ACTIVITY_TYPE_CROSSFIT: 'GYM', ACTIVITY_TYPE_HIGH_INTENSITY_INTERVAL_TRAINING: 'HIT', ACTIVITY_TYPE_YOGA: 'YOG',
+  ACTIVITY_TYPE_PILATES: 'YOG', ACTIVITY_TYPE_ELLIPTICAL: 'ELL', ACTIVITY_TYPE_STAIR_STEPPER: 'STR',
+  ACTIVITY_TYPE_ALPINE_SKI: 'SKI', ACTIVITY_TYPE_NORDIC_SKI: 'SKI', ACTIVITY_TYPE_BACKCOUNTRY_SKI: 'SKI',
+  ACTIVITY_TYPE_SNOWBOARD: 'SNO', ACTIVITY_TYPE_SNOWSHOE: 'HIK', ACTIVITY_TYPE_ROCK_CLIMBING: 'CLM',
+  ACTIVITY_TYPE_GOLF: 'GLF', ACTIVITY_TYPE_TENNIS: 'RKT', ACTIVITY_TYPE_BADMINTON: 'BAD',
+  ACTIVITY_TYPE_TABLE_TENNIS: 'TT', ACTIVITY_TYPE_SOCCER: 'FTB', ACTIVITY_TYPE_PICKLEBALL: 'TT',
+  ACTIVITY_TYPE_SQUASH: 'RKT', ACTIVITY_TYPE_RACQUETBALL: 'RKT', ACTIVITY_TYPE_SAIL: 'SAL',
+  ACTIVITY_TYPE_WINDSURF: 'KIT', ACTIVITY_TYPE_KITESURF: 'KIT', ACTIVITY_TYPE_WORKOUT: 'RUN',
 });
 
 /** @param {string|undefined} activityType */
 export function typeIcon(activityType) {
-  return ACTIVITY_ICONS[String(activityType ?? '')] ?? '🏅';
+  return ACTIVITY_ICONS[String(activityType ?? '')] ?? '★';
 }
 
 /** `exercise-item` partial type from the contract's activity type / category. */
@@ -518,16 +518,16 @@ export function groupStrengthSets(sets, prNames = new Set()) {
 // Module gating + order (contract §4)
 
 const WEATHER_ICONS = [
-  [0, '☀️'], [1, '🌤️'], [2, '⛅'], [3, '☁️'], [45, '🌫️'], [48, '🌫️'], [51, '🌦️'], [53, '🌦️'], [55, '🌧️'],
-  [56, '🌧️'], [57, '🌧️'], [61, '🌧️'], [63, '🌧️'], [65, '🌧️'], [66, '🌧️'], [67, '🌧️'], [71, '🌨️'], [73, '🌨️'],
-  [75, '❄️'], [77, '🌨️'], [80, '🌦️'], [81, '🌧️'], [82, '⛈️'], [85, '🌨️'], [86, '❄️'], [95, '⛈️'], [96, '⛈️'], [99, '⛈️'],
+  [0, 'clear'], [1, 'mostly clear'], [2, 'part cloud'], [3, 'cloud'], [45, 'fog'], [48, 'fog'], [51, 'showers'], [53, 'showers'], [55, 'rain'],
+  [56, 'rain'], [57, 'rain'], [61, 'rain'], [63, 'rain'], [65, 'rain'], [66, 'rain'], [67, 'rain'], [71, 'snow'], [73, 'snow'],
+  [75, 'snow'], [77, 'snow'], [80, 'showers'], [81, 'rain'], [82, 'storm'], [85, 'snow'], [86, 'snow'], [95, 'storm'], [96, 'storm'], [99, 'storm'],
 ];
 
-/** WMO weather code → emoji. */
+/** WMO weather code → short text label. */
 export function weatherIcon(code) {
   const c = num(code);
   const hit = WEATHER_ICONS.find(([k]) => k === c);
-  return hit ? hit[1] : '🌡️';
+  return hit ? hit[1] : 'weather';
 }
 
 /** @param {number} v @param {string} [unit] @param {string} [label] */
@@ -576,7 +576,7 @@ export function buildModule(key, ctx) {
         key, title: 'Pace', cells,
         chart: paceSeries ? lineChart(paceSeries, { label: 'Pace', unit: '/km', h: 120, x: { kind: 'clock', seconds }, invert: true, fmt: fmtPace, mults: SECOND_MULTS }) : null,
         bars: bars.length ? { rows: bars, hasHr: bars.some((b) => b.hr) } : null,
-        note: num(d.paceDropPercent) > 0 ? `😓 ${Math.round(d.paceDropPercent)}% pace drop in the final quarter` : '',
+        note: num(d.paceDropPercent) > 0 ? `${Math.round(d.paceDropPercent)}% pace drop in the final quarter` : '',
       };
     }
     case 'speed': {
@@ -746,7 +746,7 @@ export function buildModule(key, ctx) {
       if (!has('SPOTIFY_TRACKS') || !tracks.length) return null;
       const more = num(d.totalCount) - Math.min(tracks.length, 8);
       return {
-        key, title: 'Soundtrack', right: '🎧',
+        key, title: 'Soundtrack', right: 'music',
         list: tracks.slice(0, 8).map((t) => ({ primary: t.title, secondary: t.artist, tertiary: fmtClock(t.durationSeconds) })),
         note: more > 0 ? `+${more} more` : '',
       };
@@ -989,7 +989,7 @@ export function buildActivityView(file, index, opts = {}) {
   const hybridRace = hybrid.length && !race
     ? {
         total: fmtClock(hybrid.reduce((s, x) => s + num(x.durationSeconds), 0)),
-        segments: hybrid.map((s) => ({ icon: s.icon || (s.isRun ? '🏃' : '🏋️'), label: s.label || '', duration: fmtClock(s.durationSeconds) || '—', isRun: !!s.isRun })),
+        segments: hybrid.map((s) => ({ icon: s.icon || (s.isRun ? 'RUN' : 'GYM'), label: s.label || '', duration: fmtClock(s.durationSeconds) || '—', isRun: !!s.isRun })),
       }
     : null;
   const ms = has('DISTANCE_MILESTONES') && en.distanceMilestone && num(en.distanceMilestone.lifetimeDistanceKm) > 0 ? en.distanceMilestone : null;
@@ -1082,8 +1082,8 @@ export function buildActivityView(file, index, opts = {}) {
     if (m) modules.push(m);
   }
   const footerChips = [];
-  if (has('AUTO_INCREMENT')) footerChips.push('📈 Series activity');
-  if (has('SOURCE_LINK')) footerChips.push(`↗ Linked to ${sourceLabel(activity.source ?? entry.source) || 'source'}`);
+  if (has('AUTO_INCREMENT')) footerChips.push('Series activity');
+  if (has('SOURCE_LINK')) footerChips.push(`→ Linked to ${sourceLabel(activity.source ?? entry.source) || 'source'}`);
 
   const extraStats = [];
   if (category !== 'cardio-time' && calories > 0) extraStats.push({ value: fmtNumber(calories), unit: 'kcal', label: 'calories' });
@@ -1108,11 +1108,11 @@ export function buildActivityView(file, index, opts = {}) {
     : typeof entry.tempC === 'number' ? `${Math.round(entry.tempC)}°C${entry.weatherDescription ? ` · ${String(entry.weatherDescription).toLowerCase()}` : ''}` : '';
   const raceDay = race
     ? [
-        { icon: '📍', label: 'venue', value: locationName || race.event },
-        { icon: '📅', label: 'race day', value: fmtDateShort(activity.startTime ?? entry.startTime) },
-        { icon: '🏷️', label: 'division', value: race.divisionLabel },
-        weather ? { icon: '🌡️', label: 'weather', value: weather } : null,
-        race.partner ? { icon: '🤝', label: 'partner', value: race.partner } : null,
+        { icon: '', label: 'venue', value: locationName || race.event },
+        { icon: '', label: 'race day', value: fmtDateShort(activity.startTime ?? entry.startTime) },
+        { icon: '', label: 'division', value: race.divisionLabel },
+        weather ? { icon: '', label: 'weather', value: weather } : null,
+        race.partner ? { icon: '', label: 'partner', value: race.partner } : null,
       ].filter((x) => x && x.value)
     : [];
   // This race against the PB it was chasing, its own division only, history up to it (F5.5).

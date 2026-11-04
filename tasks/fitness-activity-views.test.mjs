@@ -100,8 +100,8 @@ describe('unit formatting', () => {
   test('enum labels', () => {
     assert.equal(typeLabel('ACTIVITY_TYPE_TRAIL_RUN'), 'TRAIL RUN');
     assert.equal(typeLabel(undefined), 'ACTIVITY');
-    assert.equal(typeIcon('ACTIVITY_TYPE_RIDE'), '🚴');
-    assert.equal(typeIcon('ACTIVITY_TYPE_SOMETHING_NEW'), '🏅');
+    assert.equal(typeIcon('ACTIVITY_TYPE_RIDE'), 'RDE');
+    assert.equal(typeIcon('ACTIVITY_TYPE_SOMETHING_NEW'), '★');
     assert.equal(sourceLabel('SOURCE_PARKRUN_RESULTS'), 'Parkrun Results');
     assert.equal(sourceLabel('SOURCE_FILE_UPLOAD'), 'FIT Upload');
     assert.equal(sourceLabel(''), '');
@@ -231,20 +231,20 @@ describe('PRs', () => {
 
 describe('hero anchors by category', () => {
   test('cardio-distance run: km / time / pace / hr', () => {
-    const a = anchorStats({ category: 'cardio-distance', distanceM: 5010, durationS: 1192, avgBpm: 171, maxBpm: 186, calories: 342, pace: 237.9, speedKmh: 0, sets: 0, volumeKg: 0, prCount: 1, icon: '🏃' });
+    const a = anchorStats({ category: 'cardio-distance', distanceM: 5010, durationS: 1192, avgBpm: 171, maxBpm: 186, calories: 342, pace: 237.9, speedKmh: 0, sets: 0, volumeKg: 0, prCount: 1, icon: 'RUN' });
     assert.deepEqual(a.map((x) => `${x.value}${x.unit}|${x.label}`), ['5.01km|distance', '19:52|time', '3:58/km|avg pace', '171bpm|avg hr']);
   });
   test('cardio-distance ride without pace shows speed; pace falls back to duration/distance', () => {
-    const ride = anchorStats({ category: 'cardio-distance', distanceM: 32900, durationS: 4452, avgBpm: 142, maxBpm: 0, calories: 0, pace: 0, speedKmh: 26.6, sets: 0, volumeKg: 0, prCount: 0, icon: '🚴' });
+    const ride = anchorStats({ category: 'cardio-distance', distanceM: 32900, durationS: 4452, avgBpm: 142, maxBpm: 0, calories: 0, pace: 0, speedKmh: 26.6, sets: 0, volumeKg: 0, prCount: 0, icon: 'RDE' });
     assert.equal(`${ride[2].value}${ride[2].unit}`, '26.6km/h');
-    const walk = anchorStats({ category: 'cardio-distance', distanceM: 2000, durationS: 1200, avgBpm: 0, maxBpm: 0, calories: 0, pace: 0, speedKmh: 0, sets: 0, volumeKg: 0, prCount: 0, icon: '🚶' });
+    const walk = anchorStats({ category: 'cardio-distance', distanceM: 2000, durationS: 1200, avgBpm: 0, maxBpm: 0, calories: 0, pace: 0, speedKmh: 0, sets: 0, volumeKg: 0, prCount: 0, icon: 'WLK' });
     assert.equal(walk[2].value, '10:00');
     assert.equal(walk[3].value, '—');
   });
   test('strength and untraditional padding', () => {
-    const s = anchorStats({ category: 'strength', distanceM: 0, durationS: 3300, avgBpm: 118, maxBpm: 152, calories: 410, pace: 0, speedKmh: 0, sets: 18, volumeKg: 9640, prCount: 2, icon: '🏋️' });
+    const s = anchorStats({ category: 'strength', distanceM: 0, durationS: 3300, avgBpm: 118, maxBpm: 152, calories: 410, pace: 0, speedKmh: 0, sets: 18, volumeKg: 9640, prCount: 2, icon: 'GYM' });
     assert.deepEqual(s.map((x) => x.value), ['18', '9,640', '55', '+2']);
-    const u = anchorStats({ category: 'untraditional', distanceM: 0, durationS: 600, avgBpm: 0, maxBpm: 0, calories: 0, pace: 0, speedKmh: 0, sets: 0, volumeKg: 0, prCount: 0, icon: '🏅' });
+    const u = anchorStats({ category: 'untraditional', distanceM: 0, durationS: 600, avgBpm: 0, maxBpm: 0, calories: 0, pace: 0, speedKmh: 0, sets: 0, volumeKg: 0, prCount: 0, icon: '★' });
     assert.deepEqual(u.map((x) => x.value), ['10', '—', '—', '—']);
   });
 });
@@ -257,7 +257,7 @@ describe('module gating (§4)', () => {
     assert.equal(buildModule('calories', ctx), null, 'CALORIES_BURNED not applied');
     assert.equal(buildModule('heart-rate', { ...ctx, en: { heartRate: { avgBpm: 0 } } }), null, 'avgBpm 0');
     assert.equal(buildModule('weather', { ...ctx, en: { weather: { tempC: 9 } }, category: 'strength' }), null, 'weather is cardio-distance only');
-    assert.equal(buildModule('weather', { ...ctx, en: { weather: { tempC: 9, weatherCode: 2 } } })?.right, '⛅');
+    assert.equal(buildModule('weather', { ...ctx, en: { weather: { tempC: 9, weatherCode: 2 } } })?.right, 'part cloud');
   });
   test('order per category', () => {
     assert.deepEqual(moduleOrderFor('strength').slice(0, 3), ['muscle-heatmap', 'set-list', 'heart-rate']);
@@ -310,7 +310,7 @@ describe('view model from the fixtures', () => {
     assert.match(pace.end.label, /^\d+:\d{2}$/);
     assert.ok(+pace.yTicks[0].label.split(':')[0] <= +pace.yTicks.at(-1).label.split(':')[0], 'fastest pace on top');
     assert.deepEqual(a.modules.map((m) => m.key), ['heart-rate', 'zones', 'pace', 'cadence', 'elevation', 'effort', 'calories', 'training-load', 'best-efforts', 'pr-callout', 'streak', 'weather']);
-    assert.deepEqual(a.footerChips, ['↗ Linked to Strava']);
+    assert.deepEqual(a.footerChips, ['→ Linked to Strava']);
     assert.equal(a.ogImage, a.photos[0]);
     assert.equal(v.description, a.description);
     // head.html overrides
@@ -469,7 +469,7 @@ describe('calories, the type chip and the type ink (F5.5)', async () => {
   const { hybridRaceLabel } = await import('./fitness-theme.mjs');
   test("the platform's calories over FitGlue's estimate", () => {
     const solo = { activityData: { sessions: [{ totalCalories: 1346 }] }, enrichments: { calories: { kcal: 523, comparisonText: '≈ 1.8 slice of pizza 🍕' } } };
-    assert.deepEqual(calorieFigure(solo), { kcal: 1346, source: 'platform', note: '≈ 4.7 slice of pizza 🍕' });
+    assert.deepEqual(calorieFigure(solo), { kcal: 1346, source: 'platform', note: '≈ 4.7 slice of pizza' });
     const hevy = { activityData: { sessions: [{}] }, enrichments: { calories: { kcal: 310 } } };
     assert.deepEqual(calorieFigure(hevy), { kcal: 310, source: 'estimate', note: '' });
     assert.deepEqual(calorieFigure({}, { caloriesKcal: 200 }), { kcal: 200, source: 'estimate', note: '' });

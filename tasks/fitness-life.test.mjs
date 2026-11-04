@@ -124,7 +124,7 @@ describe('activity cards', () => {
     assert.equal(c.href, '/life/activity/colwick-parkrun-2026-10-17');
     assert.equal(c.date, 'SAT 17 OCT');
     assert.equal(c.typeLabel, 'RUN');
-    assert.equal(c.glyph, '🏃');
+    assert.equal(c.glyph, 'RUN');
     assert.deepEqual(c.stats.map((s) => s.label), ['distance', 'time', 'avg hr']);
     assert.equal(c.prLabel, '★ 5K 19:52 · −14s');
     assert.equal(c.hasThumb, true);
@@ -455,7 +455,7 @@ describe('on the calendar', () => {
   test('no export: the hand-written list, upcoming only, soonest first, race by tag', () => {
     const c = buildCalendar(null, [
       { date: '2026-04-15', day: '15', month: 'Apr 2026', title: 'Marathon', tag: 'Race • 42.2km', description: 'gone' },
-      { date: '2027-01-10', title: 'Later', emoji: '🚴' },
+      { date: '2027-01-10', title: 'Later' },
       { date: '2026-11-01', title: 'Sooner', tag: 'Race • 5km', description: 'PB attempt' },
       { date: '2026-12-01', title: 'A thing', tag: 'Social' },
       { title: 'no date' },

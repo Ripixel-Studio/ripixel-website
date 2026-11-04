@@ -3,11 +3,11 @@
   {{> fitness-picture}}
   <div class="fit-card__inner">
     <div class="fit-card__top">
-      <span class="fit-chip fit-card__type"><span aria-hidden="true">{{glyph}}</span> {{typeLabel}}</span>
+      <span class="fit-chip fit-card__type">{{typeLabel}}</span>
       <time class="fit-card__date" datetime="{{dateTime}}">{{date}}</time>
     </div>
     <h3 class="fit-card__title">{{title}}</h3>
-    {{#if location}}<div class="fit-card__where">🌍 {{location}}</div>{{/if}}
+    {{#if location}}<div class="fit-card__where">@ {{location}}</div>{{/if}}
     <dl class="fit-card__stats">
       {{#each stats}}
       <div class="fit-card__stat">

@@ -16,19 +16,19 @@
 
   <div class="act-hero__body">
     <div class="act-hero__stamps">
-      <span class="stamp act-stamp act-stamp--type">{{icon}} {{typeLabel}}</span>
-      {{#if race.divisionLabel}}<span class="stamp act-stamp act-stamp--division">🏷️ {{race.divisionLabel}}</span>{{/if}}
+      <span class="stamp act-stamp act-stamp--type">{{typeLabel}}</span>
+      {{#if race.divisionLabel}}<span class="stamp act-stamp act-stamp--division">{{race.divisionLabel}}</span>{{/if}}
       {{#if source}}<span class="stamp act-stamp act-stamp--source">via {{source}}</span>{{/if}}
       {{#if dateStamp}}<span class="stamp act-stamp act-stamp--date">{{dateStamp}}</span>{{/if}}
-      {{#if race.isTotalPB}}<span class="stamp act-stamp act-stamp--pb-big">🏆 division PB</span>{{/if}}
-      {{#if race.firstLabel}}<span class="stamp act-stamp act-stamp--pb-big">🏆 {{race.firstLabel}}</span>{{/if}}
+      {{#if race.isTotalPB}}<span class="stamp act-stamp act-stamp--pb-big">★ division PB</span>{{/if}}
+      {{#if race.firstLabel}}<span class="stamp act-stamp act-stamp--pb-big">★ {{race.firstLabel}}</span>{{/if}}
       {{#if prCount}}<span class="stamp act-stamp act-stamp--pr">+{{prCount}} PR</span>{{/if}}
     </div>
 
     <h1 class="act-hero__title">{{title}}<span class="act-hero__dot">.</span></h1>
 
     <div class="act-hero__credit">
-      by <b>{{owner}}</b>{{#if race.partner}} &amp; <b>{{race.partner}}</b>{{/if}}{{#if locationName}} · 🌍 {{locationName}}{{/if}}{{#each links}} · on <a href="{{url}}" rel="noopener external">{{label}} ↗</a>{{/each}}
+      by <b>{{owner}}</b>{{#if race.partner}} &amp; <b>{{race.partner}}</b>{{/if}}{{#if locationName}} · {{locationName}}{{/if}}{{#each links}} · on <a href="{{url}}" rel="noopener external">{{label}} →</a>{{/each}}
     </div>
   </div>
 </header>

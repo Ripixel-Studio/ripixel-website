@@ -33,7 +33,7 @@
 
     {{#if fitnessUnavailable}}
     <div class="fit-unavailable">
-      ⚠ fitness data unavailable — this build could not reach the showcase export, so there are no sessions to list. check back later.
+      note: fitness data unavailable — this build could not reach the showcase export, so there are no sessions to list. check back later.
     </div>
     {{/if}}
 
@@ -41,7 +41,7 @@
     <div class="fit-filters" role="group" aria-label="Filter by activity type" hidden data-fit-filters>
       <button type="button" class="fit-filter fit-filter--all" aria-pressed="true" data-filter="all">all <span>{{fitnessSessions.total}}</span></button>
       {{#each fitnessSessions.filters}}
-      <button type="button" class="fit-filter {{typeClass}}" aria-pressed="false" data-filter="{{key}}"><span aria-hidden="true">{{glyph}}</span> {{label}} <span>{{count}}</span></button>
+      <button type="button" class="fit-filter {{typeClass}}" aria-pressed="false" data-filter="{{key}}">{{label}} <span>{{count}}</span></button>
       {{/each}}
     </div>
     {{/if}}

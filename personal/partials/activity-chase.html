@@ -6,20 +6,20 @@
 <section class="act-card act-chase" aria-label="{{label}} PB chase">
   <div class="act-card__inner">
     <div class="act-card__head">
-      <span class="act-card__title">· 🎯 PB chase · {{label}} ·</span>
+      <span class="act-card__title">· PB chase · {{label}} ·</span>
       <span class="act-card__right">{{count}} {{raceWord}} in this division{{#unless multiple}}, up to this one{{/unless}}</span>
     </div>
 
     {{#each rows}}
     <p class="act-chase__verdict act-chase__verdict--{{tone}}">
-      {{#if ../multiple}}<b>{{name}} · {{date}}:</b> {{/if}}{{#if delta}}{{#if isPB}}🏆 {{verdict}}{{else}}<span class="act-chase__delta">{{delta}}</span> slower than the PB it was chasing{{/if}}{{else}}🏆 {{verdict}}{{/if}}
+      {{#if ../multiple}}<b>{{name}} · {{date}}:</b> {{/if}}{{#if delta}}{{#if isPB}}★ {{verdict}}{{else}}<span class="act-chase__delta">{{delta}}</span> slower than the PB it was chasing{{/if}}{{else}}★ {{verdict}}{{/if}}
       {{#if pbTime}}<span class="act-chase__vs">PB to beat: <a href="{{pbUrl}}">{{pbTime}} · {{pbName}} · {{pbDate}}</a></span>{{/if}}
     </p>
     {{/each}}
 
     {{#if plot}}
     <div class="act-chase__plot" role="img" aria-label="{{label}} finish times on a time axis, faster to the left">
-      <div class="act-chase__ends" aria-hidden="true"><span>◀ faster</span><span>slower ▶</span></div>
+      <div class="act-chase__ends" aria-hidden="true"><span>← faster</span><span>slower →</span></div>
       <div class="act-chase__track">
         {{#each ticks}}<span class="act-chase__tick" style="left: {{left}}%"><i>{{label}}</i></span>{{/each}}
 

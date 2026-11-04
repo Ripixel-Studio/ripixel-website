@@ -21,8 +21,8 @@ export const EVENT_WINDOW_DAYS = 4;
 export const EVENT_BASE_PATH = '/life/event';
 
 const STATION_ICONS = /** @type {Record<string, string>} */ ({
-  skierg: '⛷️', sled_push: '🛷', sled_pull: '🛷', burpee_broad_jump: '🐸', rowing: '🚣',
-  farmers_carry: '🧳', sandbag_lunges: '🎒', wall_balls: '🏐',
+  skierg: 'SKI', sled_push: 'SLD', sled_pull: 'SLD', burpee_broad_jump: 'BBJ', rowing: 'ROW',
+  farmers_carry: 'FC', sandbag_lunges: 'LNG', wall_balls: 'WB',
 });
 
 /** @param {unknown} v */
@@ -264,7 +264,7 @@ export function buildRaceView(file, history, opts = {}) {
     if (pb && pb.splitSource && pb.splitSource !== race.splitSource) sourcesDiffer.add(pb.title);
     return {
       key: s.key,
-      icon: s.isRun ? '🏃' : STATION_ICONS[s.key] || '🏋️',
+      icon: s.isRun ? 'RUN' : STATION_ICONS[s.key] || 'GYM',
       label: s.label,
       isRun: !!s.isRun,
       duration: clock(s.durationSeconds) || '—',
@@ -439,7 +439,7 @@ function tickLabel(t) {
   return m >= 60 ? `${Math.floor(m / 60)}h${String(m % 60).padStart(2, '0')}` : `${m} min`;
 }
 
-/** "Hyrox - London Olympia 25/26 - 1:23:47 🎉" / "London Olympia" → a short event name. */
+/** "Hyrox - London Olympia 25/26 - 1:23:47" / "London Olympia" → a short event name. */
 export function shortEvent(s) {
   const t = String(s ?? '').replace(/^hyrox\s*[-–:]?\s*/i, '').replace(/\s*[-–]\s*\d{1,2}:\d{2}(:\d{2})?.*$/, '').replace(/\s+\d{2}\/\d{2}\b.*$/, '').trim();
   return t || String(s ?? '');

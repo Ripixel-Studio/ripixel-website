@@ -42,16 +42,16 @@ export const TYPE_FAMILY = /** @type {Record<string, TypeKey>} */ ({
 
 /** Family key → filter label and glyph, in the order the filter chips show them. */
 export const FAMILIES = /** @type {Record<TypeKey, { label: string, glyph: string }>} */ ({
-  run: { label: 'Run', glyph: '🏃' },
-  ride: { label: 'Ride', glyph: '🚴' },
-  crossfit: { label: 'CrossFit & Hyrox', glyph: '🔥' },
-  strength: { label: 'Strength', glyph: '🏋️' },
-  hiit: { label: 'HIIT', glyph: '⚡' },
-  yoga: { label: 'Pilates & Yoga', glyph: '🧘' },
-  swim: { label: 'Swim', glyph: '🏊' },
-  paddle: { label: 'On the water', glyph: '🚣' },
-  hike: { label: 'Walk & Hike', glyph: '🚶' },
-  sport: { label: 'Sport', glyph: '🎾' },
+  run: { label: 'Run', glyph: 'RUN' },
+  ride: { label: 'Ride', glyph: 'RDE' },
+  crossfit: { label: 'CrossFit & Hyrox', glyph: 'CF' },
+  strength: { label: 'Strength', glyph: 'GYM' },
+  hiit: { label: 'HIIT', glyph: 'HIT' },
+  yoga: { label: 'Pilates & Yoga', glyph: 'YOG' },
+  swim: { label: 'Swim', glyph: 'SWM' },
+  paddle: { label: 'On the water', glyph: 'ROW' },
+  hike: { label: 'Walk & Hike', glyph: 'WLK' },
+  sport: { label: 'Sport', glyph: 'RKT' },
   other: { label: 'Other', glyph: '✦' },
 });
 
