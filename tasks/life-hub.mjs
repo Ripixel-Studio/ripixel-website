@@ -533,6 +533,111 @@ function mediaView(sec, outings) {
   };
 }
 
+// ─── watching: the poster wall, the year by month, the YouTube channels ───
+
+/** Posters, thumbnails and avatars are hotlinked from TMDB and YouTube's image hosts only, as plain URLs. */
+const MEDIA = /^https:\/\/(image\.tmdb\.org\/t\/p\/|i\.ytimg\.com\/vi\/|yt3\.ggpht\.com\/|yt3\.googleusercontent\.com\/)[A-Za-z0-9._~%/+=-]*$/;
+/** @param {unknown} u */
+export const safeMedia = (u) => (typeof u === 'string' && MEDIA.test(u) ? u : '');
+
+/** `seasons 7–8`, `seasons 1, 3`, `season 2`; '' without any. @param {unknown} list */
+function seasonsLabel(list) {
+  const ns = (Array.isArray(list) ? list : []).map(num).filter((n) => n != null).map(Number).sort((a, b) => a - b);
+  if (!ns.length) return '';
+  if (ns.length === 1) return `season ${ns[0]}`;
+  const run = ns.every((n, i) => i === 0 || n === ns[i - 1] + 1);
+  return `seasons ${run ? `${ns[0]}–${ns.at(-1)}` : ns.join(', ')}`;
+}
+
+/** The wall: export order (newest first), a tile per film or series. @param {any} sec */
+function wallView(sec) {
+  return (Array.isArray(sec.wall) ? sec.wall : [])
+    .filter((t) => t && typeof t.title === 'string' && t.title.trim())
+    .map((t, i) => ({
+      key: String(t.key || ''), title: t.title.trim(), kind: t.kind === 'series' ? 'series' : 'film', series: t.kind === 'series',
+      poster: safeMedia(t.poster), bigScreen: t.bigScreen === true,
+      // the stamp says "big screen" already
+      reason: t.bigScreen === true && t.reason === 'on the big screen' ? '' : String(t.reason || ''),
+      month: String(t.month || ''), monthLabel: monthLabel(t.month), year: num(t.year) ?? '',
+      seasonsLabel: seasonsLabel(t.seasons), episodes: num(t.episodes) != null ? plural(/** @type {number} */ (num(t.episodes)), 'episode', 'episodes') : '',
+      weight: num(t.weight) === 2 ? 2 : 1, tilt: tiltOf(String(t.title)), ink: i % 5,
+    }));
+}
+
+/** The wall as laid out: a year card leads each year's tiles. @param {any[]} wall */
+function wallTiles(wall) {
+  const out = [];
+  let year = '';
+  for (const t of wall) {
+    const y = t.month.slice(0, 4);
+    if (/^\d{4}$/.test(y) && y !== year) {
+      year = y;
+      out.push({ yearMark: true, year: y, count: wall.filter((x) => x.month.startsWith(y)).length });
+    }
+    out.push(t);
+  }
+  return out;
+}
+
+/** The last twelve months: mini posters (by wall key) and the counts behind them. @param {any} sec @param {any[]} wall */
+function stripView(sec, wall) {
+  const byKey = new Map(wall.map((t) => [t.key, t]));
+  const rows = (Array.isArray(sec.strip) ? sec.strip : []).filter((m) => m && /^\d{4}-(0[1-9]|1[0-2])$/.test(String(m.month || '')));
+  const max = (/** @type {string} */ k) => Math.max(1, ...rows.map((m) => num(m[k]) ?? 0));
+  const epMax = max('episodes'), vidMax = max('videos');
+  return rows.map((m) => {
+    const films = num(m.films) ?? 0, episodes = num(m.episodes) ?? 0, videos = num(m.videos) ?? 0;
+    const posters = (Array.isArray(m.keys) ? m.keys : []).map((k) => byKey.get(k)).filter(Boolean).slice(0, 3)
+      .map((t, i) => ({ src: t.poster, title: t.title, ink: t.ink, n: i }));
+    return {
+      month: m.month, label: MONTHS[+m.month.slice(5) - 1], year: m.month.slice(0, 4), newYear: m.month.endsWith('-01'),
+      films, cinema: num(m.cinema) ?? 0, episodes, videos, posters,
+      counts: [plural(films, 'film', 'films'), plural(episodes, 'episode', 'episodes'), plural(videos, 'video', 'videos')].join(' · '),
+      epPct: Math.round((episodes / epMax) * 100), vidPct: Math.round((videos / vidMax) * 100),
+      quiet: !films && !episodes && !videos,
+    };
+  });
+}
+
+const RULE_LABELS = /** @type {Record<string, string>} */ ({ habit: 'habit', new: 'new', binge: 'binge' });
+
+/** `Corridor Crew` → `CC`; `Kurzgesagt – In a Nutshell` → `KI`. @param {string} t */
+const initials = (t) => t.split(/[^\p{L}\p{N}]+/u).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('');
+
+/** YouTube: the channels he actually watches, as the export ranks them. @param {any} sec */
+function channelsView(sec) {
+  return (Array.isArray(sec.channels) ? sec.channels : [])
+    .filter((c) => c && typeof c.title === 'string' && c.title.trim())
+    .map((c, i) => {
+      const days = num(c.days), views = num(c.views), share = num(c.share);
+      const rhythm = (Array.isArray(c.rhythm) ? c.rhythm : []).slice(-26).map((n) => {
+        const v = Math.max(0, num(n) ?? 0);
+        return { n: v, level: v === 0 ? 0 : v === 1 ? 1 : v <= 3 ? 2 : 3 };
+      });
+      return {
+        title: c.title.trim(), initials: initials(c.title) || '?', avatar: safeMedia(c.avatar),
+        thumbs: (Array.isArray(c.thumbs) ? c.thumbs : []).map(safeMedia).filter(Boolean).slice(0, 3),
+        ruleLabel: RULE_LABELS[c.rule] || '', reason: String(c.reason || ''),
+        stats: [days != null ? plural(days, 'day', 'days') : '', views != null ? plural(views, 'video', 'videos') : '',
+          share != null && share >= 1 ? `${group(share)}% of my YouTube` : ''].filter(Boolean),
+        sinceLabel: monthLabel(c.since), rhythm, hasRhythm: rhythm.some((r) => r.n > 0), lead: i === 0, ink: i % 5,
+      };
+    });
+}
+
+/** The watching numbers: films, cinema, episodes, an estimated film-and-TV hours, YouTube as videos and days. @param {any} t */
+function watchingRows(t) {
+  const h = num(t.hours);
+  return [
+    row('Films watched', group(num(t.films) ?? 0)),
+    stat('At the cinema', t.cinema, group),
+    stat('Episodes', t.episodes, group),
+    h != null && h > 0 ? { ...row('Film and TV', `≈${h < 10 ? one(h) : group(h)}`, 'h'), sub: 'an estimate, from TMDB runtimes' } : false,
+    stat('YouTube videos', t.videos, group),
+    stat('YouTube days', t.youtubeDays, group),
+  ].filter(Boolean);
+}
+
 /** A project link only when it is a repo under James's own GitHub accounts. */
 const REPO_URL = /^https:\/\/github\.com\/(ripixel|Ripixel-Studio)\/[\w.-]+$/;
 
@@ -592,13 +697,13 @@ export function buildSection(name, sec, now = new Date(), liveNotables = []) {
       return { ...view, ...codeView(sec) };
     case 'watching': {
       const m = mediaView(sec, []);
-      const y = m.totals.year, mo = m.totals.month;
-      return { ...view, ...m, latest: latestOf(sec.notable),
+      const wall = wallView(sec);
+      return { ...view, ...m, latest: latestOf(sec.notable), wall, wallTiles: wallTiles(wall), strip: stripView(sec, wall), channels: channelsView(sec),
         stats: [
-          ['This year', y], ['This month', mo],
+          ['This year', m.totals.year], ['This month', m.totals.month],
         ].map(([label, t]) => /** @type {any} */ (t) && Object.keys(/** @type {any} */ (t)).length ? ({
           label, // "watched", never "finished"
-          items: [row('Films watched', group(num(t.films) ?? 0)), ...(num(t.cinema) != null ? [row('At the cinema', group(num(t.cinema) ?? 0))] : []), row('Episodes', group(num(t.episodes) ?? 0)), row('Videos', group(num(t.videos) ?? 0)), row('Hours', group(num(t.hours) ?? 0), 'h')],
+          items: watchingRows(t),
         }) : null).filter(Boolean) };
     }
     case 'listening': {
@@ -809,6 +914,12 @@ export function heroView(h, title = '') {
       if (!sketch) return null;
       const slug = typeof h.slug === 'string' && /^[a-z0-9][a-z0-9-]*$/.test(h.slug) ? h.slug : '';
       return { type: 'route', route: true, ...sketch, href: slug ? `${ACTIVITY_PATH}/${slug}` : '' };
+    }
+    case 'posters': {
+      const items = Array.isArray(h.items) ? h.items : [];
+      const safe = items.map((it) => ({ src: safeMedia(it?.src), alt: String(it?.alt || '').trim() }));
+      if (safe.length < 3 || safe.length > 4 || safe.some((it) => !it.src || !it.alt)) return null;
+      return { type: 'posters', posters: true, items: safe.map((it, i) => ({ ...it, n: i, tilt: tiltOf(it.alt) })) };
     }
     case 'bars': {
       const items = (Array.isArray(h.items) ? h.items : [])

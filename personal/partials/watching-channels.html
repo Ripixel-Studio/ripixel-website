@@ -1,0 +1,25 @@
+<!-- Context: lifeSections.watching.channels [{title, initials, avatar, thumbs[], ruleLabel, reason, stats[], sinceLabel,
+     rhythm[{n, level}], hasRhythm, lead, ink}] — YouTube channels a rule says he actually watches, strongest first.
+     Recent video thumbnails only (never a video's title); days and views, never hours (YouTube does not say). -->
+<ol class="watch-channels">
+  {{#each this}}
+  <li class="watch-ch watch-ch--ink{{ink}}{{#if lead}} watch-ch--lead{{/if}}">
+    <div class="watch-ch__head">
+      {{#if avatar}}<img class="watch-ch__avatar" src="{{avatar}}" alt="" loading="lazy" decoding="async" width="88" height="88">{{else}}<span class="watch-ch__avatar watch-ch__avatar--type" aria-hidden="true">{{initials}}</span>{{/if}}
+      <div class="watch-ch__id">
+        <h3 class="watch-ch__name">{{title}}</h3>
+        {{#if ruleLabel}}<span class="watch-ch__rule watch-ch__rule--{{ruleLabel}}">{{ruleLabel}}</span>{{/if}}
+      </div>
+    </div>
+    {{#if reason}}<p class="watch-ch__why">{{reason}}</p>{{/if}}
+    {{#if thumbs.length}}
+    <div class="watch-ch__thumbs">{{#each thumbs}}<img src="{{this}}" alt="" loading="lazy" decoding="async" width="320" height="180">{{/each}}</div>
+    {{/if}}
+    <p class="watch-ch__stats">{{#each stats}}<span>{{this}}</span>{{/each}}</p>
+    {{#if hasRhythm}}
+    <div class="watch-ch__rhythm" role="img" aria-label="Days watched each week, the last 26 weeks">{{#each rhythm}}<i class="watch-ch__wk watch-ch__wk--{{level}}"></i>{{/each}}</div>
+    <p class="watch-ch__rhythm-label">the last 26 weeks</p>
+    {{/if}}
+  </li>
+  {{/each}}
+</ol>

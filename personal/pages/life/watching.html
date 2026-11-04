@@ -16,7 +16,9 @@
       <line x1="9" y1="0" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/>
     </svg>
 
-    {{!-- Watching: films and seasons worth talking about, plus totals (lifeSections.watching). --}}
+    {{!-- Watching (lifeSections.watching): the numbers (film and TV hours are an estimate from TMDB runtimes;
+          YouTube is days and videos, never hours), the poster wall, the year by month, then the YouTube channels.
+          An older export with no wall falls back to the list. --}}
     {{#with section}}
     {{> life-section-head snapTop="SCREEN" snapAccent="TIME"}}
     {{#if empty}}
@@ -28,20 +30,26 @@
       {{> life-stats items}}
     </section>
     {{/each}}
+    {{#if wall.length}}
+    <h2 class="fit-header">the <span>wall</span>.</h2>
+    <p class="watch-note">Every film, and every series I binged, finished or kept coming back to. Newest first.</p>
+    {{> watching-wall wallTiles}}
+    {{else}}
     <h2 class="fit-header">worth <span>talking about</span>.</h2>
     {{#if notable.length}}
     {{> life-notable-list items=notable}}
     {{else}}
     <p class="life-empty">Nothing has made the list yet.</p>
     {{/if}}
-    {{#if yearList.length}}
-    <h2 class="fit-header">year by <span>year</span>.</h2>
-    {{#each yearList}}
-    <section class="life-year">
-      <h3 class="life-year__label">{{this}}</h3>
-      {{> life-notable-list items=(lookup ../years this)}}
-    </section>
-    {{/each}}
+    {{/if}}
+    {{#if strip.length}}
+    <h2 class="fit-header">the year by <span>month</span>.</h2>
+    {{> watching-strip strip}}
+    {{/if}}
+    {{#if channels.length}}
+    <h2 class="fit-header">on <span>YouTube</span>.</h2>
+    <p class="watch-note">The channels I actually watch, counted in days rather than views, so an evening of autoplay is one day. YouTube does not say for how long, so no hours here.</p>
+    {{> watching-channels channels}}
     {{/if}}
     {{/if}}
     {{/with}}
