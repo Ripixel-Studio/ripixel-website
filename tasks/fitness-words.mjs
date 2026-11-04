@@ -5,9 +5,9 @@
  * A description is assembled from blocks separated by blank lines: what the source app
  * wrote (ROXFIT's "Completed via ROXFIT" header, its division/rank lines and split
  * table), what he typed (FitGlue's user_input), and FitGlue's enricher sections
- * ("✨ AI Summary:", "❤️ Heart Rate:", "🏁 Hyrox - Men's Open:" …). Only his paragraphs
+ * ("AI Summary:", "Heart Rate:", "Hyrox - Men's Open:" …, each led by an emoji). Only his paragraphs
  * are kept. The old rule — keep everything before the first emoji-led "x: y" line — cut
- * at ROXFIT's "🏆 Division:" and left "Completed via ROXFIT" as the quote.
+ * at ROXFIT's trophy-led "Division:" and left "Completed via ROXFIT" as the quote.
  */
 
 /**
@@ -54,7 +54,7 @@ export function isMachineLine(raw) {
  */
 export function athleteWords(text) {
   if (!text) return '';
-  const cleaned = String(text).replace(/\r\n?/g, '\n').replace(/\n?\n?Posted via FitGlue\s*💪/g, '').trim();
+  const cleaned = String(text).replace(/\r\n?/g, '\n').replace(/\n?\n?Posted via FitGlue\s*\u{1F4AA}/gu, '').trim();
   if (!cleaned) return '';
   const paragraphs = cleaned.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
   const kept = [];

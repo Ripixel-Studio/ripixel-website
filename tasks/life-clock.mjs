@@ -176,7 +176,6 @@ export function nextUpEntry(e, t, now) {
     kind: race ? 'race' : 'event',
     stamp: race ? 'RACE' : 'EVENT',
     stampClass: race ? 'fit-event__stamp--race' : 'fit-event__stamp--event',
-    emoji: race ? '🏁' : '📍',
     day: fmt(t.start, { day: 'numeric' }),
     month: fmt(t.start, { month: 'short', year: 'numeric' }),
     date: dayStamp(t.start),
@@ -311,7 +310,7 @@ function renderEvent(e) {
 <span class="fit-event__month">${esc(e.month)}</span>
 </div>
 <div class="fit-event__body">
-<h3 class="fit-event__title"><span aria-hidden="true">${esc(e.emoji)}</span> ${esc(e.title)}</h3>
+<h3 class="fit-event__title">${esc(e.title)}</h3>
 <div class="fit-event__meta">
 <span class="stamp fit-event__stamp ${esc(e.stampClass)}">${esc(e.stamp)}</span>
 <time class="fit-event__when" datetime="${esc(e.dateTime)}">${esc(e.when)}</time>
@@ -354,7 +353,7 @@ ${m.nextUp.map(renderEvent).join('\n')}
 <ol class="fit-week-strip">
 ${m.week.map(renderDay).join('\n')}
 </ol>
-<p class="fit-week-strip__key"><span class="fit-week-strip__key-done">done</span> logged on the record · <span class="fit-week-strip__key-planned">planned</span> on the calendar · 🏁 race</p>`);
+<p class="fit-week-strip__key"><span class="fit-week-strip__key-done">done</span> logged on the record · <span class="fit-week-strip__key-planned">planned</span> on the calendar · ★ race</p>`);
   }
   return parts.join('\n');
 }

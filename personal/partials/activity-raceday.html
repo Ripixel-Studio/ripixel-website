@@ -10,6 +10,6 @@
 <a class="act-eventlink" href="{{eventLink.url}}">
   <span class="act-eventlink__kicker">race weekend · {{eventLink.count}} races</span>
   <span class="act-eventlink__name">Hyrox {{eventLink.name}} →</span>
-  <span class="act-eventlink__others">{{#each eventLink.others}}{{#unless @first}} · {{/unless}}also {{division}} {{total}}{{#if isPB}} 🏆{{/if}}{{/each}}</span>
+  <span class="act-eventlink__others">{{#each eventLink.others}}{{#unless @first}} · {{/unless}}also {{division}} {{total}}{{#if isPB}} ★{{/if}}{{/each}}</span>
 </a>
 {{/if}}

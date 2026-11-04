@@ -8,7 +8,7 @@
 {{#if shapes.length}}
 <div class="share" data-share data-title="{{title}}">
   <button type="button" class="share__open" data-share-open aria-haspopup="dialog" aria-controls="share-dialog" hidden>
-    <span aria-hidden="true">↗</span> share card
+    <span aria-hidden="true">→</span> share card
   </button>
   <noscript>{{#each shapes}}{{#if @first}}<a class="share__open" href="{{variants.[0].url}}" download="{{variants.[0].file}}">↓ {{label}} card</a>{{/if}}{{/each}}</noscript>
   <ul class="share__files" hidden>

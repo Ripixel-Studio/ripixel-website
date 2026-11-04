@@ -249,9 +249,9 @@ test('buildRoundupView renders the fixture week per contract §6/§8', async () 
   assert.equal(v.comparison, null, 'week-41 is not in the set');
   assert.equal(v.prevNav, null);
   assert.equal(v.callouts.length, 2);
-  assert.equal(v.callouts[0].glyph, '🚴');
+  assert.equal(v.callouts[0].glyph, 'RDE');
   assert.equal(v.callouts[0].href, '/life/activity/evening-ride-to-the-reservoir-2026-10-15');
-  assert.equal(v.callouts[1].glyph, '🏆');
+  assert.equal(v.callouts[1].glyph, '★');
   assert.deepEqual(v.breakdown.map((b) => b.label), ['Run', 'Ride', 'Weight Training']);
   assert.equal(v.breakdown[2].stats, '57m · 18 sets · 6.3t moved');
   assert.equal(v.effortStrip.cells.length, 7);

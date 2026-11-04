@@ -38,22 +38,22 @@ const DOW_SHORT = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']; // Mon-firs
 
 /** Emoji per activity type — copied from fitglue-web utils/activityMeta.ts (contract says copy, not import). */
 export const ACTIVITY_TYPE_ICONS = /** @type {Record<string, string>} */ ({
-  ACTIVITY_TYPE_RUN: '🏃', ACTIVITY_TYPE_TRAIL_RUN: '🏔️', ACTIVITY_TYPE_VIRTUAL_RUN: '🏃',
-  ACTIVITY_TYPE_WALK: '🚶', ACTIVITY_TYPE_HIKE: '🥾', ACTIVITY_TYPE_RIDE: '🚴',
-  ACTIVITY_TYPE_MOUNTAIN_BIKE_RIDE: '🚵', ACTIVITY_TYPE_GRAVEL_RIDE: '🚴',
-  ACTIVITY_TYPE_EBIKE_RIDE: '⚡', ACTIVITY_TYPE_EMOUNTAIN_BIKE_RIDE: '⚡',
-  ACTIVITY_TYPE_VIRTUAL_RIDE: '🚴', ACTIVITY_TYPE_SWIM: '🏊', ACTIVITY_TYPE_ROWING: '🚣',
-  ACTIVITY_TYPE_VIRTUAL_ROW: '🚣', ACTIVITY_TYPE_KAYAKING: '🛶', ACTIVITY_TYPE_CANOEING: '🛶',
-  ACTIVITY_TYPE_STAND_UP_PADDLING: '🏄', ACTIVITY_TYPE_SURFING: '🏄',
-  ACTIVITY_TYPE_WEIGHT_TRAINING: '🏋️', ACTIVITY_TYPE_CROSSFIT: '🏋️',
-  ACTIVITY_TYPE_HIGH_INTENSITY_INTERVAL_TRAINING: '⚡', ACTIVITY_TYPE_YOGA: '🧘',
-  ACTIVITY_TYPE_PILATES: '🧘', ACTIVITY_TYPE_ELLIPTICAL: '🔄', ACTIVITY_TYPE_STAIR_STEPPER: '🪜',
-  ACTIVITY_TYPE_ALPINE_SKI: '⛷️', ACTIVITY_TYPE_NORDIC_SKI: '🎿', ACTIVITY_TYPE_BACKCOUNTRY_SKI: '🎿',
-  ACTIVITY_TYPE_SNOWBOARD: '🏂', ACTIVITY_TYPE_SNOWSHOE: '🥾', ACTIVITY_TYPE_ROCK_CLIMBING: '🧗',
-  ACTIVITY_TYPE_GOLF: '⛳', ACTIVITY_TYPE_TENNIS: '🎾', ACTIVITY_TYPE_BADMINTON: '🏸',
-  ACTIVITY_TYPE_TABLE_TENNIS: '🏓', ACTIVITY_TYPE_SOCCER: '⚽', ACTIVITY_TYPE_PICKLEBALL: '🏓',
-  ACTIVITY_TYPE_SQUASH: '🎾', ACTIVITY_TYPE_RACQUETBALL: '🎾', ACTIVITY_TYPE_SAIL: '⛵',
-  ACTIVITY_TYPE_WINDSURF: '🪁', ACTIVITY_TYPE_KITESURF: '🪁', ACTIVITY_TYPE_WORKOUT: '🏃',
+  ACTIVITY_TYPE_RUN: 'RUN', ACTIVITY_TYPE_TRAIL_RUN: 'TRL', ACTIVITY_TYPE_VIRTUAL_RUN: 'RUN',
+  ACTIVITY_TYPE_WALK: 'WLK', ACTIVITY_TYPE_HIKE: 'HIK', ACTIVITY_TYPE_RIDE: 'RDE',
+  ACTIVITY_TYPE_MOUNTAIN_BIKE_RIDE: 'MTB', ACTIVITY_TYPE_GRAVEL_RIDE: 'RDE',
+  ACTIVITY_TYPE_EBIKE_RIDE: 'RDE', ACTIVITY_TYPE_EMOUNTAIN_BIKE_RIDE: 'MTB',
+  ACTIVITY_TYPE_VIRTUAL_RIDE: 'RDE', ACTIVITY_TYPE_SWIM: 'SWM', ACTIVITY_TYPE_ROWING: 'ROW',
+  ACTIVITY_TYPE_VIRTUAL_ROW: 'ROW', ACTIVITY_TYPE_KAYAKING: 'PAD', ACTIVITY_TYPE_CANOEING: 'PAD',
+  ACTIVITY_TYPE_STAND_UP_PADDLING: 'SRF', ACTIVITY_TYPE_SURFING: 'SRF',
+  ACTIVITY_TYPE_WEIGHT_TRAINING: 'GYM', ACTIVITY_TYPE_CROSSFIT: 'GYM',
+  ACTIVITY_TYPE_HIGH_INTENSITY_INTERVAL_TRAINING: 'HIT', ACTIVITY_TYPE_YOGA: 'YOG',
+  ACTIVITY_TYPE_PILATES: 'YOG', ACTIVITY_TYPE_ELLIPTICAL: 'ELL', ACTIVITY_TYPE_STAIR_STEPPER: 'STR',
+  ACTIVITY_TYPE_ALPINE_SKI: 'SKI', ACTIVITY_TYPE_NORDIC_SKI: 'SKI', ACTIVITY_TYPE_BACKCOUNTRY_SKI: 'SKI',
+  ACTIVITY_TYPE_SNOWBOARD: 'SNO', ACTIVITY_TYPE_SNOWSHOE: 'HIK', ACTIVITY_TYPE_ROCK_CLIMBING: 'CLM',
+  ACTIVITY_TYPE_GOLF: 'GLF', ACTIVITY_TYPE_TENNIS: 'RKT', ACTIVITY_TYPE_BADMINTON: 'BAD',
+  ACTIVITY_TYPE_TABLE_TENNIS: 'TT', ACTIVITY_TYPE_SOCCER: 'FTB', ACTIVITY_TYPE_PICKLEBALL: 'TT',
+  ACTIVITY_TYPE_SQUASH: 'RKT', ACTIVITY_TYPE_RACQUETBALL: 'RKT', ACTIVITY_TYPE_SAIL: 'SAL',
+  ACTIVITY_TYPE_WINDSURF: 'KIT', ACTIVITY_TYPE_KITESURF: 'KIT', ACTIVITY_TYPE_WORKOUT: 'RUN',
 });
 
 const HR_ZONES = [
@@ -409,7 +409,7 @@ export function buildRecordGroups(prs = []) {
     if (!g) {
       g = {
         label: parsed.label,
-        glyph: pr.unit === 'kg' || parsed.isStrength ? '🏋️' : pr.unit === 'seconds' ? '🏃' : '🏅',
+        glyph: pr.unit === 'kg' || parsed.isStrength ? 'GYM' : pr.unit === 'seconds' ? 'RUN' : '★',
         date: '', _ts: -1, count: 0, metrics: [],
       };
       groups.set(parsed.label, g);
@@ -604,7 +604,7 @@ export function buildRoundupView(file, ctx) {
   // --- callouts
   const callouts = (r.calloutActivities || []).filter(Boolean).map((c) => {
     const kind = String(c.kind || '').toUpperCase();
-    const glyph = kind.includes('STREAK') ? '🔥' : kind.includes('RECORD') || kind.includes('PR') ? '🏆' : ACTIVITY_TYPE_ICONS[c.activityType] || '⚡';
+    const glyph = kind.includes('STREAK') ? 'CF' : kind.includes('RECORD') || kind.includes('PR') ? '★' : ACTIVITY_TYPE_ICONS[c.activityType] || 'HIT';
     return { kind: c.kind || '', title: c.title || '', statValue: c.statValue || '', statUnit: c.statUnit || '', sub: c.sub || '', date: c.date || '', glyph, href: href(c.showcaseId) };
   });
 
@@ -622,7 +622,7 @@ export function buildRoundupView(file, ctx) {
     if (num(b.totalSets) > 0) stats.push(`${num(b.totalSets)} sets`);
     if (w > 0) { const fw = fmtWeight(w); stats.push(`${fw.value}${fw.unit} moved`); }
     return {
-      ink: i % 6, glyph: ACTIVITY_TYPE_ICONS[b.activityType] || '🏅', label: enumLabel(b.activityType, 'ACTIVITY_TYPE_'),
+      ink: i % 6, glyph: ACTIVITY_TYPE_ICONS[b.activityType] || '★', label: enumLabel(b.activityType, 'ACTIVITY_TYPE_'),
       count, pct: sessionTotal ? Math.round((count / sessionTotal) * 100) : 0,
       share: sessionTotal ? (count / sessionTotal) * 100 : 0,
       distShare: distanceTotal ? (dist / distanceTotal) * 100 : 0,

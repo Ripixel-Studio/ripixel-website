@@ -13,16 +13,16 @@ const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : 0);
 
 /** fitglue pkg/calories Foods, in the order they are tried. */
 const FOODS = [
-  ['slice of pizza', 285, '🍕'], ['donut', 250, '🍩'], ['banana', 105, '🍌'], ['beer', 150, '🍺'],
-  ['chocolate bar', 230, '🍫'], ['cookie', 80, '🍪'], ['apple', 95, '🍎'], ['glass of wine', 125, '🍷'],
-  ['burger', 540, '🍔'], ['ice cream scoop', 140, '🍨'],
+  ['slice of pizza', 285], ['donut', 250], ['banana', 105], ['beer', 150],
+  ['chocolate bar', 230], ['cookie', 80], ['apple', 95], ['glass of wine', 125],
+  ['burger', 540], ['ice cream scoop', 140],
 ];
 
-/** "≈ 4.7 slice of pizza 🍕" (FitGlue's fun-mode text), "" for 50 kcal or less. @param {number} kcal */
+/** "≈ 4.7 slice of pizza " (FitGlue's fun-mode text), "" for 50 kcal or less. @param {number} kcal */
 export function foodComparison(kcal) {
   if (!(kcal > 50)) return '';
-  const [name, per, emoji] = FOODS.find(([, c]) => kcal / Number(c) >= 0.5 && kcal / Number(c) <= 10) ?? FOODS[0];
-  return `≈ ${(kcal / Number(per)).toFixed(1)} ${name} ${emoji}`;
+  const [name, per] = FOODS.find(([, c]) => kcal / Number(c) >= 0.5 && kcal / Number(c) <= 10) ?? FOODS[0];
+  return `≈ ${(kcal / Number(per)).toFixed(1)} ${name}`;
 }
 
 /**

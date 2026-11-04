@@ -852,7 +852,7 @@
 }
 .fit-week-strip__session--race,
 .fit-week-strip__session--event { border-style: solid; font-weight: 700; }
-.fit-week-strip__session--race::before { content: '🏁 '; }
+.fit-week-strip__session--race::before { content: '★ '; }
 .fit-week-strip__time { opacity: 0.7; font-weight: 400; }
 .fit-week-strip__rest { font-family: var(--f-mono); font-size: 11px; opacity: 0.4; }
 

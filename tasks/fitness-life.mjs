@@ -142,19 +142,19 @@ const DISTANCE_TYPES = new Set([
  */
 export function familyOf(e) {
   const t = String(e.activityType || '').replace(/^ACTIVITY_TYPE_/, '');
-  if ((e.totalSets || 0) > 0 || t === 'WEIGHT_TRAINING') return { family: 'strength', glyph: '🏋️' };
-  if (/RUN$/.test(t)) return { family: 'distance', glyph: '🏃' };
-  if (/RIDE$|CYCLE$/.test(t)) return { family: 'distance', glyph: '🚴' };
-  if (t === 'WALK' || t === 'HIKE' || t === 'SNOWSHOE') return { family: 'distance', glyph: '🚶' };
-  if (t === 'SWIM') return { family: 'distance', glyph: '🏊' };
-  if (/ROW|KAYAK|CANOE|PADDL|SAIL|SURF/.test(t)) return { family: 'distance', glyph: '🚣' };
-  if (/SKI|SKATE/.test(t)) return { family: 'distance', glyph: '⛷️' };
-  if (DISTANCE_TYPES.has(t)) return { family: 'distance', glyph: '🏃' };
-  if (t === 'YOGA' || t === 'PILATES') return { family: 'other', glyph: '🧘' };
+  if ((e.totalSets || 0) > 0 || t === 'WEIGHT_TRAINING') return { family: 'strength', glyph: 'GYM' };
+  if (/RUN$/.test(t)) return { family: 'distance', glyph: 'RUN' };
+  if (/RIDE$|CYCLE$/.test(t)) return { family: 'distance', glyph: 'RDE' };
+  if (t === 'WALK' || t === 'HIKE' || t === 'SNOWSHOE') return { family: 'distance', glyph: 'WLK' };
+  if (t === 'SWIM') return { family: 'distance', glyph: 'SWM' };
+  if (/ROW|KAYAK|CANOE|PADDL|SAIL|SURF/.test(t)) return { family: 'distance', glyph: 'ROW' };
+  if (/SKI|SKATE/.test(t)) return { family: 'distance', glyph: 'SKI' };
+  if (DISTANCE_TYPES.has(t)) return { family: 'distance', glyph: 'RUN' };
+  if (t === 'YOGA' || t === 'PILATES') return { family: 'other', glyph: 'YOG' };
   if (/TENNIS|BADMINTON|PICKLEBALL|RACQUETBALL|SQUASH|SOCCER|GOLF|CLIMBING/.test(t)) {
-    return { family: 'other', glyph: '🏅' };
+    return { family: 'other', glyph: '★' };
   }
-  return { family: 'other', glyph: '⚡' };
+  return { family: 'other', glyph: 'HIT' };
 }
 
 // ---------------------------------------------------------------------------

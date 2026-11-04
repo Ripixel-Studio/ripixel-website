@@ -7,7 +7,7 @@
 <section class="act-card act-hybrid" aria-label="Race breakdown">
   <div class="act-card__inner">
     <div class="act-card__head">
-      <span class="act-card__title">· 🏁 race breakdown ·</span>
+      <span class="act-card__title">· race breakdown ·</span>
       <span class="act-card__right">{{hybridRace.total}} total</span>
     </div>
     <div class="act-hybrid__segs">
@@ -25,17 +25,17 @@
 
 {{#if aiSummaryHtml}}
 <section class="pull-quote act-ai" aria-label="AI summary">
-  <div class="act-ai__label">✨ AI summary</div>
+  <div class="act-ai__label">AI summary</div>
   <div class="act-ai__body">{{{aiSummaryHtml}}}</div>
 </section>
 {{/if}}
 
 {{#if milestone}}
 <section class="act-milestone" aria-label="Lifetime distance">
-  <span class="act-milestone__label">📊 lifetime {{milestone.typeLabel}}</span>
+  <span class="act-milestone__label">lifetime {{milestone.typeLabel}}</span>
   <span class="act-milestone__value">{{milestone.lifetimeKm}} km</span>
   {{#if milestone.nextKm}}<span class="act-milestone__next">next: {{milestone.nextKm}} km · {{milestone.toGoKm}} km to go</span>{{/if}}
-  {{#if milestone.crossedKm}}<span class="act-milestone__hit">🎉 {{milestone.crossedKm}} km reached</span>{{/if}}
+  {{#if milestone.crossedKm}}<span class="act-milestone__hit">★ {{milestone.crossedKm}} km reached</span>{{/if}}
 </section>
 {{/if}}
 

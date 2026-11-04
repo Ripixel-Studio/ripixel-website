@@ -303,7 +303,7 @@ function hyroxRows(th, rows, x, w, rowH) {
   const hasHr = rows.some((r) => r.avgHr);
   const hasDelta = rows.some((r) => r.delta);
   const timeW = monoW('10:00', size) + 16;
-  const hrW = hasHr ? monoW('188♥', size * 0.86) + 18 : 0;
+  const hrW = hasHr ? monoW('188♡', size * 0.86) + 18 : 0;
   const deltaW = hasDelta ? monoW('+0:00', size * 0.86) + 8 : 0;
   const barX = x + labelW;
   const barW = w - labelW - timeW - hrW - deltaW;
@@ -323,7 +323,7 @@ function hyroxRows(th, rows, x, w, rowH) {
       if (r.isPB) out += T(barX + bw - 10, by + bh / 2 + size * 0.3, 'PB', { size: size * 0.8, fill: th.mode === 'photo' ? (r.isRun ? th.onFill : INK) : th.bg, bold: true, anchor: 'end' });
       const tx = barX + barW + timeW;
       out += T(tx, cy + rowH / 2 + size * 0.36, r.duration, { size, fill: th.fg, bold: true, anchor: 'end' });
-      if (hasHr && r.avgHr) out += T(tx + hrW, cy + rowH / 2 + size * 0.32, `${r.avgHr}♥`, { size: size * 0.86, fill: th.fg, op: th.soft, anchor: 'end' });
+      if (hasHr && r.avgHr) out += T(tx + hrW, cy + rowH / 2 + size * 0.32, `${r.avgHr}♡`, { size: size * 0.86, fill: th.fg, op: th.soft, anchor: 'end' });
       if (hasDelta && r.delta) {
         const tone = r.deltaTone === 'gain' ? th.gain : r.deltaTone === 'loss' ? th.loss : th.fg;
         out += T(x + w, cy + rowH / 2 + size * 0.32, r.delta, { size: size * 0.86, fill: tone, bold: true, anchor: 'end' });
