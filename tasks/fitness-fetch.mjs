@@ -15,8 +15,13 @@
  *   <base>/life/period/<periodKey>.json  (per-roundup sidecar, plan 4; optional, one per roundup key)
  *
  * Source order is live → cache → fixtures → empty, unless FITNESS_DATA_SOURCE
- * forces one. The build never fails because of fitness data: the worst case is
- * `fitnessUnavailable: true` with empty lists.
+ * forces one. Live is tried twice (the second time with a longer timeout) before
+ * it counts as failed. Without a forced source the build never fails because of
+ * fitness data: the worst case is `fitnessUnavailable: true` with empty lists.
+ * With a forced source (the box deploys with FITNESS_DATA_SOURCE=live) a failure
+ * fails the build, so a deploy leaves the live site as it was instead of
+ * publishing one with no activities (2026-11-04 21:54: a slow link timed the
+ * index out and an empty /life went live for 21 minutes).
  *
  * Globals written (names are the spec's, do not rename):
  *   fitnessIndex        the index.json object (an empty skeleton when unavailable)
@@ -40,6 +45,9 @@ export const DEFAULT_CACHE_DIR = '.cache/fitness';
 export const DEFAULT_FIXTURES_DIR = 'fixtures/fitness';
 export const DEFAULT_CONCURRENCY = 8;
 export const DEFAULT_TIMEOUT_MS = 20_000;
+/** The second live attempt waits this long first and gets RETRY_TIMEOUT_FACTOR × the timeout. */
+export const DEFAULT_RETRY_DELAY_MS = 5_000;
+const RETRY_TIMEOUT_FACTOR = 3;
 
 const SOURCES = /** @type {const} */ (['live', 'cache', 'fixtures']);
 const META_FILE = '.meta.json';
@@ -56,6 +64,7 @@ const SAFE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,200}$/;
  * @property {Source|null} [source]      forced source; null/undefined = fallback chain
  * @property {number} [concurrency]
  * @property {number} [timeoutMs]
+ * @property {number} [retryDelayMs]
  * @property {typeof fetch} [fetchImpl]
  * @property {Logger} [logger]
  * @property {Record<string, string|undefined>} [env]  defaults to process.env
@@ -71,6 +80,7 @@ const SAFE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,200}$/;
  * @property {Record<string, any>} lifePeriods
  * @property {Source|'none'} source
  * @property {boolean} unavailable
+ * @property {string|null} forced  the source FITNESS_DATA_SOURCE / config forced, else null
  * @property {string[]} notes   one line per source tried and why it was passed over
  */
 
@@ -128,6 +138,7 @@ export function resolveOptions(env = process.env, overrides = {}, logger = silen
     source,
     concurrency: Math.max(1, Math.min(overrides.concurrency || DEFAULT_CONCURRENCY, 8)),
     timeoutMs: overrides.timeoutMs || DEFAULT_TIMEOUT_MS,
+    retryDelayMs: overrides.retryDelayMs ?? DEFAULT_RETRY_DELAY_MS,
     fetchImpl: overrides.fetchImpl || globalThis.fetch,
     logger,
   };
@@ -529,11 +540,19 @@ export async function loadFitnessData(options = {}) {
     try {
       /** @type {RawSet} */
       let raw;
-      if (source === 'live') raw = await readLive(opts);
+      if (source === 'live') {
+        try {
+          raw = await readLive(opts);
+        } catch (e) {
+          logger.warn(`fitness live source failed (${errMsg(e)}); retrying once with a longer timeout`);
+          await new Promise((r) => setTimeout(r, opts.retryDelayMs));
+          raw = await readLive({ ...opts, timeoutMs: opts.timeoutMs * RETRY_TIMEOUT_FACTOR });
+        }
+      }
       else if (source === 'cache') raw = await readFromDir(opts.cacheDir, logger);
       else raw = await readFromDir(opts.fixturesDir, logger);
       const { index, activities, roundups, events, lifeIndex, lifeHeatmap, lifePeriods } = assemble(raw);
-      return { index, activities, roundups, events, lifeIndex, lifeHeatmap, lifePeriods, source, unavailable: false, notes };
+      return { index, activities, roundups, events, lifeIndex, lifeHeatmap, lifePeriods, source, unavailable: false, forced: opts.source, notes };
     } catch (e) {
       const where =
         source === 'live' ? opts.baseUrl : source === 'cache' ? opts.cacheDir : opts.fixturesDir;
@@ -552,6 +571,7 @@ export async function loadFitnessData(options = {}) {
     lifePeriods: {},
     source: 'none',
     unavailable: true,
+    forced: opts.source,
     notes,
   };
 }
@@ -589,6 +609,12 @@ export function fetchFitnessTask(config = {}) {
       }
       const summary = `${data.activities.length} activities, ${data.roundups.length} roundups, ` +
         (data.events ? `${data.events.events.length} calendar entries` : 'no calendar');
+      if (data.unavailable && data.forced) {
+        throw new Error(
+          `FITNESS_DATA_SOURCE=${data.forced} is unavailable (${data.notes.join('; ')}); ` +
+          'failing the build rather than publishing a site without fitness data',
+        );
+      }
       if (data.unavailable) {
         ctx.logger.warn(`Fitness data: UNAVAILABLE, building without it (${data.notes.join('; ')})`);
       } else {

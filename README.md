@@ -73,14 +73,17 @@ JSON files on a public bucket (`index.json`, `activity/<slug>.json`,
 | `fitnessSource` | `live` \| `cache` \| `fixtures` \| `none` |
 
 Sources are tried in order **live → `.cache/fitness/` → `fixtures/fitness/` → empty**.
-The build never fails because of fitness data; the task logs one line saying
-which source it used. The live fetch writes everything it downloads into
+Live is tried twice, the second time with a longer timeout. Without a forced source
+the build never fails because of fitness data; the task logs one line saying which
+source it used. A **forced** source that fails fails the build, so the box's deploy
+(`FITNESS_DATA_SOURCE=live`) leaves the live site as it was instead of publishing
+one with no activities. The live fetch writes everything it downloads into
 `.cache/fitness/` (gitignored) and sends `If-None-Match` on later runs, so an
 unchanged file costs a 304.
 
 | env var | effect |
 |---|---|
-| `FITNESS_DATA_SOURCE=live\|cache\|fixtures` | force one source and skip the fallback chain (a forced source that fails means `fitnessUnavailable=true`). CI and preview builds should set `fixtures`. |
+| `FITNESS_DATA_SOURCE=live\|cache\|fixtures` | force one source and skip the fallback chain (a forced source that fails fails the build). CI and preview builds should set `fixtures`. |
 | `FITNESS_DATA_BASE` | base URL of the export; default `https://storage.googleapis.com/fitglue-server-prod-showcase-assets/site/james`. `FITNESS_DATA_BASE_URL` is accepted as an alias. |
 
 - Refresh the cache from the bucket: `npm run fitness:refresh` (or just build; a normal `npm run build:personal` refreshes it too).
