@@ -688,10 +688,14 @@ export function heroCards(lifeIndex, cards, now = new Date()) {
     // The hub row for outings points at the hub itself: send it to the outings list instead.
     let href = typeof r.href === 'string' && /^\/(?!\/)/.test(r.href) ? r.href : SECTION_HREF(name);
     if (href === '/life') href = name === 'outings' && hasOutings ? '#life-outings-title' : '';
+    // A stat hero that shows the card's own headline figure would print the same number twice:
+    // keep the hero (it is the bigger one) and drop the small headline.
+    let headline = card.empty ? null : card.headline || null;
+    if (headline && hero?.type === 'stat' && String(headline.value) === hero.value) headline = null;
     out.push({
       name, title, size, href,
       side: size === 'lg' ? (lg++ % 2 ? 'right' : 'left') : '',
-      headline: card.empty ? null : card.headline || null,
+      headline,
       staleLabel: String(card.staleLabel || ''),
       caption: hero ? captionOf(r.hero?.caption) : '', // no orphan caption for a rejected hero
       hero,

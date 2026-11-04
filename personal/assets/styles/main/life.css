@@ -1356,10 +1356,13 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 2 / 3; /* Steam cover art is 2:3 portrait; a 3:2 frame cut the top off */
   object-fit: cover;
   background: var(--paper-2);
 }
+.hub-hero--image { align-items: center; }
+.hub-hero--image .hub-hero__frame { width: min(100%, 240px); }
+.hub-card--lg .hub-hero--image .hub-hero__frame { width: min(100%, 280px); }
 
 /* spark: the site's line chart, compact and unboxed */
 .hub-hero--spark .chart { --chart-h: 110px; border: 0; box-shadow: none; padding: 0; background: transparent; }

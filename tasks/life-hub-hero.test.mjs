@@ -178,7 +178,7 @@ test('the page: a card per row, sized, each hero drawn, heading and insights kep
   assert.match(cards[0], /hub-card--left hub-card--route life-ink--fitness/);
   assert.match(cards[1], /hub-card--right hub-card--stat life-ink--code/);
   // image: lazy, fixed size, alt
-  assert.match(html, /<img class="hub-hero__img" src="\/card_life.png" alt="Space Farm" loading="lazy" decoding="async" width="1200" height="800">/);
+  assert.match(html, /<img class="hub-hero__img" src="\/card_life.png" alt="Space Farm" loading="lazy" decoding="async" width="400" height="600">/);
   // spark: the shared chart partial, with axes
   assert.match(html, /<figure class="chart">[\s\S]*?class="chart__y"[\s\S]*?class="chart__x"/);
   assert.match(html, /<li style="left:100%">2 Nov<\/li>/);
@@ -221,4 +221,14 @@ test('the page keeps the stale sticker (the roundup links: life-links.test.mjs)'
   const reading = html.split('<li class="hub-card ').find((c) => c.includes('life-ink--reading">')) || '';
   assert.match(reading, /<p class="life-stale">last updated 4 days ago<\/p>/);
   assert.equal(buildHub(fixture, fitnessLife, now).hero.find((c) => c.name === 'body')?.staleLabel, '');
+});
+
+test('a stat hero equal to the headline hides the small headline; a different one keeps it', () => {
+  const base = buildHub(fixture, fitnessLife, now).cards.find((c) => c.name === 'code');
+  assert.ok(base?.headline, 'fixture code card has a headline');
+  const mk = (/** @type {any} */ value) => heroCards({ ...fixture, hub: { rows: [{ section: 'code', size: 'md', hero: { type: 'stat', value, unit: 'commits', label: 'this year' } }] } }, [base], now)[0];
+  const same = Number(String(base.headline.value).replace(/,/g, ''));
+  assert.equal(mk(same).headline, null, 'duplicate figure hidden');
+  assert.equal(mk(same).hero.value, base.headline.value);
+  assert.deepEqual(mk(same + 1).headline, base.headline, 'different figure keeps the headline');
 });
