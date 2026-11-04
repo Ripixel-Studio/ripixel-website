@@ -36,9 +36,9 @@
           <h2 class="hub-card__name">{{#if href}}<a href="{{href}}">{{title}}</a>{{else}}{{title}}{{/if}}</h2>
           {{#if headline}}
           <p class="hub-card__stat"><span class="hub-card__num">{{headline.value}}{{#if headline.unit}}<small>{{headline.unit}}</small>{{/if}}</span> <span class="hub-card__label">{{headline.label}}</span></p>
-          {{else}}
+          {{else}}{{#if empty}}
           <p class="hub-card__none">No {{name}} data yet.</p>
-          {{/if}}
+          {{/if}}{{/if}}
         </header>
         {{#if hero}}{{#unless (eq size "sm")}}<div class="hub-hero hub-hero--{{hero.type}}">{{> life-hub-hero hero}}</div>{{/unless}}{{/if}}
         {{#if caption}}<p class="hub-card__caption">{{caption}}</p>{{/if}}

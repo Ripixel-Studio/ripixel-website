@@ -232,3 +232,14 @@ test('a stat hero equal to the headline hides the small headline; a different on
   assert.equal(mk(same).hero.value, base.headline.value);
   assert.deepEqual(mk(same + 1).headline, base.headline, 'different figure keeps the headline');
 });
+
+test('a hidden duplicate headline is not "empty"; a section with no data is', () => {
+  const base = buildHub(fixture, fitnessLife, now).cards.find((c) => c.name === 'code');
+  const same = Number(String(base.headline.value).replace(/,/g, ''));
+  const row = { section: 'code', size: 'md', hero: { type: 'stat', value: same, unit: 'commits', label: 'this year' } };
+  const dup = heroCards({ ...fixture, hub: { rows: [row] } }, [base], now)[0];
+  assert.equal(dup.headline, null);
+  assert.equal(dup.empty, false, 'template must render nothing, not "No code data yet."');
+  const none = heroCards({ ...fixture, hub: { rows: [{ section: 'code', size: 'sm', hero: null }] } }, [{ ...base, empty: true }], now)[0];
+  assert.equal(none.empty, true);
+});
