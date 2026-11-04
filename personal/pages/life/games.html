@@ -30,6 +30,7 @@
     {{#if stats.length}}
     {{> life-stats stats}}
     {{/if}}
+    {{#if idleNote}}<p class="games-note">{{idleNote}}</p>{{/if}}
     {{#if yearChart}}
     <h2 class="fit-header">the <span>year so far</span>.</h2>
     <div class="life-charts life-charts--wide">{{> chart-line yearChart.chart}}</div>
@@ -77,7 +78,11 @@
         <h2 class="life-period__label">Champion of the month</h2>
         <ol class="games-months">
           {{#each fun.champs}}
-          <li class="games-months__item"><span class="games-months__month">{{month}}</span> <b>{{champion}}</b> <small>{{games}} of {{of}} games</small></li>
+          <li class="games-months__item">
+            {{#if icon}}<img class="games-months__icon" src="{{icon}}" alt="" loading="lazy" decoding="async" width="40" height="40">{{else}}<span class="games-months__icon games-months__icon--none" aria-hidden="true">{{initial}}</span>{{/if}}
+            <span class="games-months__who"><span class="games-months__month">{{month}}</span> <b class="games-months__champ">{{champion}}</b></span>
+            <span class="games-months__games"><b>{{games}}</b>{{#if of}} of {{of}}{{/if}} games</span>
+          </li>
           {{/each}}
         </ol>
       </section>

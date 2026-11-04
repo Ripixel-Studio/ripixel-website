@@ -392,7 +392,11 @@ function funView(f) {
   const modes = (Array.isArray(f.modes) ? f.modes : []).filter((m) => m && m.mode && num(m.games));
   const total = modes.reduce((t, m) => t + m.games, 0);
   const champs = (Array.isArray(f.championByMonth) ? f.championByMonth : []).filter((c) => c && c.champion && monthLabel(c.month) && num(c.games))
-    .map((c) => ({ month: monthLabel(c.month), champion: championName(c.champion), games: group(c.games), of: num(c.of) != null ? group(c.of) : '' }))
+    .map((c) => {
+      const champion = championName(c.champion);
+      // the square Data Dragon icon, resolved on the box; without one, the initial in a riso block
+      return { month: monthLabel(c.month), champion, games: group(c.games), of: num(c.of) != null ? group(c.of) : '', icon: safeArt(c.icon), initial: champion.charAt(0).toUpperCase() };
+    })
     .reverse();
   const bands = (Array.isArray(f.winByBand) ? f.winByBand : []).filter((x) => x && BAND_LABELS[x.band] && num(x.games))
     .map((x) => ({ label: BAND_LABELS[x.band], games: group(x.games), winRate: num(x.winRate), pct: Math.max(0, Math.min(100, num(x.winRate) ?? 0)) }));
@@ -427,18 +431,24 @@ function gamesStats(sec) {
   ].filter(Boolean);
 }
 
+/** The export's most-played claim, worded for the tile's ribbon; anything else is no ribbon. */
+const CLAIMS = /** @type {Record<string, string>} */ ({ 'most-by-far': 'most played, by far', most: 'most played' });
+
 /** /life/games from C6: the cover wall, League, recently played, the rarest achievements. @param {any} sec */
 function gamesView(sec) {
   const a = sec.achievements && typeof sec.achievements === 'object' ? sec.achievements : {};
   const list = (/** @type {any} */ l) => (Array.isArray(l) ? l.filter((x) => x && typeof x === 'object') : []);
   const wall = list(sec.wall).filter((t) => typeof t.name === 'string' && t.name.trim()).map((t, i) => ({
     name: t.name, art: safeArt(t.art), weight: Math.min(4, Math.max(1, Math.round(num(t.weight) ?? 1))), tilt: tiltOf(t.name),
-    quip: typeof t.quip === 'string' ? t.quip.trim() : '', league: t.source === 'league',
+    quip: typeof t.quip === 'string' ? t.quip.trim() : '', league: t.source === 'league', idle: t.idle === true,
+    // an idle game (left running) never carries a claim, only the reason it is small
+    badge: t.idle === true ? 'left running' : (CLAIMS[t.claim] || ''),
     // the typographic tile's ink (shown when there is no art, or it fails to load): cycled, so neighbours differ
     ink: i % 5,
   }));
   return {
     stats: gamesStats(sec),
+    idleNote: num(sec.allTime?.idle) ? `Idle games left running don't count: another ${group(/** @type {number} */ (num(sec.allTime.idle)))}h.` : '',
     clock: clockView(sec.clock),
     yearChart: yearChart(sec.yearWeeks, sec.year),
     fun: funView(sec.fun),
