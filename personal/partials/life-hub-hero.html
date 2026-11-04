@@ -1,0 +1,23 @@
+{{!-- One hero on a hub card (C8). Context: a heroView() from tasks/life-hub.mjs — exactly one of
+      image / spark / stat / route / bars is true. Every number here was computed by code. --}}
+{{#if image}}
+<figure class="hub-hero__frame">
+  <img class="hub-hero__img" src="{{src}}" alt="{{alt}}" loading="lazy" decoding="async" width="1200" height="800">
+</figure>
+{{/if}}
+{{#if spark}}{{> chart-line chart}}{{/if}}
+{{#if stat}}
+<p class="hub-hero__stat"><b class="hub-hero__value">{{value}}{{#if unit}}<small>{{unit}}</small>{{/if}}</b> <span class="hub-hero__what">{{label}}</span></p>
+{{/if}}
+{{#if route}}
+{{#if href}}<a class="hub-hero__route" href="{{href}}">{{else}}<div class="hub-hero__route">{{/if}}
+  <svg class="hub-hero__map" viewBox="0 0 {{w}} {{h}}" role="img" aria-label="The latest route, drawn from its published points">
+    <path class="hub-hero__line-shadow" d="{{d}}"/>
+    <path class="hub-hero__line" d="{{d}}"/>
+    <circle class="hub-hero__pin hub-hero__pin--start" cx="{{start.x}}" cy="{{start.y}}" r="6"/>
+    <circle class="hub-hero__pin hub-hero__pin--end" cx="{{end.x}}" cy="{{end.y}}" r="6"/>
+  </svg>
+  {{#if href}}<span class="hub-hero__route-cta">See the full map →</span>{{/if}}
+{{#if href}}</a>{{else}}</div>{{/if}}
+{{/if}}
+{{#if bars}}{{> life-split items=items label="" kind="hub"}}{{/if}}

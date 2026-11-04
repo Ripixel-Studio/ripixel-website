@@ -26,6 +26,33 @@
 
     {{> did-you-know items=(first lifeInsights) rotate=false}}
 
+    {{#if lifeHub.hero.length}}
+    <!-- The hero hub (C8): lifeHub.hero, one card per hub row in export order; size lg/md/sm
+         from the export, a slim row when there is no hero. The caption is James's line, as text. -->
+    <ol class="hub-grid">
+      {{#each lifeHub.hero}}
+      <li class="hub-card hub-card--{{size}}{{#if side}} hub-card--{{side}}{{/if}}{{#if hero}} hub-card--{{hero.type}}{{/if}} life-ink--{{name}}">
+        <header class="hub-card__head">
+          <h2 class="hub-card__name">{{#if href}}<a href="{{href}}">{{title}}</a>{{else}}{{title}}{{/if}}</h2>
+          {{#if headline}}
+          <p class="hub-card__stat"><span class="hub-card__num">{{headline.value}}{{#if headline.unit}}<small>{{headline.unit}}</small>{{/if}}</span> <span class="hub-card__label">{{headline.label}}</span></p>
+          {{else}}
+          <p class="hub-card__none">No {{name}} data yet.</p>
+          {{/if}}
+        </header>
+        {{#if hero}}{{#unless (eq size "sm")}}<div class="hub-hero hub-hero--{{hero.type}}">{{> life-hub-hero hero}}</div>{{/unless}}{{/if}}
+        {{#if caption}}<p class="hub-card__caption">{{caption}}</p>{{/if}}
+        <footer class="hub-card__foot">
+          {{#if staleLabel}}<p class="life-stale">{{staleLabel}}</p>{{/if}}
+          {{#if (eq name "fitness")}}{{#if @root.fitnessLife.roundup}}
+          <p class="hub-card__note">Latest roundup <a href="{{@root.fitnessLife.roundup.href}}">{{@root.fitnessLife.roundup.periodLabel}}</a>, or <a href="{{@root.fitnessLife.roundupsHref}}">every roundup</a></p>
+          {{/if}}{{/if}}
+          {{#if href}}<a class="hub-card__more" href="{{href}}" aria-label="More on {{title}}">more <span aria-hidden="true">→</span></a>{{/if}}
+        </footer>
+      </li>
+      {{/each}}
+    </ol>
+    {{else}}
     <ol class="life-index">
       {{#each lifeHub.cards}}
       <li class="life-index__entry life-ink--{{name}}{{#if empty}} life-index__entry--empty{{/if}}">
@@ -50,6 +77,7 @@
       </li>
       {{/each}}
     </ol>
+    {{/if}}
 
     {{#if lifeHub.outings.length}}
     <section class="life-hub__outings" aria-labelledby="life-outings-title">
