@@ -496,7 +496,9 @@ test('games stats say what each number covers', () => {
   const by = Object.fromEntries(g.stats.map((r) => [r.label, r]));
   assert.equal(by['League this year'].value, '148');
   assert.match(by['League this year'].sub, /231 games/);
-  assert.match(by['League this year'].sub, /Steam since 20 Oct 2026: 9\.5h/);
+  assert.equal(by['League this year'].sub, '231 games · + 10h Steam since 20 Oct');
+  const early = buildSection('games', { ...fixture.sections.games, year: { ...fixture.sections.games.year, steamSinceTracking: 0.4 } }, now);
+  assert.equal(early.stats[0].sub, '231 games', 'under 1h of tracked Steam is not shown');
   assert.equal(by['All time'].sub, 'Steam lifetime 1,228h + League 612h since Mar 2019');
   assert.equal(by['Steam, last 2 weeks'].value, '6.5');
   assert.ok(!('This year' in by), 'no blended year total');

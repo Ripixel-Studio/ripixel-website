@@ -409,7 +409,10 @@ function gamesStats(sec) {
     ...row('All time', group(/** @type {number} */ (num(sec.hoursTotal))), 'h'),
     sub: at ? `Steam lifetime ${group(num(at.steam) ?? 0)}h + League ${group(num(at.league) ?? 0)}h${lgSince ? ` since ${lgSince}` : ''}` : '',
   } : false;
-  const steamYear = num(y.steamSinceTracking) != null && dayLabel(y.steamSince) ? `Steam since ${dayLabel(y.steamSince)}: ${hoursText(y.steamSinceTracking)}` : '';
+  // Steam's tracked hours join the line only once they amount to something (a 0h reads as a glitch).
+  const tracked = num(y.steamSinceTracking);
+  const since = dayLabel(y.steamSince).replace(/ \d{4}$/, '');
+  const steamYear = tracked != null && tracked >= 1 && since ? `+ ${group(tracked)}h Steam since ${since}` : '';
   return [
     num(y.league) != null ? { ...row('League this year', group(y.league), 'h'), sub: [num(y.leagueGames) != null ? `${group(y.leagueGames)} games` : '', steamYear].filter(Boolean).join(' · ') } : false,
     num(sec.steam2Weeks) != null ? { ...row('Steam, last 2 weeks', hours(sec.steam2Weeks), 'h'), sub: "Steam's own two-week figure" } : false,
