@@ -397,7 +397,7 @@ test('code view splits', () => {
   const [tool, ledger] = c.active;
   assert.deepEqual(tool, {
     name: 'sample-tool', description: 'A small invented command-line helper that tidies folders of sample files.',
-    years: '2025–now', lastCommit: 'Oct 2026', commits: '1,212', languages: ['Python', 'Shell'],
+    years: '2025–now', lastCommit: 'Oct 2026', commits: '1,212', commitsUnit: 'commits', languages: ['Python', 'Shell'],
     url: 'https://github.com/Ripixel-Studio/sample-tool', started: '2025-08-02',
   });
   // the private one: no link, and no placeholder description
@@ -408,6 +408,9 @@ test('code view splits', () => {
   assert.equal(c.retired[1].years, '2016–2019');
   assert.equal(c.retired[1].lastCommit, 'Nov 2019');
   assert.equal(c.retired[1].url, 'https://github.com/ripixel/old-orbit');
+  const one = structuredClone(fixture.sections.code);
+  one.projects[0].commits = 1;
+  assert.equal(buildSection('code', one, now).active[0].commitsUnit, 'commit');
   assert.ok(!('projects' in c) && !('languagesByYear' in c));
 });
 

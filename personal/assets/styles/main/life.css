@@ -450,6 +450,9 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
 @media (max-width: 600px) {
   .chart--stack .chart__xl { display: none; }
   .chart--stack .chart__xs { display: inline; }
+  /* narrow: the legend names every series, so the end labels give their room to the columns */
+  .chart--stack .chart__ends { display: none; }
+  .chart--stack .chart__plot { grid-template-columns: 4.5ch minmax(0, 1fr); }
 }
 .chart__ends {
   grid-area: 1 / 3;

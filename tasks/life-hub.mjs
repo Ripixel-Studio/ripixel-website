@@ -400,6 +400,7 @@ function codeView(sec) {
           years: from && to && from !== to ? `${from}–${to}` : from,
           lastCommit: monthLabel(String(p.lastCommit || '')),
           commits: num(p.commits) != null ? group(p.commits) : '',
+          commitsUnit: p.commits === 1 ? 'commit' : 'commits',
           languages: (Array.isArray(p.languages) ? p.languages : []).filter((l) => typeof l === 'string' && l),
           url: typeof p.url === 'string' && REPO_URL.test(p.url) ? p.url : '',
           started,

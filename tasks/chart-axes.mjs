@@ -298,7 +298,7 @@ export function stackedShare(byYear, opts = { top: 5 }) {
     if (sl.kind === 'year') { centres.set(/** @type {number} */ (sl.i), centre); continue; }
     const label = sl.from === sl.to ? String(sl.from) : `${sl.from}–${sl.to}`;
     const w = pc(unit * sl.units * 0.62);
-    gaps.push({ label, short: sl.from === sl.to ? `’${String(sl.from).slice(2)}` : '…', title: `No code in ${label}`, pct: centre, left: pc(centre - w / 2), width: w });
+    gaps.push({ label, short: '', title: `No code in ${label}`, pct: centre, left: pc(centre - w / 2), width: w });
   }
 
   const years = rows.map(([label, entries], i) => {
