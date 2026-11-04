@@ -160,6 +160,12 @@ describe('built /work page', () => {
     assert.ok(!bare.split('</li>')[0].match(/__year|__detail|<a /));
   });
 
+  test('highlights sit after the last role card', () => {
+    const lastRole = html.lastIndexOf('<article class="role-card ');
+    const hl = html.indexOf('class="work-highlights"');
+    assert.ok(lastRole > 0 && hl > lastRole, 'highlights follow the roles');
+  });
+
   test('roster from evidence: a lapsed tech renders ☆', () => {
     assert.match(html, /☆/);
     assert.match(html, /★/);
@@ -210,6 +216,15 @@ describe('/work with salary rows', () => {
     assert.ok(html.includes('<td>£88,700</td>'));
     assert.ok(html.includes('+£12,350 (+13.9%)'));
     assert.ok(html.includes('the move into this job'));
+  });
+
+  test('order: roles, then career highlights, then the pay table', async () => {
+    const html = await fs.readFile(path.join(out, 'work.html'), 'utf8');
+    const lastRole = html.lastIndexOf('<article class="role-card ');
+    const hl = html.indexOf('class="work-highlights"');
+    const pay = html.indexOf('class="work-salary"');
+    assert.ok(lastRole > 0 && hl > lastRole, 'highlights come after the last role card');
+    assert.ok(pay > hl, 'highlights come before the pay table');
   });
 });
 
