@@ -110,7 +110,7 @@ function filled(v) {
 /**
  * A section has data when its headline OR anything else beyond the bookkeeping
  * keys (lists, totals, single figures) is non-empty. A null headline with a
- * populated list (games: mostPlayed, serious, backlog...) is still data.
+ * populated list (games: wall, recent, backlog...) is still data.
  * @param {any} sec
  */
 function hasData(sec) {
@@ -265,6 +265,103 @@ function bodyView(/** @type {any} */ sec) {
   return { measures, sleep: sleep || null, food: food || null, movement: movement || null, measurements: measurementsView(sec.measurements) };
 }
 
+// ─── games (C6) ───
+
+/** Art is hotlinked from Steam's CDN or Riot's Data Dragon only, and only as a plain URL. */
+const ART = /^https:\/\/(shared\.akamai\.steamstatic\.com|ddragon\.leagueoflegends\.com)\/[A-Za-z0-9._~%/+=&?-]*$/;
+/** @param {unknown} u */
+export const safeArt = (u) => (typeof u === 'string' && ART.test(u) ? u : '');
+
+/** FNV-1a, 32-bit unsigned: a stable number per game name. @param {string} s */
+function hash(s) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 0x01000193);
+  return h >>> 0;
+}
+
+/** A tile's tilt in degrees, −2.4 to 2.4 in steps of 0.8, the same on every build. @param {string} name */
+export const tiltOf = (name) => Number((((hash(name) % 7) - 3) * 0.8).toFixed(1));
+
+const APEX = new Set(['MASTER', 'GRANDMASTER', 'CHALLENGER']);
+const titleCase = (/** @type {string} */ t) => (t ? t[0].toUpperCase() + t.slice(1).toLowerCase() : '');
+/** 412345 → `412k`; 1.2M; under 1,000 as is. @param {number} n */
+const compact = (n) => (n >= 1e6 ? `${one(n / 1e6)}M` : n >= 1e3 ? `${Math.round(n / 1e3)}k` : group(n));
+/** Hours: one decimal under 10, whole above. @param {number} h */
+const hours = (h) => (h < 10 ? one(h) : group(h));
+
+/** Data Dragon ids whose display name is not just the id split at its capitals. */
+const CHAMPION_NAMES = /** @type {Record<string, string>} */ ({
+  MonkeyKing: 'Wukong', Chogath: "Cho'Gath", Kaisa: "Kai'Sa", Khazix: "Kha'Zix", KogMaw: "Kog'Maw", Velkoz: "Vel'Koz",
+  Belveth: "Bel'Veth", KSante: "K'Sante", RekSai: "Rek'Sai", DrMundo: 'Dr. Mundo', Nunu: 'Nunu & Willump',
+  Renata: 'Renata Glasc', Leblanc: 'LeBlanc', FiddleSticks: 'Fiddlesticks',
+});
+/** A champion's display name: the export's name as is, or an id ("MissFortune") made readable ("Miss Fortune"). @param {unknown} c */
+export function championName(c) {
+  const s = String(c ?? '').trim();
+  if (!s || /\s/.test(s)) return s;
+  return CHAMPION_NAMES[s] || s.replace(/([a-z])([A-Z])/g, '$1 $2');
+}
+
+/** `Gold II · 54 LP`; apex tiers have no division; '' unranked. @param {any} r */
+function rankLabel(r) {
+  if (!r || typeof r !== 'object' || typeof r.tier !== 'string' || !r.tier) return '';
+  const tier = r.tier.toUpperCase();
+  const div = !APEX.has(tier) && typeof r.division === 'string' && r.division ? ` ${r.division}` : '';
+  const lp = num(r.lp) != null ? ` · ${group(r.lp)} LP` : '';
+  return `${titleCase(tier)}${div}${lp}`;
+}
+
+/** The League block, or null without one. Champions only: never a player. @param {any} lg */
+function leagueView(lg) {
+  if (!lg || typeof lg !== 'object') return null;
+  const r = lg.rank && typeof lg.rank === 'object' ? lg.rank : null;
+  const w = num(r?.wins), l = num(r?.losses);
+  const rec = lg.recent && typeof lg.recent === 'object' ? lg.recent : {};
+  const life = lg.lifetime && typeof lg.lifetime === 'object' ? lg.lifetime : {};
+  return {
+    rankLabel: rankLabel(r),
+    queueLabel: r ? (r.queue === 'flex' ? 'Ranked flex' : 'Ranked solo/duo') : '',
+    record: w != null && l != null ? `${group(w)}W ${group(l)}L` : '',
+    seasonWinRate: w != null && l != null && w + l > 0 ? Math.round((w / (w + l)) * 100) : null,
+    mains: (Array.isArray(lg.mains) ? lg.mains : []).filter((m) => m && m.champion).slice(0, 5).map((m) => ({
+      champion: championName(m.champion), level: num(m.level), points: num(m.points) != null ? compact(m.points) : '', art: safeArt(m.splash),
+    })),
+    recent: num(rec.games) ? {
+      games: num(rec.games), winRate: num(rec.winRate), kda: num(rec.kda) != null ? rec.kda.toFixed(2) : '',
+      pool: (Array.isArray(rec.pool) ? rec.pool : []).filter((p) => p && p.champion)
+        .map((p) => ({ champion: championName(p.champion), games: num(p.games) ?? 0, winRate: num(p.winRate) })),
+    } : null,
+    lifetime: num(life.games) ? { games: group(life.games), hours: num(life.hours) != null ? group(life.hours) : '', sinceLabel: monthLabel(life.since) } : null,
+  };
+}
+
+/** /life/games from C6: the cover wall, League, recently played, the rarest achievements. @param {any} sec */
+function gamesView(sec) {
+  const a = sec.achievements && typeof sec.achievements === 'object' ? sec.achievements : {};
+  const list = (/** @type {any} */ l) => (Array.isArray(l) ? l.filter((x) => x && typeof x === 'object') : []);
+  const wall = list(sec.wall).filter((t) => typeof t.name === 'string' && t.name.trim()).map((t, i) => ({
+    name: t.name, art: safeArt(t.art), weight: Math.min(4, Math.max(1, Math.round(num(t.weight) ?? 1))), tilt: tiltOf(t.name),
+    quip: typeof t.quip === 'string' ? t.quip.trim() : '', league: t.source === 'league',
+    // the typographic tile's ink (shown when there is no art, or it fails to load): cycled, so neighbours differ
+    ink: i % 5,
+  }));
+  return {
+    stats: [
+      stat('This year', sec.hoursYear, group, 'h'),
+      stat('All time', sec.hoursTotal, group, 'h'),
+      // 0 means not counted yet (no multiplayer flags collected), not "never online"
+      num(sec.multiplayerHours) ? row('Multiplayer', group(sec.multiplayerHours), 'h') : false,
+      stat('Backlog', sec.backlog, group, 'games'),
+    ].filter(Boolean),
+    wall,
+    league: leagueView(sec.league),
+    recent: list(sec.recent).filter((g) => g.name).map((g) => ({ name: String(g.name), hours: num(g.hours) != null ? hours(g.hours) : '', art: safeArt(g.art) })),
+    achieved: num(a.unlocked) != null && num(a.total) ? `${group(a.unlocked)} of ${group(a.total)}` : '',
+    rarest: list(a.rarest).filter((r) => r.name && r.game && num(r.pct) != null).map((r) => ({ game: String(r.game), name: String(r.name), pct: one(r.pct) })),
+    completion: list(a.completion).filter((c) => c.game && num(c.pct) != null).map((c) => ({ game: String(c.game), pct: Math.max(0, Math.min(100, Math.round(c.pct))) })),
+  };
+}
+
 /** @param {any} sec @param {any[]} outings notables of the matching outing kind */
 function mediaView(sec, outings) {
   const yearTotals = sec.totals?.year || {};
@@ -293,20 +390,8 @@ export function buildSection(name, sec, now = new Date(), outingNotables = []) {
   switch (name) {
     case 'body':
       return { ...view, ...bodyView(sec) };
-    case 'games': {
-      const a = sec.achievements || {};
-      const names = (/** @type {any} */ l) => (Array.isArray(l) ? l : typeof l === 'string' && l ? [l] : []).map((g) => (typeof g === 'string' ? { name: g, hours: null } : { name: String(g?.name || ''), hours: num(g?.hours) })).filter((g) => g.name);
-      return {
-        ...view,
-        stats: [
-          num(sec.hoursYear) != null && row('This year', group(sec.hoursYear), 'h'),
-          num(sec.hoursTotal) != null && row('All time', group(sec.hoursTotal), 'h'),
-          num(a.unlocked) != null && num(a.total) != null && row('Achievements', `${group(a.unlocked)} / ${group(a.total)}`),
-          num(sec.backlog) != null && row('Backlog', group(sec.backlog), 'games'),
-        ].filter(Boolean),
-        mostPlayed: names(sec.mostPlayed), recent: names(sec.recent), serious: names(sec.serious), silly: sameList(names(sec.silly), names(sec.serious)) ? [] : names(sec.silly),
-      };
-    }
+    case 'games':
+      return { ...view, ...gamesView(sec) };
     case 'code': {
       const byYear = sec.languagesByYear || {};
       return {
@@ -378,7 +463,9 @@ export function hubNote(name, v) {
   const latest = (/** @type {any} */ n) => (n && n.title ? { label: 'Latest', value: n.by ? `${n.title}, ${n.by}` : n.title, href: '' } : null);
   switch (name) {
     case 'body': return stat('Sleep, last 30 nights') || stat('Body fat') || stat('Resting heart rate');
-    case 'games': return v.recent?.[0] ? { label: 'Recently', value: v.recent[0].name, href: '' } : null;
+    case 'games':
+      if (v.league?.rankLabel) return { label: 'League', value: v.league.rankLabel, href: '' };
+      return v.recent?.[0] ? { label: 'Recently', value: v.recent[0].name, href: '' } : null;
     case 'code': {
       const p = [...(v.projects || [])].sort((a, b) => b.started.localeCompare(a.started))[0];
       return p ? { label: 'Newest project', value: p.name, href: p.url || '' } : null;
@@ -428,12 +515,9 @@ export function buildHub(lifeIndex, fitnessLife, now = new Date()) {
   };
 }
 
-/** Same game names, ignoring case. @param {{name: string}[]} a @param {{name: string}[]} b */
-const sameList = (a, b) => a.length > 0 && a.length === b.length && a.every((x, i) => x.name.toLowerCase() === b[i].name.toLowerCase());
-
 const BIT_LABELS = {
   'personal.height': 'Height', 'personal.likes': 'Likes', 'personal.boardgames': 'Board games', 'personal.desk': 'Desk',
-  'body.weight_kg': 'Weight', 'games.serious': 'Serious games', 'games.silly': 'Silly games',
+  'body.weight_kg': 'Weight',
 };
 
 /** @param {any} f */
@@ -461,7 +545,6 @@ export function personalBits(facts) {
       value = listText(f.value) + (f.unit && !Array.isArray(f.value) ? ` ${f.unit}` : '');
     }
     if (!value) continue;
-    if (key === 'games.silly' && out.some((b) => b.key === 'games.serious' && b.value.toLowerCase() === value.toLowerCase())) continue;
     out.push({ key, label, value, tone: String(f.tone || 'neutral') });
   }
   return out;
