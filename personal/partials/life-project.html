@@ -1,9 +1,28 @@
-{{!-- One project on /life/code (R2e.6). Context: an active[] row from life-hub.mjs codeView.
+{{!-- One project card on /life/code. Context: an active[] row from life-hub.mjs codeView; `card` is
+      tasks/code-view.mjs projectCards (strip, bar, span), `timeline` the shared axis.
       A public repo links to GitHub; a private one is its name only. --}}
-<li class="life-project">
-  <span class="life-notable__title">{{#if url}}<a href="{{url}}">{{name}}</a>{{else}}{{name}}{{/if}}</span>
-  <span class="life-notable__when">{{years}}</span>
-  {{#if description}}<p class="life-project__desc">{{description}}</p>{{/if}}
-  <span class="life-project__meta">{{#if commits}}{{commits}} {{commitsUnit}}{{/if}}{{#if lastCommit}}{{#if commits}} · {{/if}}last commit {{lastCommit}}{{/if}}</span>
-  {{#if languages.length}}<span class="life-project__langs">{{#each languages}}<span class="life-chip">{{this}}</span>{{/each}}</span>{{/if}}
+<li class="code-card{{#if card.live}} code-card--live{{/if}}">
+  {{#if card.strip.length}}
+  <div class="code-card__strip" aria-hidden="true">{{#each card.strip}}<span class="code-slot-{{slot}}" style="width: {{pct}}%" title="{{label}}"></span>{{/each}}</div>
+  {{else}}<div class="code-card__strip code-card__strip--none" aria-hidden="true"></div>{{/if}}
+  <div class="code-card__body">
+    <div class="code-card__head">
+      <h3 class="code-card__name">{{#if url}}<a href="{{url}}">{{name}}</a>{{else}}{{name}}{{/if}}</h3>
+      {{#if card.live}}<span class="code-card__stamp">active</span>{{/if}}
+    </div>
+    {{#if description}}<p class="life-project__desc">{{description}}</p>{{/if}}
+    <div class="code-card__row">
+      <span class="code-card__k">commits</span>
+      <span class="code-card__bar" aria-hidden="true"><span style="width: {{card.bar}}%"></span></span>
+      <span class="code-card__v">{{#if card.commits}}{{card.commits}}{{else}}—{{/if}}</span>
+    </div>
+    <div class="code-card__row">
+      <span class="code-card__k">active</span>
+      <span class="code-card__track" aria-hidden="true">{{#each timeline.axis.ticks}}<i style="left: {{left}}%"></i>{{/each}}<b class="code-card__now" style="left: {{timeline.nowPct}}%"></b><span class="code-card__span" style="left: {{card.span.left}}%; width: {{card.span.width}}%"></span></span>
+      <span class="code-card__v">{{card.when}}</span>
+    </div>
+    {{#if card.strip.length}}
+    <ul class="code-card__langs">{{#each card.strip}}<li><i class="code-slot-{{slot}}" aria-hidden="true"></i>{{label}}</li>{{/each}}</ul>
+    {{/if}}
+  </div>
 </li>

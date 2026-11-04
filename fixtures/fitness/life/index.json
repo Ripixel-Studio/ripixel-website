@@ -237,26 +237,81 @@
           {"champion": "Placeholdra", "level": 4, "points": 40118, "splash": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Placeholdra_0.jpg", "loading": "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Placeholdra_0.jpg"}],
         "recent": {"games": 20, "winRate": 55, "kda": 3.12, "pool": [{"champion": "Examplor", "games": 8, "winRate": 63}, {"champion": "Fixtura", "games": 5, "winRate": 40}, {"champion": "Mockwyn", "games": 4, "winRate": 50}, {"champion": "Stubbard", "games": 2, "winRate": 100}, {"champion": "Placeholdra", "games": 1, "winRate": 0}]},
         "lifetime": {"games": 1284, "hours": 612, "since": "2019-03"}}},
-    "code": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value": 154, "unit": "", "label": "commits this year"},
+    "code": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value": 671, "unit": "", "label": "commits this year"},
       "projects": [
         {"key": "a1c0de0001", "name": "sample-tool", "description": "A small invented command-line helper that tidies folders of sample files.", "descriptionBy": "github",
-         "status": "active", "fromYear": 2025, "toYear": null, "started": "2025-08-02", "lastCommit": "2026-10", "commits": 1212, "languages": ["Python", "Shell"],
+         "status": "active", "fromYear": 2025, "toYear": null, "started": "2025-08-02", "lastCommit": "2026-10", "commits": 1212, "languages": ["Python", "Shell"], "languageShare": [78, 22],
          "url": "https://github.com/Ripixel-Studio/sample-tool"},
         {"key": "a1c0de0002", "name": "quiet-ledger", "description": null, "descriptionBy": null,
-         "status": "active", "fromYear": 2024, "toYear": null, "started": "2024-02-11", "lastCommit": "2026-09", "commits": 340, "languages": ["TypeScript", "CSS"],
+         "status": "active", "fromYear": 2024, "toYear": null, "started": "2024-02-11", "lastCommit": "2026-09", "commits": 340, "languages": ["TypeScript", "CSS"], "languageShare": [86, 14],
          "url": null},
+        {"key": "a1c0de0005", "name": "tide-tables", "description": "A made-up dashboard that charts imaginary tide times for a pretend harbour, mostly to try out a new chart library.", "descriptionBy": "ai",
+         "status": "active", "fromYear": 2023, "toYear": null, "started": "2023-04-18", "lastCommit": "2026-11", "commits": 642, "languages": ["TypeScript", "Go", "CSS", "HTML"], "languageShare": [58, 27, 9, 4],
+         "url": "https://github.com/ripixel/tide-tables"},
+        {"key": "a1c0de0006", "name": "pixel-kiln", "description": "Invented sprite baker: turns folders of drawings into sprite sheets.", "descriptionBy": "github",
+         "status": "active", "fromYear": 2021, "toYear": null, "started": "2021-09-30", "lastCommit": "2026-08", "commits": 187, "languages": ["Rust", "Shell"], "languageShare": [91, 9],
+         "url": "https://github.com/Ripixel-Studio/pixel-kiln"},
+        {"key": "a1c0de0007", "name": "spare-parts", "description": null, "descriptionBy": null,
+         "status": "active", "fromYear": 2024, "toYear": null, "started": "2024-06-12", "lastCommit": "2026-07", "commits": 23, "languages": ["Python", "Dockerfile", "Shell"], "languageShare": [80, 12, 8],
+         "url": null},
+        {"key": "a1c0de0008", "name": "night-bus", "description": "A fixture timetable scraper for a fictional bus route. Runs on a timer and sends a nudge.", "descriptionBy": "ai",
+         "status": "active", "fromYear": 2024, "toYear": null, "started": "2024-11-02", "lastCommit": "2026-06", "commits": 94, "languages": ["JavaScript", "HTML", "CSS"], "languageShare": [70, 20, 10],
+         "url": "https://github.com/ripixel/night-bus"},
         {"key": "a1c0de0003", "name": "paper-lantern", "description": "An invented static gallery generator, built to learn templating.", "descriptionBy": "ai",
-         "status": "retired", "fromYear": 2019, "toYear": 2023, "started": "2019-04-20", "lastCommit": "2023-06", "commits": 480, "languages": ["JavaScript", "HTML"],
+         "status": "retired", "fromYear": 2019, "toYear": 2023, "started": "2019-04-20", "lastCommit": "2023-06", "commits": 480, "languages": ["JavaScript", "HTML"], "languageShare": [64, 36],
          "url": "https://github.com/Ripixel-Studio/paper-lantern"},
         {"key": "a1c0de0004", "name": "old-orbit", "description": null, "descriptionBy": null,
-         "status": "retired", "fromYear": 2016, "toYear": 2019, "started": "2016-01-09", "lastCommit": "2019-11", "commits": 95, "languages": ["Java"],
+         "status": "retired", "fromYear": 2016, "toYear": 2019, "started": "2016-01-09", "lastCommit": "2019-11", "commits": 95, "languages": ["Java"], "languageShare": [100],
          "url": "https://github.com/ripixel/old-orbit"}],
       "languagesByYear": {"2022": {"JavaScript": 50.0, "HTML": 20.0, "CSS": 15.0, "Java": 10.0, "Shell": 5.0},
                           "2023": {"JavaScript": 45.0, "TypeScript": 25.0, "HTML": 15.0, "CSS": 10.0, "Python": 5.0},
                           "2024": {"TypeScript": 55.0, "CSS": 15.0, "JavaScript": 15.0, "Go": 10.0, "Shell": 5.0},
                           "2025": {"TypeScript": 40.0, "Python": 35.0, "Go": 15.0, "CSS": 5.0, "Shell": 5.0},
                           "2026": {"Python": 39.5, "TypeScript": 35.0, "Go": 15.0, "Rust": 6.5, "Shell": 4.0}},
-      "commitsByMonth": [{"month": "2026-09", "n": 70}, {"month": "2026-10", "n": 84}],
+      "commitsByMonth": [{"month": "2025-06", "n": 3}, {"month": "2025-07", "n": 41}, {"month": "2025-08", "n": 12}, {"month": "2025-09", "n": 26},
+                         {"month": "2025-11", "n": 89}, {"month": "2025-12", "n": 144}, {"month": "2026-01", "n": 133}, {"month": "2026-02", "n": 33},
+                         {"month": "2026-03", "n": 26}, {"month": "2026-04", "n": 11}, {"month": "2026-05", "n": 108}, {"month": "2026-06", "n": 77},
+                         {"month": "2026-07", "n": 70}, {"month": "2026-08", "n": 25}, {"month": "2026-09", "n": 10}, {"month": "2026-10", "n": 134},
+                         {"month": "2026-11", "n": 44}],
+      "commitsByDay": [{"day": "2025-10-28", "n": 1}, {"day": "2025-10-30", "n": 4}, {"day": "2025-10-31", "n": 1}, {"day": "2025-11-01", "n": 1}, {"day": "2025-11-02", "n": 1},
+                       {"day": "2025-11-03", "n": 3}, {"day": "2025-11-05", "n": 1}, {"day": "2025-11-08", "n": 3}, {"day": "2025-11-10", "n": 12}, {"day": "2025-11-11", "n": 1},
+                       {"day": "2025-11-12", "n": 2}, {"day": "2025-11-14", "n": 5}, {"day": "2025-11-15", "n": 2}, {"day": "2025-11-16", "n": 1}, {"day": "2025-11-17", "n": 1},
+                       {"day": "2025-11-19", "n": 2}, {"day": "2025-11-20", "n": 3}, {"day": "2025-11-21", "n": 9}, {"day": "2025-11-22", "n": 1}, {"day": "2025-11-23", "n": 4},
+                       {"day": "2025-11-26", "n": 24}, {"day": "2025-11-27", "n": 3}, {"day": "2025-11-29", "n": 4}, {"day": "2025-11-30", "n": 6}, {"day": "2025-12-02", "n": 13},
+                       {"day": "2025-12-03", "n": 7}, {"day": "2025-12-04", "n": 5}, {"day": "2025-12-05", "n": 11}, {"day": "2025-12-07", "n": 7}, {"day": "2025-12-08", "n": 7},
+                       {"day": "2025-12-12", "n": 3}, {"day": "2025-12-13", "n": 1}, {"day": "2025-12-14", "n": 1}, {"day": "2025-12-15", "n": 1}, {"day": "2025-12-17", "n": 1},
+                       {"day": "2025-12-18", "n": 13}, {"day": "2025-12-19", "n": 3}, {"day": "2025-12-20", "n": 13}, {"day": "2025-12-21", "n": 12}, {"day": "2025-12-22", "n": 3},
+                       {"day": "2025-12-23", "n": 14}, {"day": "2025-12-25", "n": 1}, {"day": "2025-12-26", "n": 1}, {"day": "2025-12-27", "n": 5}, {"day": "2025-12-28", "n": 1},
+                       {"day": "2025-12-29", "n": 2}, {"day": "2025-12-30", "n": 19}, {"day": "2026-01-01", "n": 6}, {"day": "2026-01-02", "n": 1}, {"day": "2026-01-03", "n": 10},
+                       {"day": "2026-01-04", "n": 10}, {"day": "2026-01-05", "n": 3}, {"day": "2026-01-06", "n": 6}, {"day": "2026-01-07", "n": 1}, {"day": "2026-01-08", "n": 1},
+                       {"day": "2026-01-09", "n": 1}, {"day": "2026-01-10", "n": 1}, {"day": "2026-01-11", "n": 3}, {"day": "2026-01-12", "n": 14}, {"day": "2026-01-13", "n": 1},
+                       {"day": "2026-01-14", "n": 2}, {"day": "2026-01-15", "n": 1}, {"day": "2026-01-17", "n": 4}, {"day": "2026-01-18", "n": 1}, {"day": "2026-01-19", "n": 2},
+                       {"day": "2026-01-20", "n": 12}, {"day": "2026-01-21", "n": 1}, {"day": "2026-01-23", "n": 1}, {"day": "2026-01-24", "n": 1}, {"day": "2026-01-25", "n": 26},
+                       {"day": "2026-01-28", "n": 3}, {"day": "2026-01-29", "n": 10}, {"day": "2026-01-30", "n": 10}, {"day": "2026-01-31", "n": 1}, {"day": "2026-02-07", "n": 3},
+                       {"day": "2026-02-08", "n": 1}, {"day": "2026-02-09", "n": 1}, {"day": "2026-02-10", "n": 5}, {"day": "2026-02-16", "n": 1}, {"day": "2026-02-17", "n": 1},
+                       {"day": "2026-02-18", "n": 4}, {"day": "2026-02-21", "n": 5}, {"day": "2026-02-23", "n": 5}, {"day": "2026-02-28", "n": 7}, {"day": "2026-03-08", "n": 1},
+                       {"day": "2026-03-09", "n": 8}, {"day": "2026-03-11", "n": 6}, {"day": "2026-03-16", "n": 1}, {"day": "2026-03-24", "n": 1}, {"day": "2026-03-28", "n": 1},
+                       {"day": "2026-03-29", "n": 8}, {"day": "2026-04-08", "n": 1}, {"day": "2026-04-10", "n": 5}, {"day": "2026-04-11", "n": 2}, {"day": "2026-04-18", "n": 2},
+                       {"day": "2026-04-19", "n": 1}, {"day": "2026-05-01", "n": 4}, {"day": "2026-05-03", "n": 12}, {"day": "2026-05-05", "n": 5}, {"day": "2026-05-08", "n": 1},
+                       {"day": "2026-05-09", "n": 1}, {"day": "2026-05-10", "n": 1}, {"day": "2026-05-14", "n": 7}, {"day": "2026-05-16", "n": 13}, {"day": "2026-05-18", "n": 18},
+                       {"day": "2026-05-19", "n": 4}, {"day": "2026-05-22", "n": 3}, {"day": "2026-05-23", "n": 2}, {"day": "2026-05-24", "n": 2}, {"day": "2026-05-26", "n": 5},
+                       {"day": "2026-05-27", "n": 1}, {"day": "2026-05-28", "n": 6}, {"day": "2026-05-29", "n": 1}, {"day": "2026-05-31", "n": 22}, {"day": "2026-06-01", "n": 1},
+                       {"day": "2026-06-02", "n": 8}, {"day": "2026-06-03", "n": 1}, {"day": "2026-06-04", "n": 13}, {"day": "2026-06-06", "n": 1}, {"day": "2026-06-10", "n": 1},
+                       {"day": "2026-06-12", "n": 1}, {"day": "2026-06-14", "n": 9}, {"day": "2026-06-15", "n": 10}, {"day": "2026-06-16", "n": 11}, {"day": "2026-06-17", "n": 2},
+                       {"day": "2026-06-20", "n": 1}, {"day": "2026-06-21", "n": 1}, {"day": "2026-06-22", "n": 1}, {"day": "2026-06-23", "n": 1}, {"day": "2026-06-24", "n": 2},
+                       {"day": "2026-06-26", "n": 3}, {"day": "2026-06-27", "n": 2}, {"day": "2026-06-28", "n": 1}, {"day": "2026-06-29", "n": 7}, {"day": "2026-07-01", "n": 3},
+                       {"day": "2026-07-03", "n": 9}, {"day": "2026-07-04", "n": 3}, {"day": "2026-07-06", "n": 3}, {"day": "2026-07-09", "n": 9}, {"day": "2026-07-11", "n": 2},
+                       {"day": "2026-07-12", "n": 1}, {"day": "2026-07-13", "n": 1}, {"day": "2026-07-15", "n": 1}, {"day": "2026-07-16", "n": 9}, {"day": "2026-07-18", "n": 1},
+                       {"day": "2026-07-19", "n": 1}, {"day": "2026-07-20", "n": 1}, {"day": "2026-07-21", "n": 1}, {"day": "2026-07-25", "n": 17}, {"day": "2026-07-26", "n": 2},
+                       {"day": "2026-07-27", "n": 2}, {"day": "2026-07-30", "n": 3}, {"day": "2026-07-31", "n": 1}, {"day": "2026-08-01", "n": 1}, {"day": "2026-08-02", "n": 1},
+                       {"day": "2026-08-04", "n": 3}, {"day": "2026-08-13", "n": 4}, {"day": "2026-08-15", "n": 6}, {"day": "2026-08-20", "n": 2}, {"day": "2026-08-29", "n": 1},
+                       {"day": "2026-08-30", "n": 1}, {"day": "2026-08-31", "n": 6}, {"day": "2026-09-06", "n": 4}, {"day": "2026-09-11", "n": 3}, {"day": "2026-09-13", "n": 1},
+                       {"day": "2026-09-25", "n": 1}, {"day": "2026-09-30", "n": 1}, {"day": "2026-10-01", "n": 6}, {"day": "2026-10-03", "n": 1}, {"day": "2026-10-04", "n": 3},
+                       {"day": "2026-10-05", "n": 1}, {"day": "2026-10-07", "n": 21}, {"day": "2026-10-09", "n": 3}, {"day": "2026-10-12", "n": 1}, {"day": "2026-10-13", "n": 16},
+                       {"day": "2026-10-14", "n": 4}, {"day": "2026-10-15", "n": 4}, {"day": "2026-10-17", "n": 9}, {"day": "2026-10-18", "n": 12}, {"day": "2026-10-20", "n": 12},
+                       {"day": "2026-10-21", "n": 1}, {"day": "2026-10-22", "n": 3}, {"day": "2026-10-23", "n": 2}, {"day": "2026-10-24", "n": 2}, {"day": "2026-10-25", "n": 10},
+                       {"day": "2026-10-26", "n": 7}, {"day": "2026-10-28", "n": 14}, {"day": "2026-10-31", "n": 2}, {"day": "2026-11-01", "n": 41}, {"day": "2026-11-02", "n": 2},
+                       {"day": "2026-11-03", "n": 1}],
       "languagesNow": ["Python", "TypeScript", "Go"]},
     "watching": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value": 42, "unit": "", "label": "films watched this year"},
       "notable": [{"key": "a1b2c3d4e5", "kind": "film", "title": "The Invented Harbour", "by": null, "season": null, "year": 2024, "provider": "Fixture Cinema", "month": "2026-10", "reason": "Rewatched twice", "poster": null}],
@@ -281,7 +336,7 @@
         "yearsShipping": 11,
         "employers": 4,
         "contracting": 1,
-        "technologies": 11
+        "technologies": 21
       },
       "roles": [
         {
@@ -296,7 +351,11 @@
           "tech": [
             "go",
             "typescript",
-            "kubernetes"
+            "kubernetes",
+            "aws",
+            "kafka",
+            "graphql",
+            "circleci"
           ],
           "period": "may 2023 — present"
         },
@@ -312,7 +371,10 @@
           "tech": [
             "typescript",
             "scala",
-            "go"
+            "go",
+            "aws",
+            "datadog",
+            "graphql"
           ],
           "period": "jul 2022 — may 2023"
         },
@@ -328,7 +390,9 @@
           "tech": [
             "typescript",
             "scala",
-            "react"
+            "react",
+            "aws",
+            "kafka"
           ],
           "period": "dec 2020 — jun 2022"
         },
@@ -344,7 +408,9 @@
           "tech": [
             "typescript",
             "node",
-            "twilio flex"
+            "twilio flex",
+            "gcp",
+            "react"
           ],
           "period": "jun 2019 — nov 2020"
         },
@@ -358,7 +424,8 @@
           "body": "Fixture text: a short contract.",
           "tech": [
             "typescript",
-            "gatsby"
+            "gatsby",
+            "prismic"
           ],
           "period": "feb 2019 — may 2019"
         },
@@ -374,7 +441,10 @@
           "tech": [
             "typescript",
             "react",
-            "php"
+            "php",
+            "redux",
+            "docker",
+            "jenkins"
           ],
           "period": "nov 2017 — jan 2019"
         },
@@ -390,7 +460,10 @@
           "tech": [
             "javascript",
             "php",
-            "symfony"
+            "symfony",
+            "redux",
+            "docker",
+            "jenkins"
           ],
           "period": "nov 2015 — oct 2017"
         }
@@ -406,6 +479,22 @@
         },
         {
           "name": "kubernetes",
+          "current": true
+        },
+        {
+          "name": "aws",
+          "current": true
+        },
+        {
+          "name": "kafka",
+          "current": true
+        },
+        {
+          "name": "graphql",
+          "current": true
+        },
+        {
+          "name": "circleci",
           "current": true
         },
         {
@@ -438,6 +527,30 @@
         },
         {
           "name": "symfony",
+          "current": false
+        },
+        {
+          "name": "datadog",
+          "current": false
+        },
+        {
+          "name": "gcp",
+          "current": false
+        },
+        {
+          "name": "prismic",
+          "current": false
+        },
+        {
+          "name": "redux",
+          "current": false
+        },
+        {
+          "name": "docker",
+          "current": false
+        },
+        {
+          "name": "jenkins",
           "current": false
         }
       ],

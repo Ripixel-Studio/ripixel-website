@@ -111,6 +111,60 @@ describe('buildWorkView', () => {
     assert.equal(v.salary[2].dir, 'flat');
   });
 
+  test('career timeline: one band per company, oldest first, on a shared year axis', () => {
+    const v = /** @type {any} */ (buildWorkView(work));
+    const t = v.timeline;
+    assert.equal(t.axis.from, 2015);
+    assert.equal(t.axis.to, 2026);
+    assert.equal(t.axis.ticks.length, 12);
+    assert.deepEqual(t.axis.ticks.slice(0, 2).map((x) => [x.label, x.short, x.left]), [['2015', '’15', 0], ['2016', '’16', 8.3]]);
+    assert.deepEqual(t.rows.map((r) => r.company), ['Sky Betting & Gaming', 'Example Contracting', 'DVELP', 'Deliveroo', 'Monzo']);
+    const sky = t.rows[0];
+    assert.equal(sky.roles.length, 2);
+    assert.deepEqual([sky.roles[0].left, sky.roles[0].width], [6.9, 16.7]); // Nov 2015 to the end of Oct 2017, of 144 months
+    assert.equal(sky.roles[0].label, 'Software engineer, Nov 2015 to Oct 2017');
+    assert.equal(sky.when, '2015 – 2019');
+    assert.equal(sky.ink, v.roles.find((/** @type {any} */ r) => r.company === sky.company).ink);
+    assert.equal(t.rows[1].contract, true);
+    assert.equal(t.rows[1].roles[0].contract, true);
+    const now = t.rows.at(-1);
+    assert.equal(now.current, true);
+    assert.equal(now.when, '2023 – now');
+    assert.equal(now.roles[0].current, true);
+    assert.equal(now.roles[0].label, 'Senior staff software engineer, May 2023 to now');
+    assert.equal(t.nowPct, 98.7);
+    assert.ok(Math.abs(now.roles[0].left + now.roles[0].width - t.nowPct) <= 0.1, 'the open role runs to now');
+  });
+
+  test('tech chart: every roster entry, grouped, bars from the roles that used it', () => {
+    const v = /** @type {any} */ (buildWorkView(work));
+    const groups = v.techChart.groups;
+    assert.deepEqual(groups.map((g) => g.label), ['languages', 'front end', 'back end & data', 'cloud & delivery']);
+    const rows = groups.flatMap((g) => g.rows);
+    assert.equal(rows.length, work.roster.length);
+    const go = rows.find((/** @type {any} */ r) => r.name === 'go');
+    assert.equal(go.current, true);
+    assert.equal(go.spans.length, 2);
+    assert.deepEqual(go.spans.map((/** @type {any} */ s) => s.company), ['Deliveroo', 'Monzo']);
+    assert.equal(go.years, '4 yrs');
+    const php = rows.find((/** @type {any} */ r) => r.name === 'php');
+    assert.equal(php.current, false);
+    assert.deepEqual(php.spans.map((/** @type {any} */ s) => s.company), ['Sky Betting & Gaming', 'Sky Betting & Gaming']);
+    // a fixture spelling with a space still finds its role
+    assert.equal(rows.find((/** @type {any} */ r) => r.name === 'twilio flex').spans.length, 1);
+    // within a group: first used first
+    const langs = groups[0].rows.map((/** @type {any} */ r) => r.name);
+    assert.deepEqual(langs.slice(0, 2), ['javascript', 'php']);
+    assert.equal(v.techChart.axis, v.timeline.axis);
+    assert.deepEqual(v.techChart.legend.map((/** @type {any} */ l) => l.company), v.timeline.rows.map((/** @type {any} */ r) => r.company));
+  });
+
+  test('tech chart: a name no group knows goes in the rest', () => {
+    const roles = [{ id: 'a', company: 'Acme', title: 'Dev', kind: 'employment', from: '2020-01', to: null, tech: ['zork'] }];
+    const v = /** @type {any} */ (buildWorkView({ roles, roster: [{ name: 'zork', current: true }], updated: '2026-11-03' }));
+    assert.deepEqual(v.techChart.groups.map((g) => g.label), ['the rest']);
+  });
+
   test('eight roles: every company gets its own ink', () => {
     const extra = { id: 'fx-role-0', company: 'Example Training Co', title: 'Assistant', kind: 'employment', from: '2013-07', to: '2014-10', tech: [] };
     const v = /** @type {any} */ (buildWorkView({ ...work, roles: [...work.roles, extra] }));
@@ -169,6 +223,14 @@ describe('built /work page', () => {
   test('roster from evidence: a lapsed tech renders ☆', () => {
     assert.match(html, /☆/);
     assert.match(html, /★/);
+  });
+
+  test('the timeline and the stack chart render before the role detail', () => {
+    assert.equal((html.match(/<div class="wt-row(?: wt-row--now)?" style="--c:/g) || []).length, 5);
+    assert.match(html, /wt-band wt-band--now" style="left: 69.4%/);
+    assert.equal((html.match(/<div class="wt-row wt-row--tech/g) || []).length, work.roster.length);
+    assert.ok(html.indexOf('class="wt wt--tech"') < html.indexOf('<article class="role-card '));
+    assert.ok(!html.includes('tech-grid'), 'the old roster grid is gone: the chart lists every technology');
   });
 
   test('no salary table by default', () => {

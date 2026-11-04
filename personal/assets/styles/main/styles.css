@@ -1889,14 +1889,6 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
   color: var(--ink);
 }
 
-/* Tech roster + extras two-col */
-.work-lower {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 30px;
-  margin-top: 14px;
-}
-
 .tech-roster__heading {
   font-family: var(--f-disp);
   font-size: 48px;
@@ -1917,26 +1909,138 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
   margin-top: 4px;
 }
 
-.tech-grid {
-  margin-top: 14px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-}
+.tech-roster__hint { margin-bottom: 14px; }
 
-.tech-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 5px 10px;
+/* ─── /work: the career timeline and the stack over time (work-view.mjs buildCharts) ───
+   One grid per chart: a label column and a track; every track shares the year axis. */
+.wt { margin: 34px 0 30px; }
+.wt-chart {
+  --label-w: 230px;
+  padding: 14px 16px 16px;
   background: #fff;
-  border: 1.5px solid var(--ink);
+  border: 2px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink-section);
+}
+.wt-row {
+  display: grid;
+  grid-template-columns: var(--label-w) minmax(0, 1fr);
+  align-items: center;
+  gap: 4px 14px;
+  padding: 7px 0;
+  border-bottom: 1.5px dashed rgba(23,19,17,0.25);
+}
+.wt-row:last-child { border-bottom: 0; }
+.wt-row--axis { padding: 0 0 4px; border-bottom: 2px solid var(--ink); }
+.wt-axis { position: relative; height: 16px; }
+.wt-axis__tick {
+  position: absolute;
+  bottom: 0;
+  padding-left: 3px;
+  border-left: 1.5px solid var(--ink);
   font-family: var(--f-mono);
-  font-size: 12px;
+  font-size: 10px;
+  line-height: 1.4;
+}
+.wt-axis__tick b { font-weight: 400; }
+.wt-axis__short { display: none; }
+
+.wt-label { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.wt-label__company {
+  font-family: var(--f-disp);
+  font-size: 22px;
+  line-height: 1;
+  text-transform: uppercase;
   color: var(--ink);
 }
+.wt-label__company::after { content: '.'; color: var(--c); }
+.wt-label__meta { font-family: var(--f-mono); font-size: 11px; font-weight: 700; color: var(--c); }
+.wt-label__titles { font-family: var(--f-mono); font-size: 10.5px; opacity: 0.75; }
+.wt-row--now .wt-label__company::before {
+  content: 'NOW';
+  display: inline-block;
+  margin-right: 6px;
+  padding: 1px 4px;
+  background: var(--c);
+  color: #fff;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  vertical-align: 5px;
+}
 
-.tech-item__status { color: var(--ink-section); }
+.wt-track { position: relative; height: 26px; background: var(--paper-4); border: 1.5px solid var(--ink); }
+.wt-grid { position: absolute; top: 0; bottom: 0; border-left: 1px dotted rgba(23,19,17,0.3); }
+.wt-today { position: absolute; top: -5px; bottom: -5px; z-index: 2; border-left: 2px solid var(--ink-red); }
+.wt-band {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  min-width: 3px;
+  background: var(--c);
+  border: 1.5px solid var(--ink);
+  border-radius: 1px;
+}
+.wt-band + .wt-band { border-left-width: 2.5px; }
+.wt-band--contract {
+  background: repeating-linear-gradient(-45deg, var(--c) 0 3px, #fff 3px 6px);
+}
+.wt-band--now { box-shadow: 0 0 0 2px var(--paper-4), 0 0 0 4px var(--c); }
+.wt-band em {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--f-mono);
+  font-style: normal;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+/* the stack: thin rows, grouped */
+.wt-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: -4px 0 14px; font-family: var(--f-mono); font-size: 11px; }
+.wt-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.wt-legend i { width: 16px; height: 10px; background: var(--c); border: 1.5px solid var(--ink); }
+.wt-legend i.wt-band--contract { background: repeating-linear-gradient(-45deg, var(--c) 0 3px, #fff 3px 6px); }
+.wt--tech .wt-chart { --label-w: 180px; }
+.wt-group {
+  margin: 14px 0 2px;
+  padding-bottom: 3px;
+  border-bottom: 2px solid var(--ink);
+  font-family: var(--f-scrib);
+  font-size: 24px;
+  line-height: 1;
+  color: var(--ink-section);
+}
+.wt-row--tech { padding: 3px 0; border-bottom-color: rgba(23,19,17,0.12); }
+.wt-label--tech { flex-direction: row; align-items: baseline; gap: 6px; font-family: var(--f-mono); font-size: 12px; }
+.wt-label__tech { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wt-label__tech::before { content: '#'; opacity: 0.5; }
+.wt-label__star { color: var(--ink-section); }
+.wt-label__yrs { margin-left: auto; font-size: 10.5px; opacity: 0.6; white-space: nowrap; }
+.wt-row--tech.wt-row--now .wt-label__tech { font-weight: 700; }
+.wt-track--thin { height: 14px; background: transparent; border: 0; border-bottom: 1px solid rgba(23,19,17,0.15); }
+.wt-track--thin .wt-band { top: 1px; bottom: 1px; border-width: 1px; }
+.wt-track--thin .wt-band + .wt-band { border-left-width: 1px; }
+
+.work-detail__heading { margin: 38px 0 16px; }
+
+@media (max-width: 720px) {
+  .wt-chart { --label-w: 1fr; padding: 12px 12px 14px; }
+  .wt-row { grid-template-columns: minmax(0, 1fr); }
+  .wt-row--axis > span:first-child { display: none; }
+  .wt-axis__long { display: none; }
+  .wt-axis__short { display: inline; }
+  .wt-axis__tick--odd { visibility: hidden; }
+  .wt-label__company { font-size: 20px; }
+  /* the stack on a phone: name and bar on one line, so 36 rows stay short */
+  .wt--tech .wt-row--tech { grid-template-columns: 13ch minmax(0, 1fr); gap: 8px; }
+  .wt--tech .wt-row--axis { grid-template-columns: 13ch minmax(0, 1fr); gap: 8px; }
+  .wt--tech .wt-row--axis > span:first-child { display: block; }
+  .wt-label--tech { font-size: 11px; gap: 4px; }
+  .wt-label__yrs { display: none; }
+}
 
 /* Work sidebar cards */
 .work-extras {
@@ -2370,14 +2474,12 @@ body.page-life     .tab-bar__item--fitness  { opacity: 1; }
   .thoughts-hero    { grid-template-columns: 1fr; }
   .thought-header   { grid-template-columns: 1fr; }
   .thought-layout   { grid-template-columns: 1fr; }
-  .work-lower    { grid-template-columns: 1fr; }
   .role-card__inner--with-photo { grid-template-columns: 1fr; }
   .find-me          { grid-template-columns: 1fr; }
   .right-now        { grid-template-columns: 1fr 1fr; }
   .stat-strip       { grid-template-columns: 1fr 1fr; }
   .stat-strip--5    { grid-template-columns: 1fr 1fr 1fr; }
   .work-stats       { grid-template-columns: 1fr 1fr; }
-  .tech-grid        { grid-template-columns: repeat(3, 1fr); }
   .thought-prevnext { grid-template-columns: 1fr; }
   .projects-intro__body { column-count: 1; }
 }
@@ -2404,7 +2506,6 @@ body.page-life     .tab-bar__item--fitness  { opacity: 1; }
 @media (max-width: 480px) {
   .section-cards { grid-template-columns: 1fr; }
   .proj-grid     { grid-template-columns: 1fr; }
-  .tech-grid     { grid-template-columns: 1fr 1fr; }
   .right-now     { grid-template-columns: 1fr; }
 
   .home-hero__name { font-size: 72px; }

@@ -2,7 +2,9 @@
 /**
  * The /work page (LH3.7): data only. `buildWorkView` shapes the export's `work`
  * section (stats, roles newest first, the tech roster, career highlights, and an optional
- * salary table) into what the template loops over. No HTML strings here.
+ * salary table) into what the template loops over, plus two charts on one year axis: the
+ * career timeline (a band per company) and the tech chart (when each technology was used,
+ * from the roles' tech lists). No HTML strings here.
  *
  * Global set by `workViewTask()`: `workView`, or `null` without a work section.
  */
@@ -101,9 +103,142 @@ function buildHighlights(highlights) {
   return rows.length ? rows : null;
 }
 
+// ─── the career timeline and the tech chart: one shared year axis ───
+
+/** Tech groups for the chart, by normalised name; anything unlisted goes in "the rest". */
+const TECH_GROUPS = [
+  ['languages', ['go', 'typescript', 'javascript', 'scala', 'php', 'c#', 'visual-basic', 'python', 'ruby', 'java',
+    'kotlin', 'swift', 'rust', 'sql', 'html', 'css', 'sass', 'elixir', 'c++', 'bash']],
+  ['front end', ['react', 'redux', 'flux', 'angular', 'angularjs', 'next.js', 'gatsby', 'vue', 'svelte', 'jamstack',
+    'jquery', 'webpack', 'react-native', 'storybook']],
+  ['back end & data', ['node', 'symfony', 'asp.net', 'graphql', 'kafka', 'nsq', 'keyspaces', 'prismic', 'twilio-flex',
+    'google-dialogflow', 'postgres', 'postgresql', 'mysql', 'redis', 'dynamodb', 'cassandra', 'elasticsearch', 'rest',
+    'grpc', 'express', 'laravel']],
+  ['cloud & delivery', ['aws', 'gcp', 'azure', 'kubernetes', 'docker', 'chef', 'jenkins', 'circleci', 'gitlab-ci',
+    'github-actions', 'datadog', 'sentry', 'infosec', 'terraform', 'ansible', 'firebase']],
+];
+const REST = 'the rest';
+/** @param {unknown} s */
+const norm = (s) => String(s || '').trim().toLowerCase().replace(/[\s_]+/g, '-');
+/** @type {Map<string, string>} */
+const GROUP_OF = new Map(TECH_GROUPS.flatMap(([label, names]) => /** @type {string[]} */ (names).map((n) => [n, /** @type {string} */ (label)])));
+
+const r1 = (/** @type {number} */ n) => Math.round(n * 10) / 10;
+const YM = /^(\d{4})-(\d{2})$/;
+
+/**
+ * The shared axis: Jan of the first role's year to Dec of the export's year; `pos(ym)` is the
+ * percentage for the start of a month, `endPos(ym|null)` for the end of one (null: today).
+ * @param {any[]} rows roles with a valid `from` @param {string} today YYYY-MM-DD
+ */
+function makeAxis(rows, today) {
+  const from = Math.min(...rows.map((r) => +String(r.from).slice(0, 4)));
+  const to = Math.max(+today.slice(0, 4), from);
+  const months = (to - from + 1) * 12;
+  const idx = (/** @type {string} */ ym) => (+ym.slice(0, 4) - from) * 12 + (+ym.slice(5, 7) - 1);
+  const daysIn = new Date(Date.UTC(+today.slice(0, 4), +today.slice(5, 7), 0)).getUTCDate();
+  const nowIdx = idx(today.slice(0, 7)) + Math.min(1, +today.slice(8, 10) / daysIn);
+  const pct = (/** @type {number} */ m) => r1(Math.max(0, Math.min(100, (100 * m) / months)));
+  const ticks = [];
+  for (let y = from; y <= to; y++) ticks.push({ label: String(y), short: `’${String(y).slice(2)}`, left: pct((y - from) * 12), odd: (y - from) % 2 === 1 });
+  return {
+    axis: { from, to, ticks },
+    nowPct: pct(nowIdx),
+    /** @param {string} ym */ startIdx: (ym) => idx(ym),
+    /** @param {string|null} ym */ endIdx: (ym) => (ym && YM.test(ym) ? Math.min(idx(ym) + 1, nowIdx) : nowIdx),
+    pct,
+  };
+}
+
+/** '4 yrs' from a number of months. @param {number} m */
+function yearsLabel(m) {
+  const y = Math.round(m / 12);
+  return m < 9 ? 'under a year' : y <= 1 ? '1 yr' : `${y} yrs`;
+}
+
+/**
+ * @param {any[]} roles buildWorkView roles (newest first, with ink) @param {any[]} raw the export rows
+ * @param {any[]} roster buildWorkView roster @param {string} today
+ */
+function buildCharts(roles, raw, roster, today) {
+  const dated = raw.map((r, i) => ({ r, v: roles[i] })).filter(({ r }) => YM.test(String(r.from)) && (r.to == null || YM.test(String(r.to))));
+  if (!dated.length) return { timeline: null, techChart: null };
+  const ax = makeAxis(dated.map(({ r }) => r), today);
+  const seg = (/** @type {any} */ r, /** @type {any} */ v) => {
+    const a = ax.startIdx(r.from);
+    const b = ax.endIdx(r.to);
+    const left = ax.pct(a);
+    return {
+      company: v.company, title: v.title, ink: v.ink, contract: v.contract, current: v.current,
+      left, width: Math.max(0.6, r1(ax.pct(b) - left)), a, b,
+      label: `${v.title}, ${ymLabel(r.from)} to ${r.to ? ymLabel(r.to) : 'now'}`,
+    };
+  };
+  const oldestFirst = [...dated].sort((x, y) => String(x.r.from).localeCompare(String(y.r.from)));
+
+  /** @type {Map<string, any>} */
+  const byCompany = new Map();
+  for (const { r, v } of oldestFirst) {
+    if (!byCompany.has(v.company)) byCompany.set(v.company, { company: v.company, ink: v.ink, roles: [], current: false, contract: true });
+    const row = byCompany.get(v.company);
+    row.roles.push(seg(r, v));
+    row.current = row.current || v.current;
+    row.contract = row.contract && v.contract;
+  }
+  const rows = [...byCompany.values()].map((row) => {
+    const first = String(oldestFirst.find(({ v }) => v.company === row.company)?.r.from).slice(0, 4);
+    const ends = dated.filter(({ v }) => v.company === row.company).map(({ r }) => r.to);
+    const last = ends.includes(null) ? 'now' : String(ends.sort().at(-1)).slice(0, 4);
+    const titles = [...new Set(row.roles.map((/** @type {any} */ s) => s.title))];
+    return {
+      ...row,
+      roles: row.roles.map(({ a: _a, b: _b, ...s }) => s),
+      when: first === last ? first : `${first} – ${last}`,
+      titles: titles.join(' → '),
+    };
+  });
+
+  /** @type {Map<string, {spans: any[], months: Set<number>, first: string}>} */
+  const used = new Map();
+  for (const { r, v } of oldestFirst) {
+    for (const t of Array.isArray(r.tech) ? r.tech : []) {
+      const k = norm(t);
+      if (!k) continue;
+      if (!used.has(k)) used.set(k, { spans: [], months: new Set(), first: String(r.from) });
+      const u = /** @type {any} */ (used.get(k));
+      const s = seg(r, v);
+      u.spans.push({ company: s.company, ink: s.ink, left: s.left, width: s.width, contract: s.contract, current: s.current, label: `${s.company}: ${s.label}` });
+      for (let m = Math.floor(s.a); m < Math.ceil(s.b); m++) u.months.add(m);
+    }
+  }
+  /** @type {Map<string, any[]>} */
+  const grouped = new Map();
+  for (const t of roster) {
+    const k = norm(t.name);
+    const u = used.get(k);
+    const g = GROUP_OF.get(k) || REST;
+    if (!grouped.has(g)) grouped.set(g, []);
+    /** @type {any[]} */ (grouped.get(g)).push({
+      name: t.name, current: t.current, spans: u ? u.spans : [], first: u ? u.first : '9999-99',
+      years: u ? yearsLabel(u.months.size) : '',
+    });
+  }
+  const order = [...TECH_GROUPS.map(([l]) => /** @type {string} */ (l)), REST];
+  const groups = order.filter((g) => grouped.has(g)).map((label) => ({
+    label,
+    rows: /** @type {any[]} */ (grouped.get(label))
+      .sort((a, b) => a.first.localeCompare(b.first) || a.name.localeCompare(b.name))
+      .map(({ first: _f, ...row }) => row),
+  }));
+  return {
+    timeline: { axis: ax.axis, nowPct: ax.nowPct, rows },
+    techChart: { axis: ax.axis, nowPct: ax.nowPct, groups, legend: rows.map((r) => ({ company: r.company, ink: r.ink, contract: r.contract })) },
+  };
+}
+
 /**
  * @param {any} work the export's `sections.work`
- * @returns {{stats: {num:string,label:string}[], roles: any[], roster: any[], highlights: any[]|null, salary: any[]|null, updated: string, staleLabel: string} | null}
+ * @returns {{stats: {num:string,label:string}[], roles: any[], roster: any[], timeline: any, techChart: any, highlights: any[]|null, salary: any[]|null, updated: string, staleLabel: string} | null}
  */
 export function buildWorkView(work) {
   if (!work || typeof work !== 'object' || !Array.isArray(work.roles)) return null;
@@ -140,10 +275,12 @@ export function buildWorkView(work) {
     .map((t) => ({ name: str(t.name), current: !!t.current, mark: t.current ? '★' : '☆' }));
   const highlights = buildHighlights(work.highlights);
   const stale = int(work.staleDays);
+  const today = /^\d{4}-\d{2}-\d{2}$/.test(str(work.updated)) ? str(work.updated) : new Date().toISOString().slice(0, 10);
   return {
     stats: buildStats(work.stats),
     roles,
     roster,
+    ...buildCharts(roles, rows, roster, today),
     highlights,
     salary: buildSalary(work.salary, rows),
     updated: str(work.updated),
