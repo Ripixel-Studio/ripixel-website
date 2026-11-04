@@ -151,11 +151,14 @@ const MEASURE_LABELS = /** @type {Record<string, string>} */ ({
   armLCm: 'Left arm', armRCm: 'Right arm', thighLCm: 'Left thigh', thighRCm: 'Right thigh', calfLCm: 'Left calf', calfRCm: 'Right calf',
   muscleKg: 'Muscle mass', waterPct: 'Body water', boneKg: 'Bone mass', visceral: 'Visceral fat', bmrKcal: 'BMR',
   metabolicAge: 'Metabolic age', subcutaneousPct: 'Subcutaneous fat', skeletalMusclePct: 'Skeletal muscle', proteinPct: 'Protein',
+  // the keys the Renpho collector writes (R2b.2b)
+  musclePct: 'Muscle', metabolicAgeYears: 'Metabolic age', leanMassKg: 'Lean mass', fatFreeKg: 'Fat-free mass',
+  abdomenCm: 'Abdomen', armCm: 'Arm', thighCm: 'Thigh', calfCm: 'Calf',
 });
 
 /** `armRCm` → `Arm r`: a readable label for a measure this site has not named yet. */
 const humanKey = (/** @type {string} */ k) => {
-  const t = k.replace(/(Cm|Kg|Pct|Kcal)$/, '').replace(/([A-Z])/g, ' $1').trim().toLowerCase();
+  const t = k.replace(/(Cm|Kg|Pct|Kcal|Years)$/, '').replace(/([A-Z])/g, ' $1').trim().toLowerCase();
   return t ? t[0].toUpperCase() + t.slice(1) : k;
 };
 

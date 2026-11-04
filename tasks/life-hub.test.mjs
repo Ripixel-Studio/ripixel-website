@@ -222,6 +222,22 @@ test('body blocks', () => {
   assert.ok(b.measurements.charts.length >= 1);
 });
 
+test('Renpho collector keys get plain labels, units and axes', () => {
+  const sec = structuredClone(fixture.sections.body);
+  const row = (key, unit, a, b) => ({ key, unit, first: { date: '2026-08-11', value: a }, latest: { date: '2026-10-30', value: b },
+    change: Number((b - a).toFixed(1)), weekly: [{ week: '2026-08-10', value: a }, { week: '2026-10-26', value: b }] });
+  sec.measurements = { tape: [row('armLCm', 'cm', 34, 34.6), row('abdomenCm', 'cm', 91, 89.5)],
+    scale: [row('musclePct', '%', 44.1, 45), row('metabolicAgeYears', 'yrs', 36, 34), row('leanMassKg', 'kg', 61.2, 62),
+      row('bmrKcal', 'kcal', 1790, 1815)] };
+  const b = buildSection('body', sec, now);
+  assert.deepEqual(b.measurements.rows.map((r) => r.label),
+    ['Left arm', 'Abdomen', 'Muscle', 'Metabolic age', 'Lean mass', 'BMR']);
+  const age = b.measurements.rows.find((r) => r.label === 'Metabolic age');
+  assert.deepEqual({ value: age.value, unit: age.unit, change: age.change, since: age.since },
+    { value: '34', unit: 'yrs', change: '−2', since: '11 Aug 2026' });
+  assert.equal(b.measurements.charts.length, 6);
+});
+
 test('a metric the device does report shows up', () => {
   const sec = structuredClone(fixture.sections.body);
   sec.latest.vo2Max = 47.2;
