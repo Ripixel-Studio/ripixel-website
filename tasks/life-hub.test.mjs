@@ -6,6 +6,11 @@ import {
   SECTION_ORDER, SECTION_HREF, staleLabel, sawLabel, monthLabel, hubNote, buildSection, buildHub, personalBits, lifeFacts, lifeHubTask, lifeInsights,
 } from './life-hub.mjs';
 import { runSkierTasks } from './skier-test-runner.mjs';
+import { templateHelpers } from './life-pages.mjs';
+import { generatePagesTask } from 'skier';
+import os from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const fixture = JSON.parse(await fs.readFile(new URL('../fixtures/fitness/life/index.json', import.meta.url), 'utf8'));
 const now = new Date('2026-11-03T08:00:00Z');
@@ -75,12 +80,13 @@ test('personal bits from facts only', () => {
     { key: 'personal.likes', label: 'Likes', value: ['running', 'film'], unit: '', tone: 'neutral' },
     { key: 'body.weight_kg', label: 'Weight', value: 82.43, unit: 'kg', tone: 'neutral' },
     { key: 'games.serious', label: 'x', value: ['Fixture Quest'], unit: '', tone: 'neutral' },
+    { key: 'games.silly', label: 'x', value: 'Sample Tactics', unit: '', tone: 'neutral' },
     { key: 'personal.salary', label: 'Salary', value: 1, visibility: 'private' },
     { key: 'personal.desk', label: 'Desk', value: 'standing', visibility: 'private' },
     { key: 'fx.films', label: 'Films', value: 42 },
   ];
   const bits = personalBits(facts);
-  assert.deepEqual(bits.map((b) => b.key), ['personal.height', 'personal.likes', 'body.weight_kg', 'games.serious']);
+  assert.deepEqual(bits.map((b) => b.key), ['personal.height', 'personal.likes', 'body.weight_kg']);
   const w = bits.find((b) => b.key === 'body.weight_kg');
   assert.equal(`${w.label}: ${w.value}`, 'Weight: 82.4 kg');
   assert.equal(bits[1].value, 'running, film');
@@ -102,7 +108,7 @@ test('section views from the fixture', () => {
   assert.equal(buildSection('body', fixture.sections.body, now).measures.stats[0].value, '80.1');
   assert.equal(buildSection('body', fixture.sections.body, now).sleep.stats[0].value, '7h 24m');
   assert.equal(buildSection('code', fixture.sections.code, now).projects[1].url, '');
-  assert.equal(buildSection('games', fixture.sections.games, now).stats[2].value, '120 / 300');
+  assert.deepEqual(buildSection('games', fixture.sections.games, now).stats.map((r) => r.label), ['This year', 'All time', 'Multiplayer', 'Backlog']);
   assert.equal(buildSection('reading', fixture.sections.reading, now).current[0].percent, 40);
 });
 
@@ -117,20 +123,12 @@ test('task sets globals', async () => {
   assert.deepEqual(none.lifePersonal, []);
 });
 
-test('export shapes: language shares are percentages, serious/silly are strings', () => {
+test('export shapes: language shares are percentages', () => {
   const c = buildSection('code', fixture.sections.code, now);
   const y25 = c.languagesByYear.find((y) => y.year === '2025');
   assert.deepEqual(y25.languages, [{ name: 'Python', pct: 55 }, { name: 'JavaScript', pct: 45 }]);
   assert.ok(c.languagesByYear.every((y) => y.languages.every((l) => l.pct <= 100)));
   assert.equal(c.languagesByYear[1].languages[0].pct, 60.5);
-  assert.equal(typeof fixture.sections.games.serious, 'string');
-  const g = buildSection('games', fixture.sections.games, now);
-  assert.deepEqual(g.serious, [{ name: 'Fixture Quest', hours: null }]);
-  assert.deepEqual(g.silly, [{ name: 'Sample Tactics', hours: null }]);
-  const none = buildSection('games', { ...fixture.sections.games, serious: null, silly: null }, now);
-  assert.deepEqual(none.serious, []);
-  // an array is tolerated too
-  assert.equal(buildSection('games', { ...fixture.sections.games, serious: ['A'] }, now).serious[0].name, 'A');
 });
 
 test('partial totals: absent fields do not become zero rows from nowhere', () => {
@@ -153,7 +151,9 @@ test('hub notes: the latest thing or the next number per section', () => {
   assert.deepEqual(notes.body, { label: 'Sleep, last 30 nights', value: '7h 24m', href: '' });
   const noSleep = buildSection('body', { ...fixture.sections.body, sleep: null }, now);
   assert.deepEqual(hubNote('body', noSleep), { label: 'Body fat', value: '17.2%', href: '' });
-  assert.equal(notes.games.value, 'Sample Tactics');
+  assert.deepEqual(notes.games, { label: 'League', value: 'Gold II · 54 LP', href: '' });
+  const noLeague = buildSection('games', { ...fixture.sections.games, league: null }, now);
+  assert.deepEqual(hubNote('games', noLeague), { label: 'Recently', value: 'Sample Tactics', href: '' });
   assert.deepEqual(notes.code, { label: 'Newest project', value: 'sample-tool', href: '' });
   assert.equal(notes.watching.value, 'The Invented Harbour');
   assert.equal(notes.listening.value, 'Sample Echoes, The Placeholders');
@@ -170,32 +170,19 @@ test('a headline in minutes reads as hours and minutes', () => {
 });
 
 test('a section with lists but a null headline has data', () => {
-  const games = { updated: '2026-11-03', staleDays: 0, headline: null, hoursYear: null, mostPlayed: [{ name: 'Revolution Idle', hours: 783 }], recent: [], serious: 'Revolution Idle', backlog: 74 };
+  const games = { updated: '2026-11-03', staleDays: 0, headline: null, hoursYear: null, wall: [{ key: '1', name: 'Idle Fixture', art: '', weight: 4, source: 'steam', quip: null }], recent: [], league: null, backlog: 74 };
   const v = buildSection('games', games);
   assert.equal(v.empty, false);
   assert.equal(v.headline, null);
-  assert.equal(v.mostPlayed[0].name, 'Revolution Idle');
+  assert.equal(v.wall[0].name, 'Idle Fixture');
   assert.equal(buildSection('games', { headline: null, backlog: 3 }).empty, false);
   assert.equal(buildSection('reading', { headline: null, totals: { year: { books: 0 } } }).empty, false);
-  assert.equal(buildSection('games', { updated: '2026-11-03', staleDays: 2, headline: null, mostPlayed: [], recent: [], achievements: {}, serious: '' }).empty, true);
+  assert.equal(buildSection('games', { updated: '2026-11-03', staleDays: 2, headline: null, wall: [], recent: [], achievements: {}, league: null }).empty, true);
 });
 
 test('games with a null headline leads with total hours', () => {
-  const v = buildSection('games', { headline: null, hoursTotal: 2625, mostPlayed: [{ name: 'A', hours: 1 }] });
+  const v = buildSection('games', { headline: null, hoursTotal: 2625, wall: [{ name: 'A', weight: 1 }] });
   assert.deepEqual(v.headline, { value: '2,625', unit: 'h', label: 'played, all time' });
-});
-
-test('silly is dropped when it equals serious (small print and games view)', () => {
-  const bits = personalBits([
-    { key: 'games.serious', value: 'Idle Fixture', tone: 'neutral' },
-    { key: 'games.silly', value: 'idle fixture', tone: 'neutral' },
-  ]);
-  assert.deepEqual(bits.map((b) => b.key), ['games.serious']);
-  const g = buildSection('games', { serious: 'Idle Fixture', silly: 'Idle Fixture' }, new Date('2026-11-01T00:00:00Z'));
-  assert.deepEqual(g.silly, []);
-  assert.deepEqual(g.serious, [{ name: 'Idle Fixture', hours: null }]);
-  const differ = buildSection('games', { serious: 'A Game', silly: 'B Game' }, new Date('2026-11-01T00:00:00Z'));
-  assert.equal(differ.silly.length, 1);
 });
 
 // ─── Round 2: one /life/body, seven sections (R2c.2) ───
@@ -299,3 +286,97 @@ test('no insights', () => {
   assert.deepEqual(lifeInsights(null), []);
   assert.deepEqual(lifeInsights({ insights: 'x' }), []);
 });
+
+// ─── Round 2: the games page reads C6 (R2d.5) ───
+
+test('games view', () => {
+  const g = buildSection('games', fixture.sections.games, now);
+  assert.equal(g.league.rankLabel, 'Gold II · 54 LP');
+  assert.equal(g.wall[0].league, true);
+  assert.equal(g.wall[0].weight, 4);
+  assert.ok(g.wall.slice(1).every((t) => t.league === false));
+  // tilt is a pure function of the name: the same across calls and builds, within ±2.4°
+  const again = buildSection('games', structuredClone(fixture.sections.games), now);
+  assert.deepEqual(g.wall.map((t) => t.tilt), again.wall.map((t) => t.tilt));
+  assert.ok(g.wall.every((t) => Math.abs(t.tilt) <= 2.4 && Math.round(t.tilt / 0.8 * 10) % 10 === 0));
+  assert.ok(new Set(g.wall.map((t) => t.tilt)).size > 1, 'tilts vary');
+  assert.deepEqual(g.league.mains.map((m) => Object.keys(m).sort()), g.league.mains.map(() => ['art', 'champion', 'level', 'points']));
+  assert.equal(g.league.recent.games, 20);
+  assert.equal(g.league.lifetime.sinceLabel, 'Mar 2019');
+  assert.ok(g.rarest.length > 0 && g.rarest.every((r) => /^\d+\.\d$/.test(r.pct)));
+  assert.ok(g.completion.length > 0 && g.completion.every((c) => Number.isInteger(c.pct)));
+  assert.ok(g.recent[0].name);
+  // quips ride on their tile, and nowhere else
+  assert.ok(g.wall.some((t) => t.quip));
+});
+
+test('art validated', () => {
+  const sec = structuredClone(fixture.sections.games);
+  const bad = ['javascript:alert(1)', 'https://evil.example/x.jpg', 'http://shared.akamai.steamstatic.com/x.jpg',
+    'https://shared.akamai.steamstatic.com.evil.example/x.jpg', "https://shared.akamai.steamstatic.com/x.jpg') ; x:url('y", 42, null];
+  sec.wall = bad.map((art, i) => ({ key: String(i), name: `Bad Art ${i}`, art, weight: 2, source: 'steam', quip: null }));
+  sec.recent = [{ name: 'Bad Recent', hours: 1, art: 'javascript:void 0' }];
+  sec.league.mains[0].splash = 'https://ddragon.example/x.jpg';
+  const g = buildSection('games', sec, now);
+  assert.ok(g.wall.every((t) => t.art === ''), JSON.stringify(g.wall.map((t) => t.art)));
+  assert.equal(g.recent[0].art, '');
+  assert.equal(g.league.mains[0].art, '');
+  const ok = buildSection('games', fixture.sections.games, now);
+  assert.match(ok.wall[0].art, /^https:\/\/ddragon\.leagueoflegends\.com\//);
+  assert.ok(ok.wall.some((t) => /^https:\/\/shared\.akamai\.steamstatic\.com\//.test(t.art)));
+});
+
+test('no serious/silly', () => {
+  const g = buildSection('games', { ...fixture.sections.games, serious: 'Fixture Quest', silly: 'Sample Tactics' }, now);
+  assert.doesNotMatch(JSON.stringify(g), /"(serious|silly)"/);
+  assert.ok(!('mostPlayed' in g));
+  const bits = personalBits([
+    { key: 'games.serious', value: 'Fixture Quest', tone: 'neutral' },
+    { key: 'games.silly', value: 'Sample Tactics', tone: 'neutral' },
+    { key: 'games.quip.100001', value: 'a quip', tone: 'neutral' },
+  ]);
+  assert.deepEqual(bits.filter((b) => b.key.startsWith('games.')), []);
+});
+
+test('no league', async () => {
+  const sec = { ...structuredClone(fixture.sections.games), league: null };
+  sec.wall = sec.wall.filter((/** @type {any} */ t) => t.source !== 'league');
+  const g = buildSection('games', sec, now);
+  assert.equal(g.league, null);
+  assert.ok(g.wall.length > 0 && g.wall.every((t) => t.league === false));
+
+  // and the page renders it: a wall of named Steam tiles, no League block
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'games-page-'));
+  try {
+    const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+    const pages = path.join(tmp, 'pages');
+    await fs.mkdir(pages);
+    await fs.copyFile(path.join(REPO, 'personal/pages/life/games.html'), path.join(pages, 'games.html'));
+    const render = async (/** @type {any} */ section) => {
+      const out = path.join(tmp, 'out-' + Math.random().toString(36).slice(2));
+      await runSkierTasks([generatePagesTask({
+        pagesDir: pages, partialsDir: path.join(REPO, 'personal/partials'), outDir: out, helpers: templateHelpers,
+        additionalVarsFn: () => ({ page: 'life', section }),
+      })], { siteUrl: 'https://james.ripixel.co.uk', cacheHash: 'test', year: 2026 }, []);
+      return fs.readFile(path.join(out, 'games.html'), 'utf8');
+    };
+    const html = await render(g);
+    assert.doesNotMatch(html, /games-league/);
+    const wall = /<ol class="games-wall"[\s\S]*?<\/ol>/.exec(html)?.[0] || '';
+    assert.equal((wall.match(/<li class="games-tile/g) || []).length, g.wall.length);
+    for (const t of g.wall) assert.ok(wall.includes(t.name.replace(/'/g, '&#x27;')), t.name);
+    // an art tile is a lazy image named for the game; a tile without art is the name in type
+    const img = /<img [^>]*alt="Fixture Quest"[^>]*>/.exec(wall)?.[0] || '';
+    assert.match(img, /loading="lazy"/);
+    assert.match(img, /width="600" height="900"/);
+    assert.match(wall, /games-tile--type/);
+    assert.doesNotMatch(wall, /<svg/);
+
+    const full = await render(buildSection('games', fixture.sections.games, now));
+    assert.ok(full.indexOf('games-league') > 0 && full.indexOf('games-league') < full.indexOf('games-wall'), 'League comes first');
+    assert.match(full, /Gold II · 54 LP/);
+    assert.match(full, /1\.2 % of players/);
+  } finally {
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+}, { timeout: 60_000 });

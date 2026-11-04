@@ -1,0 +1,49 @@
+<!-- Context: lifeSections.games.league {rankLabel, queueLabel, record, seasonWinRate, mains[{champion, level,
+     points, art}], recent{games, winRate, kda, pool[{champion, games, winRate}]}, lifetime{games, hours,
+     sinceLabel}} — League of Legends, the biggest block on the page. Champions only: never a player. -->
+<section class="games-league" aria-labelledby="games-league-title">
+  <div class="games-league__top">
+    <div class="games-league__rank">
+      <h2 class="games-league__title" id="games-league-title">League of Legends</h2>
+      {{#if rankLabel}}
+      <p class="games-league__tier">{{rankLabel}}</p>
+      <p class="games-league__queue">{{queueLabel}}{{#if record}} · {{record}}{{#if seasonWinRate}} · {{seasonWinRate}}% won{{/if}} this season{{/if}}</p>
+      {{else}}
+      <p class="games-league__tier games-league__tier--none">Unranked</p>
+      {{/if}}
+    </div>
+    {{#if lifetime}}
+    <p class="games-league__lifetime">
+      <span class="games-league__big">{{lifetime.games}}</span> games
+      {{#if lifetime.hours}}<span class="games-league__big">{{lifetime.hours}}<small>h</small></span>{{/if}}
+      {{#if lifetime.sinceLabel}}<span class="games-league__since">since {{lifetime.sinceLabel}}</span>{{/if}}
+    </p>
+    {{/if}}
+  </div>
+  {{#if mains.length}}
+  <h3 class="games-league__label">Mains, by mastery</h3>
+  <ol class="games-mains">
+    {{#each mains}}
+    <li class="games-main">
+      {{#if art}}<img class="games-main__art" src="{{art}}" alt="" loading="lazy" decoding="async" width="1215" height="717">{{/if}}
+      <span class="games-main__name">{{champion}}</span>
+      <span class="games-main__meta">{{#if level}}mastery {{level}} · {{/if}}{{points}} pts</span>
+    </li>
+    {{/each}}
+  </ol>
+  {{/if}}
+  {{#if recent}}
+  <div class="games-league__form">
+    <h3 class="games-league__label">Last {{recent.games}} games</h3>
+    <p class="games-league__formline">
+      {{#if recent.winRate}}<span><b>{{recent.winRate}}%</b> won</span>{{/if}}
+      {{#if recent.kda}}<span>KDA <b>{{recent.kda}}</b></span>{{/if}}
+    </p>
+    {{#if recent.pool.length}}
+    <ul class="games-pool" aria-label="Champions played">
+      {{#each recent.pool}}<li class="games-pool__chip">{{champion}} <small>×{{games}}</small></li>{{/each}}
+    </ul>
+    {{/if}}
+  </div>
+  {{/if}}
+</section>
