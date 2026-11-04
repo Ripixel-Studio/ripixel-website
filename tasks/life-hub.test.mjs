@@ -393,7 +393,8 @@ test('League champion names, not Data Dragon ids', () => {
 test('code view splits', () => {
   const c = buildSection('code', fixture.sections.code, now);
   assert.deepEqual(c.active.map((p) => p.name), ['sample-tool', 'quiet-ledger']);
-  assert.deepEqual(c.retired.map((p) => p.name), ['paper-lantern', 'old-orbit']);
+  assert.ok(!('retired' in c));
+  assert.ok(!c.active.some((p) => ['paper-lantern', 'old-orbit'].includes(p.name)), 'status: retired rows are filtered out');
   const [tool, ledger] = c.active;
   assert.deepEqual(tool, {
     name: 'sample-tool', description: 'A small invented command-line helper that tidies folders of sample files.',
@@ -404,10 +405,6 @@ test('code view splits', () => {
   assert.equal(ledger.url, '');
   assert.equal(ledger.description, '');
   assert.equal(ledger.years, '2024–now');
-  assert.equal(c.retired[0].years, '2019–2023');
-  assert.equal(c.retired[1].years, '2016–2019');
-  assert.equal(c.retired[1].lastCommit, 'Nov 2019');
-  assert.equal(c.retired[1].url, 'https://github.com/ripixel/old-orbit');
   const one = structuredClone(fixture.sections.code);
   one.projects[0].commits = 1;
   assert.equal(buildSection('code', one, now).active[0].commitsUnit, 'commit');
@@ -445,7 +442,6 @@ test('old export: projects without status are active, and the page renders', asy
   ];
   const c = buildSection('code', sec, now);
   assert.deepEqual(c.active.map((p) => p.name), ['example-site', 'sample-tool']);
-  assert.deepEqual(c.retired, []);
   assert.equal(c.active[0].years, '2024–now');
   assert.equal(c.active[0].lastCommit, '');
   assert.equal(c.active[0].description, '');
@@ -467,19 +463,18 @@ test('old export: projects without status are active, and the page renders', asy
     };
     const old = await render(c);
     assert.match(old, /example-site/);
-    assert.doesNotMatch(old, /retired<\/span> shelf/);
     assert.doesNotMatch(old, /class="life-langs[" _]/);
 
     // the full fixture: chart, active, then the shelf; private repo unlinked; no empty descriptions
     const full = await render(buildSection('code', fixture.sections.code, now));
     assert.match(full, /class="chart chart--stack"/);
     assert.match(full, /<title>Python 39.5%<\/title>/);
-    const iActive = full.indexOf('sample-tool');
-    const iShelf = full.indexOf('the <span>retired</span> shelf.');
-    assert.ok(iActive > 0 && iShelf > iActive && full.indexOf('old-orbit') > iShelf);
+    assert.ok(full.indexOf('sample-tool') > 0);
+    assert.doesNotMatch(full, /retired/i);
+    assert.doesNotMatch(full, /old-orbit|paper-lantern/);
     assert.match(full, /<a href="https:\/\/github.com\/Ripixel-Studio\/sample-tool"/);
     assert.doesNotMatch(full, /href="[^"]*quiet-ledger/);
-    assert.equal((full.match(/class="life-project__desc"/g) || []).length, 2);
+    assert.equal((full.match(/class="life-project__desc"/g) || []).length, 1);
     assert.doesNotMatch(full, /life-project__desc">\s*</);
   } finally {
     await fs.rm(tmp, { recursive: true, force: true });

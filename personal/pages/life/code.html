@@ -16,7 +16,7 @@
       <line x1="9" y1="0" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/>
     </svg>
 
-    {{!-- Code (C7, R2e.6): commits a month, languages by year, active projects, then the retired shelf (lifeSections.code). --}}
+    {{!-- Code (C7, R2e.6): commits a month, languages by year, active projects (lifeSections.code). --}}
     {{#with section}}
     {{> life-section-head snapTop="PUSHED" snapAccent="TO MAIN"}}
     {{#if empty}}
@@ -41,12 +41,6 @@
     <h2 class="fit-header">the <span>projects</span>.</h2>
     <ol class="life-projects">
       {{#each active}}{{> life-project}}{{/each}}
-    </ol>
-    {{/if}}
-    {{#if retired.length}}
-    <h2 class="fit-header">the <span>retired</span> shelf.</h2>
-    <ol class="life-projects life-projects--retired">
-      {{#each retired}}{{> life-project retired=true}}{{/each}}
     </ol>
     {{/if}}
     {{/if}}

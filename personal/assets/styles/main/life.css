@@ -751,7 +751,7 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
 
 .life-project__langs { flex-basis: 100%; }
 
-/* ─── /life/code projects: description, meta, and the retired shelf (R2e.6) ─ */
+/* ─── /life/code projects: description, meta (R2e.6) ─ */
 .life-project__desc {
   flex-basis: 100%;
   margin: 8px 0 0;
@@ -766,29 +766,6 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
   opacity: 0.75;
 }
 .life-project__meta:empty { display: none; }
-.life-projects--retired {
-  background: var(--paper-2);
-  border-top-style: double;
-  border-top-width: 4px;
-  padding: 0 14px;
-}
-.life-project--retired .life-notable__title { color: color-mix(in srgb, var(--ink) 72%, var(--paper-2)); }
-.life-project--retired .life-notable__title a { border-bottom-color: color-mix(in srgb, var(--life-ink) 45%, var(--paper-2)); }
-.life-project--retired .life-chip { background: transparent; }
-.life-project__stamp {
-  align-self: center;
-  padding: 0 6px;
-  border: 1.5px solid currentColor;
-  border-radius: 2px;
-  font-family: var(--f-mono);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  line-height: 1.6;
-  color: color-mix(in srgb, var(--ink-red) 60%, var(--paper-2));
-  transform: rotate(-4deg);
-}
 
 /* ─── /life/fitness: every route on one sheet ─ */
 .life-heatmap {
