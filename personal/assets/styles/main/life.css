@@ -423,6 +423,65 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
   white-space: nowrap;
 }
 
+/* ─── Stacked-share columns (partials/chart-stack.html, chart-axes.mjs stackedShare, R2e.5) ─
+   Series tokens: five site inks nudged into the categorical band (validated with the dataviz
+   validate_palette.js, light on #fff and dark on --ink: all checks pass) plus a de-emphasis
+   grey for Other. A slot follows its language, never its rank in a year. */
+.chart--stack {
+  --series-1: #1B905E; /* --ink-green  + 5% white */
+  --series-2: #2C51C3; /* --ink-blue   + 5% white */
+  --series-3: #E7571B; /* --ink-orange + 5% ink   */
+  --series-4: #8344EE; /* --ink-purple + 5% white */
+  --series-5: #B7261F; /* --ink-red */
+  --series-6: #8C8680; /* Other: de-emphasis grey (chroma floor fails by design) */
+  --chart-surface: #fff;
+  --chart-h: 180px;
+}
+.chart--stack .chart__plot { grid-template-columns: 4.5ch minmax(0, 1fr) auto; }
+.chart--stack .chart__x { grid-area: 2 / 2; }
+.chart--stack .chart__x li,
+.chart--stack .chart__x li:first-child,
+.chart--stack .chart__x li:last-child:not(:first-child) { transform: translateX(-50%); }
+.chart__seg { stroke: var(--chart-surface); stroke-width: 2; }
+.chart__ends {
+  grid-area: 1 / 3;
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-width: 9ch;
+  color: var(--ink);
+  font-size: 11px;
+}
+.chart__ends li {
+  position: absolute;
+  left: 0;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.chart__ends i,
+.chart__legend i { display: inline-block; width: 9px; height: 9px; flex: none; }
+.chart__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--ink);
+}
+.chart__legend li { display: flex; align-items: center; gap: 5px; }
+.chart__table { margin-top: 8px; font-family: var(--f-mono); font-size: 11px; color: var(--ink-muted); }
+.chart__table summary { cursor: pointer; }
+.chart__table ul { list-style: none; margin: 6px 0 0; padding: 0; }
+.chart__table li { display: flex; flex-wrap: wrap; gap: 2px 10px; padding: 2px 0; }
+.chart__table b { color: var(--ink); min-width: 4ch; }
+
 /* ─── /life/body: four blocks, one ink each (R2c.2) ─ */
 .life-block { --ink-section: var(--life-ink); margin-bottom: 8px; }
 .life-block--measures { --life-ink: var(--ink-red); }
