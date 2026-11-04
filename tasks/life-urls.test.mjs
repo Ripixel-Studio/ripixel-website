@@ -115,7 +115,15 @@ describe('/life URL inventory', () => {
     const html = await read('life/fitness.html');
     const title = g.fitnessLife.activities[0].title;
     assert.ok(html.includes(title), title);
-    assert.match(html, /<svg[^>]*class="life-heatmap__map"/);
+    assert.match(html, /<svg[^>]*class="route-map__fallback life-heatmap__map"/);
+    // The tiled map: its JSON next to the no-JS sheet, and the vendored Leaflet + map script.
+    const data = html.match(/<script type="application\/json" data-route-map-data>([^<]*)<\/script>/);
+    assert.ok(data, 'heatmap map data');
+    const d = JSON.parse(data[1]);
+    assert.equal(d.kind, 'heatmap');
+    assert.ok(Array.isArray(d.segments) && d.fit && d.all);
+    assert.match(html, /<script src="\/vendor\/leaflet-[\d.]*\/leaflet\.js" defer><\/script>/);
+    assert.match(html, /<script src="\/scripts\/route-map\.[^"]+\.js" defer><\/script>/);
   });
 
   test('stale label rendered', async () => {
@@ -201,7 +209,7 @@ describe('/life without a life export', () => {
         const html = await fs.readFile(path.join(out, 'life', `${name}.html`), 'utf8');
         assert.match(html, /No [a-z]+ data yet/, name);
       }
-      assert.doesNotMatch(await fs.readFile(path.join(out, 'life', 'fitness.html'), 'utf8'), /class="life-heatmap__map"/);
+      assert.doesNotMatch(await fs.readFile(path.join(out, 'life', 'fitness.html'), 'utf8'), /life-heatmap__map|data-route-map/);
     } finally {
       await fs.rm(out, { recursive: true, force: true });
     }

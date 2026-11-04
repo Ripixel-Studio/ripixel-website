@@ -1,0 +1,5 @@
+<!-- Tiled route maps: vendored Leaflet + the static map script, only on pages that have a map
+     (tasks/route-map.mjs routeMapAssetsTask). Without them the static SVG underneath stays. -->
+<link rel="stylesheet" href="/vendor/leaflet-{{@root.leafletVersion}}/leaflet.css" />
+<script src="/vendor/leaflet-{{@root.leafletVersion}}/leaflet.js" defer></script>
+<script src="/scripts/route-map.{{@root.cacheHash}}.js" defer></script>

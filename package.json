@@ -37,6 +37,7 @@
         "@fontsource/anton": "^5.2.7",
         "@fontsource/jetbrains-mono": "^5.2.8",
         "firebase-tools": "^15.0.0",
+        "leaflet": "1.9.4",
         "nodemon": "^3.0.0",
         "sharp": "^0.35.5",
         "skier": "git+https://github.com/Ripixel-Studio/skier.git#ad8178372e1679c9ebb7ca0be2266ef223eefae2",

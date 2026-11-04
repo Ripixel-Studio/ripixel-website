@@ -1,0 +1,77 @@
+/* ─── Tiled route maps (activity route, /life/fitness heatmap) ───
+   personal/assets/scripts/route-map.js lays a Leaflet map over the static SVG once it
+   loads; until then (or without JS) the SVG is the map. Fixed aspect ratio either way,
+   so nothing shifts when the tiles arrive. */
+.route-map {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  background: var(--paper-4);
+  border: 1.5px solid var(--ink);
+  overflow: hidden;
+  color: var(--ink);
+}
+.route-map--heatmap { aspect-ratio: 16 / 10; }
+.route-map__fallback { display: block; width: 100%; height: 100%; max-height: none; }
+.route-map.is-live .route-map__fallback { visibility: hidden; }
+.route-map__canvas { position: absolute; inset: 0; }
+.route-map:not(.is-live) .route-map__canvas { display: none; }
+
+/* Tiles restyled to the zine: OSM's colours knocked back to ink on cream paper. */
+.route-map .leaflet-container { background: var(--paper); font-family: var(--f-mono); }
+.route-map .route-map__tiles { filter: grayscale(1) sepia(0.45) saturate(1.1) contrast(0.78) brightness(1.08); }
+.route-map .leaflet-tile-pane::after { content: none; }
+
+/* Lines: the SVG classes Leaflet puts on each path; CSS beats its stroke attributes. */
+.route-map path.route-map__line {
+  stroke: var(--ink-section);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.route-map path.route-map__start { stroke: var(--ink); fill: var(--ink-green); }
+.route-map path.route-map__end { stroke: var(--ink); fill: var(--ink-section); }
+.route-map path.route-map__heat {
+  stroke: var(--life-ink, var(--ink-section));
+  stroke-opacity: 0.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  mix-blend-mode: multiply;
+}
+
+/* Controls: zine buttons, keyboard focus visible. */
+.route-map .leaflet-bar { border: 1.5px solid var(--ink); border-radius: 0; box-shadow: 3px 3px 0 var(--ink); }
+.route-map .leaflet-bar a,
+.route-map .route-map__button {
+  width: auto; min-width: 32px; height: 32px; line-height: 30px;
+  background: #fff; color: var(--ink); border-radius: 0 !important;
+  font: 700 16px/30px var(--f-mono);
+}
+.route-map .leaflet-bar a { border-bottom: 1.5px solid var(--ink); }
+.route-map .leaflet-bar a:last-child { border-bottom: 0; }
+.route-map .route-map__buttons { display: flex; }
+.route-map .route-map__button {
+  padding: 0 10px; border: 0; border-right: 1.5px solid var(--ink);
+  font-size: 12px; text-transform: lowercase; cursor: pointer;
+}
+.route-map .route-map__button:last-child { border-right: 0; }
+.route-map .leaflet-bar a:hover,
+.route-map .route-map__button:hover { background: var(--paper-2); }
+.route-map .leaflet-bar a:focus-visible,
+.route-map .route-map__button:focus-visible,
+.route-map .leaflet-container:focus-visible { outline: 3px solid var(--ink-section); outline-offset: -3px; }
+.route-map .leaflet-control-attribution {
+  background: rgba(255, 252, 239, 0.85); color: var(--ink); font: 10px/1.4 var(--f-mono);
+}
+.route-map .leaflet-control-attribution a { color: var(--ink); text-decoration: underline; }
+
+/* Empty states: one line, never a blank box. */
+.route-map__empty {
+  margin: 0; padding: 18px 14px; text-align: center;
+  font: 700 13px var(--f-mono); text-transform: lowercase; letter-spacing: 0.02em;
+  border: 1.5px dashed var(--ink); background: var(--paper-4);
+}
+
+@media (max-width: 600px) {
+  .route-map { aspect-ratio: 1 / 1; }
+  .route-map--heatmap { aspect-ratio: 4 / 5; }
+}

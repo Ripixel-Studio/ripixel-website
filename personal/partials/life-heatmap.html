@@ -1,7 +1,11 @@
-<!-- Context: lifeHeatmapView {viewBox, paths, count} — every route on one sheet, ends near home trimmed -->
+<!-- Context: lifeHeatmapView {viewBox, paths, count, json} — every route on one map, ends near home trimmed.
+     The SVG is the no-JS sheet; route-map.js lays the tiled map over it from the JSON. -->
 <figure class="life-heatmap">
-  <svg class="life-heatmap__map" viewBox="{{viewBox}}" role="img" aria-label="Routes from {{count}} activities, drawn over each other">
-    {{#each paths}}<path d="{{this}}"/>{{/each}}
-  </svg>
+  <div class="route-map route-map--heatmap" data-route-map role="region" aria-label="Map of routes from {{count}} activities. Zoom with the plus and minus buttons, or focus the map and use the arrow keys to pan; fit all shows every route.">
+    <svg class="route-map__fallback life-heatmap__map" viewBox="{{viewBox}}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Routes from {{count}} activities, drawn over each other">
+      {{#each paths}}<path d="{{this}}"/>{{/each}}
+    </svg>
+    <script type="application/json" data-route-map-data>{{{json}}}</script>
+  </div>
   <figcaption class="life-heatmap__caption">{{count}} activities drawn over each other. The darker the line, the more often I've been along it.</figcaption>
 </figure>

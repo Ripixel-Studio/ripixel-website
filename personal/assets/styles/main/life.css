@@ -729,13 +729,6 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
   box-shadow: 6px 6px 0 var(--ink);
 }
 
-.life-heatmap__map {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-height: 520px;
-}
-
 .life-heatmap__map path {
   fill: none;
   stroke: var(--ink-section);

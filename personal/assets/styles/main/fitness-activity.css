@@ -213,10 +213,9 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
 .act-photo:nth-child(even) { transform: rotate(.8deg); }
 .act-photo img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; cursor: zoom-in; }
 
-.act-map__svg { display: block; width: 100%; max-height: 420px; color: var(--ink); }
+.act-map__svg { color: var(--ink); }
 .act-map__start { fill: var(--ink-green); }
 .act-map__end { fill: var(--ink-section); }
-.act-map__thumb { display: block; width: 100%; max-height: 420px; object-fit: contain; }
 
 /* ─── Module grid ──────────────────────── */
 .act-layout { display: grid; grid-template-columns: 1fr 260px; gap: 22px; align-items: start; margin-top: 4px; }
