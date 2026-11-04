@@ -226,7 +226,9 @@ export function lineChart(values, opts) {
 
 /**
  * @typedef {{ key: string, label: string, slot: number, pct: number, y: number, h: number }} StackSegment
- * @typedef {{ years: { label: string, pct: number, left: number, width: number, segments: StackSegment[] }[],
+ * @typedef {{ label: string, short: string, title: string, pct: number, left: number, width: number }} StackGap
+ * @typedef {{ years: { label: string, short: string, pct: number, left: number, width: number, segments: StackSegment[] }[],
+ *   gaps: StackGap[],
  *   series: { key: string, label: string, slot: number }[],
  *   yTicks: Tick[], ends: { label: string, slot: number, y: number }[], summary: string }} StackModel
  */
@@ -272,9 +274,33 @@ export function stackedShare(byYear, opts = { top: 5 }) {
   const folded = ranked.length > top;
   const series = [...keys, ...(folded ? ['Other'] : [])].map((key, i) => ({ key, label: key, slot: i + 1 }));
 
-  const n = rows.length;
-  const band = 100 / n;
-  const width = pc(band * 0.62);
+  // x layout: one band per year present; a run of missing years gets a half-width marked slot,
+  // so 2016 never sits silently beside 2020.
+  const isYear = (l) => /^\d{4}$/.test(String(l));
+  /** @type {{ kind: 'year' | 'gap', i?: number, from?: number, to?: number, units: number }[]} */
+  const slots = [];
+  rows.forEach(([label], i) => {
+    const prev = i ? rows[i - 1][0] : null;
+    if (prev != null && isYear(prev) && isYear(label) && +label - +prev > 1) {
+      slots.push({ kind: 'gap', from: +prev + 1, to: +label - 1, units: 0.5 });
+    }
+    slots.push({ kind: 'year', i, units: 1 });
+  });
+  const unit = 100 / slots.reduce((s, x) => s + x.units, 0);
+  const width = pc(unit * 0.62);
+  /** @type {Map<number, number>} */
+  const centres = new Map();
+  const gaps = [];
+  let at = 0;
+  for (const sl of slots) {
+    const centre = pc(unit * (at + sl.units / 2));
+    at += sl.units;
+    if (sl.kind === 'year') { centres.set(/** @type {number} */ (sl.i), centre); continue; }
+    const label = sl.from === sl.to ? String(sl.from) : `${sl.from}–${sl.to}`;
+    const w = pc(unit * sl.units * 0.62);
+    gaps.push({ label, short: sl.from === sl.to ? `’${String(sl.from).slice(2)}` : '…', title: `No code in ${label}`, pct: centre, left: pc(centre - w / 2), width: w });
+  }
+
   const years = rows.map(([label, entries], i) => {
     const m = new Map(entries);
     const vals = series.map((s) => (s.key === 'Other' && folded
@@ -289,8 +315,9 @@ export function stackedShare(byYear, opts = { top: 5 }) {
       cum += t[j];
       segments.push({ key: s.key, label: s.label, slot: s.slot, pct, y: clean((1000 - cum) / 10), h: pct });
     });
-    const centre = pc(band * (i + 0.5));
-    return { label: String(label), pct: centre, left: pc(centre - width / 2), width, segments };
+    const centre = /** @type {number} */ (centres.get(i));
+    const l = String(label);
+    return { label: l, short: isYear(l) ? `’${l.slice(2)}` : l, pct: centre, left: pc(centre - width / 2), width, segments };
   });
 
   const last = years[years.length - 1];
@@ -307,6 +334,7 @@ export function stackedShare(byYear, opts = { top: 5 }) {
 
   return {
     years,
+    gaps,
     series,
     yTicks: [{ label: '100%', pct: 0 }, { label: '50%', pct: 50 }, { label: '0%', pct: 100 }],
     ends,

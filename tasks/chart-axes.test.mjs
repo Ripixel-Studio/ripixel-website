@@ -214,4 +214,25 @@ describe('stackedShare', () => {
     // direct labels on the latest column, for segments tall enough to hold one
     assert.deepEqual(m.ends.map((e) => e.label), ['TypeScript', 'Go', 'HTML']);
   });
+
+  test('gap years: a missing run gets its own marked slot, not silent adjacency', () => {
+    const m = stackedShare({ '2016': { Java: 100 }, '2020': { Go: 100 }, '2021': { Go: 50, Java: 50 }, '2024': { Go: 100 } });
+    assert.ok(m);
+    assert.deepEqual(m.years.map((y) => y.label), ['2016', '2020', '2021', '2024']);
+    assert.deepEqual(m.gaps.map((g) => g.label), ['2017–2019', '2022–2023']);
+    assert.deepEqual(m.gaps.map((g) => g.title), ['No code in 2017–2019', 'No code in 2022–2023']);
+    // the gap sits between its neighbours on the x axis
+    const [g1, g2] = m.gaps;
+    assert.ok(m.years[0].pct < g1.pct && g1.pct < m.years[1].pct);
+    assert.ok(m.years[2].pct < g2.pct && g2.pct < m.years[3].pct);
+    // a single missing year is labelled by itself
+    const one = stackedShare({ '2023': { Go: 100 }, '2025': { Go: 100 } });
+    assert.deepEqual(one?.gaps.map((g) => g.label), ['2024']);
+    // contiguous years: no gaps; short labels for narrow screens
+    const none = stackedShare({ '2025': { Go: 100 }, '2026': { Go: 100 } });
+    assert.deepEqual(none?.gaps, []);
+    assert.deepEqual(none?.years.map((y) => y.short), ['’25', '’26']);
+    // every slot fits inside the plot
+    for (const c of [...m.years, ...m.gaps]) assert.ok(c.left >= 0 && c.left + c.width <= 100.01, JSON.stringify(c));
+  });
 });
