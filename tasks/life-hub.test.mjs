@@ -33,6 +33,14 @@ test('hub without life export', () => {
   assert.deepEqual(hub.outings, []);
 });
 
+test('the outings list carries every year, not only the last two months', () => {
+  const old = { key: 'o1', kind: 'gig', title: 'Invented Old Act', month: '2023-05' };
+  const recent = { key: 'o2', kind: 'cinema', title: 'Invented Recent Film', month: '2026-10' };
+  const sec = { ...fixture.sections.outings, notable: [recent], years: { 2026: [recent], 2023: [old] } };
+  const hub = buildHub({ ...fixture, sections: { ...fixture.sections, outings: sec } }, fitnessLife, now);
+  assert.deepEqual(hub.outings.map((n) => n.title).sort(), ['Invented Old Act', 'Invented Recent Film']);
+});
+
 test('stale label, and a stale section keeps its numbers', () => {
   assert.equal(staleLabel(3), 'last updated 3 days ago');
   assert.equal(staleLabel(2), 'last updated 2 days ago');
