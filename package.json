@@ -17,30 +17,30 @@
         "serve:corporate": "serve public/corporate/",
         "start:personal": "npm run build:personal && npm run serve:personal",
         "start:corporate": "npm run build:corporate && npm run serve:corporate",
-        "release": "standard-version"
+        "release": "commit-and-tag-version"
     },
     "type": "module",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/ripixel/ripixel-website.git"
+        "url": "git+https://github.com/Ripixel-Studio/ripixel-website.git"
     },
     "author": "James King <ripixel@gmail.com>",
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/ripixel/ripixel-website/issues"
+        "url": "https://github.com/Ripixel-Studio/ripixel-website/issues"
     },
     "engines": {
         "node": "^24"
     },
-    "homepage": "https://github.com/ripixel/ripixel-website#readme",
+    "homepage": "https://github.com/Ripixel-Studio/ripixel-website#readme",
     "devDependencies": {
         "@fontsource/anton": "^5.2.7",
         "@fontsource/jetbrains-mono": "^5.2.8",
+        "commit-and-tag-version": "^13.3.0",
         "firebase-tools": "^15.0.0",
         "leaflet": "1.9.4",
         "nodemon": "^3.0.0",
         "sharp": "^0.35.5",
-        "skier": "git+https://github.com/Ripixel-Studio/skier.git#ad8178372e1679c9ebb7ca0be2266ef223eefae2",
-        "standard-version": "^9.0.0"
+        "skier": "git+https://github.com/Ripixel-Studio/skier.git#ad8178372e1679c9ebb7ca0be2266ef223eefae2"
     }
 }

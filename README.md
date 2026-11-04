@@ -50,7 +50,7 @@ But then Skier came along—minimal, modular, and just as allergic to bloat as I
   From a laptop: `npx firebase hosting:channel:deploy <name> --only <target>`.
 - **Releases:**
   Versions are no longer tagged by CI. When a bump is wanted, run `npm run release`
-  (`standard-version`: bumps `package.json`, writes `CHANGELOG.md`, commits and tags) and push the
+  (`commit-and-tag-version`, the maintained fork of `standard-version`: bumps `package.json`, writes `CHANGELOG.md`, commits and tags) and push the
   commit and tag like any other change. The `/changelog` page and its "vX.Y.Z" are rendered from
   `CHANGELOG.md` at build time, so between releases the site simply shows the last release.
 
