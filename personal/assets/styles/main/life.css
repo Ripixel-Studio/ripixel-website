@@ -1475,3 +1475,347 @@ a.hub-hero__route:hover .hub-hero__route-cta { background: var(--life-ink); colo
 .outings-month__items li { padding: 1px 0; overflow-wrap: anywhere; }
 .outings-kind { margin-left: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--life-ink, var(--ink-section)); }
 .life-notable__big { margin-left: 6px; font-family: var(--f-mono); font-size: 10px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.08em; padding: 1px 5px; border: 1px solid var(--life-ink, var(--ink-section)); color: var(--life-ink, var(--ink-section)); white-space: nowrap; vertical-align: middle; }
+
+/* ─── /life/live: ticket stubs (lifeSections.live) ─────────────────────────────
+   One stub per night out, a run of them per year. Each kind of night has its own
+   riso ink (--stub-ink); a picture is printed in that ink (grey, multiplied) and
+   shows its own colours on hover. The stub is cut with two notches at the
+   perforation and a torn zigzag foot, all by mask, so the ink shadow follows it. */
+.stub--gig       { --stub-ink: var(--ink-blue);    --stub-on: var(--paper-4); }
+.stub--musical   { --stub-ink: var(--ink-magenta); --stub-on: var(--paper-4); }
+.stub--theatre   { --stub-ink: var(--ink-red);     --stub-on: var(--paper-4); }
+.stub--comedy    { --stub-ink: var(--ink-yellow);  --stub-on: var(--ink); }
+.stub--festival  { --stub-ink: var(--ink-green);   --stub-on: var(--paper-4); }
+.stub--classical { --stub-ink: var(--ink-purple);  --stub-on: var(--paper-4); }
+.stub--other     { --stub-ink: var(--ink-orange);  --stub-on: var(--ink); }
+
+/* what kind of night: one bar, then a chip per kind */
+.live-kinds { margin: 0 0 44px; }
+.live-kinds__bar {
+  display: flex;
+  height: 44px;
+  border: 2px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+  background: var(--paper-4);
+  overflow: hidden;
+}
+.live-kinds__part {
+  position: relative;
+  flex: 1 1 0;
+  background: var(--stub-ink);
+}
+.live-kinds__part + .live-kinds__part { border-left: 2px solid var(--ink); }
+.live-kinds__part::after,
+.stub__art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(23, 19, 17, 0.32) 0.9px, transparent 1.3px);
+  background-size: 4px 4px;
+  mix-blend-mode: multiply;
+}
+.live-kinds__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 14px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.live-kinds__chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 14px 7px 12px;
+  background: var(--stub-ink);
+  color: var(--stub-on);
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  /* a cloakroom ticket: notched at both ends */
+  -webkit-mask: radial-gradient(circle 6px at 0 50%, #0000 95%, #000) left / 51% 100% no-repeat,
+                radial-gradient(circle 6px at 100% 50%, #0000 95%, #000) right / 51% 100% no-repeat;
+  mask: radial-gradient(circle 6px at 0 50%, #0000 95%, #000) left / 51% 100% no-repeat,
+        radial-gradient(circle 6px at 100% 50%, #0000 95%, #000) right / 51% 100% no-repeat;
+}
+.live-kinds__count { font-family: var(--f-disp); font-size: 30px; font-weight: 400; line-height: 1; }
+.live-kinds__label { font-family: var(--f-mono); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.live-kinds__pct { font-family: var(--f-mono); font-size: 11px; opacity: 0.8; }
+
+/* a year: its label, the count and a strip of tiny tickets in their inks */
+.live-year { margin: 0 0 54px; }
+.live-year__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 16px;
+  margin: 0 0 22px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--ink);
+}
+.live-year__head .life-year__label { margin: 0; }
+.live-year__strip { display: inline-flex; flex-wrap: wrap; gap: 3px; margin-left: auto; align-self: center; }
+.live-year__strip i {
+  display: block;
+  width: 9px;
+  height: 15px;
+  background: var(--stub-ink);
+  border: 1.5px solid var(--ink);
+}
+
+.live-stubs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(206px, 1fr));
+  gap: 48px 26px;
+  margin: 0;
+  padding: 0 6px 0 0;
+  list-style: none;
+}
+.stub {
+  position: relative;
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform 0.18s ease;
+}
+.stub:hover { z-index: 2; transform: rotate(0deg) translateY(-4px); }
+.stub__ticket {
+  --notch: 10px;
+  --tear: 40px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin: 0;
+  background: var(--paper-4);
+  border: 2px solid var(--ink);
+  border-bottom: 0;
+}
+/* the cut: notches either side of the perforation, a torn foot */
+.stub__ticket {
+  -webkit-mask:
+    radial-gradient(circle var(--notch) at 0 calc(100% - var(--tear)), #0000 95%, #000),
+    radial-gradient(circle var(--notch) at 100% calc(100% - var(--tear)), #0000 95%, #000),
+    conic-gradient(from -45deg at 50% 100%, #0000, #000 1deg 89deg, #0000 90deg) 50% 100% / 12px 100% repeat-x;
+  -webkit-mask-composite: source-in, source-in;
+  mask:
+    radial-gradient(circle var(--notch) at 0 calc(100% - var(--tear)), #0000 95%, #000),
+    radial-gradient(circle var(--notch) at 100% calc(100% - var(--tear)), #0000 95%, #000),
+    conic-gradient(from -45deg at 50% 100%, #0000, #000 1deg 89deg, #0000 90deg) 50% 100% / 12px 100% repeat-x;
+  mask-composite: intersect;
+}
+/* the mask clips a shadow of its own, so the ink shadow lives on a wrapper (never on the credit) */
+.stub__shadow { height: 100%; filter: drop-shadow(5px 5px 0 var(--ink)); }
+.stub__ticket { filter: none; }
+
+.stub__art {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--stub-ink);
+  border-bottom: 2px solid var(--ink);
+  container-type: inline-size;
+}
+/* no picture: the kind's own print, under the halftone */
+.stub--gig .stub__art--type {
+  background-image: radial-gradient(color-mix(in srgb, var(--ink) 30%, transparent) 28%, transparent 31%);
+  background-size: 15px 15px;
+}
+.stub--musical .stub__art--type {
+  background-image: repeating-linear-gradient(-45deg, transparent 0 11px, rgba(255, 252, 239, 0.16) 11px 22px);
+}
+.stub--theatre .stub__art--type {
+  /* curtain folds and a scalloped pelmet */
+  background-image:
+    radial-gradient(circle at 50% 0, var(--ink) 0 9px, transparent 10px),
+    repeating-linear-gradient(90deg, rgba(23, 19, 17, 0.32) 0, transparent 9px, rgba(255, 252, 239, 0.14) 15px, rgba(23, 19, 17, 0.32) 26px);
+  background-size: 26px 18px, auto;
+  background-repeat: repeat-x, repeat;
+}
+.stub--comedy .stub__art--type {
+  background-image: repeating-conic-gradient(from 0deg at 50% 62%, rgba(255, 252, 239, 0.38) 0 9deg, transparent 9deg 18deg);
+}
+.stub--festival .stub__art--type {
+  /* bunting along the top, a field of stripes below */
+  background-image:
+    conic-gradient(from 135deg at 50% 0, var(--ink-yellow) 0 90deg, transparent 90deg),
+    repeating-linear-gradient(0deg, transparent 0 14px, rgba(23, 19, 17, 0.14) 14px 16px);
+  background-size: 26px 20px, auto;
+  background-repeat: repeat-x, repeat;
+  background-position: 0 6px, 0 0;
+}
+.stub--classical .stub__art--type {
+  /* a stave: five lines, then space */
+  background-image: repeating-linear-gradient(180deg, transparent 0 14px, rgba(255, 252, 239, 0.4) 14px 16px, transparent 16px 22px,
+    rgba(255, 252, 239, 0.4) 22px 24px, transparent 24px 30px, rgba(255, 252, 239, 0.4) 30px 32px, transparent 32px 38px,
+    rgba(255, 252, 239, 0.4) 38px 40px, transparent 40px 46px, rgba(255, 252, 239, 0.4) 46px 48px, transparent 48px 70px);
+}
+.stub--other .stub__art--type {
+  background-image: conic-gradient(rgba(23, 19, 17, 0.2) 25%, transparent 0 50%, rgba(23, 19, 17, 0.2) 0 75%, transparent 0);
+  background-size: 22px 22px;
+}
+.stub__art--type .stub__glyph { transform: rotate(calc(var(--tilt, 0deg) * -4 - 6deg)); }
+
+.stub__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 22%;
+  filter: grayscale(1) contrast(1.18) brightness(1.06);
+  mix-blend-mode: multiply;
+  color: transparent; /* a picture that fails to load leaves the printed panel, not its alt text */
+  transition: filter 0.25s ease;
+}
+.stub:hover .stub__img { filter: none; mix-blend-mode: normal; }
+.stub:hover .stub__art::after { opacity: 0; }
+.stub__glyph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--f-disp);
+  font-weight: 400;
+  line-height: 0.85;
+  text-transform: uppercase;
+  color: var(--stub-on);
+  text-shadow: 0.05em 0.05em 0 var(--ink);
+  transform: rotate(-7deg);
+  white-space: nowrap;
+}
+.stub__glyph--s { font-size: 44cqi; }
+.stub__glyph--m { font-size: 27cqi; }
+.stub__glyph--l { font-size: 20cqi; }
+
+.stub__body {
+  position: relative;
+  flex: 1;
+  padding: 14px 14px 16px;
+}
+.stub__stamp {
+  position: absolute;
+  top: -15px;
+  right: 10px;
+  padding: 3px 8px 2px;
+  background: var(--paper-4);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  outline: 1.5px solid var(--paper-4);
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transform: rotate(5deg);
+}
+.stub__kind {
+  margin: 0 0 6px;
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--stub-ink) 78%, var(--ink));
+}
+.stub--comedy .stub__kind { color: var(--ink); }
+.stub__kind span { font-weight: 400; color: color-mix(in srgb, var(--ink) 60%, #fff); }
+.stub__title {
+  margin: 0;
+  font-family: var(--f-disp);
+  font-size: 23px;
+  font-weight: 400;
+  line-height: 1.02;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+}
+
+/* below the perforation */
+.stub__tear {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  height: var(--tear);
+  padding: 0 14px 7px;
+  background: color-mix(in srgb, var(--stub-ink) 16%, var(--paper-4));
+  border-top: 2px dashed var(--ink);
+}
+.stub__no { font-family: var(--f-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink); }
+.stub__code {
+  width: 64px;
+  height: 14px;
+  background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 4px, var(--ink) 4px 5px, transparent 5px 8px, var(--ink) 8px 11px, transparent 11px 12px);
+  opacity: 0.8;
+}
+/* under the ticket, in the row gap, so every ticket in a row keeps the same height */
+.stub__credit {
+  position: absolute;
+  top: 100%;
+  left: 2px;
+  right: 0;
+  margin: 11px 0 0;
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  line-height: 1.35;
+  color: color-mix(in srgb, var(--ink) 62%, #fff);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .live-stubs { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 46px 16px; padding-right: 4px; }
+  .stub__credit { font-size: 8.5px; }
+  .stub__ticket { --tear: 32px; --notch: 8px; }
+  .stub__body { padding: 12px 10px 12px; }
+  .stub__title { font-size: 18px; }
+  .stub__kind span { display: none; }
+  .stub__stamp { font-size: 9.5px; padding: 2px 5px 1px; top: -12px; right: 6px; }
+  .stub__code { width: 34px; }
+  .stub__tear { padding: 0 10px 6px; }
+  .live-kinds__bar { height: 34px; }
+  .live-kinds__count { font-size: 24px; }
+  .live-year__strip { margin-left: 0; width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stub, .stub__img { transition: none; }
+}
+
+/* The hub's Live card, drawn like the page: a picture is printed in the live ink on a
+   ticket with an "admit one" foot; the kinds bar uses each kind's own ink. */
+.hub-card.life-ink--live .hub-hero__frame {
+  padding: 8px 8px 30px;
+  background: linear-gradient(var(--life-ink), var(--life-ink)) content-box no-repeat, var(--paper-4);
+  isolation: isolate;
+}
+.hub-card.life-ink--live .hub-hero__frame::after {
+  content: "admit one";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 0;
+  height: 24px;
+  padding-top: 4px;
+  border-top: 2px dashed var(--ink);
+  font-family: var(--f-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.hub-card.life-ink--live .hub-hero__img {
+  aspect-ratio: 4 / 5;
+  object-position: 50% 22%;
+  background: transparent;
+  filter: grayscale(1) contrast(1.18) brightness(1.06);
+  mix-blend-mode: multiply;
+}
+.hub-card.life-ink--live .hub-hero__frame::before { background: color-mix(in srgb, var(--ink-magenta) 70%, transparent); }
+.life-ink--live .life-split__part--gigs         { background: var(--ink-blue);    color: var(--paper-4); }
+.life-ink--live .life-split__part--musicals     { background: var(--ink-magenta); color: var(--paper-4); }
+.life-ink--live .life-split__part--theatre      { background: var(--ink-red);     color: var(--paper-4); }
+.life-ink--live .life-split__part--comedy       { background: var(--ink-yellow);  color: var(--ink); }
+.life-ink--live .life-split__part--festivals    { background: var(--ink-green);   color: var(--paper-4); }
+.life-ink--live .life-split__part--classical    { background: var(--ink-purple);  color: var(--paper-4); }
+.life-ink--live .life-split__part--other-nights,
+.life-ink--live .life-split__part--other        { background: var(--ink-orange);  color: var(--ink); }
