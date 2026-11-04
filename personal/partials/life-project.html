@@ -1,0 +1,10 @@
+{{!-- One project on /life/code (R2e.6). Context: an active[] or retired[] row from life-hub.mjs codeView;
+      `retired` adds the shelf stamp. A public repo links to GitHub; a private one is its name only. --}}
+<li class="life-project{{#if retired}} life-project--retired{{/if}}">
+  <span class="life-notable__title">{{#if url}}<a href="{{url}}">{{name}}</a>{{else}}{{name}}{{/if}}</span>
+  {{#if retired}}<span class="life-project__stamp" aria-hidden="true">retired</span>{{/if}}
+  <span class="life-notable__when">{{years}}</span>
+  {{#if description}}<p class="life-project__desc">{{description}}</p>{{/if}}
+  <span class="life-project__meta">{{#if commits}}{{commits}} commits{{/if}}{{#if lastCommit}}{{#if commits}} · {{/if}}last commit {{lastCommit}}{{/if}}</span>
+  {{#if languages.length}}<span class="life-project__langs">{{#each languages}}<span class="life-chip">{{this}}</span>{{/each}}</span>{{/if}}
+</li>

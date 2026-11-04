@@ -16,7 +16,7 @@
       <line x1="9" y1="0" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/>
     </svg>
 
-    {{!-- Code: GitHub activity, languages over time, projects by first commit (lifeSections.code). --}}
+    {{!-- Code (C7, R2e.6): commits a month, languages by year, active projects, then the retired shelf (lifeSections.code). --}}
     {{#with section}}
     {{> life-section-head snapTop="PUSHED" snapAccent="TO MAIN"}}
     {{#if empty}}
@@ -32,29 +32,21 @@
       {{> chart-line commits}}
     </div>
     {{/if}}
-    {{#if languagesByYear.length}}
-    <h2 class="fit-header">languages, <span>by year</span>.</h2>
-    <ol class="life-langs">
-      {{#each languagesByYear}}
-      <li class="life-langs__year">
-        <span class="life-langs__label">{{year}}</span>
-        <span class="life-langs__bar">
-          {{#each languages}}<span class="life-langs__part" style="flex-grow: {{pct}}" title="{{name}} {{pct}}%">{{name}} {{pct}}%</span>{{/each}}
-        </span>
-      </li>
-      {{/each}}
-    </ol>
+    {{#if languages}}
+    <div class="life-charts life-charts--wide">
+      {{> chart-stack languages}}
+    </div>
     {{/if}}
-    {{#if projects.length}}
+    {{#if active.length}}
     <h2 class="fit-header">the <span>projects</span>.</h2>
     <ol class="life-projects">
-      {{#each projects}}
-      <li class="life-project">
-        <span class="life-notable__title">{{#if url}}<a href="{{url}}">{{name}}</a>{{else}}{{name}}{{/if}}</span>
-        {{#if started}}<span class="life-notable__when">first commit {{started}}</span>{{/if}}
-        {{#if languages.length}}<span class="life-project__langs">{{#each languages}}<span class="life-chip">{{this}}</span>{{/each}}</span>{{/if}}
-      </li>
-      {{/each}}
+      {{#each active}}{{> life-project}}{{/each}}
+    </ol>
+    {{/if}}
+    {{#if retired.length}}
+    <h2 class="fit-header">the <span>retired</span> shelf.</h2>
+    <ol class="life-projects life-projects--retired">
+      {{#each retired}}{{> life-project retired=true}}{{/each}}
     </ol>
     {{/if}}
     {{/if}}

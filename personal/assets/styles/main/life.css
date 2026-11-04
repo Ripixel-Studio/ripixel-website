@@ -449,7 +449,7 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
   list-style: none;
   margin: 0;
   padding: 0;
-  min-width: 9ch;
+  min-width: 12.5ch;
   color: var(--ink);
   font-size: 11px;
 }
@@ -738,46 +738,46 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
 
 .life-charts--wide { grid-template-columns: 1fr; }
 
-.life-langs { margin-bottom: 26px; }
-
-.life-langs__year {
-  display: grid;
-  grid-template-columns: 4rem 1fr;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
-.life-langs__label {
-  font-family: var(--f-disp);
-  font-size: 24px;
-}
-
-.life-langs__bar {
-  display: flex;
-  min-width: 0;
-  border: 2px solid var(--ink);
-  background: #fff;
-}
-
-.life-langs__part {
-  min-width: 0;
-  padding: 3px 8px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  font-family: var(--f-mono);
-  font-size: 11px;
-  font-weight: 700;
-  background: var(--life-ink);
-  color: #fff;
-}
-
-.life-langs__part:nth-child(2n) { background: var(--paper-3); color: var(--ink); }
-.life-langs__part:nth-child(3n) { background: var(--ink); color: var(--paper); }
-.life-langs__part + .life-langs__part { border-left: 2px solid var(--ink); }
-
 .life-project__langs { flex-basis: 100%; }
+
+/* ─── /life/code projects: description, meta, and the retired shelf (R2e.6) ─ */
+.life-project__desc {
+  flex-basis: 100%;
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.life-project .life-notable__when { margin-top: 4px; }
+.life-project__meta {
+  flex-basis: 100%;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  opacity: 0.75;
+}
+.life-project__meta:empty { display: none; }
+.life-projects--retired {
+  background: var(--paper-2);
+  border-top-style: double;
+  border-top-width: 4px;
+  padding: 0 14px;
+}
+.life-project--retired .life-notable__title { color: color-mix(in srgb, var(--ink) 72%, var(--paper-2)); }
+.life-project--retired .life-notable__title a { border-bottom-color: color-mix(in srgb, var(--life-ink) 45%, var(--paper-2)); }
+.life-project--retired .life-chip { background: transparent; }
+.life-project__stamp {
+  align-self: center;
+  padding: 0 6px;
+  border: 1.5px solid currentColor;
+  border-radius: 2px;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--ink-red) 60%, var(--paper-2));
+  transform: rotate(-4deg);
+}
 
 /* ─── /life/fitness: every route on one sheet ─ */
 .life-heatmap {
