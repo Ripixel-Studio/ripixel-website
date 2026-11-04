@@ -38,25 +38,6 @@
       {{/each}}
     </div>
 
-    {{#if workView.highlights}}
-    <!-- Career highlights: the standout sheet -->
-    <section class="work-highlights" aria-labelledby="work-highlights-h">
-      <h2 class="work-highlights__title" id="work-highlights-h"><span>career highlights</span></h2>
-      <ol class="work-highlights__list">
-        {{#each workView.highlights}}
-        <li class="work-highlights__item">
-          <span class="work-highlights__n" aria-hidden="true">{{n}}</span>
-          <div class="work-highlights__text">
-            <strong class="work-highlights__label">{{#if url}}<a href="{{url}}" rel="noopener">{{label}} ↗</a>{{else}}{{label}}{{/if}}</strong>
-            {{#if year}}<span class="work-highlights__year">{{year}}</span>{{/if}}
-            {{#if detail}}<span class="work-highlights__detail">{{detail}}</span>{{/if}}
-          </div>
-        </li>
-        {{/each}}
-      </ol>
-    </section>
-    {{/if}}
-
     <!-- Roles, newest first -->
     <ol class="work-roles">
       {{#each workView.roles}}
@@ -90,6 +71,25 @@
       </li>
       {{/each}}
     </ol>
+
+    {{#if workView.highlights}}
+    <!-- Career highlights: the standout sheet -->
+    <section class="work-highlights" aria-labelledby="work-highlights-h">
+      <h2 class="work-highlights__title" id="work-highlights-h"><span>career highlights</span></h2>
+      <ol class="work-highlights__list">
+        {{#each workView.highlights}}
+        <li class="work-highlights__item">
+          <span class="work-highlights__n" aria-hidden="true">{{n}}</span>
+          <div class="work-highlights__text">
+            <strong class="work-highlights__label">{{#if url}}<a href="{{url}}" rel="noopener">{{label}} ↗</a>{{else}}{{label}}{{/if}}</strong>
+            {{#if year}}<span class="work-highlights__year">{{year}}</span>{{/if}}
+            {{#if detail}}<span class="work-highlights__detail">{{detail}}</span>{{/if}}
+          </div>
+        </li>
+        {{/each}}
+      </ol>
+    </section>
+    {{/if}}
 
     {{#if workView.salary}}
     <!-- Pay, only when James has confirmed it -->
