@@ -28,6 +28,7 @@ import { lifeHubTask } from './tasks/life-hub.mjs';
 import { workViewTask } from './tasks/work-view.mjs';
 import { lifeHeatmapTask } from './tasks/life-heatmap.mjs';
 import { lifePageTasks, templateHelpers } from './tasks/life-pages.mjs';
+import { routeMapAssetsTask } from './tasks/route-map.mjs';
 
 const SITE_URL = 'https://james.ripixel.co.uk';
 
@@ -184,6 +185,13 @@ export const tasks = [
     copyStaticTask({
         from: './personal/assets/images',
         to: './public/personal',
+    }),
+
+    // Tiled route maps: vendored Leaflet + the map script (sets leafletVersion)
+    routeMapAssetsTask({
+        outDir: './public/personal',
+        script: './personal/assets/scripts/route-map.js',
+        cacheHash,
     }),
 
     // Read and convert CHANGELOG.md to HTML for downstream use

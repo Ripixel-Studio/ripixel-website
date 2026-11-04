@@ -4,8 +4,11 @@
  * zone-trimmed) segments to SVG path strings, as `routePath()` does for one route;
  * Skier builtins render them.
  *
- * Sets `lifeHeatmapView`: `{viewBox, paths, count}`, or `null` without a heatmap doc.
+ * Sets `lifeHeatmapView`: `{viewBox, paths, count, json}`, or `null` without a heatmap doc.
+ * `paths` is the static sheet (home turf only; the no-JS fallback); `json` feeds the
+ * tiled map (every published segment, fitted to the same home turf; tasks/route-map.mjs).
  */
+import { heatmapMapData, scriptJson } from './route-map.mjs';
 
 const r2 = (/** @type {number} */ n) => Math.round(n * 100) / 100;
 
@@ -99,7 +102,8 @@ export function lifeHeatmapTask(config = {}) {
       const { viewBox, paths } = projectSegments(core.segments, core.bounds);
       const count = Number.isFinite(doc.activities) ? doc.activities : paths.length;
       ctx.logger.info(`Life heatmap: ${paths.length} segments from ${count} activities`);
-      return { lifeHeatmapView: { viewBox, paths, count } };
+      const json = scriptJson(heatmapMapData(doc.segments, core.bounds));
+      return { lifeHeatmapView: { viewBox, paths, count, json } };
     },
   };
 }

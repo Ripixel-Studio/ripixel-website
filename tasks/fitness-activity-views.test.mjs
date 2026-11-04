@@ -292,7 +292,8 @@ describe('view model from the fixtures', () => {
     assert.match(a.aiSummaryHtml, /^<p>A <b>5K personal best<\/b>/);
     assert.ok(a.hrZones && a.hrZones.total === 20);
     assert.ok(a.route && a.route.d.startsWith('M'));
-    assert.equal(a.routeThumbnailUrl, '');
+    assert.equal(a.routeMap?.state, 'map');
+    assert.equal(JSON.parse(a.routeMap.json).kind, 'route');
     assert.equal(a.photos.length, 1);
     assert.equal(a.heroSpark, undefined);
     assert.equal(a.heroChart?.label, 'heart rate');
@@ -351,7 +352,7 @@ describe('view model from the fixtures', () => {
     assert.equal(a.category, 'strength');
     assert.deepEqual(a.anchors.map((x) => x.label), ['sets', 'volume moved', 'duration', 'personal records']);
     assert.equal(a.route, null);
-    assert.equal(a.routeThumbnailUrl, '');
+    assert.equal(a.routeMap, null);
     const keys = a.modules.map((m) => m.key);
     assert.deepEqual(keys.slice(0, 3), ['muscle-heatmap', 'set-list', 'heart-rate']);
     const setList = a.modules.find((m) => m.key === 'set-list')?.setList;
@@ -416,7 +417,13 @@ describe('task', () => {
       assert.match(html, /class="act-zones__bar"/);
       assert.match(html, /class="chart__line"/);
       assert.match(html, /class="act-zones__yaxis"/);
-      assert.match(html, /class="act-map__svg"/);
+      assert.match(html, /class="route-map__fallback act-map__svg"/);
+      assert.match(html, /<div class="route-map route-map--activity" data-route-map role="region" aria-label="Route map\./);
+      const mapData = html.match(/<script type="application\/json" data-route-map-data>([^<]*)<\/script>/);
+      assert.ok(mapData, 'route map data');
+      assert.equal(JSON.parse(mapData[1]).kind, 'route');
+      assert.match(html, /<link rel="stylesheet" href="\/vendor\/leaflet-[^"]*\/leaflet\.css" \/>/);
+      assert.match(html, /<script src="\/scripts\/route-map\.x\.js" defer><\/script>/);
       assert.match(html, /act-band--parkrun/);
       assert.match(html, /href="\/life"/);
       assert.match(html, /<link rel="stylesheet" href="\/styles\.min\.x\.css"/);

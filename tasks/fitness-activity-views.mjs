@@ -26,6 +26,7 @@ import { buildHyroxHistory, buildRaceView, pbChase, eventUrl } from './fitness-h
 import { activityTheme, hybridRaceLabel } from './fitness-theme.mjs';
 import { calorieFigure } from './fitness-calories.mjs';
 import { orientationOf } from './fitness-photo-dims.mjs';
+import { routeMapState, cleanPoints, activityMapData, scriptJson, ROUTE_EMPTY_LABELS } from './route-map.mjs';
 
 export const ACTIVITY_BASE_PATH = '/life/activity';
 /** Where the fitness Atom feed is written (kept as a literal: tasks/fitness-feed-items.mjs imports this module). */
@@ -1002,8 +1003,15 @@ export function buildActivityView(file, index, opts = {}) {
       }
     : null;
   const tags = Array.isArray(activity.tags) ? activity.tags.filter((t) => typeof t === 'string' && t) : [];
-  const route = category === 'cardio-distance' && routePoints.length >= 10 ? routePath(routePoints) : null;
-  const routeThumbnailUrl = !route && entry.routeThumbnailUrl && /^https:\/\//.test(entry.routeThumbnailUrl) ? entry.routeThumbnailUrl : '';
+  // Route card: the tiled map over the published points (static SVG underneath for no-JS),
+  // or a one-line empty state. A hidden route is never drawn, whatever points came with it.
+  const routeState = routeMapState({ routePoints, routeHidden: file?.routeHidden ?? entry.routeHidden, category });
+  const route = routeState === 'map' ? routePath(cleanPoints(routePoints)) : null;
+  const routeMap = !routeState
+    ? null
+    : routeState === 'map' && route
+      ? { state: 'map', json: scriptJson(activityMapData(routePoints)) }
+      : { state: routeState === 'map' ? 'indoor' : routeState, label: ROUTE_EMPTY_LABELS[routeState === 'map' ? 'indoor' : routeState] };
 
   // Page bands
   const pk = has('PARKRUN') && activityType === 'ACTIVITY_TYPE_RUN' && en.parkrun?.eventName ? en.parkrun : null;
@@ -1162,7 +1170,7 @@ export function buildActivityView(file, index, opts = {}) {
       tags,
       photos,
       route,
-      routeThumbnailUrl,
+      routeMap,
       heroChart,
       hrZones,
       modules,
