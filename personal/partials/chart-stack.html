@@ -1,0 +1,23 @@
+{{!-- A 100 % stacked column chart with axes (R2e.5). Context: a StackModel from tasks/chart-axes.mjs
+      stackedShare(): years carry {label, pct (column centre), left, width, segments [{key, label, slot,
+      pct, y, h}]} in percent of the plot; series is the fixed legend order (slot 1 on the baseline,
+      colour var(--series-N)); gaps are runs of missing years, drawn as a pale marked slot so years that are
+      not adjacent never look adjacent; ends label the latest column; the details twin carries every value. --}}
+<figure class="chart chart--stack">
+  <figcaption class="chart__label">Languages <span>share of code, by year</span></figcaption>
+  <div class="chart__plot">
+    <ol class="chart__y" aria-hidden="true">{{#each yTicks}}<li style="top:{{pct}}%">{{label}}</li>{{/each}}</ol>
+    <svg class="chart__svg" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="{{summary}}">
+      {{#each yTicks}}<line class="chart__grid" x1="0" x2="100" y1="{{pct}}" y2="{{pct}}" vector-effect="non-scaling-stroke"/>{{/each}}
+      {{#each gaps}}<rect class="chart__gap" x="{{left}}" width="{{width}}" y="0" height="100"><title>{{title}}</title></rect>{{/each}}
+      {{#each years}}<g>{{#each segments}}<rect class="chart__seg" x="{{../left}}" width="{{../width}}" y="{{y}}" height="{{h}}" style="fill:var(--series-{{slot}})" vector-effect="non-scaling-stroke"><title>{{label}} {{pct}}%</title></rect>{{/each}}</g>{{/each}}
+    </svg>
+    <ol class="chart__ends" aria-hidden="true">{{#each ends}}<li style="top:{{y}}%"><i style="background:var(--series-{{slot}})"></i>{{label}}</li>{{/each}}</ol>
+    <ol class="chart__x" aria-hidden="true">{{#each years}}<li style="left:{{pct}}%"><span class="chart__xl">{{label}}</span><span class="chart__xs">{{short}}</span></li>{{/each}}{{#each gaps}}<li class="chart__xgap" style="left:{{pct}}%"><span class="chart__xl">{{label}}</span><span class="chart__xs">{{short}}</span></li>{{/each}}</ol>
+  </div>
+  <ul class="chart__legend">{{#each series}}<li><i style="background:var(--series-{{slot}})" aria-hidden="true"></i>{{label}}</li>{{/each}}</ul>
+  <details class="chart__table">
+    <summary>the numbers</summary>
+    <ul>{{#each years}}<li><b>{{label}}</b> {{#each segments}}<span>{{label}} {{pct}}%</span>{{/each}}</li>{{/each}}{{#each gaps}}<li><b>{{label}}</b> <span>no code</span></li>{{/each}}</ul>
+  </details>
+</figure>

@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const LIFE = path.join(REPO, 'public', 'personal', 'life');
 
-const WRAPPERS = ['chart', 'act-zones-wrap', 'fit-strip', 'roundup-effort-wrap'];
+const WRAPPERS = ['chart', 'chart--stack', 'act-zones-wrap', 'fit-strip', 'roundup-effort-wrap'];
 const EXEMPT = /act-map__svg|heatmap|route|reg-?mark/;
 const AXIS = /class="(?:chart__y|[\w-]*__yaxis)[\s"]/;
 

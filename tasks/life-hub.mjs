@@ -18,7 +18,7 @@
  * `work.salary` exists in the export (ruling F9).
  */
 
-import { lineChart } from './chart-axes.mjs';
+import { lineChart, stackedShare } from './chart-axes.mjs';
 
 export const SECTION_ORDER = ['fitness', 'body', 'games', 'code', 'watching', 'listening', 'reading'];
 /** @param {string} name */
@@ -376,6 +376,48 @@ function mediaView(sec, outings) {
   };
 }
 
+/** A project link only when it is a repo under James's own GitHub accounts. */
+const REPO_URL = /^https:\/\/github\.com\/(ripixel|Ripixel-Studio)\/[\w.-]+$/;
+
+/**
+ * The code page (C7, R2e.6): active projects, the retired shelf, the commits line chart and the
+ * languages-by-year stacked shares. An old export without `status` reads as all active.
+ * @param {any} sec
+ */
+function codeView(sec) {
+  const year = (/** @type {unknown} */ y) => (Number.isInteger(y) ? String(y) : '');
+  const projects = (Array.isArray(sec.projects) ? sec.projects : []).filter((p) => p && typeof p === 'object' && p.name)
+    .map((/** @type {any} */ p) => {
+      const started = /^\d{4}-\d{2}-\d{2}/.test(String(p.started || '')) ? String(p.started).slice(0, 10) : '';
+      const from = year(p.fromYear) || started.slice(0, 4);
+      const retired = p.status === 'retired';
+      const to = retired ? (year(p.toYear) || String(p.lastCommit || '').slice(0, 4)) : 'now';
+      return {
+        retired,
+        view: {
+          name: String(p.name),
+          description: typeof p.description === 'string' ? p.description.trim() : '',
+          years: from && to && from !== to ? `${from}–${to}` : from,
+          lastCommit: monthLabel(String(p.lastCommit || '')),
+          commits: num(p.commits) != null ? group(p.commits) : '',
+          commitsUnit: p.commits === 1 ? 'commit' : 'commits',
+          languages: (Array.isArray(p.languages) ? p.languages : []).filter((l) => typeof l === 'string' && l),
+          url: typeof p.url === 'string' && REPO_URL.test(p.url) ? p.url : '',
+          started,
+        },
+      };
+    });
+  const months = (Array.isArray(sec.commitsByMonth) ? sec.commitsByMonth : []).filter((m) => m && typeof m === 'object');
+  const byYear = sec.languagesByYear && typeof sec.languagesByYear === 'object' ? sec.languagesByYear : {};
+  return {
+    languagesNow: Array.isArray(sec.languagesNow) ? sec.languagesNow : [],
+    commits: lineChart(months.map((m) => num(m.n) ?? 0), { label: 'Commits', unit: 'a month', x: { kind: 'months', months: months.map((m) => String(m.month || '')) } }),
+    languages: stackedShare(byYear),
+    active: projects.filter((p) => !p.retired).map((p) => p.view),
+    retired: projects.filter((p) => p.retired).map((p) => p.view),
+  };
+}
+
 /**
  * One section's page view. `sec` is the export's section, or the fitness card
  * source; a missing or empty one gives `empty: true` and no numbers at all.
@@ -392,26 +434,8 @@ export function buildSection(name, sec, now = new Date(), outingNotables = []) {
       return { ...view, ...bodyView(sec) };
     case 'games':
       return { ...view, ...gamesView(sec) };
-    case 'code': {
-      const byYear = sec.languagesByYear || {};
-      return {
-        ...view,
-        projects: (Array.isArray(sec.projects) ? sec.projects : []).map((p) => ({
-          name: String(p?.name || ''), started: String(p?.started || ''), languages: Array.isArray(p?.languages) ? p.languages : [],
-          url: typeof p?.url === 'string' && /^https:\/\//.test(p.url) ? p.url : '',
-        })).filter((p) => p.name),
-        languagesNow: Array.isArray(sec.languagesNow) ? sec.languagesNow : [],
-        languagesByYear: Object.keys(byYear).sort().map((y) => ({
-          year: y,
-          languages: Object.entries(byYear[y] || {}).sort((a, b) => Number(b[1]) - Number(a[1]))
-            .map(([lang, share]) => ({ name: lang, pct: Math.round(Number(share) * 10) / 10 })),
-        })),
-        commits: (() => {
-          const months = (Array.isArray(sec.commitsByMonth) ? sec.commitsByMonth : []).filter((m) => m && typeof m === 'object');
-          return lineChart(months.map((m) => num(m.n) ?? 0), { label: 'Commits', unit: 'a month', x: { kind: 'months', months: months.map((m) => String(m.month || '')) } });
-        })(),
-      };
-    }
+    case 'code':
+      return { ...view, ...codeView(sec) };
     case 'watching': {
       const m = mediaView(sec, outingNotables.filter((n) => n.kind === 'cinema'));
       const y = m.totals.year, mo = m.totals.month;
@@ -467,7 +491,7 @@ export function hubNote(name, v) {
       if (v.league?.rankLabel) return { label: 'League', value: v.league.rankLabel, href: '' };
       return v.recent?.[0] ? { label: 'Recently', value: v.recent[0].name, href: '' } : null;
     case 'code': {
-      const p = [...(v.projects || [])].sort((a, b) => b.started.localeCompare(a.started))[0];
+      const p = [...(v.active || [])].sort((a, b) => b.started.localeCompare(a.started))[0];
       return p ? { label: 'Newest project', value: p.name, href: p.url || '' } : null;
     }
     case 'reading': {

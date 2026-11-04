@@ -107,7 +107,7 @@ test('empty section has no numbers', () => {
 test('section views from the fixture', () => {
   assert.equal(buildSection('body', fixture.sections.body, now).measures.stats[0].value, '80.1');
   assert.equal(buildSection('body', fixture.sections.body, now).sleep.stats[0].value, '7h 24m');
-  assert.equal(buildSection('code', fixture.sections.code, now).projects[1].url, '');
+  assert.equal(buildSection('code', fixture.sections.code, now).active[1].url, '');
   assert.deepEqual(buildSection('games', fixture.sections.games, now).stats.map((r) => r.label), ['This year', 'All time', 'Multiplayer', 'Backlog']);
   assert.equal(buildSection('reading', fixture.sections.reading, now).current[0].percent, 40);
 });
@@ -121,14 +121,6 @@ test('task sets globals', async () => {
   const none = await runSkierTasks([lifeHubTask()], { lifeIndex: null, fitnessLife: null });
   assert.equal(none.lifeHub.cards.every((c) => c.empty), true);
   assert.deepEqual(none.lifePersonal, []);
-});
-
-test('export shapes: language shares are percentages', () => {
-  const c = buildSection('code', fixture.sections.code, now);
-  const y25 = c.languagesByYear.find((y) => y.year === '2025');
-  assert.deepEqual(y25.languages, [{ name: 'Python', pct: 55 }, { name: 'JavaScript', pct: 45 }]);
-  assert.ok(c.languagesByYear.every((y) => y.languages.every((l) => l.pct <= 100)));
-  assert.equal(c.languagesByYear[1].languages[0].pct, 60.5);
 });
 
 test('partial totals: absent fields do not become zero rows from nowhere', () => {
@@ -154,7 +146,7 @@ test('hub notes: the latest thing or the next number per section', () => {
   assert.deepEqual(notes.games, { label: 'League', value: 'Gold II · 54 LP', href: '' });
   const noLeague = buildSection('games', { ...fixture.sections.games, league: null }, now);
   assert.deepEqual(hubNote('games', noLeague), { label: 'Recently', value: 'Sample Tactics', href: '' });
-  assert.deepEqual(notes.code, { label: 'Newest project', value: 'sample-tool', href: '' });
+  assert.deepEqual(notes.code, { label: 'Newest project', value: 'sample-tool', href: 'https://github.com/Ripixel-Studio/sample-tool' });
   assert.equal(notes.watching.value, 'The Invented Harbour');
   assert.equal(notes.listening.value, 'Sample Echoes, The Placeholders');
   assert.equal(notes.reading.value, 'A Made-Up Almanac, Ada Example');
@@ -394,4 +386,102 @@ test('League champion names, not Data Dragon ids', () => {
   const g = buildSection('games', sec, now);
   assert.equal(g.league.mains[0].champion, 'Miss Fortune');
   assert.equal(g.league.recent.pool[0].champion, 'Twisted Fate');
+});
+
+// ─── Round 2: the code page reads C7 (R2e.6) ───
+
+test('code view splits', () => {
+  const c = buildSection('code', fixture.sections.code, now);
+  assert.deepEqual(c.active.map((p) => p.name), ['sample-tool', 'quiet-ledger']);
+  assert.deepEqual(c.retired.map((p) => p.name), ['paper-lantern', 'old-orbit']);
+  const [tool, ledger] = c.active;
+  assert.deepEqual(tool, {
+    name: 'sample-tool', description: 'A small invented command-line helper that tidies folders of sample files.',
+    years: '2025–now', lastCommit: 'Oct 2026', commits: '1,212', commitsUnit: 'commits', languages: ['Python', 'Shell'],
+    url: 'https://github.com/Ripixel-Studio/sample-tool', started: '2025-08-02',
+  });
+  // the private one: no link, and no placeholder description
+  assert.equal(ledger.url, '');
+  assert.equal(ledger.description, '');
+  assert.equal(ledger.years, '2024–now');
+  assert.equal(c.retired[0].years, '2019–2023');
+  assert.equal(c.retired[1].years, '2016–2019');
+  assert.equal(c.retired[1].lastCommit, 'Nov 2019');
+  assert.equal(c.retired[1].url, 'https://github.com/ripixel/old-orbit');
+  const one = structuredClone(fixture.sections.code);
+  one.projects[0].commits = 1;
+  assert.equal(buildSection('code', one, now).active[0].commitsUnit, 'commit');
+  assert.ok(!('projects' in c) && !('languagesByYear' in c));
+});
+
+test('url validated', () => {
+  const sec = structuredClone(fixture.sections.code);
+  const bad = ['https://evil.example/x', 'http://github.com/ripixel/x', 'https://github.com/someone-else/x',
+    'https://github.com/ripixel/x/tree/main', 'https://github.com/ripixel/x?y=1', 'javascript:alert(1)', 'https://github.com.evil.example/ripixel/x', 42, null];
+  sec.projects = bad.map((url, i) => ({ name: `bad-${i}`, status: 'active', fromYear: 2025, toYear: null, started: '2025-01-01', lastCommit: '2026-10', commits: 1, languages: [], url }));
+  const c = buildSection('code', sec, now);
+  assert.equal(c.active.length, bad.length);
+  assert.ok(c.active.every((p) => p.url === ''), JSON.stringify(c.active.map((p) => p.url)));
+  sec.projects = [{ ...sec.projects[0], url: 'https://github.com/Ripixel-Studio/some.repo-name_2' }];
+  assert.equal(buildSection('code', sec, now).active[0].url, 'https://github.com/Ripixel-Studio/some.repo-name_2');
+});
+
+test('languages chart', () => {
+  const c = buildSection('code', fixture.sections.code, now);
+  assert.ok(c.languages);
+  assert.ok(c.languages.series.length <= 6);
+  assert.deepEqual(c.languages.yTicks.map((t) => t.label), ['100%', '50%', '0%']);
+  assert.equal(c.languages.series.at(-1).key, 'Other');
+  assert.deepEqual(c.languages.years.map((y) => y.label), ['2022', '2023', '2024', '2025', '2026']);
+  assert.deepEqual(c.languagesNow, ['Python', 'TypeScript', 'Go']);
+  assert.equal(buildSection('code', { ...fixture.sections.code, languagesByYear: { '2026': { Go: 100 } } }, now).languages, null);
+});
+
+test('old export: projects without status are active, and the page renders', async () => {
+  const sec = structuredClone(fixture.sections.code);
+  sec.projects = [
+    { name: 'example-site', started: '2024-03-14', languages: ['JavaScript', 'CSS'], url: 'https://github.com/ripixel/example-site' },
+    { name: 'sample-tool', started: '2025-08-02', languages: ['Python'], url: null },
+  ];
+  const c = buildSection('code', sec, now);
+  assert.deepEqual(c.active.map((p) => p.name), ['example-site', 'sample-tool']);
+  assert.deepEqual(c.retired, []);
+  assert.equal(c.active[0].years, '2024–now');
+  assert.equal(c.active[0].lastCommit, '');
+  assert.equal(c.active[0].description, '');
+  assert.deepEqual(hubNote('code', c), { label: 'Newest project', value: 'sample-tool', href: '' });
+
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'code-page-'));
+  try {
+    const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+    const pages = path.join(tmp, 'pages');
+    await fs.mkdir(pages);
+    await fs.copyFile(path.join(REPO, 'personal/pages/life/code.html'), path.join(pages, 'code.html'));
+    const render = async (/** @type {any} */ section) => {
+      const out = path.join(tmp, 'out-' + Math.random().toString(36).slice(2));
+      await runSkierTasks([generatePagesTask({
+        pagesDir: pages, partialsDir: path.join(REPO, 'personal/partials'), outDir: out, helpers: templateHelpers,
+        additionalVarsFn: () => ({ page: 'life', section }),
+      })], { siteUrl: 'https://james.ripixel.co.uk', cacheHash: 'test', year: 2026 }, []);
+      return fs.readFile(path.join(out, 'code.html'), 'utf8');
+    };
+    const old = await render(c);
+    assert.match(old, /example-site/);
+    assert.doesNotMatch(old, /retired<\/span> shelf/);
+    assert.doesNotMatch(old, /class="life-langs[" _]/);
+
+    // the full fixture: chart, active, then the shelf; private repo unlinked; no empty descriptions
+    const full = await render(buildSection('code', fixture.sections.code, now));
+    assert.match(full, /class="chart chart--stack"/);
+    assert.match(full, /<title>Python 39.5%<\/title>/);
+    const iActive = full.indexOf('sample-tool');
+    const iShelf = full.indexOf('the <span>retired</span> shelf.');
+    assert.ok(iActive > 0 && iShelf > iActive && full.indexOf('old-orbit') > iShelf);
+    assert.match(full, /<a href="https:\/\/github.com\/Ripixel-Studio\/sample-tool"/);
+    assert.doesNotMatch(full, /href="[^"]*quiet-ledger/);
+    assert.equal((full.match(/class="life-project__desc"/g) || []).length, 2);
+    assert.doesNotMatch(full, /life-project__desc">\s*</);
+  } finally {
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
 });

@@ -4,7 +4,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { niceTicks, formatTick, lineChart, SECOND_MULTS } from './chart-axes.mjs';
+import { niceTicks, formatTick, lineChart, SECOND_MULTS, stackedShare } from './chart-axes.mjs';
 
 const WEEKS = ['2026-10-05', '2026-10-12', '2026-10-19', '2026-10-26', '2026-11-02'];
 const weeks = (n) => ({ kind: /** @type {const} */ ('weeks'), weeks: WEEKS.slice(0, n) });
@@ -134,5 +134,105 @@ describe('lineChart', () => {
     assert.equal(m.summary, 'Pace in /km, over 20:00: 5:12 to 5:45');
     // The fastest sample (301 s) sits higher than the slowest (345 s).
     assert.ok(m.end.y > 0 && m.yTicks[0].label === '5:00');
+  });
+});
+
+// ─── R2e.5: the stacked-share column model (languages by year) ───
+describe('stackedShare', () => {
+  // TypeScript leads overall; Go leads 2025 alone.
+  const BY_YEAR = {
+    '2023': { TypeScript: 70, Python: 20, CSS: 10 },
+    '2024': { TypeScript: 50, Go: 30, Python: 20 },
+    '2025': { Go: 55, TypeScript: 40, Shell: 5 },
+    '2026': { TypeScript: 60, Go: 25, HTML: 10, Rust: 5 },
+  };
+
+  test('stackedShare sums: each year\'s segments sum to 100', () => {
+    const m = stackedShare({ '2024': { A: 33.33, B: 33.33, C: 33.34 }, '2025': { A: 1, B: 2 } });
+    assert.ok(m);
+    for (const y of m.years) {
+      const sum = y.segments.reduce((s, g) => s + g.pct, 0);
+      assert.ok(Math.abs(sum - 100) <= 0.1, `${y.label}: ${sum}`);
+      const h = y.segments.reduce((s, g) => s + g.h, 0);
+      assert.ok(Math.abs(h - 100) <= 0.1, `${y.label} heights: ${h}`);
+    }
+    const m2 = stackedShare(BY_YEAR);
+    assert.ok(m2);
+    for (const y of m2.years) assert.ok(Math.abs(y.segments.reduce((s, g) => s + g.pct, 0) - 100) <= 0.1);
+    assert.deepEqual(m2.years.map((y) => y.label), ['2023', '2024', '2025', '2026']);
+    assert.deepEqual(m2.yTicks.map((t) => t.label), ['100%', '50%', '0%']);
+    assert.deepEqual(m2.yTicks.map((t) => t.pct), [0, 50, 100]);
+  });
+
+  test('slots stable: TypeScript keeps slot 1 even when Go leads a year', () => {
+    const m = stackedShare(BY_YEAR);
+    assert.ok(m);
+    assert.equal(m.series[0].key, 'TypeScript');
+    assert.equal(m.series[0].slot, 1);
+    assert.equal(m.series[1].key, 'Go');
+    for (const y of m.years) {
+      const ts = y.segments.find((g) => g.key === 'TypeScript');
+      assert.ok(ts, y.label);
+      assert.equal(ts.slot, 1, y.label);
+      // slot 1 sits on the baseline in every column
+      assert.ok(Math.abs(ts.y + ts.h - 100) < 0.01, y.label);
+    }
+    // segments keep the fixed series order, not the year's rank
+    const y25 = m.years.find((y) => y.label === '2025');
+    assert.deepEqual(y25?.segments.map((g) => g.key), ['TypeScript', 'Go', 'Other']);
+  });
+
+  test('other bucket: a 7th language is folded into Other', () => {
+    const m = stackedShare({
+      '2025': { A: 30, B: 20, C: 15, D: 12, E: 10, F: 8, G: 5 },
+      '2026': { A: 30, B: 20, C: 15, D: 12, E: 10, F: 8, G: 5 },
+    });
+    assert.ok(m);
+    assert.deepEqual(m.series.map((s) => s.key), ['A', 'B', 'C', 'D', 'E', 'Other']);
+    assert.deepEqual(m.series.map((s) => s.slot), [1, 2, 3, 4, 5, 6]);
+    const other = m.years[0].segments.find((g) => g.key === 'Other');
+    assert.equal(other?.pct, 13);
+    assert.equal(other?.label, 'Other');
+    // no Other series when nothing is folded
+    const few = stackedShare({ '2025': { A: 60, B: 40 }, '2026': { A: 50, B: 50 } });
+    assert.deepEqual(few?.series.map((s) => s.key), ['A', 'B']);
+  });
+
+  test('single year: null', () => {
+    assert.equal(stackedShare({ '2026': { TypeScript: 100 } }), null);
+    assert.equal(stackedShare({}), null);
+    assert.equal(stackedShare(/** @type {any} */ (null)), null);
+    // a year with no usable shares does not count
+    assert.equal(stackedShare({ '2025': { Go: 0 }, '2026': { Go: 100 } }), null);
+  });
+
+  test('summary and x positions', () => {
+    const m = stackedShare(BY_YEAR);
+    assert.ok(m);
+    assert.equal(m.summary, 'Languages by year, 2023 to 2026: TypeScript most in 2023, 2024, 2026; Go most in 2025');
+    assert.deepEqual(m.years.map((y) => y.pct), [12.5, 37.5, 62.5, 87.5]);
+    // direct labels on the latest column, for segments tall enough to hold one
+    assert.deepEqual(m.ends.map((e) => e.label), ['TypeScript', 'Go', 'HTML']);
+  });
+
+  test('gap years: a missing run gets its own marked slot, not silent adjacency', () => {
+    const m = stackedShare({ '2016': { Java: 100 }, '2020': { Go: 100 }, '2021': { Go: 50, Java: 50 }, '2024': { Go: 100 } });
+    assert.ok(m);
+    assert.deepEqual(m.years.map((y) => y.label), ['2016', '2020', '2021', '2024']);
+    assert.deepEqual(m.gaps.map((g) => g.label), ['2017–2019', '2022–2023']);
+    assert.deepEqual(m.gaps.map((g) => g.title), ['No code in 2017–2019', 'No code in 2022–2023']);
+    // the gap sits between its neighbours on the x axis
+    const [g1, g2] = m.gaps;
+    assert.ok(m.years[0].pct < g1.pct && g1.pct < m.years[1].pct);
+    assert.ok(m.years[2].pct < g2.pct && g2.pct < m.years[3].pct);
+    // a single missing year is labelled by itself
+    const one = stackedShare({ '2023': { Go: 100 }, '2025': { Go: 100 } });
+    assert.deepEqual(one?.gaps.map((g) => g.label), ['2024']);
+    // contiguous years: no gaps; short labels for narrow screens
+    const none = stackedShare({ '2025': { Go: 100 }, '2026': { Go: 100 } });
+    assert.deepEqual(none?.gaps, []);
+    assert.deepEqual(none?.years.map((y) => y.short), ['’25', '’26']);
+    // every slot fits inside the plot
+    for (const c of [...m.years, ...m.gaps]) assert.ok(c.left >= 0 && c.left + c.width <= 100.01, JSON.stringify(c));
   });
 });

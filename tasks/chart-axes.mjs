@@ -223,3 +223,121 @@ export function lineChart(values, opts) {
     },
   };
 }
+
+/**
+ * @typedef {{ key: string, label: string, slot: number, pct: number, y: number, h: number }} StackSegment
+ * @typedef {{ label: string, short: string, title: string, pct: number, left: number, width: number }} StackGap
+ * @typedef {{ years: { label: string, short: string, pct: number, left: number, width: number, segments: StackSegment[] }[],
+ *   gaps: StackGap[],
+ *   series: { key: string, label: string, slot: number }[],
+ *   yTicks: Tick[], ends: { label: string, slot: number, y: number }[], summary: string }} StackModel
+ */
+
+/** Shares (any scale) to tenths of a percent that sum to exactly 100 (largest remainder). */
+function tenths(values) {
+  const total = values.reduce((s, v) => s + v, 0);
+  const raw = values.map((v) => (v / total) * 1000);
+  const out = raw.map(Math.floor);
+  let left = 1000 - out.reduce((s, v) => s + v, 0);
+  const order = raw.map((v, i) => [v - Math.floor(v), i]).sort((a, b) => b[0] - a[0] || a[1] - b[1]);
+  for (let k = 0; left > 0 && k < order.length; k++, left--) out[order[k][1]]++;
+  return out;
+}
+
+/**
+ * The model for a 100 % stacked column chart (languages by year, R2e.5): one column per
+ * year, the `top` keys by share summed over every year in that fixed order (slot 1 on
+ * the baseline), the rest folded into `Other`. A key's slot follows the key, never its
+ * rank within a year. Null with fewer than 2 years that have shares.
+ * @param {Record<string, Record<string, number>>} byYear
+ * @param {{ top?: number, label?: string }} [opts]
+ * @returns {StackModel | null}
+ */
+export function stackedShare(byYear, opts = { top: 5 }) {
+  if (!byYear || typeof byYear !== 'object') return null;
+  const top = Math.max(1, Math.min(5, opts?.top ?? 5));
+  const finitePos = (v) => typeof v === 'number' && Number.isFinite(v) && v > 0;
+  const rows = Object.keys(byYear).sort()
+    .map((label) => [label, Object.entries(byYear[label] || {}).filter(([k, v]) => k && finitePos(v))])
+    .filter(([, e]) => e.length);
+  if (rows.length < 2) return null;
+
+  // Rank keys by their share summed over every year (each year normalised first).
+  /** @type {Map<string, number>} */
+  const total = new Map();
+  for (const [, entries] of rows) {
+    const sum = entries.reduce((s, [, v]) => s + v, 0);
+    for (const [k, v] of entries) total.set(k, (total.get(k) ?? 0) + v / sum);
+  }
+  const ranked = [...total.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([k]) => k);
+  const keys = ranked.slice(0, top);
+  const folded = ranked.length > top;
+  const series = [...keys, ...(folded ? ['Other'] : [])].map((key, i) => ({ key, label: key, slot: i + 1 }));
+
+  // x layout: one band per year present; a run of missing years gets a half-width marked slot,
+  // so 2016 never sits silently beside 2020.
+  const isYear = (l) => /^\d{4}$/.test(String(l));
+  /** @type {{ kind: 'year' | 'gap', i?: number, from?: number, to?: number, units: number }[]} */
+  const slots = [];
+  rows.forEach(([label], i) => {
+    const prev = i ? rows[i - 1][0] : null;
+    if (prev != null && isYear(prev) && isYear(label) && +label - +prev > 1) {
+      slots.push({ kind: 'gap', from: +prev + 1, to: +label - 1, units: 0.5 });
+    }
+    slots.push({ kind: 'year', i, units: 1 });
+  });
+  const unit = 100 / slots.reduce((s, x) => s + x.units, 0);
+  const width = pc(unit * 0.62);
+  /** @type {Map<number, number>} */
+  const centres = new Map();
+  const gaps = [];
+  let at = 0;
+  for (const sl of slots) {
+    const centre = pc(unit * (at + sl.units / 2));
+    at += sl.units;
+    if (sl.kind === 'year') { centres.set(/** @type {number} */ (sl.i), centre); continue; }
+    const label = sl.from === sl.to ? String(sl.from) : `${sl.from}–${sl.to}`;
+    const w = pc(unit * sl.units * 0.62);
+    gaps.push({ label, short: '', title: `No code in ${label}`, pct: centre, left: pc(centre - w / 2), width: w });
+  }
+
+  const years = rows.map(([label, entries], i) => {
+    const m = new Map(entries);
+    const vals = series.map((s) => (s.key === 'Other' && folded
+      ? entries.filter(([k]) => !keys.includes(k)).reduce((t, [, v]) => t + v, 0)
+      : m.get(s.key) ?? 0));
+    const t = tenths(vals);
+    let cum = 0;
+    const segments = [];
+    series.forEach((s, j) => {
+      if (!t[j]) return;
+      const pct = t[j] / 10;
+      cum += t[j];
+      segments.push({ key: s.key, label: s.label, slot: s.slot, pct, y: clean((1000 - cum) / 10), h: pct });
+    });
+    const centre = /** @type {number} */ (centres.get(i));
+    const l = String(label);
+    return { label: l, short: isYear(l) ? `’${l.slice(2)}` : l, pct: centre, left: pc(centre - width / 2), width, segments };
+  });
+
+  const last = years[years.length - 1];
+  const ends = last.segments.filter((g) => g.h >= 8).map((g) => ({ label: g.label, slot: g.slot, y: pc(g.y + g.h / 2) }));
+
+  /** @type {Map<string, string[]>} */
+  const leads = new Map();
+  for (const y of years) {
+    const lead = y.segments.reduce((a, b) => (b.pct > a.pct ? b : a));
+    leads.set(lead.label, [...(leads.get(lead.label) ?? []), y.label]);
+  }
+  const name = String(opts?.label ?? 'Languages by year');
+  const summary = `${name}, ${years[0].label} to ${last.label}: ${[...leads].map(([k, ys]) => `${k} most in ${ys.join(', ')}`).join('; ')}`;
+
+  return {
+    years,
+    gaps,
+    series,
+    yTicks: [{ label: '100%', pct: 0 }, { label: '50%', pct: 50 }, { label: '0%', pct: 100 }],
+    ends,
+    summary,
+  };
+}
