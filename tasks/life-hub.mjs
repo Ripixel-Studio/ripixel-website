@@ -380,8 +380,8 @@ function mediaView(sec, outings) {
 const REPO_URL = /^https:\/\/github\.com\/(ripixel|Ripixel-Studio)\/[\w.-]+$/;
 
 /**
- * The code page (C7, R2e.6): active projects, the retired shelf, the commits line chart and the
- * languages-by-year stacked shares. An old export without `status` reads as all active.
+ * The code page (C7, R2e.6): active projects, the commits line chart and the
+ * languages-by-year stacked shares. Retired rows are dropped; an old export without `status` reads as all active.
  * @param {any} sec
  */
 function codeView(sec) {
@@ -390,14 +390,12 @@ function codeView(sec) {
     .map((/** @type {any} */ p) => {
       const started = /^\d{4}-\d{2}-\d{2}/.test(String(p.started || '')) ? String(p.started).slice(0, 10) : '';
       const from = year(p.fromYear) || started.slice(0, 4);
-      const retired = p.status === 'retired';
-      const to = retired ? (year(p.toYear) || String(p.lastCommit || '').slice(0, 4)) : 'now';
       return {
-        retired,
+        retired: p.status === 'retired',
         view: {
           name: String(p.name),
           description: typeof p.description === 'string' ? p.description.trim() : '',
-          years: from && to && from !== to ? `${from}–${to}` : from,
+          years: from ? `${from}–now` : '',
           lastCommit: monthLabel(String(p.lastCommit || '')),
           commits: num(p.commits) != null ? group(p.commits) : '',
           commitsUnit: p.commits === 1 ? 'commit' : 'commits',
@@ -414,7 +412,6 @@ function codeView(sec) {
     commits: lineChart(months.map((m) => num(m.n) ?? 0), { label: 'Commits', unit: 'a month', x: { kind: 'months', months: months.map((m) => String(m.month || '')) } }),
     languages: stackedShare(byYear),
     active: projects.filter((p) => !p.retired).map((p) => p.view),
-    retired: projects.filter((p) => p.retired).map((p) => p.view),
   };
 }
 
