@@ -508,7 +508,17 @@ export function hubNote(name, v) {
 /** @param {any} lifeIndex */
 function outingNotables(lifeIndex) {
   const o = lifeIndex?.sections?.outings;
-  return Array.isArray(o?.notable) ? o.notable.filter((n) => n && n.title) : [];
+  // Outings keep month precision and are few: the list carries every year the export holds
+  // (`years`), not only the last two months (`notable`), de-duplicated by key and month.
+  const all = [...(Array.isArray(o?.notable) ? o.notable : []), ...Object.values(o?.years || {}).flatMap((l) => (Array.isArray(l) ? l : []))];
+  const seen = new Set();
+  return all.filter((n) => {
+    if (!n || !n.title) return false;
+    const id = `${n.key}|${n.month}`;
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
 }
 
 /**
