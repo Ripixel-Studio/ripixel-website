@@ -519,8 +519,8 @@ function liveView(notables) {
   return { total: items.length, stats, charts, yearRows };
 }
 
-/** @param {any} sec @param {any[]} outings notables of the matching outing kind */
-function mediaView(sec, outings) {
+/** @param {any} sec */
+function mediaView(sec) {
   const yearTotals = sec.totals?.year || {};
   const monthTotals = sec.totals?.month || {};
   return {
@@ -528,8 +528,6 @@ function mediaView(sec, outings) {
     years: Object.fromEntries(Object.entries(sec.years || {}).map(([y, l]) => [y, sortedNotables(/** @type {any[]} */ (l))])),
     yearList: Object.keys(sec.years || {}).sort().reverse(),
     totals: { month: monthTotals, year: yearTotals },
-    saw: outings.map((n) => ({ ...notableView(n), sawLabel: sawLabel(n.month) })),
-    hasSaw: outings.length > 0,
   };
 }
 
@@ -576,7 +574,7 @@ function codeView(sec) {
  * One section's page view. `sec` is the export's section, or the fitness card
  * source; a missing or empty one gives `empty: true` and no numbers at all.
  * @param {string} name @param {any} sec @param {Date} [now]
- * @param {any[]} [liveNotables] outings notables (cinema/gig split here)
+ * @param {any[]} [liveNotables] every live event (the live page only)
  */
 export function buildSection(name, sec, now = new Date(), liveNotables = []) {
   const base = { name, href: SECTION_HREF(name), title: /** @type {any} */ (TITLES)[name] || name };
@@ -591,7 +589,7 @@ export function buildSection(name, sec, now = new Date(), liveNotables = []) {
     case 'code':
       return { ...view, ...codeView(sec) };
     case 'watching': {
-      const m = mediaView(sec, []);
+      const m = mediaView(sec);
       const y = m.totals.year, mo = m.totals.month;
       return { ...view, ...m, latest: latestOf(sec.notable),
         stats: [
@@ -602,7 +600,7 @@ export function buildSection(name, sec, now = new Date(), liveNotables = []) {
         }) : null).filter(Boolean) };
     }
     case 'listening': {
-      const m = mediaView(sec, liveNotables.filter((n) => n.kind === 'gig'));
+      const m = mediaView(sec);
       return { ...view, ...m, latest: latestOf(sec.notable),
         stats: [['This year', m.totals.year], ['This month', m.totals.month]].map(([label, t]) => /** @type {any} */ (t) && Object.keys(/** @type {any} */ (t)).length ? ({
           label,
@@ -610,7 +608,7 @@ export function buildSection(name, sec, now = new Date(), liveNotables = []) {
         }) : null).filter(Boolean) };
     }
     case 'reading': {
-      const m = mediaView(sec, []);
+      const m = mediaView(sec);
       return { ...view, ...m, latest: latestOf(sec.notable),
         current: (Array.isArray(sec.current) ? sec.current : []).map((c) => ({ title: String(c?.title || ''), by: c?.by || '', percent: Math.round((num(c?.progress) ?? 0) * 100) })).filter((c) => c.title),
         stats: [['This year', m.totals.year], ['This month', m.totals.month]].map(([label, t]) => /** @type {any} */ (t) && Object.keys(/** @type {any} */ (t)).length ? ({
@@ -848,14 +846,19 @@ export function heroCards(lifeIndex, cards, now = new Date()) {
     seen.add(name);
     const card = byName.get(name) || /** @type {any} */ (buildSection(name, sections[name], now));
     const title = String(card.title || '') === name ? name[0].toUpperCase() + name.slice(1) : String(card.title);
-    const hero = heroView(r.hero, title);
+    let hero = heroView(r.hero, title);
+    let headline = card.empty ? null : card.headline || null;
+    // The hub is picked once a day and the export republished during it. A stat hero naming the
+    // headline's own measure with another figure is a day stale: drop it, caption and all, and
+    // let the section's figure stand. (The box holds heroes to the export too; this is the backstop.)
+    if (hero?.type === 'stat' && headline && String(r.hero?.label ?? '').trim() === String(headline.label ?? '').trim()
+      && hero.value !== String(headline.value)) hero = null;
     let size = HERO_SIZES.includes(r.size) ? r.size : 'md';
     if (!hero) size = 'sm';
     let href = typeof r.href === 'string' && /^\/(?!\/)/.test(r.href) ? r.href : SECTION_HREF(name);
     if (href === '/life') href = SECTION_HREF(name); // an older export pointed the row at the hub itself (outings)
     // A stat hero that shows the card's own headline figure would print the same number twice:
     // keep the hero (it is the bigger one) and drop the small headline.
-    let headline = card.empty ? null : card.headline || null;
     if (headline && hero?.type === 'stat' && String(headline.value) === hero.value) headline = null;
     out.push({
       name, title, size, href,

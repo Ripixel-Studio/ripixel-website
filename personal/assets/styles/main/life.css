@@ -182,23 +182,7 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
 
 .life-index__note a:hover { background: var(--paper-3); }
 
-/* ─── The hub: outings and the small print ─ */
-.life-saw { margin-bottom: 22px; }
-
-.life-saw__item {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 12px;
-  padding: 8px 0;
-  border-bottom: 1.5px dashed rgba(23,19,17,0.4);
-}
-
-.life-saw__when {
-  font-family: var(--f-mono);
-  font-size: 12px;
-}
-
+/* ─── The hub: the small print ─ */
 .life-personal {
   margin: 34px 0 20px;
   max-width: 720px;

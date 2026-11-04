@@ -459,7 +459,7 @@
     {"section":"body","size":"md","href":"/life/body","hero":{"type":"spark","caption":"Sleep at 7.1 h, up 0.4 over 12 weeks. Bedtime finally won.","points":[["2026-W34",6.7],["2026-W35",6.7],["2026-W36",6.8],["2026-W37",6.8],["2026-W38",6.8],["2026-W39",6.9],["2026-W40",6.9],["2026-W41",6.9],["2026-W42",7.0],["2026-W43",7.0],["2026-W44",7.0],["2026-W45",7.1]],"unit":"h","label":"sleep"}},
     {"section":"games","size":"md","href":"/life/games","hero":{"type":"image","caption":"410 hours of Space Farm, all time. No regrets.","src":"/card_life.png","alt":"Space Farm"}},
     {"section":"reading","size":"md","href":"/life/reading","hero":{"type":"bars","caption":"Sci-fi leads the shelf at 48%.","items":[{"label":"Sci-fi","pct":48},{"label":"Fantasy","pct":30},{"label":"Non-fiction","pct":22}]}},
-    {"section":"live","size":"sm","href":"/life/live","hero":{"type":"stat","caption":"9 live events this year.","value":9,"unit":"","label":"live events this year"}},
+    {"section":"live","size":"sm","href":"/life/live","hero":{"type":"stat","caption":"3 live events this year.","value":3,"unit":"","label":"live events this year"}},
     {"section":"watching","size":"sm","href":"/life/watching","hero":null},
     {"section":"listening","size":"sm","href":"/life/listening","hero":null}
   ]}

@@ -69,7 +69,7 @@
         <h2 class="roundup-section__title">EFFORT<span>.</span></h2>
         <span class="roundup-section__note">{{roundup.activeDays}} of {{roundup.dayCount}} days active</span>
       </div>
-      <div class="roundup-grid roundup-grid--effort">
+      <div class="roundup-grid roundup-grid--effort{{#if roundup.effortStrip}} roundup-grid--effort-{{roundup.effortStrip.kind}}{{/if}}">
         <div class="zine-card">
           <div class="zine-card__inner">
             <div class="roundup-card__label">{{#if roundup.isWeek}}THE SEVEN DAYS{{else}}{{#if roundup.isMonth}}DAY BY DAY{{else}}THE WHOLE YEAR{{/if}}{{/if}}</div>
@@ -120,7 +120,7 @@
         <h2 class="roundup-section__title">OUT THERE<span>.</span></h2>
         {{#if roundup.placesNote}}<span class="roundup-section__note">{{roundup.placesNote}}</span>{{/if}}
       </div>
-      <div class="roundup-grid roundup-grid--2">
+      <div class="roundup-grid roundup-grid--out">
         <div class="zine-card">
           <div class="zine-card__inner">
             <div class="roundup-card__label">PLACES</div>
@@ -139,7 +139,7 @@
         <div class="zine-card">
           <div class="zine-card__inner">
             <div class="roundup-card__label">WEATHER GRIT</div>
-            <div class="roundup-cells">
+            <div class="roundup-cells roundup-cells--pair">
               {{#each roundup.weather.cells}}
               <div class="roundup-cell">
                 <div class="roundup-cell__num">{{value}}</div>

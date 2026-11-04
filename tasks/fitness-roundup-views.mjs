@@ -334,8 +334,39 @@ export function buildEffortStrip(type, days) {
     return { kind: 'bars', width, height, vx: 0, vw: width, cells, labels: [], yAxis };
   }
 
-  const cell = type === 'year' ? 11 : 18;
-  const gap = type === 'year' ? 2 : 4;
+  if (type === 'month') {
+    // A small wall calendar: weekday columns, a row per (ISO) week, the date in each square.
+    const cell = 30, gap = 4, top = 18;
+    const isoWeek = (/** @type {Date} */ d) => {
+      const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+      t.setUTCDate(t.getUTCDate() + 3 - dowMon(t)); // the week's Thursday names its year
+      const jan4 = new Date(Date.UTC(t.getUTCFullYear(), 0, 4));
+      return 1 + Math.round(((t.getTime() - jan4.getTime()) / 864e5 - 3 + dowMon(jan4)) / 7);
+    };
+    const rows = [];
+    let row = -1;
+    const cells = days.map((d, i) => {
+      const dow = dowMon(d.date);
+      if (i === 0 || dow === 0) rows.push(`W${String(isoWeek(d.date)).padStart(2, '0')}`), row++;
+      const x = dow * (cell + gap);
+      const y = top + row * (cell + gap);
+      return {
+        x, y, w: cell, h: cell, level: d.level, title: cellTitle(d),
+        num: String(d.date.getUTCDate()), nx: x + cell - 4, ny: y + cell - 5, on: d.level >= 3,
+      };
+    });
+    const width = 7 * (cell + gap) - gap;
+    const height = top + rows.length * (cell + gap) - gap;
+    const labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((text, i) => ({ x: i * (cell + gap) + cell / 2, y: 11, text, anchor: 'middle' }));
+    const yAxis = {
+      caption: 'week',
+      ticks: rows.map((label, r) => ({ label, pct: Math.round(((top + r * (cell + gap) + cell / 2) / height) * 10000) / 100 })),
+    };
+    return { kind: 'calendar', width, height, vx: 0, vw: width, cells, labels, yAxis };
+  }
+
+  const cell = 11;
+  const gap = 2;
   const top = 14;
   const cells = [];
   const labels = [];
