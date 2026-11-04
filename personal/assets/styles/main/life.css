@@ -14,7 +14,7 @@
 .life-ink--watching  { --life-ink: var(--ink-red); }
 .life-ink--listening { --life-ink: var(--ink-blue); }
 .life-ink--reading   { --life-ink: var(--ink-orange); }
-.life-ink--outings   { --life-ink: var(--ink-magenta); }
+.life-ink--live       { --life-ink: var(--ink-magenta); }
 
 /* A section page takes its ink for the wash, the dots and the header accents too. */
 body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
@@ -1465,3 +1465,13 @@ a.hub-hero__route:hover .hub-hero__route-cta { background: var(--life-ink); colo
   .hub-card { transition: none; }
   .hub-card:hover { transform: none; box-shadow: 7px 7px 0 var(--life-ink); }
 }
+
+/* ─── /life/live: the month-by-month list under each year ─ */
+.outings-count { font-family: var(--f-mono); font-size: 13px; letter-spacing: 0; -webkit-text-stroke: 0; color: color-mix(in srgb, var(--ink) 72%, #fff); margin-left: 8px; }
+.outings-months { list-style: none; margin: 0 0 18px; padding: 0; font-family: var(--f-mono); font-size: 13px; }
+.outings-month { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; padding: 6px 0; border-bottom: 1px dashed var(--paper-2); }
+.outings-month__name { min-width: 10ch; color: color-mix(in srgb, var(--ink) 72%, #fff); }
+.outings-month__items { list-style: none; margin: 0; padding: 0; flex: 1 1 220px; min-width: 0; }
+.outings-month__items li { padding: 1px 0; overflow-wrap: anywhere; }
+.outings-kind { margin-left: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--life-ink, var(--ink-section)); }
+.life-notable__big { margin-left: 6px; font-family: var(--f-mono); font-size: 10px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.08em; padding: 1px 5px; border: 1px solid var(--life-ink, var(--ink-section)); color: var(--life-ink, var(--ink-section)); white-space: nowrap; vertical-align: middle; }

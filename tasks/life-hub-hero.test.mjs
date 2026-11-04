@@ -107,10 +107,10 @@ test('hero cards: export order, sizes, zig-zag and headlines', () => {
   const byName = Object.fromEntries(hub.cards.map((c) => [c.name, c]));
   for (const c of cards) if (byName[c.name]) assert.deepEqual(c.headline, byName[c.name].headline, c.name);
   assert.equal(cards[0].headline?.value, '614');
-  assert.equal(cards.find((c) => c.name === 'outings')?.title, 'Outings');
-  assert.equal(cards.find((c) => c.name === 'outings')?.headline?.value, '3');
-  // outings has no sub-page: its link goes to the outings list on the hub
-  assert.equal(cards.find((c) => c.name === 'outings')?.href, '#life-outings-title');
+  assert.equal(cards.find((c) => c.name === 'live')?.title, 'Live');
+  assert.equal(cards.find((c) => c.name === 'live')?.headline?.value, '3');
+  // outings has its own page like the rest (the export's href is /life/live)
+  assert.equal(cards.find((c) => c.name === 'live')?.href, '/life/live');
   assert.equal(cards[0].href, '/life/fitness');
   assert.equal(cards[0].caption, '6.2 km of fresh line, legs mostly intact.');
 });
@@ -193,11 +193,11 @@ test('the page: a card per row, sized, each hero drawn, heading and insights kep
   assert.match(html, /<p class="hub-card__caption">Sci-fi leads the shelf at 48%.<\/p>/);
   assert.match(html, /<a class="hub-card__more" href="\/life\/reading" aria-label="More on Reading">/);
   // sm rows show no hero, only the caption
-  const outings = /<li class="hub-card hub-card--sm hub-card--stat life-ink--outings">[\s\S]*?<\/li>/.exec(html)?.[0] || '';
+  const outings = /<li class="hub-card hub-card--sm hub-card--stat life-ink--live">[\s\S]*?<\/li>/.exec(html)?.[0] || '';
   assert.doesNotMatch(outings, /hub-hero/);
-  assert.match(outings, /9 outings this year\./);
-  assert.match(outings, /href="#life-outings-title"/);
-  assert.match(html, /id="life-outings-title"/);
+  assert.match(outings, /9 live events this year\./);
+  assert.match(outings, /href="\/life\/live"/);
+  assert.doesNotMatch(html, /id="life-outings-title"/);
 });
 
 test('the page escapes a caption', async () => {
@@ -213,7 +213,7 @@ test('the page without a hub key: the old rows', async () => {
   assert.match(html, /James, by the <span>numbers<\/span>\./);
   assert.match(html, /class="did-you-know"/);
   assert.doesNotMatch(html, /hub-grid|hub-card/);
-  assert.equal((html.match(/<li class="life-index__entry/g) || []).length, 7);
+  assert.equal((html.match(/<li class="life-index__entry/g) || []).length, 8);
 });
 
 test('the page keeps the stale sticker (the roundup links: life-links.test.mjs)', async () => {

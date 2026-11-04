@@ -335,7 +335,7 @@ export const tasks = [
                         case 'projects':  return "Shall we take a look at some projects I've done?";
                         case 'changelog': return 'What changes have happened to this site?';
                         case 'home':      return "I'm James King, and I make things for the web";
-                        case 'life':      return 'James King, by the numbers: fitness, body (sleep, food and movement too), games, code, watching, listening and reading.';
+                        case 'life':      return 'James King, by the numbers: fitness, body (sleep, food and movement too), games, code, watching, listening, reading and live events.';
                         default:          return vars.description || '';
                     }
                 })(),

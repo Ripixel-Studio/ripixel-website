@@ -548,7 +548,7 @@ export function buildRoundupLife(period, labels) {
   if (!period || typeof period !== 'object') return null;
   const blocks = [];
   for (const name of LIFE_BLOCKS) {
-    const section = period[name];
+    const section = name === 'outings' ? (period.live ?? period.outings) : period[name]; // the box renamed the sidecar's outings key to live
     if (!section || typeof section !== 'object') continue;
     const items = (Array.isArray(section.notable) ? section.notable : []).map((n) => lifeItem(name, n)).filter(Boolean);
     const line = totalsLine(name, section.totals);

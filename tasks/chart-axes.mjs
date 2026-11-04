@@ -416,3 +416,40 @@ export function clockBars(hours, opts) {
     rows,
   };
 }
+
+/**
+ * The model for a plain column chart with one labelled column per category (outings per year).
+ * Same shape as `clockBars`, so the `chart-bars` partial draws it. Whole-number y ticks; every
+ * category is labelled on the x axis. Null with fewer than 2 categories or nothing counted.
+ * @param {string[]} labels one per column, in order
+ * @param {Array<number|null|undefined>} values counts, same length
+ * @param {{ label: string, unit?: string, noun?: string, max?: number }} opts
+ * @returns {ClockModel | null}
+ */
+export function columnBars(labels, values, opts) {
+  if (!Array.isArray(labels) || !Array.isArray(values) || labels.length < 2 || labels.length !== values.length) return null;
+  const vals = values.map((v) => (typeof v === 'number' && Number.isFinite(v) && v > 0 ? v : 0));
+  const peak = Math.max(...vals);
+  if (!(peak > 0)) return null;
+  const top = Math.max(peak, typeof opts?.max === 'number' && Number.isFinite(opts.max) ? opts.max : 0);
+  const ticks = niceTicks(0, top, 3, [1, 2, 5]).filter((t) => Number.isInteger(t));
+  const hi = ticks[ticks.length - 1];
+  const yOf = (v) => pc(100 - (v / hi) * 100);
+  const slot = 100 / vals.length;
+  const noun = String(opts?.noun ?? '');
+  const bars = vals.map((v, i) => {
+    const y = yOf(v);
+    return { label: labels[i], title: `${labels[i]}: ${v}${noun ? ` ${noun}` : ''}`, left: pc(i * slot + slot * 0.12), width: pc(slot * 0.76), y, h: pc(100 - y), merged: false };
+  });
+  const best = vals.indexOf(peak);
+  const label = String(opts?.label ?? '');
+  return {
+    bars,
+    yTicks: [...ticks].reverse().map((t) => ({ label: String(t), pct: yOf(t) })),
+    xTicks: labels.map((l, i) => ({ label: l, pct: pc((i + 0.5) * slot) })),
+    summary: `${label}, ${labels[0]} to ${labels[labels.length - 1]}; most in ${labels[best]} with ${peak}`,
+    label,
+    unit: String(opts?.unit ?? ''),
+    rows: labels.map((l, i) => ({ label: l, value: String(vals[i]) })),
+  };
+}
