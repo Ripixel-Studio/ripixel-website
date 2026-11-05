@@ -394,6 +394,17 @@ test('no league', async () => {
     assert.ok(full.indexOf('games-league') > 0 && full.indexOf('games-league') < full.indexOf('games-wall'), 'League comes first');
     assert.match(full, /Gold II · 54 LP/);
     assert.match(full, /1\.2 % of players/);
+    // the ribbon comes from the export's claim; an idle tile says so; champion months carry their icon
+    assert.match(full, /games-tile__badge">most played, by far</);
+    assert.match(full, /games-tile__badge games-tile__badge--idle">left running</);
+    assert.equal((full.match(/class="games-tile__badge/g) || []).length, 2);
+    assert.match(full, /Idle games left running don&#x27;t count: another 816h\./);
+    assert.match(full, /<img class="games-months__icon" src="https:\/\/ddragon\.leagueoflegends\.com\/cdn\/16\.22\.1\/img\/champion\/Jinx\.png" alt="" loading="lazy" decoding="async" width="40" height="40">/);
+    assert.match(full, /games-months__icon games-months__icon--none/);
+    // and with no claim on any tile, no ribbon: it is never assumed for League
+    const quiet = structuredClone(fixture.sections.games);
+    for (const t of quiet.wall) t.claim = null;
+    assert.doesNotMatch(await render(buildSection('games', quiet, now)), /games-tile__badge">most/);
   } finally {
     await fs.rm(tmp, { recursive: true, force: true });
   }
@@ -412,6 +423,41 @@ test('League champion names, not Data Dragon ids', () => {
   const g = buildSection('games', sec, now);
   assert.equal(g.league.mains[0].champion, 'Miss Fortune');
   assert.equal(g.league.recent.pool[0].champion, 'Twisted Fate');
+});
+
+test('games: idle games make no claim', () => {
+  const g = buildSection('games', fixture.sections.games, now);
+  assert.equal(g.wall[0].badge, 'most played, by far');
+  const last = g.wall[g.wall.length - 1];
+  assert.deepEqual([last.name, last.idle, last.badge], ['Placeholder Idler', true, 'left running']);
+  assert.ok(g.wall.slice(1, -1).every((t) => t.badge === '' && t.idle === false));
+  assert.equal(g.idleNote, "Idle games left running don't count: another 816h.");
+  const sec = structuredClone(fixture.sections.games);
+  sec.wall[0].claim = null;
+  sec.wall[1].claim = 'most';
+  sec.allTime.idle = 0;
+  const h = buildSection('games', sec, now);
+  assert.deepEqual([h.wall[0].badge, h.wall[1].badge], ['', 'most played']);
+  assert.equal(h.idleNote, '');
+  sec.wall[1].claim = 'biggest ever';
+  assert.equal(buildSection('games', sec, now).wall[1].badge, '');
+  delete sec.allTime;
+  assert.equal(buildSection('games', sec, now).idleNote, '');
+});
+
+test('champion of the month carries its icon', () => {
+  const g = buildSection('games', fixture.sections.games, now);
+  const byMonth = Object.fromEntries(g.fun.champs.map((c) => [c.month, c]));
+  assert.equal(byMonth['Oct 2026'].icon, 'https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/Jinx.png');
+  assert.equal(byMonth['Sep 2026'].champion, 'Miss Fortune');
+  assert.equal(byMonth['Nov 2026'].icon, '');
+  assert.equal(byMonth['Nov 2026'].initial, 'E');
+  const sec = structuredClone(fixture.sections.games);
+  sec.fun.championByMonth[0].icon = 'https://evil.example/x.png';
+  sec.fun.championByMonth[1].icon = 'javascript:alert(1)';
+  const bad = buildSection('games', sec, now).fun.champs;
+  assert.equal(bad[bad.length - 1].icon, '');
+  assert.equal(bad[bad.length - 2].icon, '');
 });
 
 // ─── Round 2: the code page reads C7 (R2e.6) ───
