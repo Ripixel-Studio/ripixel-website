@@ -1,0 +1,124 @@
+{{!-- A year: the biggest. A cover collage under the year, the top moments, the twelve months as
+     stacked columns linking their roundups, the races in order, the whole year's days, photos,
+     records, life. Context: roundup view (isYear). --}}
+<header class="rl-ycover">
+  {{#if story.collage.length}}
+  <ol class="rl-ycover__collage rl-ycover__collage--n{{story.collage.length}}" aria-hidden="true">
+    {{#each story.collage}}<li class="{{typeClass}}"><img src="{{url}}" alt="" decoding="async" width="600" height="600"></li>{{/each}}
+  </ol>
+  {{else}}{{#if story.hasRoutes}}
+  <span class="rl-ycover__routes" aria-hidden="true">{{#each story.routes}}<span class="{{typeClass}}">{{> rl-route this}}</span>{{/each}}</span>
+  {{/if}}{{/if}}
+  <div class="rl-ycover__mast">
+    <div class="rl-kicker">· YEAR IN REVIEW ·</div>
+    <h1 class="rl-ycover__title">{{title}}<span>.</span></h1>
+    {{#if dateRange}}<div class="rl-range">{{dateRange}}</div>{{/if}}
+  </div>
+  {{#if story.coverLines.length}}
+  <ul class="rl-mcover__lines rl-ycover__lines" aria-label="In this issue">
+    {{#each story.coverLines}}
+    <li class="{{typeClass}}"><span class="rl-stamp">{{stamp}}</span><span class="rl-mcover__line">{{title}}</span></li>
+    {{/each}}
+  </ul>
+  {{/if}}
+</header>
+
+{{> rl-numbers this}}
+<div class="rl-yfacts">
+  <span><b>{{story.activeDays}}</b> days moving</span>
+  {{#if story.raceCount}}<span><b>{{story.raceCount}}</b> races</span>{{/if}}
+  {{#if prCount}}<span><b>{{prCount}}</b> records</span>{{/if}}
+</div>
+
+{{> rl-moments this}}
+
+<section class="rl-section">
+  <div class="rl-head">
+    <h2 class="rl-h2">MONTH BY MONTH<span>.</span></h2>
+    <span class="rl-note">sessions per month, by sport · each month opens its roundup</span>
+  </div>
+  <div class="rl-yrmonths">
+    <div class="rl-yrmonths__yaxis" aria-hidden="true"><span>most</span><span>0</span></div>
+    <ol class="rl-yrmonths__cols">
+      {{#each story.months}}
+      <li class="rl-yrmonth">
+        {{#if href}}<a class="rl-yrmonth__box rl-link" href="{{href}}">{{else}}<div class="rl-yrmonth__box">{{/if}}
+          <span class="rl-yrmonth__pic">{{#if cover}}<img src="{{cover}}" alt="" loading="lazy" decoding="async" width="200" height="200">{{/if}}</span>
+          <span class="rl-yrmonth__bar" title="{{sessions}} sessions, {{hours}}"><span class="rl-yrmonth__stack" style="height:{{height}}%">{{#each stack}}<i class="{{typeClass}}" style="height:{{pct}}%" title="{{label}}: {{n}}"></i>{{/each}}</span></span>
+          <span class="rl-yrmonth__n">{{sessions}}</span>
+          <span class="rl-yrmonth__label">{{label}}</span>
+          {{#if topStamp}}<span class="rl-yrmonth__top">{{topStamp}}</span>{{/if}}
+          {{#if href}}<span class="rl-arrow" aria-hidden="true">→</span>{{/if}}
+        {{#if href}}</a>{{else}}</div>{{/if}}
+      </li>
+      {{/each}}
+    </ol>
+  </div>
+  <ul class="rl-legend">{{#each story.familyMix}}<li class="{{typeClass}}"><i></i>{{label}} <b>{{n}}</b></li>{{/each}}</ul>
+</section>
+
+{{#if story.hasRaces}}
+<section class="rl-section">
+  <div class="rl-head">
+    <h2 class="rl-h2">RACE CALENDAR<span>.</span></h2>
+    <span class="rl-note">every race and big day out, from the calendar and the sessions</span>
+  </div>
+  <ol class="rl-races">
+    {{#each story.races}}
+    <li class="rl-races__item {{typeClass}}">
+      {{#if href}}<a class="rl-races__row rl-link" href="{{href}}">{{else}}<div class="rl-races__row">{{/if}}
+        <span class="rl-races__date">{{date}}</span>
+        <span class="rl-stamp">{{stamp}}</span>
+        <span class="rl-races__title">{{title}}</span>
+        <span class="rl-races__value">{{value}}{{#if unit}} <small>{{unit}}</small>{{/if}}</span>
+        {{#if sub}}<span class="rl-races__sub">{{sub}}</span>{{/if}}
+        {{#if href}}<span class="rl-arrow" aria-hidden="true">→</span>{{/if}}
+      {{#if href}}</a>{{else}}</div>{{/if}}
+    </li>
+    {{/each}}
+  </ol>
+</section>
+{{/if}}
+
+{{#if effortStrip}}
+<section class="rl-section">
+  <div class="rl-head">
+    <h2 class="rl-h2">EVERY DAY OF IT<span>.</span></h2>
+    <span class="rl-note">{{activeDays}} of {{dayCount}} days active</span>
+  </div>
+  <div class="zine-card"><div class="zine-card__inner">
+    {{> roundup-effort-strip effortStrip}}
+    <div class="roundup-legend" aria-hidden="true">
+      <span><i class="roundup-legend__swatch roundup-effort__cell--l0"></i>rest</span>
+      <span><i class="roundup-legend__swatch roundup-effort__cell--l1"></i>easy</span>
+      <span><i class="roundup-legend__swatch roundup-effort__cell--l2"></i>moderate</span>
+      <span><i class="roundup-legend__swatch roundup-effort__cell--l3"></i>hard</span>
+      <span><i class="roundup-legend__swatch roundup-effort__cell--l4"></i>very hard</span>
+    </div>
+  </div></div>
+</section>
+{{/if}}
+
+{{#if breakdown.length}}
+<section class="rl-section">
+  <div class="rl-head">
+    <h2 class="rl-h2">BY SPORT<span>.</span></h2>
+    <span class="rl-note">{{breakdown.length}} kinds of moving</span>
+  </div>
+  {{> roundup-breakdown this}}
+</section>
+{{/if}}
+
+{{> rl-mosaic this}}
+
+{{> rl-routes this}}
+
+{{> roundup-highlights this}}
+
+{{> roundup-records this}}
+
+{{> rl-writeup this}}
+
+{{#if life}}{{> roundup-life this}}{{/if}}
+
+{{> rl-foot this}}

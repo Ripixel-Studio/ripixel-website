@@ -430,7 +430,8 @@ export function roundupShareModel(file, ctx) {
     prs,
     prCount: view.prCount,
     vs: view.comparison && view.comparison.deltas.length ? { label: view.comparison.label, deltas: view.comparison.deltas } : null,
-    photos: view.photos.map((/** @type {any} */ p) => httpsUrl(p.url)).filter(Boolean).slice(0, 3),
+    // The export's own photo picks, behind the profile's gallery switch (the page draws its own mosaic).
+    photos: ctx.showPhotoGallery ? (r.photos || []).map((/** @type {any} */ p) => httpsUrl(p?.url)).filter(Boolean).slice(0, 3) : [],
     life: roundupLifeLines(view.life),
   };
 }

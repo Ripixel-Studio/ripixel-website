@@ -24,7 +24,7 @@
       <div class="roundup-hero__main">
         <div class="page-hero__section-label">· ROUNDUPS ·</div>
         <h1 class="roundup-hero__title">BACK<br><span>ISSUES.</span></h1>
-        <div class="roundup-hero__byline">every week, month and year, summed up.</div>
+        <div class="roundup-hero__byline">every week, month and year, summed up, in one stream.</div>
       </div>
       <aside class="roundup-hero__aside">
         <span class="stamp">{{roundupCountLabel}}</span>
@@ -37,23 +37,20 @@
     </div>
     {{/if}}
 
-    {{#each roundupGroups}}
-    <section class="roundup-section">
-      <div class="roundup-section__head">
-        <h2 class="roundup-section__title">{{heading}}<span>.</span></h2>
-        <span class="roundup-section__note">{{blurb}}</span>
-      </div>
-      <div class="roundup-grid roundup-grid--tiles">
-        {{#each tiles}}
-        {{> roundup-tile this}}
+    {{#if timeline.length}}
+    <p class="rl-tl__strap">one stream, newest first: each year opens with its review, each month with its feature, then that month's weeks.</p>
+    <div class="rl-tl-wrap">
+      <ol class="rl-tl" aria-label="Every roundup, newest first">
+        {{#each timeline}}
+        {{> rl-tl-tile this}}
         {{/each}}
-      </div>
-    </section>
+      </ol>
+    </div>
     {{else}}
     {{#unless fitnessUnavailable}}
     <p class="roundup-empty">no roundups yet — the first one lands at the end of the week.</p>
     {{/unless}}
-    {{/each}}
+    {{/if}}
 
     <footer class="roundup-foot">
       <div class="roundup-foot__meta">

@@ -16,7 +16,7 @@ import {
   buildRecordGroups,
   buildDeltas,
   buildRoundupView,
-  buildIndexView,
+  buildTimeline,
   fitnessRoundupViewsTask,
   fmtKm,
   fmtDuration,
@@ -161,34 +161,13 @@ test('calendarDays fills every day of [start, end) with level 0 where absent', (
   assert.equal(days[0].iso, '2026-10-12');
 });
 
-test('buildEffortStrip: a week is seven labelled bars, a month a Mon-first grid, a year has month labels', () => {
-  const week = buildEffortStrip('week', calendarDays('2026-10-12T00:00:00Z', '2026-10-19T00:00:00Z', [{ date: '2026-10-17', effortLevel: 4, activityCount: 1 }]));
-  assert.equal(week.kind, 'bars');
-  assert.equal(week.cells.length, 7);
-  assert.deepEqual(week.cells.map((c) => c.label), ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']);
-  assert.equal(week.cells[5].level, 4);
-  assert.ok(week.cells[5].h > week.cells[0].h, 'a harder day is a taller bar');
-  assert.match(week.cells[5].title, /17 OCT 2026: very hard · 1 session/);
-
-  // A month is a small wall calendar: weekday columns, a row per week, the date in each square.
-  const month = buildEffortStrip('month', calendarDays('2026-10-01T00:00:00Z', '2026-11-01T00:00:00Z', [{ date: '2026-10-18', effortLevel: 4, activityCount: 1 }]));
-  assert.equal(month.kind, 'calendar');
-  assert.equal(month.cells.length, 31);
-  assert.equal(month.cells[0].x, month.cells[7].x, '1 Oct and 8 Oct share a column (Thursday)');
-  assert.ok(month.cells[4].x < month.cells[0].x, '5 Oct (Mon) is left of 1 Oct (Thu)');
-  assert.ok(month.cells[4].y > month.cells[0].y, '5 Oct starts the next row');
-  assert.deepEqual(month.cells.slice(0, 3).map((c) => c.num), ['1', '2', '3']);
-  assert.equal(month.cells[17].on, true, 'a very hard day prints its date in paper');
-  assert.equal(month.cells[0].on, false);
-  assert.deepEqual(month.labels.map((l) => l.text), ['M', 'T', 'W', 'T', 'F', 'S', 'S']);
-  assert.deepEqual(month.yAxis.ticks.map((t) => t.label), ['W40', 'W41', 'W42', 'W43', 'W44']);
-  assert.ok(month.width <= 280 && month.height <= 260, `compact: ${month.width}x${month.height}`);
-  assert.ok(month.cells[0].w >= 28, 'still big enough to read the date');
-
-  const year = buildEffortStrip('year', calendarDays('2026-01-01T00:00:00Z', '2027-01-01T00:00:00Z', []));
+test('buildEffortStrip: the year is a weekday grid with month labels', () => {
+  const year = buildEffortStrip(calendarDays('2026-01-01T00:00:00Z', '2027-01-01T00:00:00Z', [{ date: '2026-10-18', effortLevel: 4, activityCount: 1 }]));
+  assert.equal(year.kind, 'grid');
   assert.equal(year.cells.length, 365);
   assert.ok(year.labels.length >= 11, 'month labels along the top');
-  assert.equal(buildEffortStrip('week', []), null);
+  assert.match(year.cells.find((c) => c.level === 4).title, /18 OCT 2026: very hard · 1 session/);
+  assert.equal(buildEffortStrip([]), null);
 });
 
 // ---------------------------------------------------------------------------
@@ -256,23 +235,13 @@ test('buildRoundupView renders the fixture week per contract §6/§8', async () 
   assert.deepEqual(v.totals[3], { value: '1.6', unit: 'k', label: 'calories burned' });
   assert.equal(v.comparison, null, 'week-41 is not in the set');
   assert.equal(v.prevNav, null);
-  assert.equal(v.callouts.length, 2);
-  assert.equal(v.callouts[0].glyph, 'RDE');
-  assert.equal(v.callouts[0].href, '/life/activity/evening-ride-to-the-reservoir-2026-10-15');
-  assert.equal(v.callouts[1].glyph, '★');
   assert.deepEqual(v.breakdown.map((b) => b.label), ['Run', 'Ride', 'Weight Training']);
   assert.equal(v.breakdown[2].stats, '57m · 18 sets · 6.3t moved');
-  assert.equal(v.effortStrip.cells.length, 7);
+  assert.equal(v.effortStrip, null, 'a week draws its own seven days (the story)');
+  assert.equal(v.story, null, 'no story context, no story');
   assert.equal(v.activeDays, 3);
-  assert.equal(v.zones.length, 5);
-  assert.equal(v.hrTracked, 138);
-  assert.equal(v.zones[0].minutes, 38, 'index 0 (below Z1) is skipped');
-  assert.equal(v.photos.length, 1);
-  assert.equal(v.routes.length, 2);
-  assert.equal(v.routes[1].km, '32.4 km');
   assert.equal(v.placesNote, '2 places · 1 country');
   assert.deepEqual(v.weather.cells.map((c) => c.label), ['coldest', 'hottest', 'sessions tracked'], 'no rain → no wet cell');
-  assert.deepEqual(v.muscles.map((m) => m.name), ['Chest', 'Shoulders', 'Triceps']);
   assert.equal(v.bestEfforts[2].time, '19:50');
   assert.deepEqual(v.highlights.map((h) => h.label), ['longest session', 'highest burn rate', 'peak avg HR', 'total vertical', 'furthest session', 'biggest burn', 'heaviest session']);
   assert.equal(v.highlights[3].href, null, 'elevation is an aggregate, never linked');
@@ -283,13 +252,10 @@ test('buildRoundupView renders the fixture week per contract §6/§8', async () 
   assert.ok(v.description.length <= 160);
 });
 
-test('buildRoundupView: photos are gated by showPhotoGallery and links by the index', async () => {
+test('buildRoundupView: peaks link only sessions the index has', async () => {
   const { file } = await fixtureCtx();
   const ctx = { byKey: new Map([[file.key, file]]), neighbours: resolveNeighbours([file]), activitySlugs: new Set(), showPhotoGallery: false };
   const v = buildRoundupView(file, ctx);
-  assert.equal(v.photos.length, 0);
-  assert.ok(v.callouts.every((c) => c.href === null));
-  assert.ok(v.routes.every((r) => r.href === null));
   assert.ok(v.highlights.every((h) => h.href === null));
 });
 
@@ -299,26 +265,38 @@ test('buildRoundupView: empty roundup renders placeholders rather than throwing'
   assert.equal(v.title, 'JANUARY');
   assert.deepEqual(v.totals.map((t) => t.value), ['0', '0m', '—', '—']);
   assert.equal(v.effortStrip, null);
-  assert.equal(v.zones, null);
   assert.equal(v.aiSummary, '');
   assert.equal(v.hasNav, false);
 });
 
-test('buildIndexView groups newest-first by period type with the secondary stat rule', () => {
-  const files = [
-    weekFile('week-41-2026', '2026-10-05T00:00:00Z', '2026-10-12T00:00:00Z', { roundup: { totalDistanceMeters: 0, activityTypeBreakdowns: [{ totalSets: 10, totalWeightKg: 1500 }] } }),
-    weekFile('week-42-2026', '2026-10-12T00:00:00Z', '2026-10-19T00:00:00Z', { roundup: { prsAchieved: [{}, {}] } }),
-    { key: 'year-2026', roundup: { periodType: 'ROUNDUP_PERIOD_TYPE_YEAR', periodStart: '2026-01-01T00:00:00Z', periodEnd: '2027-01-01T00:00:00Z', totalActivities: 1, totalDurationSeconds: 5400, totalDistanceMeters: 0, aiSummary: 'x' } },
+test('buildTimeline: one stream, newest first; a year leads its year, a month leads its weeks', () => {
+  const view = (key, start, end, extra = {}) => ({
+    key, url: `/life/roundup/${key}`, ...periodLabels(key, { periodStart: start, periodEnd: end }), totals: [{ value: '3' }, { value: '1h' }, { value: '10.0', unit: 'km', label: 'distance covered' }],
+    prCount: 0, sessionCount: 3, story: { lead: null, highlights: [], cover: null, coverLines: [], collage: [], days: [], months: [] }, periodStart: start, ...extra,
+  });
+  const views = [
+    view('week-41-2026', '2026-10-05T00:00:00Z', '2026-10-12T00:00:00Z'),
+    view('week-44-2026', '2026-10-26T00:00:00Z', '2026-11-02T00:00:00Z', { story: { lead: { stamp: 'RACE WEEKEND', title: 'Hyrox Birmingham', typeClass: 'fit-type--crossfit' }, highlights: [], cover: { url: 'https://x.test/a.jpg' }, coverLines: [], collage: [], days: [{ sessions: [{ typeClass: 'fit-type--crossfit' }] }], months: [] } }),
+    view('month-10-2026', '2026-10-01T00:00:00Z', '2026-11-01T00:00:00Z'),
+    view('week-45-2026', '2026-11-02T00:00:00Z', '2026-11-09T00:00:00Z'),
+    view('year-2025', '2025-01-01T00:00:00Z', '2026-01-01T00:00:00Z'),
+    view('month-12-2025', '2025-12-01T00:00:00Z', '2026-01-01T00:00:00Z'),
+    view('week-01-2026', '2025-12-29T00:00:00Z', '2026-01-05T00:00:00Z'),
   ];
-  const groups = buildIndexView(files);
-  assert.deepEqual(groups.map((g) => g.heading), ['WEEKS', 'YEARS']);
-  assert.deepEqual(groups[0].tiles.map((t) => t.key), ['week-42-2026', 'week-41-2026']);
-  assert.equal(groups[0].tiles[0].secondary, '10.0 km');
-  assert.equal(groups[0].tiles[0].prs, '+2 PRS');
-  assert.equal(groups[0].tiles[1].secondary, '1.5t moved');
-  assert.equal(groups[1].tiles[0].secondary, '1h 30m');
-  assert.equal(groups[1].tiles[0].sessionsLabel, 'session');
-  assert.equal(groups[1].tiles[0].hasAiSummary, true);
+  const t = buildTimeline(views);
+  assert.deepEqual(t.map((x) => x.key || x.mark), [
+    '2026', 'November 2026', 'week-45-2026', 'month-10-2026', 'week-44-2026', 'week-41-2026', 'January 2026', 'week-01-2026',
+    'year-2025', 'month-12-2025',
+  ]);
+  assert.equal(t[0].isYearMark, true, 'no year roundup yet: a plain year card, not a link');
+  assert.equal(t[1].isMonthMark, true);
+  assert.equal(t[3].isMonth, true);
+  assert.equal(t[4].isWeek, true);
+  assert.equal(t[4].top.title, 'Hyrox Birmingham');
+  assert.equal(t[4].cover, 'https://x.test/a.jpg');
+  assert.equal(t[7].key, 'week-01-2026', 'week 1 of 2026 has its Thursday in January');
+  assert.equal(t[8].isYear, true);
+  assert.equal(t[8].href, '/life/roundup/year-2025');
 });
 
 // ---------------------------------------------------------------------------
@@ -352,7 +330,7 @@ test('fitnessRoundupViewsTask builds page and index view models', async () => {
   assert.equal(page.ogImage, 'https://james.ripixel.co.uk/life/og/roundup/week-42-2026.png');
   assert.equal(page.subpage, '| week 42 2026 roundup');
   assert.equal(result.fitnessRoundupsIndex.roundupCountLabel, '1 issue');
-  assert.equal(result.fitnessRoundupsIndex.roundupGroups[0].tiles[0].href, '/life/roundup/week-42-2026');
+  assert.equal(result.fitnessRoundupsIndex.timeline.find((x) => x.isWeek).href, '/life/roundup/week-42-2026');
   assert.ok(logs.some((l) => /unusable key/.test(l)));
   assert.ok(!logs.some((l) => l.startsWith('ERROR')), logs.join('\n'));
 });
@@ -368,7 +346,7 @@ test('Skier renders one page per roundup plus the index from the views', async (
 
     const page = await fs.readFile(path.join(outDir, 'life', 'roundup', 'week-42-2026.html'), 'utf8');
     assert.match(page, /<title>James King \| life \| week 42 2026 roundup<\/title>/);
-    assert.match(page, /class="roundup-effort roundup-effort--bars"/);
+    assert.match(page, /class="rl-days"/, "a week is its seven days");
     assert.match(page, /href="\/life\/activity\/push-day-2026-10-13"/);
     assert.match(page, /Three sessions, three different shapes/);
     // Nothing on the page links to fitglue.tech (the nav points at /life since S2.5); the assets host is the one exception.

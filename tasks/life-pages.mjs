@@ -8,7 +8,8 @@
  *   fitnessActivityPages  → life/activity/<slug>/index.html  (generateDataPagesTask)
  *   fitnessRoundupPages   → life/roundup/<key>.html          (generateDataPagesTask)
  *   fitnessRoundupsIndex  → life/roundups.html               (generatePagesTask, personal/pages/life/)
- *   fitnessSessionsPage   → life/sessions.html               (generatePagesTask, personal/pages/life/)
+ *   fitnessSessionsPages  → life/sessions.html, life/sessions/<n>.html,
+ *                           life/sessions/<family>[/<n>].html (generateDataPagesTask)
  *   fitnessLife, lifeHeatmapView → life/fitness.html         (generatePagesTask, personal/pages/life/)
  *   lifeSections[name]    → life/<name>.html                 (generatePagesTask, one page per section)
  *   fitnessFeedItems      → life/feed.xml                    (generateFeedTask, Atom only)
@@ -23,6 +24,7 @@ import { activityOutPath } from './fitness-activity-views.mjs';
 import { keyToPath as roundupOutPath } from './fitness-roundup-views.mjs';
 import { FEED_PATH, FEED_TITLE, FEED_SUBTITLE } from './fitness-feed-items.mjs';
 import { eventOutPath } from './fitness-event-views.mjs';
+import { sessionsOutPath } from './fitness-sessions.mjs';
 
 /**
  * Handlebars helpers the activity and event partials use (`{{#unless (eq sets 1)}}` in
@@ -67,14 +69,14 @@ export function lifePageTasks({
       outPath: (/** @type {any} */ page) => roundupOutPath(page.roundup.key),
     }),
 
-    // /life/roundups, /life/sessions, /life/fitness and the eight section pages — the pages in
+    // /life/roundups, /life/fitness and the eight section pages — the pages in
     // personal/pages/life/, each with its own view model
     generatePagesTask({
       pagesDir,
       partialsDir,
       outDir: `${outDir}/life`,
       helpers: templateHelpers,
-      additionalVarsFn: ({ currentPage, fitnessRoundupsIndex, fitnessSessionsPage, lifeSections }) => {
+      additionalVarsFn: ({ currentPage, fitnessRoundupsIndex, lifeSections }) => {
         if (currentPage === 'fitness') {
           return {
             page: 'life',
@@ -96,7 +98,7 @@ export function lifePageTasks({
           };
         }
         /** @type {Record<string, unknown>} */
-        const views = { roundups: fitnessRoundupsIndex, sessions: fitnessSessionsPage };
+        const views = { roundups: fitnessRoundupsIndex };
         return /** @type {Record<string, unknown>} */ (views[currentPage] ?? {});
       },
     }),
@@ -128,6 +130,17 @@ export function lifePageTasks({
       partialsDir,
       outDir,
       outPath: (/** @type {any} */ page) => eventOutPath(page.ev.slug),
+      helpers: templateHelpers,
+    }),
+
+    // /life/sessions and its pages: every session, a page at a time, per type
+    generateDataPagesTask({
+      // @ts-ignore — Skier resolves this `${var}` reference to the global array at runtime
+      items: '${fitnessSessionsPages}',
+      template: `${templatesDir}/sessions.html`,
+      partialsDir,
+      outDir,
+      outPath: (/** @type {any} */ page) => sessionsOutPath(page.fitnessSessions.href),
       helpers: templateHelpers,
     }),
   ];

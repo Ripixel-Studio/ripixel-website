@@ -118,7 +118,17 @@ still-to-come entries from both calendars show as *planned*; a past day with nei
 rest day). Past calendar entries are never shown; with nothing upcoming or logged this week
 the section is omitted. The hand-written
 `events` in `personal/items/life/fitness.json` are used only when `events.json` is
-unavailable.
+unavailable. The same file carries `past`: every Fitness Event since 2025 that already
+happened (no locations); the roundups name their races from it (below).
+
+**Roundup highlights.** `tasks/fitness-highlights.mjs` walks every activity once and finds the
+*moments*: Hyrox race weekends, calendar races and big days out (the name from
+`events.json` `past`, the numbers from that day's activity: "Yorkshire Marathon", not
+"Morning Run"), parkruns (position, PB, first visit, milestone number), PBs that beat an earlier
+record, the longest run and heaviest session yet, firsts, lifetime milestones and weekly streaks.
+`tasks/fitness-roundup-story.mjs` picks a period's moments (plus its own facts: days in a row,
+busiest week/month) and builds each period's layout: a week's seven days, a month's wall
+calendar and week bars, a year's month columns and race calendar, covers, photos and routes.
 
 Downstream tasks can page over the globals directly (`generatePaginatedItemsTask({ dataVar: '${fitnessActivities}', ... })`); no JSON needs writing to disk.
 
@@ -132,9 +142,9 @@ globals (and draw the share cards). The render configuration is `tasks/life-page
 | `tasks/fitness-og-images.mjs` | `fitnessOgImages`, `fitnessShareCards` | — (sharp, see below) | `/life/share/<kind>/<id>/<shape>-<background>.(jpg\|png)` — the share cards (the landscape one is the page's OG image) and `/life/share/index.json`, their manifest |
 | `tasks/fitness-activity-views.mjs` | `fitnessActivityPages` | `generateDataPagesTask` + `personal/templates/activity.html` | `/life/activity/<slug>` |
 | `tasks/fitness-event-views.mjs` | `fitnessEventPages` | `generateDataPagesTask` + `personal/templates/event.html` | `/life/event/<slug>` — one page per race weekend (several races at one event within a few days) |
-| `tasks/fitness-roundup-views.mjs` | `fitnessRoundupPages` | `generateDataPagesTask` + `personal/templates/roundup.html` | `/life/roundup/<key>` |
-| `tasks/fitness-roundup-views.mjs` | `fitnessRoundupsIndex` | `generatePagesTask` + `personal/pages/life/roundups.html` | `/life/roundups` |
-| `tasks/fitness-sessions.mjs` | `fitnessSessionsPage` | `generatePagesTask` + `personal/pages/life/sessions.html` | `/life/sessions` — every session newest first, by month, filterable by type (JS reveals 48 at a time) |
+| `tasks/fitness-roundup-views.mjs` | `fitnessRoundupPages` | `generateDataPagesTask` + `personal/templates/roundup.html` (`rl-week`, `rl-month`, `rl-year` partials) | `/life/roundup/<key>` — a week, a month and a year are three layouts, each led by its highlights |
+| `tasks/fitness-roundup-views.mjs` | `fitnessRoundupsIndex` | `generatePagesTask` + `personal/pages/life/roundups.html` | `/life/roundups` — one stream newest first: a year leads its year, a month its weeks |
+| `tasks/fitness-sessions.mjs` | `fitnessSessionsPages` | `generateDataPagesTask` + `personal/templates/sessions.html` | `/life/sessions[/<n>]`, `/life/sessions/<family>[/<n>]` — every session newest first, 60 a page; JS loads the next page on scroll, the pager works without it |
 | `tasks/fitness-feed-items.mjs` | `fitnessFeedItems` | `generateFeedTask` (Atom only) | **`/life/feed.xml`** — activities and roundups interleaved newest first, 50 entries |
 
 The sitemap is Skier's `generateSitemapTask` with `trailingSlash: false`.

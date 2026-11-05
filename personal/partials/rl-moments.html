@@ -1,0 +1,15 @@
+{{!-- The period's highlights: the lead as a feature, the rest as tickets. Context: roundup view (story). --}}
+{{#if story.lead}}
+<section class="rl-section rl-moments rl-moments--{{type}}">
+  <div class="rl-head">
+    <h2 class="rl-h2">{{#if isWeek}}WHAT HAPPENED{{else}}{{#if isMonth}}THE MOMENTS{{else}}THE YEAR'S BIG MOMENTS{{/if}}{{/if}}<span>.</span></h2>
+    <span class="rl-note">races, records, firsts and streaks, from the sessions{{#if story.hasRaces}} and the calendar{{/if}}</span>
+  </div>
+  <div class="rl-moments__grid">
+    {{> rl-ticket story.lead}}
+    {{#each story.others}}
+    {{> rl-ticket this}}
+    {{/each}}
+  </div>
+</section>
+{{/if}}

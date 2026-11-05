@@ -1,0 +1,9 @@
+{{!-- Footer: sources, back links, previous / next. Context: roundup view. --}}
+<footer class="roundup-foot">
+  <div class="roundup-foot__meta">
+    {{#if sources}}<span>data from {{sources}}</span>{{/if}}
+    <a class="roundup-foot__back" href="/life">← back to life</a>
+    <a class="roundup-foot__back" href="{{indexUrl}}">all roundups →</a>
+  </div>
+  {{> roundup-prevnext this}}
+</footer>

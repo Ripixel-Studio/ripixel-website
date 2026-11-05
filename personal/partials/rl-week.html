@@ -1,0 +1,67 @@
+{{!-- A week: compact and punchy. The lead moment is the cover, the other moments are tickets,
+     the seven days are a strip of sessions. Context: roundup view (isWeek). --}}
+<header class="rl-whero {{story.lead.typeClass}}{{#if story.cover}} rl-whero--cover{{else}}{{#if story.hasRoutes}} rl-whero--cover{{/if}}{{/if}}">
+  <div class="rl-whero__text">
+    <div class="rl-kicker">· WEEKLY ROUNDUP ·</div>
+    <h1 class="rl-whero__title">{{title}}<span>.</span></h1>
+    {{#if dateRange}}<div class="rl-range">{{dateRange}}</div>{{/if}}
+    {{#if story.lead}}
+    <p class="rl-whero__line">the week of <b>{{story.lead.title}}</b></p>
+    {{else}}
+    <p class="rl-whero__line">{{byline}}</p>
+    {{/if}}
+  </div>
+  {{#if story.cover}}
+  <figure class="rl-whero__cover">
+    <img src="{{story.cover.url}}" alt="{{story.cover.title}}" decoding="async" width="800" height="600">
+    {{#if story.lead}}<figcaption class="rl-whero__stamp"><span class="rl-stamp rl-stamp--big">{{story.lead.stamp}}</span></figcaption>{{/if}}
+  </figure>
+  {{else}}{{#if story.hasRoutes}}
+  <div class="rl-whero__routes rl-whero__routes--n{{story.routes.length}}" aria-hidden="true">
+    {{#each story.routes}}<span class="{{typeClass}}">{{> rl-route this}}<small>{{km}}</small></span>{{/each}}
+  </div>
+  {{/if}}{{/if}}
+</header>
+
+{{> rl-numbers this}}
+
+{{> rl-moments this}}
+
+<section class="rl-section">
+  <div class="rl-head">
+    <h2 class="rl-h2">THE SEVEN DAYS<span>.</span></h2>
+    <span class="rl-note">{{story.activeDays}} of 7 days moving</span>
+  </div>
+  <ol class="rl-days">
+    {{#each story.days}}
+    <li class="rl-day{{#if rest}} rl-day--rest{{/if}}">
+      <div class="rl-day__head"><b>{{label}}</b><span>{{num}}</span></div>
+      {{#each sessions}}
+      <a class="rl-sess rl-link {{typeClass}}{{#if mark}} rl-sess--mark{{/if}}" href="{{href}}">
+        {{#if photo}}<span class="rl-sess__pic"><img src="{{photo}}" alt="" loading="lazy" decoding="async" width="320" height="240"></span>{{/if}}
+        <span class="rl-sess__body">
+          <span class="fit-chip">{{familyGlyph}}</span>
+          <span class="rl-sess__title">{{title}}</span>
+          <span class="rl-sess__stat">{{stat}}{{#if statUnit}}<small>{{statUnit}}</small>{{/if}}</span>
+          {{#if mark}}<span class="rl-stamp rl-sess__mark">{{mark}}</span>{{/if}}
+        </span>
+        <span class="rl-arrow" aria-hidden="true">→</span>
+      </a>
+      {{/each}}
+      {{#if rest}}<span class="rl-day__rest">rest</span>{{/if}}
+    </li>
+    {{/each}}
+  </ol>
+</section>
+
+{{> rl-mosaic this}}
+
+{{#if story.routeSheet}}{{> rl-routes this}}{{/if}}
+
+{{#if prCount}}{{> roundup-records this}}{{/if}}
+
+{{> rl-writeup this}}
+
+{{#if life}}{{> roundup-life this}}{{/if}}
+
+{{> rl-foot this}}

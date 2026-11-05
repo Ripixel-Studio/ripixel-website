@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+{{> head}}
+
+<body class="page-life page-sessions" data-page="life">
+  <div class="paper-wash" aria-hidden="true"></div>
+  <div class="paper-dot" aria-hidden="true"></div>
+
+  {{> masthead}}
+
+  <div class="zine-content fit-page">
+
+    <svg class="reg-mark" style="position:absolute;top:4px;left:6px" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+      <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <line x1="0" y1="9" x2="18" y2="9" stroke="currentColor" stroke-width="1.2"/>
+      <line x1="9" y1="0" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/>
+    </svg>
+
+    <nav class="thought-breadcrumb" aria-label="Breadcrumb">
+      <a href="/life">life</a> / {{#if fitnessSessions.filterLabel}}<a href="/life/sessions">sessions</a> / {{fitnessSessions.filterLabel}}{{else}}sessions{{/if}}{{#unless fitnessSessions.isFirst}} / page {{fitnessSessions.page}}{{/unless}}
+    </nav>
+
+    <div class="page-hero fit-hero fit-hero--sessions">
+      <div class="page-hero__left">
+        <div class="page-hero__section-label">· SESSIONS ·</div>
+        <h1 class="page-hero__h1 fit-hero__h1">EVERY<br><span>SINGLE ONE.</span></h1>
+        <div class="fit-hero__strap">every run, ride, class and lift — newest first{{#if fitnessSessions.filterLabel}}, {{fitnessSessions.filterLabel}} only{{/if}}.</div>
+      </div>
+      <div class="page-hero__aside fit-hero__aside">
+        <span class="stamp">{{fitnessSessions.shownLabel}}</span>
+      </div>
+    </div>
+
+    {{#if fitnessUnavailable}}
+    <div class="fit-unavailable">
+      note: fitness data unavailable — this build could not reach the showcase export, so there are no sessions to list. check back later.
+    </div>
+    {{/if}}
+
+    {{#if fitnessSessions.hasFilters}}
+    <nav class="ss-filters" aria-label="Filter by activity type">
+      {{#each fitnessSessions.filters}}
+      <a class="ss-filter {{typeClass}}" href="{{href}}"{{#if current}} aria-current="page"{{/if}}>{{label}} <span>{{count}}</span></a>
+      {{/each}}
+    </nav>
+    {{/if}}
+
+    <div class="ss-list" data-fit-sessions>
+      {{#each fitnessSessions.months}}
+      <section class="ss-month" data-month="{{key}}">
+        <header class="ss-month__head">
+          <h2 class="ss-month__title">{{title}} <span>{{year}}</span></h2>
+          <div class="ss-month__meta">
+            <span class="ss-month__count">{{countLabel}}{{#if stats}} · {{stats}}{{/if}}</span>
+            <span class="ss-month__stack" role="img" aria-label="sessions by type">{{#each stack}}<i class="{{typeClass}}" style="width:{{pct}}%" title="{{label}}: {{n}}"></i>{{/each}}</span>
+            {{#if roundupHref}}<a class="ss-month__roundup" href="{{roundupHref}}">read the {{title}} roundup →</a>{{/if}}
+          </div>
+        </header>
+        <ol class="ss-grid" data-month-items>
+          {{#each items}}
+          {{> ss-card this}}
+          {{/each}}
+        </ol>
+      </section>
+      {{else}}
+      {{#unless fitnessUnavailable}}<p class="ss-empty">nothing on the record yet.</p>{{/unless}}
+      {{/each}}
+    </div>
+
+    {{#if fitnessSessions.nextHref}}
+    <div class="ss-more" data-more>
+      <a class="ss-more__link" rel="next" href="{{fitnessSessions.nextHref}}">older sessions →</a>
+    </div>
+    {{/if}}
+    {{#if fitnessSessions.pager.length}}
+    <nav class="ss-pager" aria-label="Pages" data-pager>
+      {{#if fitnessSessions.prevHref}}<a href="{{fitnessSessions.prevHref}}" rel="prev">← newer</a>{{/if}}
+      {{#each fitnessSessions.pager}}<a href="{{href}}"{{#if current}} aria-current="page"{{/if}}>{{n}}</a>{{/each}}
+      {{#if fitnessSessions.nextHref}}<a href="{{fitnessSessions.nextHref}}" rel="next">older →</a>{{/if}}
+    </nav>
+    {{/if}}
+
+    <footer class="roundup-foot">
+      <div class="roundup-foot__meta">
+        <a class="roundup-foot__back" href="/life">← back to life</a>
+      </div>
+    </footer>
+  </div>
+
+  {{> footer}}
+
+  <div class="paper-grain" aria-hidden="true"></div>
+
+  <script>
+  // Load more on scroll. Every page is a static page with a "older sessions" link to the next
+  // one; when that link comes into view this fetches the page, appends its cards (a month split
+  // across two pages joins up) and moves the link on. Without JS (or without
+  // IntersectionObserver) the link and the pager below it still work.
+  (function () {
+    var list = document.querySelector('[data-fit-sessions]');
+    var more = document.querySelector('[data-more]');
+    // Old links filtered by #type: go to that type's own page.
+    var h = location.hash.slice(1);
+    if (/^[a-z]+$/.test(h) && document.querySelector('.ss-filter[href$="/' + h + '"]')) { location.replace(location.pathname.replace(/\/$/, '') + '/' + h); return; }
+    if (!list || !more || !('IntersectionObserver' in window) || !window.fetch || !window.DOMParser) return;
+    var link = more.querySelector('a[rel="next"]');
+    var pager = document.querySelector('[data-pager]');
+    if (pager) pager.hidden = true;
+    var busy = false;
+    function append(doc) {
+      var months = doc.querySelectorAll('[data-fit-sessions] [data-month]');
+      Array.prototype.forEach.call(months, function (m) {
+        var sections = list.querySelectorAll('[data-month]');
+        var last = sections[sections.length - 1];
+        if (last && last.getAttribute('data-month') === m.getAttribute('data-month')) {
+          var into = last.querySelector('[data-month-items]');
+          Array.prototype.forEach.call(m.querySelectorAll('[data-month-items] > li'), function (li) { into.appendChild(document.importNode(li, true)); });
+        } else {
+          list.appendChild(document.importNode(m, true));
+        }
+      });
+      var next = doc.querySelector('[data-more] a[rel="next"]');
+      if (next) link.setAttribute('href', next.getAttribute('href'));
+      else { more.remove(); io.disconnect(); }
+    }
+    var io = new IntersectionObserver(function (entries) {
+      if (busy || !entries.some(function (e) { return e.isIntersecting; })) return;
+      busy = true;
+      more.classList.add('ss-more--loading');
+      fetch(link.href).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.text();
+      }).then(function (html) {
+        append(new DOMParser().parseFromString(html, 'text/html'));
+        busy = false;
+        more.classList.remove('ss-more--loading');
+        // still in view (a short page, a tall screen): keep going
+        if (document.body.contains(more) && more.getBoundingClientRect().top < innerHeight + 600) { io.unobserve(more); io.observe(more); }
+      }).catch(function () {
+        more.classList.remove('ss-more--loading');
+        if (pager) pager.hidden = false;
+        io.disconnect(); // leave the link and the pager to the reader
+      });
+    }, { rootMargin: '0px 0px 900px 0px' });
+    io.observe(more);
+  })();
+  </script>
+</body>
+</html>
