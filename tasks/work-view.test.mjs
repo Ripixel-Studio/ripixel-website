@@ -111,29 +111,29 @@ describe('buildWorkView', () => {
     assert.equal(v.salary[2].dir, 'flat');
   });
 
-  test('career timeline: one band per company, oldest first, on a shared year axis', () => {
+  test('career timeline: one band per company, newest on top, the axis running back from this year (James, 2026-11-05)', () => {
     const v = /** @type {any} */ (buildWorkView(work));
     const t = v.timeline;
     assert.equal(t.axis.from, 2015);
     assert.equal(t.axis.to, 2026);
     assert.equal(t.axis.ticks.length, 12);
-    assert.deepEqual(t.axis.ticks.slice(0, 2).map((x) => [x.label, x.short, x.left]), [['2015', '’15', 0], ['2016', '’16', 8.3]]);
-    assert.deepEqual(t.rows.map((r) => r.company), ['Sky Betting & Gaming', 'Example Contracting', 'DVELP', 'Deliveroo', 'Monzo']);
-    const sky = t.rows[0];
+    assert.deepEqual(t.axis.ticks.slice(0, 2).map((x) => [x.label, x.short, x.left]), [['2026', '’26', 0], ['2025', '’25', 8.3]]);
+    assert.deepEqual(t.rows.map((r) => r.company), ['Monzo', 'Deliveroo', 'DVELP', 'Example Contracting', 'Sky Betting & Gaming']);
+    const sky = t.rows.at(-1);
     assert.equal(sky.roles.length, 2);
-    assert.deepEqual([sky.roles[0].left, sky.roles[0].width], [6.9, 16.7]); // Nov 2015 to the end of Oct 2017, of 144 months
+    assert.deepEqual([sky.roles[0].left, sky.roles[0].width], [76.4, 16.7]); // Nov 2015 to the end of Oct 2017, of 144 months, mirrored
     assert.equal(sky.roles[0].label, 'Software engineer, Nov 2015 to Oct 2017');
     assert.equal(sky.when, '2015 – 2019');
     assert.equal(sky.ink, v.roles.find((/** @type {any} */ r) => r.company === sky.company).ink);
-    assert.equal(t.rows[1].contract, true);
-    assert.equal(t.rows[1].roles[0].contract, true);
-    const now = t.rows.at(-1);
+    assert.equal(t.rows[3].contract, true);
+    assert.equal(t.rows[3].roles[0].contract, true);
+    const now = t.rows[0];
     assert.equal(now.current, true);
     assert.equal(now.when, '2023 – now');
     assert.equal(now.roles[0].current, true);
     assert.equal(now.roles[0].label, 'Senior staff software engineer, May 2023 to now');
-    assert.equal(t.nowPct, 98.7);
-    assert.ok(Math.abs(now.roles[0].left + now.roles[0].width - t.nowPct) <= 0.1, 'the open role runs to now');
+    assert.equal(t.nowPct, 1.3);
+    assert.ok(Math.abs(now.roles[0].left - t.nowPct) <= 0.1, 'the open role runs to now, at the left');
   });
 
   test('tech chart: every roster entry, grouped, bars from the roles that used it', () => {
@@ -152,9 +152,9 @@ describe('buildWorkView', () => {
     assert.deepEqual(php.spans.map((/** @type {any} */ s) => s.company), ['Sky Betting & Gaming', 'Sky Betting & Gaming']);
     // a fixture spelling with a space still finds its role
     assert.equal(rows.find((/** @type {any} */ r) => r.name === 'twilio flex').spans.length, 1);
-    // within a group: first used first
+    // within a group: most recently picked up first
     const langs = groups[0].rows.map((/** @type {any} */ r) => r.name);
-    assert.deepEqual(langs.slice(0, 2), ['javascript', 'php']);
+    assert.ok(langs.indexOf('go') < langs.indexOf('javascript'), langs.join());
     assert.equal(v.techChart.axis, v.timeline.axis);
     assert.deepEqual(v.techChart.legend.map((/** @type {any} */ l) => l.company), v.timeline.rows.map((/** @type {any} */ r) => r.company));
   });
@@ -227,7 +227,7 @@ describe('built /work page', () => {
 
   test('employment first: timeline, role detail, highlights, then the stack (James, 2026-11-05)', () => {
     assert.equal((html.match(/<div class="wt-row(?: wt-row--now)?" style="--c:/g) || []).length, 5);
-    assert.match(html, /wt-band wt-band--now" style="left: 69.4%/);
+    assert.match(html, /wt-band wt-band--now" style="left: 1.3%; width: 29.3%/);   // mirrored: the open role starts at today, on the left
     assert.equal((html.match(/<div class="wt-row wt-row--tech/g) || []).length, work.roster.length);
     const timeline = html.indexOf('id="wt-h"'), detail = html.indexOf('<article class="role-card ');
     const stack = html.indexOf('class="wt wt--tech"'), highlights = html.indexOf('id="work-highlights-h"');
