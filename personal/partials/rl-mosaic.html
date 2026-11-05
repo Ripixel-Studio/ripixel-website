@@ -1,0 +1,20 @@
+{{!-- The period's photos, highlights first. Context: roundup view (story.photos). Each photo links its session. --}}
+{{#if story.hasPhotos}}
+<section class="rl-section">
+  <div class="rl-head">
+    <h2 class="rl-h2">ON FILM<span>.</span></h2>
+    <span class="rl-note">{{story.photos.length}} frames</span>
+  </div>
+  <ol class="rl-mosaic rl-mosaic--{{type}}">
+    {{#each story.photos}}
+    <li class="rl-mosaic__item {{typeClass}}">
+      <a class="rl-mosaic__link rl-link" href="{{href}}">
+        <img src="{{url}}" alt="{{title}}" loading="lazy" decoding="async" width="640" height="640">
+        <span class="rl-mosaic__cap">{{#if stamp}}<b>{{stamp}}</b> {{/if}}{{title}}</span>
+        <span class="rl-arrow" aria-hidden="true">→</span>
+      </a>
+    </li>
+    {{/each}}
+  </ol>
+</section>
+{{/if}}

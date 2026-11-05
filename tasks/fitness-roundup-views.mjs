@@ -20,6 +20,9 @@
  */
 import path from 'node:path';
 
+import { buildStory, storyContext } from './fitness-roundup-story.mjs';
+import { activityTheme } from './fitness-theme.mjs';
+
 export const ROUNDUP_URL_BASE = '/life/roundup';
 export const ROUNDUPS_INDEX_URL = '/life/roundups';
 export const ACTIVITY_URL_BASE = '/life/activity';
@@ -55,14 +58,6 @@ export const ACTIVITY_TYPE_ICONS = /** @type {Record<string, string>} */ ({
   ACTIVITY_TYPE_SQUASH: 'RKT', ACTIVITY_TYPE_RACQUETBALL: 'RKT', ACTIVITY_TYPE_SAIL: 'SAL',
   ACTIVITY_TYPE_WINDSURF: 'KIT', ACTIVITY_TYPE_KITESURF: 'KIT', ACTIVITY_TYPE_WORKOUT: 'RUN',
 });
-
-const HR_ZONES = [
-  { z: 'Z1', name: 'Easy' },
-  { z: 'Z2', name: 'Aerobic' },
-  { z: 'Z3', name: 'Tempo' },
-  { z: 'Z4', name: 'Threshold' },
-  { z: 'Z5', name: 'Max' },
-];
 
 const STRENGTH_SUFFIXES = ['_1rm', '_set_volume', '_volume', '_reps'];
 const PR_METRIC_ORDER = ['1RM', 'SET VOLUME', 'VOLUME', 'REPS'];
@@ -261,9 +256,6 @@ export function enumLabel(value, prefix) {
 /** `upper_back` → `Upper Back` */
 const titleCase = (s) => String(s || '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
-/** Only absolute https URLs are rendered (contract §5); anything else is dropped. */
-const safeUrl = (u) => (typeof u === 'string' && /^https:\/\//i.test(u) ? u : null);
-
 function elevationComparison(m) {
   if (m < 150) return '';
   for (const l of ELEVATION_LANDMARKS) {
@@ -307,64 +299,15 @@ export function calendarDays(periodStart, periodEnd, dayEntries = []) {
 const LEVEL_WORDS = ['rest', 'easy', 'moderate', 'hard', 'very hard'];
 
 /**
- * Week → seven bars; month/year → a Mon-first day grid. Coordinates are
- * precomputed so the partial only places <rect>s and <text>s.
+ * The year's days as a Mon-first weekday grid with month labels (the week and the month
+ * draw their own days: tasks/fitness-roundup-story.mjs). Coordinates are precomputed so
+ * the partial only places <rect>s and <text>s.
+ * @param {Array<{ date: Date, level: number, count: number }>} days
  */
-export function buildEffortStrip(type, days) {
+export function buildEffortStrip(days) {
   if (!days.length) return null;
-  const dowMon = (d) => (d.getUTCDay() + 6) % 7;
-  const cellTitle = (d) => `${fmtDay(d.date, true)}: ${LEVEL_WORDS[d.level]}${d.count ? ` · ${d.count} session${d.count === 1 ? '' : 's'}` : ''}`;
-
-  if (type === 'week') {
-    const cw = 44, gap = 10, maxH = 72, base = 6, labelH = 34;
-    const cells = days.map((d, i) => {
-      const h = d.level === 0 ? base : base + (maxH - base) * (d.level / 4);
-      return {
-        x: i * (cw + gap), y: maxH - h, w: cw, h,
-        level: d.level, title: cellTitle(d),
-        label: DOW_SHORT[dowMon(d.date)], sub: String(d.date.getUTCDate()),
-        lx: i * (cw + gap) + cw / 2, ly: maxH + 16, sy: maxH + 29,
-      };
-    });
-    const width = days.length * (cw + gap) - gap;
-    const height = maxH + labelH;
-    // Bars sit on y = maxH; a level-L bar reaches the tick at the same height.
-    const tickPct = (level) => Math.round(((level === 0 ? maxH - base : maxH - (base + (maxH - base) * (level / 4))) / height) * 10000) / 100;
-    const yAxis = { caption: 'effort, 0–4', ticks: [4, 2, 0].map((l) => ({ label: String(l), pct: tickPct(l) })) };
-    return { kind: 'bars', width, height, vx: 0, vw: width, cells, labels: [], yAxis };
-  }
-
-  if (type === 'month') {
-    // A small wall calendar: weekday columns, a row per (ISO) week, the date in each square.
-    const cell = 30, gap = 4, top = 18;
-    const isoWeek = (/** @type {Date} */ d) => {
-      const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
-      t.setUTCDate(t.getUTCDate() + 3 - dowMon(t)); // the week's Thursday names its year
-      const jan4 = new Date(Date.UTC(t.getUTCFullYear(), 0, 4));
-      return 1 + Math.round(((t.getTime() - jan4.getTime()) / 864e5 - 3 + dowMon(jan4)) / 7);
-    };
-    const rows = [];
-    let row = -1;
-    const cells = days.map((d, i) => {
-      const dow = dowMon(d.date);
-      if (i === 0 || dow === 0) rows.push(`W${String(isoWeek(d.date)).padStart(2, '0')}`), row++;
-      const x = dow * (cell + gap);
-      const y = top + row * (cell + gap);
-      return {
-        x, y, w: cell, h: cell, level: d.level, title: cellTitle(d),
-        num: String(d.date.getUTCDate()), nx: x + cell - 4, ny: y + cell - 5, on: d.level >= 3,
-      };
-    });
-    const width = 7 * (cell + gap) - gap;
-    const height = top + rows.length * (cell + gap) - gap;
-    const labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((text, i) => ({ x: i * (cell + gap) + cell / 2, y: 11, text, anchor: 'middle' }));
-    const yAxis = {
-      caption: 'week',
-      ticks: rows.map((label, r) => ({ label, pct: Math.round(((top + r * (cell + gap) + cell / 2) / height) * 10000) / 100 })),
-    };
-    return { kind: 'calendar', width, height, vx: 0, vw: width, cells, labels, yAxis };
-  }
-
+  const dowMon = (/** @type {Date} */ d) => (d.getUTCDay() + 6) % 7;
+  const cellTitle = (/** @type {any} */ d) => `${fmtDay(d.date, true)}: ${LEVEL_WORDS[d.level]}${d.count ? ` · ${d.count} session${d.count === 1 ? '' : 's'}` : ''}`;
   const cell = 11;
   const gap = 2;
   const top = 14;
@@ -375,7 +318,7 @@ export function buildEffortStrip(type, days) {
   days.forEach((d, i) => {
     const dow = dowMon(d.date);
     if (i > 0 && dow === 0) col++;
-    if (type === 'year' && d.date.getUTCMonth() !== lastMonth && dow === 0) {
+    if (d.date.getUTCMonth() !== lastMonth && dow === 0) {
       lastMonth = d.date.getUTCMonth();
       labels.push({ x: col * (cell + gap), y: 10, text: MONTHS_SHORT[lastMonth] });
     }
@@ -595,7 +538,8 @@ export function buildRoundupLife(period, labels) {
 /**
  * Everything `personal/templates/roundup.html` renders, as plain data.
  * @param {{ key: string, previousKey?: string, roundup: any }} file
- * @param {{ byKey: Map<string, any>, neighbours: Map<string, any>, activitySlugs: Set<string>, showPhotoGallery: boolean, lifePeriods?: Record<string, any> }} ctx
+ * @param {{ byKey: Map<string, any>, neighbours: Map<string, any>, activitySlugs: Set<string>, showPhotoGallery: boolean, lifePeriods?: Record<string, any>, story?: ReturnType<typeof storyContext> }} ctx
+ *   `story`: the shared highlights context (tasks/fitness-roundup-story.mjs); without it the page has no story blocks
  */
 export function buildRoundupView(file, ctx) {
   const r = file.roundup || {};
@@ -632,13 +576,6 @@ export function buildRoundupView(file, ctx) {
     ? { label: periodLabels(nb.comparison, prevFile.roundup).short, href: keyToUrl(nb.comparison), deltas: buildDeltas(r, prevFile.roundup || {}) }
     : null;
 
-  // --- callouts
-  const callouts = (r.calloutActivities || []).filter(Boolean).map((c) => {
-    const kind = String(c.kind || '').toUpperCase();
-    const glyph = kind.includes('STREAK') ? 'CF' : kind.includes('RECORD') || kind.includes('PR') ? '★' : ACTIVITY_TYPE_ICONS[c.activityType] || 'HIT';
-    return { kind: c.kind || '', title: c.title || '', statValue: c.statValue || '', statUnit: c.statUnit || '', sub: c.sub || '', date: c.date || '', glyph, href: href(c.showcaseId) };
-  });
-
   // --- sport breakdown
   const breakdownsRaw = [...(r.activityTypeBreakdowns || [])].filter(Boolean).sort((a, b) => num(b.activityCount) - num(a.activityCount));
   const sessionTotal = breakdownsRaw.reduce((s, b) => s + num(b.activityCount), 0);
@@ -653,6 +590,7 @@ export function buildRoundupView(file, ctx) {
     if (num(b.totalSets) > 0) stats.push(`${num(b.totalSets)} sets`);
     if (w > 0) { const fw = fmtWeight(w); stats.push(`${fw.value}${fw.unit} moved`); }
     return {
+      ...activityTheme(b.activityType),
       ink: i % 6, glyph: ACTIVITY_TYPE_ICONS[b.activityType] || '★', label: enumLabel(b.activityType, 'ACTIVITY_TYPE_'),
       count, pct: sessionTotal ? Math.round((count / sessionTotal) * 100) : 0,
       share: sessionTotal ? (count / sessionTotal) * 100 : 0,
@@ -661,21 +599,6 @@ export function buildRoundupView(file, ctx) {
     };
   });
   const distanceStack = breakdown.filter((b) => b.distShare > 0);
-
-  // --- muscles
-  const musclesRaw = (r.muscles || []).filter((m) => m && num(m.count) > 0);
-  const muscleMax = Math.max(1, ...musclesRaw.map((m) => num(m.count)));
-  const muscles = musclesRaw.map((m) => ({ name: titleCase(m.name), count: num(m.count), width: (num(m.count) / muscleMax) * 100 }));
-
-  // --- media
-  const photos = ctx.showPhotoGallery
-    ? (r.photos || []).filter((p) => p && safeUrl(p.url)).map((p) => ({ url: safeUrl(p.url), title: p.activityTitle || '', date: p.date || '', glyph: ACTIVITY_TYPE_ICONS[p.activityType] || '', href: href(p.showcaseId) }))
-    : [];
-  const routes = (r.routes || []).filter((x) => x && safeUrl(x.thumbnailUrl)).map((x) => ({
-    url: safeUrl(x.thumbnailUrl), title: x.activityTitle || '', date: x.date || '',
-    km: num(x.distanceMeters) > 500 ? `${fmtKm(num(x.distanceMeters))} km` : '',
-    glyph: ACTIVITY_TYPE_ICONS[x.activityType] || '', href: href(x.showcaseId),
-  }));
 
   // --- places + weather
   const places = (r.places || []).filter((p) => p && p.name).map((p) => ({ name: p.name, country: p.country || '', count: num(p.activityCount) }));
@@ -691,19 +614,10 @@ export function buildRoundupView(file, ctx) {
     ],
   } : null;
 
-  // --- effort strip + HR zones
+  // --- the year's day grid (a week and a month draw their own days: tasks/fitness-roundup-story.mjs)
   const days = calendarDays(r.periodStart, r.periodEnd, r.dayEntries);
-  const effortStrip = buildEffortStrip(type, days);
+  const effortStrip = type === 'year' ? buildEffortStrip(days) : null;
   const activeDays = days.filter((d) => d.level > 0).length;
-  const hrMinutes = Array.isArray(r.hrZoneMinutes) ? r.hrZoneMinutes.map(num) : [];
-  const tracked = [1, 2, 3, 4, 5].reduce((s, i) => s + (hrMinutes[i] || 0), 0);
-  const zoneMax = Math.max(1, ...[1, 2, 3, 4, 5].map((i) => hrMinutes[i] || 0));
-  const zones = tracked >= 30
-    ? HR_ZONES.map((z, i) => {
-      const m = hrMinutes[i + 1] || 0;
-      return { ...z, minutes: Math.round(m), pct: Math.round((m / tracked) * 100), width: (m / zoneMax) * 100 };
-    })
-    : null;
 
   // --- best efforts, highlights, records
   const bestEfforts = (r.bestEfforts || []).filter((b) => b && num(b.timeSeconds) > 0).map((b) => ({ display: b.display || b.distanceKey || '', time: fmtClock(num(b.timeSeconds)) }));
@@ -741,47 +655,88 @@ export function buildRoundupView(file, ctx) {
     key, url: keyToUrl(key), ...labels, byline: `your ${labels.word.toLowerCase()} in sport`,
     isWeek: type === 'week', isMonth: type === 'month', isYear: type === 'year',
     generatedAt: r.generatedAt || '',
-    totals, comparison, callouts, breakdown, distanceStack, hasDistanceStack: distanceStack.length > 1,
-    muscles, photos, featuredPhoto: photos.length >= 5 ? photos[0] : null, gridPhotos: photos.length >= 5 ? photos.slice(1) : photos,
-    routes, places, placesNote, weather,
-    effortStrip, activeDays, dayCount: days.length, zones, hrTracked: Math.round(tracked),
+    totals, comparison, breakdown, distanceStack, hasDistanceStack: distanceStack.length > 1,
+    places, placesNote, weather,
+    effortStrip, activeDays, dayCount: days.length,
     bestEfforts, highlights, records, prCount, sources: sources.join(' · '),
     life: buildRoundupLife(ctx.lifePeriods?.[key], labels),
     aiSummary, prevNav, nextNav, hasNav: Boolean(prevNav || nextNav), description,
     indexUrl: ROUNDUPS_INDEX_URL,
+    periodStart: r.periodStart || '', sessionCount: num(r.totalActivities),
+    story: ctx.story ? buildStory(file, type, ctx.story) : null,
   };
 }
 
-/** Tiles for `/life/roundups`, newest first inside each period group. */
-export function buildIndexView(files) {
-  const groups = { week: [], month: [], year: [] };
-  for (const f of files) {
-    if (!f || !parsePeriodKey(f.key)) continue;
-    const r = f.roundup || {};
-    const labels = periodLabels(f.key, r);
-    const distance = num(r.totalDistanceMeters);
-    const weight = (r.activityTypeBreakdowns || []).reduce((s, b) => s + num(b?.totalWeightKg), 0);
-    const hasStrength = (r.activityTypeBreakdowns || []).some((b) => num(b?.totalSets) > 0);
-    let secondary;
-    if (distance > 500) secondary = `${fmtKm(distance)} km`;
-    else if (hasStrength && weight > 0) { const fw = fmtWeight(weight); secondary = `${fw.value}${fw.unit} moved`; }
-    else secondary = fmtDuration(num(r.totalDurationSeconds));
-    const prs = (r.prsAchieved || []).length;
-    groups[labels.type].push({
-      key: f.key, href: keyToUrl(f.key), kicker: labels.kicker, title: labels.title, short: labels.short,
-      dateRange: labels.dateRange, sessions: num(r.totalActivities), sessionsLabel: num(r.totalActivities) === 1 ? 'session' : 'sessions', secondary,
-      prs: prs ? `+${prs} PR${prs === 1 ? '' : 'S'}` : '', hasAiSummary: typeof r.aiSummary === 'string' && r.aiSummary.trim() !== '',
-      _start: Date.parse(r.periodStart || '') || 0,
-    });
+const MONTH_NAMES = MONTHS;
+
+/**
+ * `/life/roundups` as one stream, newest first, like the watching wall: each year opens
+ * with its year roundup (or a plain year card while the year is still running), each
+ * month with its month roundup (or a plain month label), then that month's weeks. A week
+ * belongs to the month its Thursday falls in (ISO). Every tile carries a teaser: the
+ * headline numbers, the top highlight, a photo or a mini chart.
+ * @param {any[]} views  buildRoundupView results
+ */
+export function buildTimeline(views) {
+  /** @type {Map<number, { year: any, months: Map<number, { month: any, weeks: any[] }> }>} */
+  const years = new Map();
+  const yearOf = (/** @type {number} */ y) => {
+    if (!years.has(y)) years.set(y, { year: null, months: new Map() });
+    return /** @type {any} */ (years.get(y));
+  };
+  const monthOf = (/** @type {number} */ y, /** @type {number} */ m) => {
+    const Y = yearOf(y);
+    if (!Y.months.has(m)) Y.months.set(m, { month: null, weeks: [] });
+    return Y.months.get(m);
+  };
+  for (const v of views) {
+    const start = Date.parse(v.periodStart || '');
+    if (!Number.isFinite(start)) continue;
+    if (v.type === 'year') yearOf(new Date(start).getUTCFullYear()).year = v;
+    else if (v.type === 'month') monthOf(new Date(start).getUTCFullYear(), new Date(start).getUTCMonth()).month = v;
+    else {
+      const thu = new Date(start + 3 * 864e5);
+      monthOf(thu.getUTCFullYear(), thu.getUTCMonth()).weeks.push(v);
+    }
   }
-  const order = [
-    { type: 'week', heading: 'WEEKS', blurb: 'seven days at a time.' },
-    { type: 'month', heading: 'MONTHS', blurb: 'the longer arc.' },
-    { type: 'year', heading: 'YEARS', blurb: 'in review.' },
-  ];
-  return order
-    .map((o) => ({ ...o, tiles: groups[o.type].sort((a, b) => b._start - a._start).map(({ _start, ...t }) => t) }))
-    .filter((g) => g.tiles.length > 0);
+  const out = [];
+  for (const y of [...years.keys()].sort((a, b) => b - a)) {
+    const Y = /** @type {any} */ (years.get(y));
+    let count = 0;
+    for (const M of Y.months.values()) count += (M.month ? M.month.sessionCount : M.weeks.reduce((s, w) => s + w.sessionCount, 0));
+    out.push(Y.year ? { ...tile(Y.year), isYear: true } : { isYearMark: true, mark: String(y), year: String(y), sub: 'so far' });
+    for (const m of [...Y.months.keys()].sort((a, b) => b - a)) {
+      const M = Y.months.get(m);
+      if (M.month) out.push({ ...tile(M.month), isMonth: true });
+      else out.push({ isMonthMark: true, mark: `${MONTH_NAMES[m]} ${y}`, label: MONTH_NAMES[m].toUpperCase(), year: String(y) });
+      for (const w of M.weeks.sort((a, b) => Date.parse(b.periodStart) - Date.parse(a.periodStart))) out.push({ ...tile(w), isWeek: true });
+    }
+  }
+  return out;
+}
+
+/** One tile's teaser. @param {any} v a buildRoundupView result */
+function tile(v) {
+  const st = v.story || {};
+  const second = (v.totals || []).slice(2).find((t) => t.label && t.label !== '—');
+  const lead = st.lead || null;
+  const days = Array.isArray(st.days) ? st.days : [];
+  const most = Math.max(1, ...days.map((d) => d.sessions.length));
+  const months = Array.isArray(st.months) ? st.months : [];
+  return {
+    key: v.key, href: v.url, title: v.title, short: v.short, kicker: v.kicker, range: v.dateRange,
+    sessions: String(v.sessionCount), sessionsLabel: v.sessionCount === 1 ? 'session' : 'sessions',
+    secondary: second ? `${second.value}${second.unit ? ` ${second.unit}` : ''}` : '',
+    secondaryLabel: second ? second.label.replace(/ covered$| moved$| burned$/, (m) => m) : '',
+    prs: v.prCount ? `${v.prCount} PB${v.prCount === 1 ? '' : 's'}` : '',
+    top: lead ? { stamp: lead.stamp, title: lead.title, typeClass: lead.typeClass } : null,
+    lines: (st.coverLines || []).slice(1, 3),
+    cover: st.cover?.url || '',
+    collage: (st.collage || []).slice(0, 4).map((p) => p.url),
+    routes: (st.routes || []).slice(0, v.type === 'year' ? 8 : 6),
+    days: days.map((d) => ({ label: String(d.label || '').slice(0, 1), h: Math.round((d.sessions.length / most) * 100), typeClass: d.sessions[0]?.typeClass || '' })),
+    months: months.map((m) => ({ label: String(m.label || '').slice(0, 1), h: m.height })),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -816,6 +771,14 @@ export function fitnessRoundupViewsTask() {
         activitySlugs,
         showPhotoGallery: Boolean(index.profile?.showPhotoGallery),
         lifePeriods: g.lifePeriods || {},
+        // Highlights: every activity file, the index, and the calendar's past Fitness Events (Jarvis).
+        story: storyContext({
+          files: Array.isArray(g.fitnessActivities) ? g.fitnessActivities : [],
+          entries: Array.isArray(index.activities) ? index.activities : [],
+          past: Array.isArray(g.fitnessEvents?.past) ? g.fitnessEvents.past : [],
+          roundupFiles: files,
+          showPhotos: Boolean(index.profile?.showPhotoGallery),
+        }),
       };
       const siteUrl = String(g.siteUrl || '').replace(/\/+$/, '');
       const ogCards = g.fitnessOgImages?.roundup || {};
@@ -836,14 +799,13 @@ export function fitnessRoundupViewsTask() {
         }
       }
 
-      const built = new Set(pages.map((p) => p.roundup.key));
-      const groups = buildIndexView(files.filter((f) => built.has(f.key)));
+      const timeline = buildTimeline(pages.map((p) => p.roundup));
       /** Template variables for /life/roundups, rendered by Skier's generatePagesTask. */
       const fitnessRoundupsIndex = {
         page: 'life', atomFeed: FITNESS_FEED_PATH,
         subpage: '| roundups',
         description: 'Weekly, monthly and yearly training roundups — every session, summed up.',
-        roundupGroups: groups,
+        timeline,
         roundupCount: pages.length,
         roundupCountLabel: `${pages.length} issue${pages.length === 1 ? '' : 's'}`,
         fitnessUnavailable: Boolean(g.fitnessUnavailable),

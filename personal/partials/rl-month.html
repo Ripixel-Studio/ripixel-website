@@ -1,0 +1,108 @@
+{{!-- A month: a feature. Cover photo under the month's name with cover lines, the story,
+     the moments, the wall calendar and the weeks, then sport, photos, records, places, life.
+     Context: roundup view (isMonth). --}}
+<header class="rl-mcover {{story.lead.typeClass}}{{#if story.cover}} rl-mcover--photo{{/if}}">
+  {{#if story.cover}}<img class="rl-mcover__img" src="{{story.cover.url}}" alt="" decoding="async" width="1600" height="1000">{{else}}{{#if story.hasRoutes}}
+  <span class="rl-mcover__routes" aria-hidden="true">{{#each story.routes}}{{> rl-route this}}{{/each}}</span>
+  {{/if}}{{/if}}
+  <div class="rl-mcover__mast">
+    <div class="rl-kicker">· MONTHLY ROUNDUP · {{year}} ·</div>
+    <h1 class="rl-mcover__title">{{title}}<span>.</span></h1>
+    {{#if dateRange}}<div class="rl-range">{{dateRange}}</div>{{/if}}
+  </div>
+  {{#if story.coverLines.length}}
+  <ul class="rl-mcover__lines" aria-label="In this issue">
+    {{#each story.coverLines}}
+    <li class="{{typeClass}}"><span class="rl-stamp">{{stamp}}</span><span class="rl-mcover__line">{{title}}</span></li>
+    {{/each}}
+  </ul>
+  {{/if}}
+  <span class="rl-mcover__issue">{{story.sessionCount}} sessions · {{story.activeDays}} days</span>
+</header>
+
+{{> rl-numbers this}}
+
+{{> rl-writeup this}}
+
+{{> rl-moments this}}
+
+<section class="rl-section">
+  <div class="rl-head">
+    <h2 class="rl-h2">DAY BY DAY<span>.</span></h2>
+    <span class="rl-note">{{story.activeDays}} of {{dayCount}} days moving · every dot a session, in its sport's ink</span>
+  </div>
+  <div class="rl-month-grid">
+    <div class="rl-cal" role="group" aria-label="The month, day by day">
+      <ol class="rl-cal__dow" aria-hidden="true">{{#each story.calendar.dow}}<li>{{this}}</li>{{/each}}</ol>
+      {{#each story.calendar.weeks}}
+      <ol class="rl-cal__week">
+        {{#each cells}}
+        {{#if blank}}<li class="rl-cal__day rl-cal__day--blank" aria-hidden="true"></li>{{else}}
+        <li class="rl-cal__day{{#if count}} rl-cal__day--on{{/if}}{{#if mark}} rl-cal__day--mark{{/if}}">
+          {{#if href}}<a class="rl-cal__link rl-link" href="{{href}}">{{/if}}
+          {{#if photo}}<img class="rl-cal__pic" src="{{photo}}" alt="" loading="lazy" decoding="async" width="120" height="120">{{/if}}
+          <span class="rl-cal__num">{{num}}</span>
+          <span class="rl-cal__dots">{{#each dots}}<i class="{{typeClass}}" title="{{title}}"></i>{{/each}}</span>
+          {{#if mark}}<span class="rl-cal__mark">{{mark}}</span>{{/if}}
+          {{#if href}}</a>{{/if}}
+        </li>
+        {{/if}}
+        {{/each}}
+      </ol>
+      {{/each}}
+    </div>
+    <div class="rl-weeks">
+      <div class="rl-card-label">WEEK BY WEEK · sessions</div>
+      <ol class="rl-weeks__list">
+        {{#each story.weekBars}}
+        <li>
+          {{#if href}}<a class="rl-weeks__row rl-link" href="{{href}}">{{else}}<span class="rl-weeks__row">{{/if}}
+            <span class="rl-weeks__label">{{label}}</span>
+            <span class="rl-weeks__track"><span class="rl-weeks__fill" style="width:{{pct}}%"></span></span>
+            <span class="rl-weeks__value"><b>{{sessions}}</b> · {{hours}}</span>
+            {{#if href}}<span class="rl-arrow" aria-hidden="true">→</span>{{/if}}
+          {{#if href}}</a>{{else}}</span>{{/if}}
+        </li>
+        {{/each}}
+      </ol>
+      <div class="rl-weeks__axis" aria-hidden="true"><span>0</span><span>sessions in the week</span></div>
+    </div>
+  </div>
+</section>
+
+{{#if breakdown.length}}
+<section class="rl-section">
+  <div class="rl-head">
+    <h2 class="rl-h2">BY SPORT<span>.</span></h2>
+    <span class="rl-note">{{breakdown.length}} kinds of moving</span>
+  </div>
+  {{> roundup-breakdown this}}
+</section>
+{{/if}}
+
+{{> rl-mosaic this}}
+
+{{> rl-routes this}}
+
+{{> roundup-highlights this}}
+
+{{> roundup-records this}}
+
+{{#if places.length}}
+<section class="rl-section">
+  <div class="rl-head">
+    <h2 class="rl-h2">OUT THERE<span>.</span></h2>
+    {{#if placesNote}}<span class="rl-note">{{placesNote}}</span>{{/if}}
+  </div>
+  <ul class="rl-places">
+    {{#each places}}<li><b>{{name}}</b>{{#if country}} <span>{{country}}</span>{{/if}} <i>×{{count}}</i></li>{{/each}}
+  </ul>
+  {{#if weather}}
+  <div class="rl-weather">{{#each weather.cells}}<span><b>{{value}}</b> {{label}}</span>{{/each}}</div>
+  {{/if}}
+</section>
+{{/if}}
+
+{{#if life}}{{> roundup-life this}}{{/if}}
+
+{{> rl-foot this}}

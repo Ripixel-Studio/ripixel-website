@@ -1,0 +1,20 @@
+{{!-- The period's longest outdoor sessions as route drawings, each opening its session. Context: roundup view. --}}
+{{#if story.hasRoutes}}
+<section class="rl-section">
+  <div class="rl-head">
+    <h2 class="rl-h2">THE ROUTES<span>.</span></h2>
+    <span class="rl-note">the {{story.routes.length}} longest, as the watch drew them</span>
+  </div>
+  <ol class="rl-routes">
+    {{#each story.routes}}
+    <li class="{{typeClass}}">
+      <a class="rl-routes__card rl-link" href="{{href}}">
+        {{> rl-route this}}
+        <span class="rl-routes__cap"><b>{{km}}</b> {{title}}</span>
+        <span class="rl-arrow" aria-hidden="true">→</span>
+      </a>
+    </li>
+    {{/each}}
+  </ol>
+</section>
+{{/if}}

@@ -1,0 +1,52 @@
+{{!-- One entry on the /life/roundups timeline (buildTimeline in tasks/fitness-roundup-views.mjs):
+     a year card or year roundup, a month label or month roundup, a week roundup. Roundups are
+     clickable cards (rl-link + rl-arrow); the year and month labels are not. --}}
+{{#if isYearMark}}
+<li class="rl-tl__year-mark"><span class="rl-tl__year-y">{{year}}</span><span class="rl-tl__year-n">{{sub}}</span></li>
+{{/if}}
+{{#if isMonthMark}}
+<li class="rl-tl__month-mark"><span>{{label}}</span><small>{{year}} · so far</small></li>
+{{/if}}
+{{#if isYear}}
+<li class="rl-tl__item rl-tl__item--year">
+  <a class="rl-tl__card rl-tl__card--year rl-link" href="{{href}}">
+    {{#if collage.length}}<span class="rl-tl__collage" aria-hidden="true">{{#each collage}}<img src="{{this}}" alt="" loading="lazy" decoding="async" width="300" height="300">{{/each}}</span>{{else}}{{#if routes.length}}<span class="rl-tl__routes" aria-hidden="true">{{#each routes}}{{> rl-route this}}{{/each}}</span>{{/if}}{{/if}}
+    <span class="rl-tl__kicker">YEAR IN REVIEW</span>
+    <span class="rl-tl__year-title">{{title}}</span>
+    <span class="rl-tl__nums"><b>{{sessions}}</b> {{sessionsLabel}}{{#if secondary}} · <b>{{secondary}}</b>{{/if}}{{#if prs}} · <b>{{prs}}</b>{{/if}}</span>
+    {{#if months.length}}<span class="rl-tl__months" aria-hidden="true">{{#each months}}<i style="height:{{h}}%"></i>{{/each}}</span>{{/if}}
+    {{#if top}}<span class="rl-tl__top {{top.typeClass}}"><span class="rl-stamp">{{top.stamp}}</span> {{top.title}}</span>{{/if}}
+    <span class="rl-arrow" aria-hidden="true">→</span>
+  </a>
+</li>
+{{/if}}
+{{#if isMonth}}
+<li class="rl-tl__item rl-tl__item--month {{top.typeClass}}">
+  <a class="rl-tl__card rl-tl__card--month{{#if cover}} rl-tl__card--photo{{/if}} rl-link" href="{{href}}">
+    {{#if cover}}<img class="rl-tl__cover" src="{{cover}}" alt="" loading="lazy" decoding="async" width="600" height="600">{{else}}{{#if routes.length}}<span class="rl-tl__routes" aria-hidden="true">{{#each routes}}{{> rl-route this}}{{/each}}</span>{{/if}}{{/if}}
+    <span class="rl-tl__kicker">MONTH · {{range}}</span>
+    <span class="rl-tl__month-title">{{title}}</span>
+    <span class="rl-tl__nums"><b>{{sessions}}</b> {{sessionsLabel}}{{#if secondary}} · <b>{{secondary}}</b>{{/if}}{{#if prs}} · <b>{{prs}}</b>{{/if}}</span>
+    {{#if top}}
+    <span class="rl-tl__lines">
+      <span class="rl-tl__line {{top.typeClass}}"><span class="rl-stamp">{{top.stamp}}</span> {{top.title}}</span>
+      {{#each lines}}<span class="rl-tl__line {{typeClass}}"><span class="rl-stamp">{{stamp}}</span> {{title}}</span>{{/each}}
+    </span>
+    {{/if}}
+    <span class="rl-arrow" aria-hidden="true">→</span>
+  </a>
+</li>
+{{/if}}
+{{#if isWeek}}
+<li class="rl-tl__item rl-tl__item--week {{top.typeClass}}">
+  <a class="rl-tl__card rl-tl__card--week{{#if cover}}{{#if top}} rl-tl__card--photo{{/if}}{{/if}} rl-link" href="{{href}}">
+    {{#if top}}{{#if cover}}<span class="rl-tl__wpic"><img src="{{cover}}" alt="" loading="lazy" decoding="async" width="320" height="200"></span>{{/if}}{{/if}}
+    <span class="rl-tl__wk">{{title}}</span>
+    <span class="rl-tl__range">{{range}}</span>
+    <span class="rl-tl__wnums"><b>{{sessions}}</b> {{sessionsLabel}}{{#if secondary}}<br>{{secondary}}{{/if}}</span>
+    {{#if days.length}}<span class="rl-tl__days" aria-hidden="true">{{#each days}}<i class="{{typeClass}}" style="height:{{h}}%"></i>{{/each}}</span>{{/if}}
+    {{#if top}}<span class="rl-tl__wtop"><span class="rl-stamp">{{top.stamp}}</span><span>{{top.title}}</span></span>{{/if}}
+    <span class="rl-arrow" aria-hidden="true">→</span>
+  </a>
+</li>
+{{/if}}

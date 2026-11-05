@@ -1,0 +1,14 @@
+{{!-- One roundup highlight as a ticket (tasks/fitness-highlights.mjs via fitness-roundup-story.mjs ticket()).
+     Clickable when it has an href: the whole ticket is the link, with the arrow tab (rl-link / rl-arrow).
+     Context: a highlight; `feature` (bool, from the caller's hash) draws the big photo-led version. --}}
+{{#if href}}<a class="rl-ticket rl-link {{typeClass}}{{#if photo}} rl-ticket--photo{{else}}{{#if route}} rl-ticket--photo{{/if}}{{/if}}{{#if lead}} rl-ticket--lead{{/if}}" href="{{href}}">{{else}}<div class="rl-ticket {{typeClass}}{{#if photo}} rl-ticket--photo{{else}}{{#if route}} rl-ticket--photo{{/if}}{{/if}}{{#if lead}} rl-ticket--lead{{/if}}">{{/if}}
+  {{#if photo}}<span class="rl-ticket__pic"><img src="{{photo}}" alt="" loading="lazy" decoding="async" width="640" height="480"></span>{{else}}{{#if route}}<span class="rl-ticket__pic rl-ticket__pic--route">{{> rl-route route}}</span>{{/if}}{{/if}}
+  <span class="rl-ticket__body">
+    <span class="rl-ticket__top"><span class="rl-stamp">{{stamp}}</span>{{#if date}}<span class="rl-ticket__date">{{date}}</span>{{/if}}</span>
+    <span class="rl-ticket__title">{{title}}</span>
+    {{#if value}}<span class="rl-ticket__value">{{value}}{{#if unit}}<small>{{unit}}</small>{{/if}}</span>{{/if}}
+    {{#if sub}}<span class="rl-ticket__sub">{{sub}}</span>{{/if}}
+    {{#if hasTags}}<span class="rl-ticket__tags">{{#each tags}}<span class="rl-tag">{{this}}</span>{{/each}}</span>{{/if}}
+  </span>
+  {{#if href}}<span class="rl-arrow" aria-hidden="true">→</span>{{/if}}
+{{#if href}}</a>{{else}}</div>{{/if}}

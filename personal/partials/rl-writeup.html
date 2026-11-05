@@ -1,0 +1,10 @@
+{{!-- The export's write-up (plain text, never HTML). Context: roundup view. --}}
+{{#if aiSummary}}
+<section class="rl-section rl-writeup rl-writeup--{{type}}">
+  <div class="rl-head">
+    <h2 class="rl-h2">{{#if isWeek}}THE WRITE-UP{{else}}THE STORY{{/if}}<span>.</span></h2>
+    <span class="rl-note">machine-written, human-checked</span>
+  </div>
+  <blockquote class="rl-writeup__body">{{aiSummary}}</blockquote>
+</section>
+{{/if}}

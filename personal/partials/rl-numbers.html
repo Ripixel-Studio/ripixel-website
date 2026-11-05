@@ -1,0 +1,19 @@
+{{!-- The headline numbers, big, with the comparison against the previous period under them. Context: roundup view. --}}
+<div class="rl-numbers rl-numbers--{{type}}">
+  {{#each totals}}
+  <div class="rl-numbers__item">
+    <span class="rl-numbers__num">{{value}}{{#if unit}}<small>{{unit}}</small>{{/if}}</span>
+    <span class="rl-numbers__label">{{label}}</span>
+  </div>
+  {{/each}}
+</div>
+{{#if comparison}}
+<div class="roundup-ticker rl-ticker">
+  <a class="roundup-ticker__vs" href="{{comparison.href}}">vs {{comparison.label}} →</a>
+  {{#each comparison.deltas}}
+  <span class="roundup-ticker__item roundup-ticker__item--{{dir}}"><b>{{value}}</b> {{label}}</span>
+  {{else}}
+  <span class="roundup-ticker__item">level with last time</span>
+  {{/each}}
+</div>
+{{/if}}
