@@ -1,10 +1,11 @@
 {{!-- A Hyrox race leads with its result: the race weekend it belongs to, the day, the
      runs-against-stations breakdown and the PB chase. Context: `act`. --}}
 {{#if eventLink}}
-<a class="act-eventlink" href="{{eventLink.url}}">
+<a class="act-eventlink card-link" href="{{eventLink.url}}">
   <span class="act-eventlink__kicker">race weekend · {{eventLink.count}} races · see it all</span>
-  <span class="act-eventlink__name">Hyrox {{eventLink.name}} →</span>
+  <span class="act-eventlink__name">Hyrox {{eventLink.name}}</span>
   <span class="act-eventlink__others">{{#each eventLink.others}}{{#unless @first}} · {{/unless}}also {{division}} {{total}}{{#if isPB}} ★{{/if}}{{/each}}</span>
+  {{> card-arrow}}
 </a>
 {{/if}}
 {{#if raceDay.length}}

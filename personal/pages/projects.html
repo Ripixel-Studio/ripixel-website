@@ -103,12 +103,12 @@
     </div>
 
     <div class="proj-grid">
-      <article class="proj-card">
+      <article class="proj-card card-link">
         <div class="proj-card__inner">
           <div class="proj-card__top">
             <span class="proj-card__num">NO. 002</span>
           </div>
-          <div class="proj-card__title">SKIER.</div>
+          <h3 class="proj-card__title"><a class="card-link__target" href="https://skier.ripixel.co.uk">SKIER.</a></h3>
           <div class="proj-card__blurb">
             A custom static site generator, because the world definitely needed another one.
             I kept getting frustrated with existing options — either too simple or requiring
@@ -118,20 +118,18 @@
           </div>
           <div class="proj-card__footer">
             <span class="proj-card__tech">tech / node · cli · markdown</span>
-            <span class="proj-card__year">
-              <a href="https://skier.ripixel.co.uk">docs</a> ·
-              <a href="https://github.com/ripixel/skier">github</a>
-            </span>
+            <span class="proj-card__year"><a class="card-link__aside" href="https://github.com/ripixel/skier">github</a></span>
           </div>
         </div>
+        {{> card-arrow}}
       </article>
 
-      <article class="proj-card">
+      <article class="proj-card card-link">
         <div class="proj-card__inner">
           <div class="proj-card__top">
             <span class="proj-card__num">NO. 003</span>
           </div>
-          <div class="proj-card__title">BINGHAM SRC.</div>
+          <h3 class="proj-card__title"><a class="card-link__target" href="https://binghamsundayrunningclub.co.uk">BINGHAM SRC.</a></h3>
           <div class="proj-card__blurb">
             A full digital ecosystem for a small Sunday running club. What started as
             "can you make us a simple website?" turned into a React-based race tracker app,
@@ -140,19 +138,17 @@
           </div>
           <div class="proj-card__footer">
             <span class="proj-card__tech">tech / react · firebase · spotify</span>
-            <span class="proj-card__year">
-              <a href="https://binghamsundayrunningclub.co.uk">club site</a>
-            </span>
           </div>
         </div>
+        {{> card-arrow}}
       </article>
 
-      <article class="proj-card">
+      <article class="proj-card card-link">
         <div class="proj-card__inner">
           <div class="proj-card__top">
             <span class="proj-card__num">NO. 004</span>
           </div>
-          <div class="proj-card__title">STATE EXAMPLES.</div>
+          <h3 class="proj-card__title"><a class="card-link__target" href="https://sme.ripixel.co.uk">STATE EXAMPLES.</a></h3>
           <div class="proj-card__blurb">
             A site demoing Redux, Zustand, Jotai, Context, and more — for the curious developer.
             With brutally honest pros/cons for each approach. Because "which state manager should
@@ -160,20 +156,18 @@
           </div>
           <div class="proj-card__footer">
             <span class="proj-card__tech">tech / react · vite</span>
-            <span class="proj-card__year">
-              <a href="https://sme.ripixel.co.uk">live site</a> ·
-              <a href="https://github.com/ripixel/state-management-examples">github</a>
-            </span>
+            <span class="proj-card__year"><a class="card-link__aside" href="https://github.com/ripixel/state-management-examples">github</a></span>
           </div>
         </div>
+        {{> card-arrow}}
       </article>
 
-      <article class="proj-card">
+      <article class="proj-card card-link">
         <div class="proj-card__inner">
           <div class="proj-card__top">
             <span class="proj-card__num">NO. 005</span>
           </div>
-          <div class="proj-card__title">PRES. TIMER.</div>
+          <h3 class="proj-card__title"><a class="card-link__target" href="https://pt.ripixel.co.uk">PRES. TIMER.</a></h3>
           <div class="proj-card__blurb">
             A countdown timer with music streaming for presentations and streams,
             all in one browser tab. Having the countdown and music in the same tab
@@ -181,43 +175,39 @@
           </div>
           <div class="proj-card__footer">
             <span class="proj-card__tech">tech / vanilla js · web audio</span>
-            <span class="proj-card__year">
-              <a href="https://pt.ripixel.co.uk">live site</a> ·
-              <a href="https://github.com/ripixel/presentation-timer">github</a>
-            </span>
+            <span class="proj-card__year"><a class="card-link__aside" href="https://github.com/ripixel/presentation-timer">github</a></span>
           </div>
         </div>
+        {{> card-arrow}}
       </article>
 
-      <article class="proj-card">
+      <article class="proj-card card-link">
         <div class="proj-card__inner">
           <div class="proj-card__top">
             <span class="proj-card__num">NO. 006</span>
           </div>
-          <div class="proj-card__title">JANKY WEREWOLF.</div>
+          <h3 class="proj-card__title"><a class="card-link__target" href="https://github.com/ripixel/janky-werewolf-client">JANKY WEREWOLF.</a></h3>
           <div class="proj-card__blurb">
             Browser-based Ultimate Werewolf, born in lockdown 2020. My friends and I
             adore the card game, and when meetings went virtual there was no way to play.
             React frontend, WebSockets, AWS Lambdas, and a Rust backend by
-            <a href="https://www.mgoddard.net/" style="color:var(--ink-section);border-bottom:1px solid var(--ink-section)">Michael Goddard</a>.
+            <a class="card-link__aside" href="https://www.mgoddard.net/" style="color:var(--ink-section);border-bottom:1px solid var(--ink-section)">Michael Goddard</a>.
             Who's dead, Jim?
           </div>
           <div class="proj-card__footer">
             <span class="proj-card__tech">tech / react · ws · rust</span>
-            <span class="proj-card__year">
-              <a href="https://github.com/ripixel/janky-werewolf-client">fe</a> ·
-              <a href="https://github.com/mcgoddard/janky_werewolf_backend">be</a>
-            </span>
+            <span class="proj-card__year"><a class="card-link__aside" href="https://github.com/mcgoddard/janky_werewolf_backend">backend</a></span>
           </div>
         </div>
+        {{> card-arrow}}
       </article>
 
-      <article class="proj-card">
+      <article class="proj-card card-link">
         <div class="proj-card__inner">
           <div class="proj-card__top">
             <span class="proj-card__num">NO. 007</span>
           </div>
-          <div class="proj-card__title">RIPIXEL.CO.UK.</div>
+          <h3 class="proj-card__title"><a class="card-link__target" href="https://www.ripixel.co.uk">RIPIXEL.CO.UK.</a></h3>
           <div class="proj-card__blurb">
             This very website. Why use a static site generator when you can just…
             y'know… write the HTML yourself? (Also it uses Skier, sometimes.)
@@ -226,11 +216,9 @@
           </div>
           <div class="proj-card__footer">
             <span class="proj-card__tech">tech / html · css · skier</span>
-            <span class="proj-card__year">
-              <a href="https://www.ripixel.co.uk">corporate site</a>
-            </span>
           </div>
         </div>
+        {{> card-arrow}}
       </article>
     </div>
 

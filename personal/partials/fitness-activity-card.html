@@ -1,5 +1,5 @@
 <!-- Context: one of fitnessLife.activities (buildCard) -->
-<a class="fit-card fit-card--{{family}} {{typeClass}}" href="{{href}}">
+<a class="fit-card fit-card--{{family}} {{typeClass}} card-link" href="{{href}}">
   {{> fitness-picture}}
   <div class="fit-card__inner">
     <div class="fit-card__top">
@@ -18,7 +18,7 @@
     </dl>
     <div class="fit-card__foot">
       {{#if prLabel}}<span class="fit-card__pr">{{prLabel}}</span>{{else}}<span class="fit-card__via">via {{source}}</span>{{/if}}
-      <span class="fit-card__more">read →</span>
     </div>
   </div>
+  {{> card-arrow}}
 </a>

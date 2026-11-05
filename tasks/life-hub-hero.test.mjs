@@ -256,13 +256,15 @@ test('the page: a card per row, sized, each hero drawn, heading and insights kep
   assert.match(html, /<figure class="chart">[\s\S]*?class="chart__y"[\s\S]*?class="chart__x"/);
   assert.match(html, /<li style="left:100%">2 Nov<\/li>/);
   // route: an SVG, no tiles, linked to the full map
-  assert.match(html, /<a class="hub-hero__route" href="\/life\/activity\/evening-ride-to-the-reservoir-2026-10-15">\s*<svg class="hub-hero__map"/);
+  assert.match(html, /<a class="hub-hero__route card-link__aside" href="\/life\/activity\/evening-ride-to-the-reservoir-2026-10-15">\s*<svg class="hub-hero__map"/);
   assert.doesNotMatch(html, /leaflet|route-map\.js/i);
   // bars: the life-split partial
   assert.match(html, /<figure class="life-split life-split--hub">[\s\S]*?Non-fiction/);
   // captions as text, sub-page links
   assert.match(html, /<p class="hub-card__caption">Sci-fi leads the shelf at 48%.<\/p>/);
-  assert.match(html, /<a class="hub-card__more" href="\/life\/reading" aria-label="More on Reading">/);
+  // the whole card is the link (card-link): the title stretches over it, the arrow tab says so
+  assert.match(html, /<li class="hub-card [^"]*life-ink--reading card-link">[\s\S]*?<a class="card-link__target" href="\/life\/reading">Reading<\/a>[\s\S]*?<span class="card-link__arrow" aria-hidden="true"><\/span>/);
+  assert.doesNotMatch(html, /hub-card__more/);
   assert.doesNotMatch(html, /id="life-outings-title"/);
   // the small print is gone
   assert.doesNotMatch(html, /life-personal|the small print/);
@@ -279,7 +281,7 @@ test('the page draws covers, an image and a stat, and an sm row shows only its c
   assert.match(html, /<div class="hub-hero__posters hub-hero__posters--covers">\s*<figure class="hub-hero__poster hub-hero__poster--n0" style="--tilt: [-0-9.]+deg"><img src="https:\/\/shared\.akamai\.steamstatic\.com\/[^"]+" alt="Game A" loading="lazy" decoding="async" width="600" height="900">/);
   assert.match(html, /<img class="hub-hero__img" src="\/card_life.png" alt="Space Farm" loading="lazy" decoding="async" width="400" height="600">/);
   assert.match(html, /<b class="hub-hero__value">212<\/b> <span class="hub-hero__what">commits this month<\/span>/);
-  const outings = /<li class="hub-card hub-card--sm hub-card--stat hub-card--wide6 hub-card--solo life-ink--live">[\s\S]*?<\/li>/.exec(html)?.[0] || '';
+  const outings = /<li class="hub-card hub-card--sm hub-card--stat hub-card--wide6 hub-card--solo life-ink--live card-link">[\s\S]*?<\/li>/.exec(html)?.[0] || '';
   assert.doesNotMatch(outings, /hub-hero/);
   assert.match(outings, /3 live events this year\./);
   assert.match(outings, /href="\/life\/live"/);
@@ -303,7 +305,7 @@ test('the page without a hub key: the old rows', async () => {
 
 test('the page keeps the stale sticker (the roundup links: life-links.test.mjs)', async () => {
   const html = await renderHub(fixture);
-  const reading = html.split('<li class="hub-card ').find((c) => c.includes('life-ink--reading">')) || '';
+  const reading = html.split('<li class="hub-card ').find((c) => c.includes('life-ink--reading card-link">')) || '';
   assert.match(reading, /<p class="life-stale">last updated 4 days ago<\/p>/);
   assert.equal(buildHub(fixture, fitnessLife, now).hero.find((c) => c.name === 'body')?.staleLabel, '');
 });

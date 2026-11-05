@@ -59,32 +59,32 @@
         {{#each thoughts}}
         {{#if @first}}
         <!-- Featured (latest) -->
-        <article class="post-row post-row--featured">
+        <article class="post-row post-row--featured card-link card-link--wide">
           <div class="post-row__inner">
             <div class="post-row__meta-row">
               <div class="post-row__left-meta">
                 <span class="post-row__date">{{dateDisplay}} · {{readTime}} min</span>
                 <span class="post-row__latest">★ LATEST</span>
               </div>
-              <a class="post-row__read-link" href="/{{relativePath}}">read →</a>
             </div>
-            <h2 class="post-row__title"><a href="/{{relativePath}}">{{title}}.</a></h2>
+            <h2 class="post-row__title"><a class="card-link__target" href="/{{relativePath}}">{{title}}.</a></h2>
             <div class="post-row__excerpt">{{excerpt}}</div>
           </div>
+          {{> card-arrow}}
         </article>
         {{else}}
         <!-- Regular post row -->
-        <article class="post-row">
+        <article class="post-row card-link card-link--wide">
           <div class="post-row__inner">
             <div class="post-row__meta-row">
               <div class="post-row__left-meta">
                 <span class="post-row__date">{{dateDisplay}} · {{readTime}} min</span>
               </div>
-              <a class="post-row__read-link" href="/{{relativePath}}">read →</a>
             </div>
-            <h2 class="post-row__title"><a href="/{{relativePath}}">{{title}}.</a></h2>
+            <h2 class="post-row__title"><a class="card-link__target" href="/{{relativePath}}">{{title}}.</a></h2>
             <div class="post-row__excerpt">{{excerpt}}</div>
           </div>
+          {{> card-arrow}}
         </article>
         {{/if}}
         {{/each}}

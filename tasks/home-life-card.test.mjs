@@ -38,7 +38,7 @@ test('built homepage: Life card links to /life, blurb has no FitGlue', async () 
       }),
     ], globals, []);
     const html = await fs.readFile(path.join(out, 'index.html'), 'utf8');
-    const m = /<a class="section-card section-card--fitness" href="([^"]*)">([\s\S]*?)<\/a>/.exec(html);
+    const m = /<a class="section-card section-card--fitness card-link" href="([^"]*)">([\s\S]*?)<\/a>/.exec(html);
     assert.ok(m, 'life card present');
     assert.equal(m[1], '/life');
     assert.ok(m[2].includes('>life.<'));

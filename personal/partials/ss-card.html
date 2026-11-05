@@ -1,7 +1,7 @@
 <!-- One session card on /life/sessions (fitness-sessions buildSessionPages: buildCard + its stamp).
-     The whole card is the link (rl-link + rl-arrow); a session the roundups call out is a double card. -->
+     The whole card is the link (card-link + the card-arrow partial); a session the roundups call out is a double card. -->
 <li class="ss-item{{#if feature}} ss-item--feature{{/if}} {{typeClass}}" data-type="{{typeKey}}">
-  <a class="ss-card rl-link {{typeClass}}{{#if photo}} ss-card--photo{{/if}}" href="{{href}}">
+  <a class="ss-card card-link {{typeClass}}{{#if photo}} ss-card--photo{{/if}}" href="{{href}}">
     <span class="ss-card__pic {{pictureClass}}" aria-hidden="true">
       {{#if photo}}<img src="{{photo}}" alt="" loading="lazy" decoding="async" width="640" height="480">{{#if photoCount}}<span class="ss-card__count">{{photoCount}}</span>{{/if}}
       {{else}}{{#if route}}{{> rl-route route}}
@@ -18,6 +18,6 @@
       </span>
       {{#if prLabel}}<span class="ss-card__pr">{{prLabel}}</span>{{/if}}
     </span>
-    <span class="rl-arrow" aria-hidden="true">→</span>
+    {{> card-arrow}}
   </a>
 </li>

@@ -99,6 +99,7 @@
   opacity: 0.1;
   mix-blend-mode: multiply;
   pointer-events: none;
+  z-index: -1; /* under the text and the card-link overlay */
 }
 
 .fit-week__head {
@@ -238,8 +239,6 @@
   margin-top: 3px;
 }
 
-.fit-week__link,
-.fit-roundup__link,
 .fit-roundup__all {
   position: relative;
   display: inline-block;
@@ -267,13 +266,8 @@
   border-top: 7px solid var(--type, var(--ink));
   overflow: hidden;
   color: var(--ink);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.fit-card:hover,
-.fit-card:focus-visible {
-  transform: rotate(var(--hover-rotate, 1deg)) translateY(-2px);
-  box-shadow: 6px 6px 0 var(--type, var(--ink));
+  --card-ink: var(--type, var(--ink));
+  --card-ink-fg: var(--type-on, #fff);
 }
 
 .fit-card__inner {
@@ -336,6 +330,8 @@
 
 .fit-card__foot {
   margin-top: 10px;
+  padding-right: 30px; /* clear of the arrow tab */
+  min-height: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -359,13 +355,6 @@
 }
 
 .fit-card__via { opacity: 0.7; }
-
-.fit-card__more {
-  color: var(--ink);
-  font-weight: 700;
-  white-space: nowrap;
-  border-bottom: 2px solid var(--type, var(--ink));
-}
 
 .fit-header-row__link {
   opacity: 1;
@@ -406,6 +395,7 @@
   opacity: 0.1;
   mix-blend-mode: multiply;
   pointer-events: none;
+  z-index: -1; /* under the text and the card-link overlay */
 }
 
 .fit-roundup__inner {
@@ -469,6 +459,9 @@
 }
 
 .fit-roundup__all { font-weight: 400; }
+.fit-week.card-link .fit-week__head { position: static; } /* the title's link spans the whole panel */
+.fit-week.card-link { padding-bottom: 36px; }
+.fit-roundup__inner { padding-right: 40px; } /* clear of the arrow tab */
 
 /* ─── 4. Stats (reuses .stat-strip) ─────── */
 .fit-stats__strip { margin-bottom: 18px; }
@@ -618,9 +611,8 @@
 /* Hyrox PBs per division (F5.5): the total as a lead tile, then two linked lists
    (stations + Roxzone, runs) in the Hyrox ink. Lists stack on phones. */
 .fit-hx { display: grid; grid-template-columns: minmax(150px, 0.8fr) 2fr; gap: 8px; align-items: start; }
-.fit-hx__total { color: var(--ink); text-decoration: none; }
+.fit-hx__total { color: var(--ink); text-decoration: none; --card-ink: var(--type); --card-ink-fg: var(--type-on, #fff); padding-right: 36px; }
 .fit-hx__total .fit-pr__value { font-size: 40px; margin-top: 4px; }
-.fit-hx__total:hover .fit-pr__date { opacity: 1; text-decoration: underline; }
 .fit-hx__lists { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .fit-hx__list {
   margin: 0; padding: 4px 0; list-style: none; background: #fff;

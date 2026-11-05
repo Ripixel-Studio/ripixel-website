@@ -16,6 +16,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { auditHtml } from './card-link.mjs';
+
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(REPO, 'public', 'personal');
 const ORIGIN = 'https://james.ripixel.co.uk';
@@ -91,6 +93,21 @@ describe('built personal site has no trailing-slash internal links', () => {
     assert.ok(hrefs.some((h) => /^\/life\/roundup\/[^/]+$/.test(h)), 'roundup teaser link');
     assert.ok(hrefs.includes('/life/roundups'), 'roundups index link');
     assert.ok(hrefs.includes('/life'), 'masthead/tab-bar /life link');
+  });
+
+  test('clickable cards follow the card-link convention on every page (tasks/card-link.mjs)', async () => {
+    const html = (await walk(OUT)).filter((f) => f.endsWith('.html'));
+    const hits = [];
+    for (const f of html) for (const p of auditHtml(await fs.readFile(f, 'utf8'))) hits.push(`${path.relative(OUT, f)}: ${p}`);
+    assert.deepEqual(hits, []);
+    // the convention is in use where it should be: the home cards, the hub cards, the activity cards
+    const count = async (rel) => ((await fs.readFile(path.join(OUT, rel), 'utf8')).match(/class="card-link__arrow"/g) || []).length;
+    assert.ok(await count('index.html') >= 7, 'home: 4 section cards + 3 press cards');
+    assert.ok(await count('life.html') >= 1, 'hub cards');
+    assert.ok(await count('life/fitness.html') >= 1, 'latest sessions');
+    assert.ok(await count('life/roundups.html') >= 1, 'the roundups timeline tiles');
+    assert.ok(await count('life/sessions.html') >= 1, 'the session cards');
+    assert.doesNotMatch(await fs.readFile(path.join(OUT, 'life', 'roundups.html'), 'utf8'), /rl-link|rl-arrow/, 'the local roundup classes are gone');
   });
 
   test('Atom feed ids and links are slash-less', async () => {

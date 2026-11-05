@@ -64,7 +64,7 @@
 <p class="hub-hero__stat"><b class="hub-hero__value">{{value}}{{#if unit}}<small>{{unit}}</small>{{/if}}</b> <span class="hub-hero__what">{{label}}</span></p>
 {{/if}}
 {{#if route}}
-{{#if href}}<a class="hub-hero__route" href="{{href}}">{{else}}<div class="hub-hero__route">{{/if}}
+{{#if href}}<a class="hub-hero__route card-link__aside" href="{{href}}">{{else}}<div class="hub-hero__route">{{/if}}
   <svg class="hub-hero__map" viewBox="0 0 {{w}} {{h}}" role="img" aria-label="The latest route, drawn from its published points">
     <path class="hub-hero__line-shadow" d="{{d}}"/>
     <path class="hub-hero__line" d="{{d}}"/>

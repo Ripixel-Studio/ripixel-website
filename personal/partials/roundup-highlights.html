@@ -26,13 +26,13 @@
   </div>
   <div class="roundup-grid roundup-grid--3">
     {{#each highlights}}
-    {{#if href}}<a class="zine-card roundup-peak rl-link" href="{{href}}">{{else}}<div class="zine-card roundup-peak">{{/if}}
+    {{#if href}}<a class="zine-card roundup-peak card-link" href="{{href}}">{{else}}<div class="zine-card roundup-peak">{{/if}}
       <div class="zine-card__inner">
         <div class="roundup-peak__value">{{value}}{{#if unit}}<small>{{unit}}</small>{{/if}}</div>
         <div class="roundup-peak__label">{{label}}</div>
         {{#if sub}}<div class="roundup-peak__sub">{{sub}}</div>{{/if}}
       </div>
-      {{#if href}}<span class="rl-arrow" aria-hidden="true">→</span>{{/if}}
+      {{#if href}}{{> card-arrow}}{{/if}}
     {{#if href}}</a>{{else}}</div>{{/if}}
     {{/each}}
   </div>

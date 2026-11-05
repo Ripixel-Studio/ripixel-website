@@ -37,7 +37,7 @@
     <li class="rl-day{{#if rest}} rl-day--rest{{/if}}">
       <div class="rl-day__head"><b>{{label}}</b><span>{{num}}</span></div>
       {{#each sessions}}
-      <a class="rl-sess rl-link {{typeClass}}{{#if mark}} rl-sess--mark{{/if}}" href="{{href}}">
+      <a class="rl-sess card-link {{typeClass}}{{#if mark}} rl-sess--mark{{/if}}" href="{{href}}">
         {{#if photo}}<span class="rl-sess__pic"><img src="{{photo}}" alt="" loading="lazy" decoding="async" width="320" height="240"></span>{{/if}}
         <span class="rl-sess__body">
           <span class="fit-chip">{{familyGlyph}}</span>
@@ -45,7 +45,7 @@
           <span class="rl-sess__stat">{{stat}}{{#if statUnit}}<small>{{statUnit}}</small>{{/if}}</span>
           {{#if mark}}<span class="rl-stamp rl-sess__mark">{{mark}}</span>{{/if}}
         </span>
-        <span class="rl-arrow" aria-hidden="true">→</span>
+        {{> card-arrow}}
       </a>
       {{/each}}
       {{#if rest}}<span class="rl-day__rest">rest</span>{{/if}}

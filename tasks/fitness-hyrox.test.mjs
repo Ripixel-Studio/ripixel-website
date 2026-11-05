@@ -165,7 +165,7 @@ describe('race weekends', () => {
     const globals = { fitnessActivities: withPhotos, fitnessIndex: { profile: { displayName: 'James King', showPhotoGallery: true } }, siteUrl: '' };
     await runSkierTasks([fitnessEventViewsTask(), lifePageTasks({ outDir: out, siteUrl: 'https://james.ripixel.co.uk' })[EVENT_PAGES]], globals);
     const html = await fs.readFile(path.join(out, 'life', 'event', 'hyrox-birmingham-2026-10-27', 'index.html'), 'utf8');
-    assert.equal((html.match(/class="ev-collage__tile"/g) || []).length, 2);
+    assert.equal((html.match(/class="ev-collage__tile card-link"/g) || []).length, 2);
     assert.doesNotMatch(html, /class="ev-race__art"/);
   });
 });
