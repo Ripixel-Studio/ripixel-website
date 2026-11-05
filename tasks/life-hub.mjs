@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * The /life hub, its eight section pages and the personal bits (LH3.4, R2c.2): data only.
+ * The /life hub and its eight section pages (LH3.4, R2c.2): data only.
  * Pure functions shape `lifeIndex` (the public life export) and `fitnessLife`
  * into view models; the templates only loop and test. No HTML strings here.
  * The only computed strings are chart models from `chart-axes.mjs` (SVG path
@@ -10,7 +10,6 @@
  *   lifeHub       { cards[{name, href, title, headline, latest, note, staleLabel, empty}], live[],
  *                   hero[{name, title, size, side, href, headline, staleLabel, caption, hero}] (C8; [] → the old rows) }
  *   lifeSections  { [name]: view }
- *   lifePersonal  [{ key, label, value, tone }]
  *   lifeFacts     { [key]: value }
  *   lifeInsights  [{ id, text, href }]  (C5, at most 6)
  *
@@ -475,6 +474,8 @@ export const LIVE_FORMS = /** @type {Record<string, [string, string]>} */ ({
 });
 /** The word set large on a stub that has no picture. */
 const LIVE_GLYPH = /** @type {Record<string, string>} */ ({ gig: 'Gig', musical: 'Musical', theatre: 'Stage', comedy: 'Comedy', festival: 'Festival', classical: 'Classical', other: 'Live' });
+/** The glyph's size class: short words set bigger. @param {string} g */
+const glyphSize = (g) => (g.length <= 4 ? 's' : g.length <= 6 ? 'm' : 'l');
 const LEGACY_KIND = /** @type {Record<string, string>} */ ({ gig: 'gig', theatre: 'theatre', comedy: 'comedy' });
 const CREDIT_MAX = 120;
 /** The kind of a live notable. @param {any} n */
@@ -539,7 +540,7 @@ function liveView(notables) {
     return {
       year: y, total: mine.length, countLabel: plural(mine.length, 'night out', 'nights out'), kinds: kindShares(mine),
       stubs: mine.map((i) => ({
-        title: i.title, kind: i.kind, kindLabel: LIVE_FORMS[i.kind][0], glyph: LIVE_GLYPH[i.kind], glyphSize: LIVE_GLYPH[i.kind].length <= 4 ? 's' : LIVE_GLYPH[i.kind].length <= 6 ? 'm' : 'l',
+        title: i.title, kind: i.kind, kindLabel: LIVE_FORMS[i.kind][0], glyph: LIVE_GLYPH[i.kind], glyphSize: glyphSize(LIVE_GLYPH[i.kind]),
         stamp: `${MONTHS[+i.month.slice(5, 7) - 1]} ${i.month.slice(0, 4)}`,
         no: String(order.indexOf(i) + 1).padStart(digits, '0'),
         poster: i.poster, hasPoster: Boolean(i.poster), credit: i.credit ? `Photo: ${i.credit}` : '',
@@ -876,6 +877,8 @@ export function buildHub(lifeIndex, fitnessLife, now = new Date()) {
 /* ─── The hero hub (C8): `hub.rows` → cards with one hero each ─────────────── */
 
 export const HERO_SIZES = ['lg', 'md', 'sm'];
+/** League tiers, lowest first (the hub's rank hero). */
+const TIERS = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
 /** Activity pages live here (fitness-activity-views.mjs ACTIVITY_BASE_PATH; a literal to keep this module light). */
 const ACTIVITY_PATH = '/life/activity';
 const CAPTION_MAX = 240;
@@ -983,6 +986,50 @@ export function heroView(h, title = '') {
       if (safe.length < 3 || safe.length > 4 || safe.some((it) => !it.src || !it.alt)) return null;
       return { type: 'posters', posters: true, items: safe.map((it, i) => ({ ...it, n: i, tilt: tiltOf(it.alt) })) };
     }
+    case 'covers': {
+      // the top of the games cover wall, fanned like the posters (Steam and Riot art only)
+      const items = Array.isArray(h.items) ? h.items : [];
+      const safe = items.map((it) => ({ src: safeArt(it?.src), alt: String(it?.alt || '').trim() }));
+      if (safe.length < 3 || safe.length > 4 || safe.some((it) => !it.src || !it.alt)) return null;
+      return { type: 'covers', covers: true, items: safe.map((it, i) => ({ ...it, n: i, tilt: tiltOf(it.alt) })) };
+    }
+    case 'stubs': {
+      // the newest ticket stubs from /life/live, drawn with the page's own stub
+      const items = Array.isArray(h.items) ? h.items : [];
+      const stubs = items.map((it) => {
+        const month = String(it?.month ?? '');
+        const t = String(it?.title ?? '').trim();
+        if (!t || !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) return null;
+        const kind = LIVE_FORMS[String(it?.form)] ? String(it.form) : 'other';
+        const src = safeSrc(it?.src);
+        return {
+          title: t, kind, kindLabel: LIVE_FORMS[kind][0], glyph: LIVE_GLYPH[kind], glyphSize: glyphSize(LIVE_GLYPH[kind]),
+          stamp: `${MONTHS[+month.slice(5, 7) - 1]} ${month.slice(0, 4)}`, src, hasPoster: Boolean(src), tilt: tiltOf(`${t}|${month}`) / 2,
+        };
+      });
+      if (!stubs.length || stubs.length > 3 || stubs.some((x) => !x)) return null;
+      return { type: 'stubs', stubs: true, items: stubs, count: stubs.length };
+    }
+    case 'grid': {
+      // the code page's commit grid, the last few weeks only
+      const weeks = Number.isInteger(h.weeks) && h.weeks >= 4 && h.weeks <= 26 ? h.weeks : 0;
+      const days = (Array.isArray(h.days) ? h.days : []).filter((d) => Array.isArray(d)).map((d) => ({ day: d[0], n: d[1] }));
+      const chart = weeks ? commitGrid(days, String(h.through ?? ''), weeks) : null;
+      return chart ? { type: 'grid', grid: true, chart } : null;
+    }
+    case 'rank': {
+      // the League rank, beside this month's champion
+      const tier = String(h.tier ?? '').toUpperCase();
+      const division = String(h.division ?? '');
+      const lp = num(h.lp);
+      const icon = safeArt(h.icon);
+      if (!TIERS.includes(tier) || !['', 'I', 'II', 'III', 'IV'].includes(division) || lp == null || lp < 0 || !icon) return null;
+      const queue = h.queue === 'solo' ? 'Ranked solo' : h.queue === 'flex' ? 'Ranked flex' : 'Ranked';
+      return {
+        type: 'rank', rank: true, tier: `${tier[0]}${tier.slice(1).toLowerCase()}${division ? ` ${division}` : ''}`, tierKey: tier.toLowerCase(),
+        lp: group(lp), queue, icon, champion: String(h.champion || '').trim(),
+      };
+    }
     case 'bars': {
       const items = (Array.isArray(h.items) ? h.items : [])
         .map((it) => ({ label: String(it?.label || '').trim(), pct: num(it?.pct) }))
@@ -1048,40 +1095,8 @@ export function heroCards(lifeIndex, cards, now = new Date()) {
   return out;
 }
 
-const BIT_LABELS = {
-  'personal.height': 'Height', 'personal.likes': 'Likes', 'personal.boardgames': 'Board games', 'personal.desk': 'Desk',
-  'body.weight_kg': 'Weight',
-};
-
 /** @param {any} f */
 const isPublic = (f) => f && typeof f === 'object' && typeof f.key === 'string' && !['private', 'sensitive'].includes(f.visibility);
-
-/** @param {any} v */
-const listText = (v) => (Array.isArray(v) ? v.map((x) => (typeof x === 'string' ? x : x?.name)).filter(Boolean).join(', ') : String(v ?? ''));
-
-/**
- * The personal bits, from public facts only.
- * @param {any[]} facts the export's `facts`
- */
-export function personalBits(facts) {
-  const byKey = new Map((Array.isArray(facts) ? facts : []).filter(isPublic).map((f) => [f.key, f]));
-  const out = [];
-  for (const [key, label] of Object.entries(BIT_LABELS)) {
-    const f = byKey.get(key);
-    if (!f || f.value == null || f.value === '') continue;
-    let value;
-    if (key === 'body.weight_kg') {
-      const n = Number(f.value);
-      if (!Number.isFinite(n)) continue;
-      value = `${one(n)} kg`;
-    } else {
-      value = listText(f.value) + (f.unit && !Array.isArray(f.value) ? ` ${f.unit}` : '');
-    }
-    if (!value) continue;
-    out.push({ key, label, value, tone: String(f.tone || 'neutral') });
-  }
-  return out;
-}
 
 /** @param {any[]} facts */
 export function lifeFacts(facts) {
@@ -1139,7 +1154,7 @@ export function homeLifeGlobals(hub) {
 export function lifeHubTask(config = {}) {
   return {
     name: 'life-hub',
-    title: 'Build the /life hub, section and personal-bits view models',
+    title: 'Build the /life hub and section view models',
     config,
     run: async (/** @type {any} */ cfg, /** @type {any} */ ctx) => {
       const g = ctx.globals || {};
@@ -1151,7 +1166,7 @@ export function lifeHubTask(config = {}) {
       );
       const lifeHub = buildHub(idx, g.fitnessLife, now);
       ctx.logger.info(`Life hub: ${lifeHub.cards.filter((c) => !c.empty).length}/${lifeHub.cards.length} sections have data`);
-      return { lifeHub, ...homeLifeGlobals(lifeHub), lifeSections, lifePersonal: personalBits(idx?.facts), lifeFacts: lifeFacts(idx?.facts),
+      return { lifeHub, ...homeLifeGlobals(lifeHub), lifeSections, lifeFacts: lifeFacts(idx?.facts),
         lifeInsights: lifeInsights(idx),
         // the homepage's "latest project" line and the "built <year>" badges
         fitglueStartedYear: fitglueStarted(idx),

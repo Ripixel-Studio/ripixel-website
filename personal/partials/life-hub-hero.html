@@ -1,5 +1,6 @@
 {{!-- One hero on a hub card (C8). Context: a heroView() from tasks/life-hub.mjs — exactly one of
-      image / spark / stat / route / bars / posters is true. Every number here was computed by code. --}}
+      image / spark / stat / route / bars / posters / covers / stubs / grid / rank is true: each a
+      miniature of its section page's own picture. Every number here was computed by code. --}}
 {{#if image}}
 <figure class="hub-hero__frame">
   <img class="hub-hero__img" src="{{src}}" alt="{{alt}}" loading="lazy" decoding="async" width="400" height="600">
@@ -8,6 +9,53 @@
 {{#if posters}}
 <div class="hub-hero__posters">
   {{#each items}}<figure class="hub-hero__poster hub-hero__poster--n{{n}}" style="--tilt: {{tilt}}deg"><img src="{{src}}" alt="{{alt}}" loading="lazy" decoding="async" width="342" height="513"></figure>{{/each}}
+</div>
+{{/if}}
+{{#if covers}}
+<div class="hub-hero__posters hub-hero__posters--covers">
+  {{#each items}}<figure class="hub-hero__poster hub-hero__poster--n{{n}}" style="--tilt: {{tilt}}deg"><img src="{{src}}" alt="{{alt}}" loading="lazy" decoding="async" width="600" height="900"></figure>{{/each}}
+</div>
+{{/if}}
+{{#if stubs}}
+<ol class="hub-hero__stubs hub-hero__stubs--n{{count}}">
+  {{#each items}}
+  <li class="stub stub--{{kind}}" style="--tilt: {{tilt}}deg">
+    <div class="stub__shadow">
+    <div class="stub__ticket">
+      <div class="stub__art{{#unless hasPoster}} stub__art--type{{/unless}}">
+        {{#if hasPoster}}
+        <img class="stub__img" src="{{src}}" alt="{{title}}" loading="lazy" decoding="async" width="600" height="450">
+        {{else}}
+        <span class="stub__glyph stub__glyph--{{glyphSize}}" aria-hidden="true">{{glyph}}</span>
+        {{/if}}
+      </div>
+      <div class="stub__body">
+        <span class="stub__stamp">{{stamp}}</span>
+        <p class="stub__kind">{{kindLabel}}<span> · admit one</span></p>
+        <p class="stub__title">{{title}}</p>
+      </div>
+      <div class="stub__tear"><span class="stub__code" aria-hidden="true"></span></div>
+    </div>
+    </div>
+  </li>
+  {{/each}}
+</ol>
+{{/if}}
+{{#if grid}}{{#with chart}}
+<svg class="hub-hero__grid" viewBox="0 0 {{width}} {{height}}" role="img" aria-label="Commits per day over the last {{weeks}} weeks: {{total}} in all">
+  {{#each months}}<text class="code-grid__month" x="{{x}}" y="{{y}}">{{label}}</text>{{/each}}
+  {{#each dayLabels}}<text class="code-grid__dow" x="{{x}}" y="{{y}}" text-anchor="end">{{label}}</text>{{/each}}
+  {{#each cells}}<rect class="code-grid__cell code-lv-{{level}}" x="{{x}}" y="{{y}}" width="11" height="11" rx="2"><title>{{title}}</title></rect>{{/each}}
+</svg>
+{{/with}}{{/if}}
+{{#if rank}}
+<div class="hub-hero__rank">
+  <img class="hub-hero__champ" src="{{icon}}" alt="{{champion}}" loading="lazy" decoding="async" width="120" height="120">
+  <div class="hub-hero__rank-text">
+    <p class="hub-hero__tier">{{tier}}</p>
+    <p class="hub-hero__lp"><b>{{lp}}</b> LP · {{queue}}</p>
+    {{#if champion}}<p class="hub-hero__champ-name">Champion of the month: {{champion}}</p>{{/if}}
+  </div>
 </div>
 {{/if}}
 {{#if spark}}{{> chart-line chart}}{{/if}}

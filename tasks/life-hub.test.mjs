@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {
-  SECTION_ORDER, SECTION_HREF, staleLabel, sawLabel, monthLabel, hubNote, buildSection, buildHub, personalBits, lifeFacts, lifeHubTask, lifeInsights, championName,
+  SECTION_ORDER, SECTION_HREF, staleLabel, sawLabel, monthLabel, hubNote, buildSection, buildHub, lifeFacts, lifeHubTask, lifeInsights, championName,
 } from './life-hub.mjs';
 import { runSkierTasks } from './skier-test-runner.mjs';
 import { templateHelpers } from './life-pages.mjs';
@@ -84,23 +84,11 @@ test('watching totals say watched, never finished', () => {
   assert.ok(!JSON.stringify(w).includes('inished'));
 });
 
-test('personal bits from facts only', () => {
+test('public facts only', () => {
   const facts = [
-    { key: 'personal.height', label: 'Height', value: '180 cm', unit: '', tone: 'neutral' },
-    { key: 'personal.likes', label: 'Likes', value: ['running', 'film'], unit: '', tone: 'neutral' },
-    { key: 'body.weight_kg', label: 'Weight', value: 82.43, unit: 'kg', tone: 'neutral' },
-    { key: 'games.serious', label: 'x', value: ['Fixture Quest'], unit: '', tone: 'neutral' },
-    { key: 'games.silly', label: 'x', value: 'Sample Tactics', unit: '', tone: 'neutral' },
-    { key: 'personal.salary', label: 'Salary', value: 1, visibility: 'private' },
     { key: 'personal.desk', label: 'Desk', value: 'standing', visibility: 'private' },
     { key: 'fx.films', label: 'Films', value: 42 },
   ];
-  const bits = personalBits(facts);
-  assert.deepEqual(bits.map((b) => b.key), ['personal.height', 'personal.likes', 'body.weight_kg']);
-  const w = bits.find((b) => b.key === 'body.weight_kg');
-  assert.equal(`${w.label}: ${w.value}`, 'Weight: 82.4 kg');
-  assert.equal(bits[1].value, 'running, film');
-  assert.deepEqual(personalBits(null), []);
   assert.equal(lifeFacts(facts)['fx.films'], 42);
   assert.ok(!('personal.desk' in lifeFacts(facts)));
 });
@@ -126,11 +114,10 @@ test('task sets globals', async () => {
   const g = await runSkierTasks([lifeHubTask()], { lifeIndex: fixture, fitnessLife });
   assert.equal(g.lifeHub.cards.length, 8);
   assert.deepEqual(Object.keys(g.lifeSections), SECTION_ORDER.slice(1));
-  assert.ok(g.lifePersonal.length === 0 || Array.isArray(g.lifePersonal));
+  assert.ok(!('lifePersonal' in g), 'the small print is gone');
   assert.equal(g.lifeFacts['fx.films'], 42);
   const none = await runSkierTasks([lifeHubTask()], { lifeIndex: null, fitnessLife: null });
   assert.equal(none.lifeHub.cards.every((c) => c.empty), true);
-  assert.deepEqual(none.lifePersonal, []);
 });
 
 test('partial totals: absent fields do not become zero rows from nowhere', () => {
@@ -348,12 +335,6 @@ test('no serious/silly', () => {
   const g = buildSection('games', { ...fixture.sections.games, serious: 'Fixture Quest', silly: 'Sample Tactics' }, now);
   assert.doesNotMatch(JSON.stringify(g), /"(serious|silly)"/);
   assert.ok(!('mostPlayed' in g));
-  const bits = personalBits([
-    { key: 'games.serious', value: 'Fixture Quest', tone: 'neutral' },
-    { key: 'games.silly', value: 'Sample Tactics', tone: 'neutral' },
-    { key: 'games.quip.100001', value: 'a quip', tone: 'neutral' },
-  ]);
-  assert.deepEqual(bits.filter((b) => b.key.startsWith('games.')), []);
 });
 
 test('no league', async () => {

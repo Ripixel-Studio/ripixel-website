@@ -182,44 +182,6 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
 
 .life-index__note a:hover { background: var(--paper-3); }
 
-/* ─── The hub: the small print ─ */
-.life-personal {
-  margin: 34px 0 20px;
-  max-width: 720px;
-  padding: 16px 20px 18px;
-  background: var(--paper-4);
-  border: 2px solid var(--ink);
-  box-shadow: 6px 6px 0 var(--ink);
-  transform: rotate(-0.6deg);
-}
-
-.life-personal__title {
-  font-family: var(--f-disp);
-  font-weight: 400;
-  font-size: 34px;
-  line-height: 1;
-  margin-bottom: 10px;
-}
-
-.life-personal__row {
-  display: grid;
-  grid-template-columns: 9rem 1fr;
-  gap: 12px;
-  padding: 5px 0;
-  border-top: 1.5px dashed rgba(23,19,17,0.33);
-}
-
-.life-personal__row dt {
-  font-family: var(--f-mono);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.life-personal__row dd {
-  font-family: 'Special Elite', var(--f-mono);
-  font-size: 15px;
-}
-
 /* ─── Section pages: head ───────────────── */
 .life-head {
   display: flex;
@@ -1295,8 +1257,6 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
   .life-head__headline { max-width: none; flex: 1 1 100%; }
   .life-head__num { font-size: 52px; }
   .stat-strip.life-stats .stat-strip__num { font-size: 40px; }
-  .life-personal { transform: none; box-shadow: 4px 4px 0 var(--ink); }
-  .life-personal__row { grid-template-columns: 1fr; gap: 0; }
   .life-notable__when { margin-left: 0; flex-basis: 100%; }
 }
 
@@ -1528,7 +1488,7 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
 }
 .hub-hero--image { align-items: center; }
 .hub-hero--image .hub-hero__frame { width: min(100%, 240px); }
-.hub-card--lg .hub-hero--image .hub-hero__frame { width: min(100%, 280px); }
+.hub-card--lg .hub-hero--image .hub-hero__frame { width: min(100%, 250px); }
 
 /* spark: the site's line chart, compact and unboxed */
 .hub-hero--spark .chart { --chart-h: 110px; border: 0; box-shadow: none; padding: 0; background: transparent; }
@@ -2225,43 +2185,77 @@ a.hub-hero__route:hover .hub-hero__route-cta { background: var(--life-ink); colo
   .stub, .stub__img { transition: none; }
 }
 
-/* The hub's Live card, drawn like the page: a picture is printed in the live ink on a
-   ticket with an "admit one" foot; the kinds bar uses each kind's own ink. */
-.hub-card.life-ink--live .hub-hero__frame {
-  padding: 8px 8px 30px;
-  background: linear-gradient(var(--life-ink), var(--life-ink)) content-box no-repeat, var(--paper-4);
-  isolation: isolate;
+/* ─── The hub's mini pages: each card's hero is its section page's own picture, smaller ───
+   covers fan like the posters; stubs are the live page's tickets; the grid is the code page's;
+   the rank is the games page's League block. Every picture has a fixed box, so nothing re-flows. */
+.hub-hero--covers { align-items: center; }
+.hub-hero__posters--covers .hub-hero__poster img { background: var(--ink); }
+
+.hub-hero__stubs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px 22px;
+  margin: 18px 4px 8px 0;
+  padding: 0;
+  list-style: none;
 }
-.hub-card.life-ink--live .hub-hero__frame::after {
-  content: "admit one";
-  position: absolute;
-  left: 8px;
-  right: 8px;
-  bottom: 0;
-  height: 24px;
-  padding-top: 4px;
-  border-top: 2px dashed var(--ink);
-  font-family: var(--f-mono);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-align: center;
+.hub-hero__stubs--n1 { grid-template-columns: minmax(0, 220px); }
+.hub-hero__stubs--n2 { grid-template-columns: repeat(2, minmax(0, 220px)); }
+.hub-hero__stubs .stub__ticket { --tear: 30px; --notch: 8px; }
+.hub-hero__stubs .stub__body { padding: 12px 10px 12px; }
+.hub-hero__stubs .stub__title { font-size: 19px; }
+.hub-hero__stubs .stub__kind span { display: none; }
+.hub-hero__stubs .stub__stamp { font-size: 10px; padding: 2px 6px 1px; top: -13px; right: 8px; }
+.hub-hero__stubs .stub__tear { justify-content: flex-end; padding: 0 10px 6px; }
+.hub-hero__stubs .stub__code { width: 46px; }
+
+.hub-hero--grid { justify-content: center; }
+.hub-hero__grid { display: block; width: 100%; height: auto; margin: 10px 0 4px; }
+.hub-card .hub-hero__grid .code-grid__cell:hover { stroke: var(--ink); stroke-width: 1.5; }
+
+.hub-hero__rank {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 8px 6px 6px 0;
+  padding: 16px 16px 16px;
+  background: var(--ink);
+  color: var(--paper-4);
+  border: 2px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--life-ink);
+}
+.hub-hero__champ {
+  flex: 0 0 auto;
+  width: 64px;
+  height: 64px;
+  border: 2px solid var(--paper-4);
+  box-shadow: 4px 4px 0 var(--life-ink);
+  transform: rotate(-3deg);
+  background: var(--paper-3);
+}
+.hub-hero__rank-text { min-width: 0; }
+.hub-hero__tier {
+  margin: 0;
+  font-family: var(--f-disp);
+  font-size: clamp(26px, 2.5vw, 34px);
+  line-height: 0.95;
   text-transform: uppercase;
-  color: var(--ink);
+  white-space: nowrap;
+  text-shadow: 3px 3px 0 var(--life-ink);
 }
-.hub-card.life-ink--live .hub-hero__img {
-  aspect-ratio: 4 / 5;
-  object-position: 50% 22%;
-  background: transparent;
-  filter: grayscale(1) contrast(1.18) brightness(1.06);
-  mix-blend-mode: multiply;
+.hub-hero__lp { margin: 8px 0 0; font-family: var(--f-mono); font-size: 12px; }
+.hub-hero__lp b { font-family: var(--f-disp); font-weight: 400; font-size: 24px; color: var(--paper-4); }
+.hub-hero__champ-name { margin: 6px 0 0; font-family: var(--f-mono); font-size: 11px; opacity: 0.8; }
+
+@media (max-width: 600px) {
+  .hub-hero__stubs { gap: 18px 10px; margin-right: 6px; }
+  .hub-hero__stubs--n1 { grid-template-columns: minmax(0, 60%); }
+  .hub-hero__stubs--n2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hub-hero__stubs .stub__body { padding: 10px 6px 8px; }
+  .hub-hero__stubs .stub__title { font-size: 14px; }
+  .hub-hero__stubs .stub__kind { font-size: 8.5px; }
+  .hub-hero__stubs .stub__stamp { font-size: 8.5px; padding: 1px 4px; top: -11px; right: 4px; }
+  .hub-hero__stubs .stub__ticket { --tear: 22px; --notch: 6px; }
+  .hub-hero__stubs .stub__code { width: 26px; height: 10px; }
+  .hub-hero__champ { width: 60px; height: 60px; }
 }
-.hub-card.life-ink--live .hub-hero__frame::before { background: color-mix(in srgb, var(--ink-magenta) 70%, transparent); }
-.life-ink--live .life-split__part--gigs         { background: var(--ink-blue);    color: var(--paper-4); }
-.life-ink--live .life-split__part--musicals     { background: var(--ink-magenta); color: var(--paper-4); }
-.life-ink--live .life-split__part--theatre      { background: var(--ink-red);     color: var(--paper-4); }
-.life-ink--live .life-split__part--comedy       { background: var(--ink-yellow);  color: var(--ink); }
-.life-ink--live .life-split__part--festivals    { background: var(--ink-green);   color: var(--paper-4); }
-.life-ink--live .life-split__part--classical    { background: var(--ink-purple);  color: var(--paper-4); }
-.life-ink--live .life-split__part--other-nights,
-.life-ink--live .life-split__part--other        { background: var(--ink-orange);  color: var(--ink); }
