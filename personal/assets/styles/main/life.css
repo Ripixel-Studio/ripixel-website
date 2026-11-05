@@ -2259,3 +2259,73 @@ a.hub-hero__route:hover .hub-hero__route-cta { background: var(--life-ink); colo
   .hub-hero__stubs .stub__code { width: 26px; height: 10px; }
   .hub-hero__champ { width: 60px; height: 60px; }
 }
+
+/* ── Watching: service stamps ─────────────────────────────────────────────
+   Where a film or show was watched, as a set of riso text stamps (never a logo file): one shape, the
+   service's brand-ish colour. Top left of a poster tile (the "big screen" ticket stays top right), and a
+   short chip on the strip's mini posters. Colours are tokens so a new service is one line. */
+.watch-stamp {
+  --stamp-bg: var(--ink);
+  --stamp-fg: var(--paper-4);
+}
+.watch-stamp--netflix  { --stamp-bg: #141111; --stamp-fg: #E5262C; }
+.watch-stamp--prime    { --stamp-bg: #1F86D6; --stamp-fg: #FFFCEF; }
+.watch-stamp--disney   { --stamp-bg: #13246B; --stamp-fg: #FFFCEF; }
+.watch-stamp--youtube  { --stamp-bg: #E2231A; --stamp-fg: #FFFCEF; }
+.watch-stamp--appletv  { --stamp-bg: #FFFCEF; --stamp-fg: #141111; }
+.watch-stamp--iplayer  { --stamp-bg: #EE3C8E; --stamp-fg: #FFFCEF; }
+.watch-stamp--channel4 { --stamp-bg: #5B2D9E; --stamp-fg: #FFFCEF; }
+.watch-stamp--itvx     { --stamp-bg: #D7F04B; --stamp-fg: #141111; }
+.watch-stamp--now      { --stamp-bg: #0E8A80; --stamp-fg: #FFFCEF; }
+.watch-stamp--dropout  { --stamp-bg: #FFD21F; --stamp-fg: #141111; }
+
+.watch-tile__figure > .watch-stamp {
+  position: absolute;
+  z-index: 3;
+  top: 9px;
+  left: -4px;
+  max-width: calc(100% - 14px);
+  padding: 3px 7px 2px 9px;
+  background: var(--stamp-bg);
+  color: var(--stamp-fg);
+  border: 2px solid var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+  font-family: var(--f-disp);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  transform: rotate(-4deg);
+  /* a rubber stamp's uneven ink: a fine paper grain over the colour */
+  background-image: radial-gradient(circle, rgba(255, 252, 239, 0.16) 0.8px, transparent 1.2px);
+  background-size: 4px 4px;
+}
+.watch-tile--w2 .watch-tile__figure > .watch-stamp { top: 14px; font-size: 17px; padding: 4px 10px 3px 12px; }
+/* a title set in type (no poster, or one that failed to load) starts below the stamp */
+.watch-tile__figure:has(> .watch-stamp) .watch-tile__name { padding-top: max(22%, 38px); }
+
+.watch-mini__stamp {
+  position: absolute;
+  z-index: 1;
+  left: 2px;
+  bottom: 2px;
+  min-width: 13px;
+  padding: 1px 2px 0;
+  background: var(--stamp-bg);
+  color: var(--stamp-fg);
+  border: 1px solid var(--ink);
+  font-family: var(--f-disp);
+  font-style: normal;
+  font-size: 8.5px;
+  line-height: 1.1;
+  letter-spacing: 0.03em;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .watch-tile__figure > .watch-stamp { font-size: 10.5px; padding: 2px 5px 1px 7px; top: 7px; }
+  .watch-tile--w2 .watch-tile__figure > .watch-stamp { font-size: 13px; }
+}

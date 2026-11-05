@@ -1,6 +1,7 @@
 <!-- Context: lifeSections.watching.channels [{title, initials, avatar, thumbs[], ruleLabel, reason, stats[], sinceLabel,
      rhythm[{n, level}], hasRhythm, lead, ink}] — YouTube channels a rule says he actually watches, strongest first.
-     Recent video thumbnails only (never a video's title); days and views, never hours (YouTube does not say). -->
+     Recent video thumbnails only (never a video's title); days, views and estimated hours (video lengths x how much of
+     each was watched). -->
 <ol class="watch-channels">
   {{#each this}}
   <li class="watch-ch watch-ch--ink{{ink}}{{#if lead}} watch-ch--lead{{/if}}">
