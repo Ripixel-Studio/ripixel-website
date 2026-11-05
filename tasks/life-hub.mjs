@@ -601,15 +601,37 @@ function seasonsLabel(list) {
   return `seasons ${run ? `${ns[0]}–${ns.at(-1)}` : ns.join(', ')}`;
 }
 
+/**
+ * The services as stamps, designed as a set (riso text stamps, never a logo file): `label` on a poster tile,
+ * `short` on the strip's mini posters. The CSS colours each by key (`.watch-stamp--<key>`, life.css).
+ * Keys are the export's `provider` (jarvis lifehub collectors), plus the ones still to come.
+ */
+const STAMPS = /** @type {Record<string, {label: string, short: string}>} */ ({
+  netflix: { label: 'NETFLIX', short: 'N' },
+  prime: { label: 'PRIME VIDEO', short: 'PV' },
+  disney: { label: 'DISNEY+', short: 'D+' },
+  youtube: { label: 'YOUTUBE', short: 'YT' },
+  appletv: { label: 'APPLE TV', short: 'TV' },
+  iplayer: { label: 'BBC iPLAYER', short: 'iP' },
+  channel4: { label: 'CHANNEL 4', short: '4' },
+  itvx: { label: 'ITVX', short: 'X' },
+  now: { label: 'NOW', short: 'NOW' },
+  dropout: { label: 'DROPOUT', short: 'DO' },
+});
+/** @param {unknown} p */
+const stampOf = (p) => (typeof p === 'string' && Object.hasOwn(STAMPS, p) ? { key: p, ...STAMPS[p] } : null);
+/** "streamed on Netflix" (and "watched at home") only say where: the stamp says that now. @param {string} r */
+const PLACE_ONLY = /^(?:streamed on .+|watched at home)$/;
+
 /** The wall: export order (newest first), a tile per film or series. @param {any} sec */
 function wallView(sec) {
   return (Array.isArray(sec.wall) ? sec.wall : [])
     .filter((t) => t && typeof t.title === 'string' && t.title.trim())
     .map((t, i) => ({
       key: String(t.key || ''), title: t.title.trim(), kind: t.kind === 'series' ? 'series' : 'film', series: t.kind === 'series',
-      poster: safeMedia(t.poster), bigScreen: t.bigScreen === true,
-      // the stamp says "big screen" already
-      reason: t.bigScreen === true && t.reason === 'on the big screen' ? '' : String(t.reason || ''),
+      poster: safeMedia(t.poster), bigScreen: t.bigScreen === true, stamp: stampOf(t.provider),
+      // the stamps say "big screen" and the service already
+      reason: (t.bigScreen === true && t.reason === 'on the big screen') || PLACE_ONLY.test(String(t.reason || '')) ? '' : String(t.reason || ''),
       month: String(t.month || ''), monthLabel: monthLabel(t.month), year: num(t.year) ?? '',
       seasonsLabel: seasonsLabel(t.seasons), episodes: num(t.episodes) != null ? plural(/** @type {number} */ (num(t.episodes)), 'episode', 'episodes') : '',
       weight: num(t.weight) === 2 ? 2 : 1, tilt: tiltOf(String(t.title)), ink: i % 5,
@@ -640,7 +662,7 @@ function stripView(sec, wall) {
   return rows.map((m) => {
     const films = num(m.films) ?? 0, episodes = num(m.episodes) ?? 0, videos = num(m.videos) ?? 0;
     const posters = (Array.isArray(m.keys) ? m.keys : []).map((k) => byKey.get(k)).filter(Boolean).slice(0, 3)
-      .map((t, i) => ({ src: t.poster, title: t.title, ink: t.ink, n: i }));
+      .map((t, i) => ({ src: t.poster, title: t.title, ink: t.ink, n: i, stamp: t.stamp }));
     return {
       month: m.month, label: MONTHS[+m.month.slice(5) - 1], year: m.month.slice(0, 4), newYear: m.month.endsWith('-01'),
       films, cinema: num(m.cinema) ?? 0, episodes, videos, posters,
@@ -661,7 +683,7 @@ function channelsView(sec) {
   return (Array.isArray(sec.channels) ? sec.channels : [])
     .filter((c) => c && typeof c.title === 'string' && c.title.trim())
     .map((c, i) => {
-      const days = num(c.days), views = num(c.views), share = num(c.share);
+      const days = num(c.days), views = num(c.views), share = num(c.share), hours = num(c.hours);
       const rhythm = (Array.isArray(c.rhythm) ? c.rhythm : []).slice(-26).map((n) => {
         const v = Math.max(0, num(n) ?? 0);
         return { n: v, level: v === 0 ? 0 : v === 1 ? 1 : v <= 3 ? 2 : 3 };
@@ -671,20 +693,23 @@ function channelsView(sec) {
         thumbs: (Array.isArray(c.thumbs) ? c.thumbs : []).map(safeMedia).filter(Boolean).slice(0, 3),
         ruleLabel: RULE_LABELS[c.rule] || '', reason: String(c.reason || ''),
         stats: [days != null ? plural(days, 'day', 'days') : '', views != null ? plural(views, 'video', 'videos') : '',
+          // estimated: video lengths x how much of each was watched (the export's youtube watch time)
+          hours != null && hours > 0 ? `≈${hours < 10 ? one(hours) : group(Math.round(hours))} ${hours === 1 ? 'hour' : 'hours'}` : '',
           share != null && share >= 1 ? `${group(share)}% of my YouTube` : ''].filter(Boolean),
         sinceLabel: monthLabel(c.since), rhythm, hasRhythm: rhythm.some((r) => r.n > 0), lead: i === 0, ink: i % 5,
       };
     });
 }
 
-/** The watching numbers: films, cinema, episodes, an estimated film-and-TV hours, YouTube as videos and days. @param {any} t */
+/** The watching numbers: films, cinema, episodes, estimated hours (film and TV, YouTube apart), YouTube videos and days. @param {any} t */
 function watchingRows(t) {
-  const h = num(t.hours);
+  const h = num(t.hours), yh = num(t.youtubeHours);
   return [
     row('Films watched', group(num(t.films) ?? 0)),
     stat('At the cinema', t.cinema, group),
     stat('Episodes', t.episodes, group),
     h != null && h > 0 ? { ...row('Film and TV', `≈${h < 10 ? one(h) : group(h)}`, 'h'), sub: 'an estimate, from TMDB runtimes' } : false,
+    yh != null && yh > 0 ? { ...row('YouTube', `≈${yh < 10 ? one(yh) : group(yh)}`, 'h'), sub: 'an estimate, from video lengths and how much of each I watched' } : false,
     stat('YouTube videos', t.videos, group),
     stat('YouTube days', t.youtubeDays, group),
   ].filter(Boolean);

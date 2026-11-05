@@ -17,7 +17,8 @@
     </svg>
 
     {{!-- Watching (lifeSections.watching): the numbers (film and TV hours are an estimate from TMDB runtimes;
-          YouTube is days and videos, never hours), the poster wall, the year by month, then the YouTube channels.
+          YouTube hours, apart, an estimate from video lengths and watched bars), the poster wall (a service stamp per
+          tile), the year by month, then the YouTube channels.
           An older export with no wall falls back to the list. --}}
     {{#with section}}
     {{> life-section-head snapTop="SCREEN" snapAccent="TIME"}}
@@ -32,7 +33,7 @@
     {{/each}}
     {{#if wall.length}}
     <h2 class="fit-header">the <span>wall</span>.</h2>
-    <p class="watch-note">Every film, and every series I binged, finished or kept coming back to. Newest first.</p>
+    <p class="watch-note">Every film, and every series I binged, finished or kept coming back to, stamped with where I watched it. Newest first.</p>
     {{> watching-wall wallTiles}}
     {{else}}
     <h2 class="fit-header">worth <span>talking about</span>.</h2>
@@ -48,7 +49,7 @@
     {{/if}}
     {{#if channels.length}}
     <h2 class="fit-header">on <span>YouTube</span>.</h2>
-    <p class="watch-note">The channels I actually watch, counted in days rather than views, so an evening of autoplay is one day. YouTube does not say for how long, so no hours here.</p>
+    <p class="watch-note">The channels I actually watch, counted in days rather than views, so an evening of autoplay is one day. The hours are an estimate: YouTube does not say how long I watched, so each video's length is multiplied by how much of it its progress bar says I saw (four fifths when there is no bar, or for a Short).</p>
     {{> watching-channels channels}}
     {{/if}}
     {{/if}}

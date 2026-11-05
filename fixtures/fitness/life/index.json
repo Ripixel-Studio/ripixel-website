@@ -3320,7 +3320,9 @@
      "hours": null,
      "cinema": 0,
      "channels": 7,
-     "youtubeDays": 3
+     "youtubeDays": 3,
+     "youtubeHours": 7.4,
+     "youtubeHoursEstimated": true
     },
     "year": {
      "films": 8,
@@ -3330,7 +3332,9 @@
      "cinema": 6,
      "channels": 474,
      "youtubeDays": 211,
-     "hoursEstimated": true
+     "hoursEstimated": true,
+     "youtubeHours": 205.3,
+     "youtubeHoursEstimated": true
     }
    },
    "years": {
@@ -3394,6 +3398,18 @@
      ],
      "episodes": 12,
      "reason": "binged 8 episodes in 4 days",
+     "weight": 1
+    },
+    {
+     "key": "ab00000009",
+     "kind": "film",
+     "title": "Sample Rental",
+     "year": 2025,
+     "poster": "https://image.tmdb.org/t/p/w342/fx-rental.jpg",
+     "bigScreen": false,
+     "provider": "youtube",
+     "month": "2026-09",
+     "reason": "",
      "weight": 1
     },
     {
@@ -3634,11 +3650,13 @@
     },
     {
      "month": "2026-09",
-     "films": 0,
+     "films": 1,
      "cinema": 0,
      "episodes": 3,
      "videos": 64,
-     "keys": []
+     "keys": [
+      "ab00000009"
+     ]
     },
     {
      "month": "2026-10",
@@ -3707,7 +3725,8 @@
       1,
       1,
       0
-     ]
+     ],
+     "hours": 41.5
     },
     {
      "key": "cc00000002",
@@ -3751,7 +3770,8 @@
       0,
       1,
       2
-     ]
+     ],
+     "hours": 12.0
     },
     {
      "key": "cc00000003",
@@ -3792,7 +3812,8 @@
       3,
       3,
       2
-     ]
+     ],
+     "hours": 3.2
     },
     {
      "key": "cc00000004",
@@ -3833,7 +3854,8 @@
       0,
       0,
       0
-     ]
+     ],
+     "hours": null
     },
     {
      "key": "cc00000005",
@@ -3876,7 +3898,8 @@
       0,
       0,
       0
-     ]
+     ],
+     "hours": 1.0
     }
    ]
   },

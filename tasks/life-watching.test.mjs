@@ -62,7 +62,7 @@ test('YouTube channels: the habit, avatar or initials, thumbnails, rhythm, plain
   assert.equal(lead.ruleLabel, 'habit');
   assert.ok(lead.avatar.startsWith('https://yt3.'));
   assert.equal(lead.thumbs.length, 3);
-  assert.deepEqual(lead.stats, ['68 days', '74 videos', '5% of my YouTube']);
+  assert.deepEqual(lead.stats, ['68 days', '74 videos', '≈42 hours', '5% of my YouTube']);
   assert.equal(lead.rhythm.length, 26);
   assert.ok(lead.rhythm.every((/** @type {any} */ r) => r.level >= 0 && r.level <= 3));
   const bare = v.channels.find((/** @type {any} */ c) => !c.avatar);
@@ -72,7 +72,7 @@ test('YouTube channels: the habit, avatar or initials, thumbnails, rhythm, plain
   assert.ok(!JSON.stringify(v.channels).includes('sustained'));
 });
 
-test('hours: an estimate from runtimes, or no row at all; YouTube is days, never hours', () => {
+test('film and TV hours: an estimate from runtimes, or no row at all', () => {
   const v = w();
   const year = v.stats[0].items;
   const hours = year.find((/** @type {any} */ r) => r.label === 'Film and TV');
@@ -114,4 +114,52 @@ test('the wall as laid out: a year card leads each year, cinema tiles do not rep
   assert.equal(marks[0].count, v.wall.filter((/** @type {any} */ t) => t.month.startsWith('2026')).length);
   const big = v.wall.find((/** @type {any} */ t) => t.bigScreen);
   assert.equal(big.reason, '');
+});
+
+test('service stamps: one per tile from the provider, a set of text stamps, never a logo file', async () => {
+  const v = w();
+  const byTitle = Object.fromEntries(v.wall.map((/** @type {any} */ t) => [t.title, t]));
+  assert.deepEqual(byTitle['Lanterns of the Quiet Coast'].stamp, { key: 'netflix', label: 'NETFLIX', short: 'N' });
+  assert.deepEqual(byTitle['Sample Rental'].stamp, { key: 'youtube', label: 'YOUTUBE', short: 'YT' });
+  assert.equal(byTitle['Fixture Falls'].stamp, null, 'a cinema trip keeps its big screen stamp only');
+  // "streamed on Netflix" says what the stamp says: gone, even from an older export
+  assert.ok(v.wall.every((/** @type {any} */ t) => !/^streamed on |^watched at home$/.test(t.reason)), JSON.stringify(v.wall.map((/** @type {any} */ t) => t.reason)));
+  assert.equal(byTitle['The Invented Harbour'].reason, 'watched twice', 'a reason that says something stays');
+  const old = /** @type {any} */ (buildSection('watching', { ...fixture.sections.watching,
+    wall: [{ key: 'o', kind: 'film', title: 'Old Export', month: '2026-10', provider: 'prime', reason: 'streamed on Prime Video' },
+      { key: 'u', kind: 'film', title: 'Unknown Service', month: '2026-10', provider: 'evil"><script>', reason: 'watched at home' }] }, now));
+  assert.equal(old.wall[0].reason, '');
+  assert.equal(old.wall[0].stamp.label, 'PRIME VIDEO');
+  assert.equal(old.wall[1].stamp, null);
+  // the set covers the services ahead of their collectors, each a distinct label
+  const labels = ['netflix', 'prime', 'disney', 'youtube', 'appletv', 'iplayer', 'channel4', 'itvx', 'now', 'dropout']
+    .map((k) => /** @type {any} */ (buildSection('watching', { ...fixture.sections.watching,
+      wall: [{ key: k, kind: 'film', title: k, month: '2026-10', provider: k }] }, now)).wall[0].stamp?.label);
+  assert.ok(labels.every(Boolean), JSON.stringify(labels));
+  assert.equal(new Set(labels).size, labels.length);
+  // the strip's mini posters carry the short stamp
+  const oct = v.strip.find((/** @type {any} */ m) => m.month === '2026-10');
+  assert.ok(oct.posters.some((/** @type {any} */ p) => p.stamp && p.stamp.short));
+  // the rendered page: stamps as text, styled per service, no logo images
+  const html = await fs.readFile(new URL('../public/personal/life/watching.html', import.meta.url), 'utf8').catch(() => '');
+  if (html) {
+    assert.match(html, /class="watch-stamp watch-stamp--netflix"[^>]*>NETFLIX</);
+    assert.match(html, /class="watch-stamp watch-stamp--youtube"/);
+    assert.match(html, /watch-mini__stamp watch-stamp--/);
+    assert.doesNotMatch(html, /streamed on/);
+    assert.doesNotMatch(html, /<img[^>]+(netflix|youtube|logo)[^>]*\.(svg|png)/i);
+  }
+});
+
+test('YouTube hours: an estimate from video lengths, per period and per channel', () => {
+  const v = w();
+  const year = v.stats[0].items;
+  const yt = year.find((/** @type {any} */ r) => r.label === 'YouTube');
+  assert.ok(yt && yt.value.startsWith('≈') && yt.unit === 'h' && /estimate/i.test(yt.sub), JSON.stringify(year));
+  const film = year.find((/** @type {any} */ r) => r.label === 'Film and TV');
+  assert.ok(film, 'film and TV hours stay apart');
+  assert.ok(v.channels[0].stats.some((/** @type {any} */ s) => /^≈[\d.,]+ hours?$/.test(s)), JSON.stringify(v.channels[0].stats));
+  const none = /** @type {any} */ (buildSection('watching', { ...fixture.sections.watching,
+    totals: { year: { films: 2, hours: null, youtubeHours: null }, month: { films: 0, youtubeHours: 0 } } }, now));
+  assert.ok(!JSON.stringify(none.stats).includes('"YouTube"'));
 });
