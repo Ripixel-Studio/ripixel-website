@@ -43,11 +43,13 @@ const longDay = (d) => `${DAYS[weekday(d)]} ${d.getUTCDate()} ${MONTHS[d.getUTCM
 /**
  * @param {any} commitsByDay [{day, n}]
  * @param {string} endDay YYYY-MM-DD: the last day drawn (the export's `updated`)
+ * @param {number} [weeks] columns drawn (the hub's mini grid draws fewer)
  */
-export function commitGrid(commitsByDay, endDay) {
+export function commitGrid(commitsByDay, endDay, weeks = WEEKS) {
   if (!Array.isArray(commitsByDay) || !commitsByDay.length || !DAY.test(String(endDay))) return null;
+  if (!Number.isInteger(weeks) || weeks < 1 || weeks > WEEKS) return null;
   const end = utc(endDay);
-  const first = addDays(end, -weekday(end) - (WEEKS - 1) * 7);
+  const first = addDays(end, -weekday(end) - (weeks - 1) * 7);
   /** @type {Map<string, number>} */
   const counts = new Map();
   for (const r of commitsByDay) {
@@ -80,7 +82,7 @@ export function commitGrid(commitsByDay, endDay) {
       // and never in the last two columns, where it would run off the edge
       const m = d.getUTCMonth();
       const prev = months.at(-1);
-      if ((col === 0 || addDays(d, -7).getUTCMonth() !== m) && (!prev || col - prev.col >= 3) && col <= WEEKS - 3) {
+      if ((col === 0 || addDays(d, -7).getUTCMonth() !== m) && (!prev || col - prev.col >= 3) && col <= weeks - 3) {
         months.push({ label: MONTHS[m], col, x: LEFT + col * STEP });
       }
     }
@@ -97,9 +99,9 @@ export function commitGrid(commitsByDay, endDay) {
   }
   const t = /** @type {{n: number, d: Date}} */ (top);
   return {
-    weeks: WEEKS,
+    weeks,
     cell: CELL,
-    width: LEFT + WEEKS * STEP,
+    width: LEFT + weeks * STEP,
     height: TOP + 7 * STEP,
     cells,
     months: months.map((m) => ({ ...m, y: TOP - 6 })),

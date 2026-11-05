@@ -17,28 +17,6 @@
    "tone": "neutral"
   },
   {
-   "key": "personal.height",
-   "label": "Height",
-   "value": 180,
-   "unit": "cm",
-   "tone": "neutral"
-  },
-  {
-   "key": "personal.likes",
-   "label": "Likes",
-   "value": [
-    "invented cola",
-    "sample toast"
-   ],
-   "tone": "fun"
-  },
-  {
-   "key": "personal.boardgames",
-   "label": "Board games",
-   "value": "keen, rarely wins",
-   "tone": "fun"
-  },
-  {
    "key": "site.started_year",
    "label": "Site started",
    "value": 2019,
@@ -4709,11 +4687,216 @@
     "size": "lg",
     "href": "/life/code",
     "hero": {
-     "type": "stat",
-     "caption": "212 commits this month. The keyboard is fine. Probably.",
-     "value": 212,
-     "unit": "",
-     "label": "commits this month"
+     "type": "grid",
+     "caption": "239 commits in the last 16 weeks. The squares do not lie.",
+     "through": "2026-11-02",
+     "weeks": 16,
+     "days": [
+      [
+       "2026-07-20",
+       1
+      ],
+      [
+       "2026-07-21",
+       1
+      ],
+      [
+       "2026-07-25",
+       17
+      ],
+      [
+       "2026-07-26",
+       2
+      ],
+      [
+       "2026-07-27",
+       2
+      ],
+      [
+       "2026-07-30",
+       3
+      ],
+      [
+       "2026-07-31",
+       1
+      ],
+      [
+       "2026-08-01",
+       1
+      ],
+      [
+       "2026-08-02",
+       1
+      ],
+      [
+       "2026-08-04",
+       3
+      ],
+      [
+       "2026-08-13",
+       4
+      ],
+      [
+       "2026-08-15",
+       6
+      ],
+      [
+       "2026-08-20",
+       2
+      ],
+      [
+       "2026-08-29",
+       1
+      ],
+      [
+       "2026-08-30",
+       1
+      ],
+      [
+       "2026-08-31",
+       6
+      ],
+      [
+       "2026-09-06",
+       4
+      ],
+      [
+       "2026-09-11",
+       3
+      ],
+      [
+       "2026-09-13",
+       1
+      ],
+      [
+       "2026-09-25",
+       1
+      ],
+      [
+       "2026-09-30",
+       1
+      ],
+      [
+       "2026-10-01",
+       6
+      ],
+      [
+       "2026-10-03",
+       1
+      ],
+      [
+       "2026-10-04",
+       3
+      ],
+      [
+       "2026-10-05",
+       1
+      ],
+      [
+       "2026-10-07",
+       21
+      ],
+      [
+       "2026-10-09",
+       3
+      ],
+      [
+       "2026-10-12",
+       1
+      ],
+      [
+       "2026-10-13",
+       16
+      ],
+      [
+       "2026-10-14",
+       4
+      ],
+      [
+       "2026-10-15",
+       4
+      ],
+      [
+       "2026-10-17",
+       9
+      ],
+      [
+       "2026-10-18",
+       12
+      ],
+      [
+       "2026-10-20",
+       12
+      ],
+      [
+       "2026-10-21",
+       1
+      ],
+      [
+       "2026-10-22",
+       3
+      ],
+      [
+       "2026-10-23",
+       2
+      ],
+      [
+       "2026-10-24",
+       2
+      ],
+      [
+       "2026-10-25",
+       10
+      ],
+      [
+       "2026-10-26",
+       7
+      ],
+      [
+       "2026-10-28",
+       14
+      ],
+      [
+       "2026-10-31",
+       2
+      ],
+      [
+       "2026-11-01",
+       41
+      ],
+      [
+       "2026-11-02",
+       2
+      ]
+     ]
+    }
+   },
+   {
+    "section": "live",
+    "size": "lg",
+    "href": "/life/live",
+    "hero": {
+     "type": "stubs",
+     "caption": "Sample Band Live, the latest night out.",
+     "items": [
+      {
+       "title": "Sample Band Live",
+       "month": "2026-10",
+       "form": "gig",
+       "src": "https://storage.googleapis.com/fitglue-server-prod-showcase-assets/site/james/life/live/0a1b2c3d4e5f6071.jpg"
+      },
+      {
+       "title": "Glasshouse The Musical",
+       "month": "2026-07",
+       "form": "musical"
+      },
+      {
+       "title": "A Quiet Revolt",
+       "month": "2026-03",
+       "form": "theatre",
+       "src": "https://storage.googleapis.com/fitglue-server-prod-showcase-assets/site/james/life/live/1b2c3d4e5f607182.jpg"
+      }
+     ]
     }
    },
    {
@@ -4782,10 +4965,14 @@
     "size": "md",
     "href": "/life/games",
     "hero": {
-     "type": "image",
-     "caption": "410 hours of Space Farm, all time. No regrets.",
-     "src": "/card_life.png",
-     "alt": "Space Farm"
+     "type": "rank",
+     "caption": "Gold II, 54 LP in ranked solo.",
+     "tier": "GOLD",
+     "division": "II",
+     "lp": 54,
+     "queue": "solo",
+     "icon": "https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/Jinx.png",
+     "champion": "Jinx"
     }
    },
    {
@@ -4836,18 +5023,6 @@
        "alt": "Fixture Falls"
       }
      ]
-    }
-   },
-   {
-    "section": "live",
-    "size": "sm",
-    "href": "/life/live",
-    "hero": {
-     "type": "stat",
-     "caption": "3 live events this year.",
-     "value": 3,
-     "unit": "",
-     "label": "live events this year"
     }
    },
    {

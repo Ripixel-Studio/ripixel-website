@@ -7,7 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { generatePagesTask } from 'skier';
-import { buildHub, heroCards, heroView, isoWeekMonday, routeSketch, lifeInsights } from './life-hub.mjs';
+import { buildHub, buildSection, heroCards, heroView, isoWeekMonday, routeSketch, lifeInsights } from './life-hub.mjs';
 import { runSkierTasks } from './skier-test-runner.mjs';
 import { templateHelpers } from './life-pages.mjs';
 
@@ -57,7 +57,7 @@ test('spark hero: week labels on the shared line chart, compact', () => {
 });
 
 test('stat hero: the big number', () => {
-  assert.deepEqual(heroView(rowOf('code').hero), { type: 'stat', stat: true, value: '212', unit: '', label: 'commits this month' });
+  assert.deepEqual(heroView({ type: 'stat', value: 212, unit: '', label: 'commits this month' }), { type: 'stat', stat: true, value: '212', unit: '', label: 'commits this month' });
   assert.equal(heroView({ type: 'stat', value: 12345, unit: 'km', label: 'x' })?.value, '12,345');
   assert.equal(heroView({ type: 'stat', value: 7.14, label: 'x' })?.value, '7.1');
   assert.equal(heroView({ type: 'stat', value: '4:59', label: '5K PB' })?.value, '4:59');
@@ -92,6 +92,66 @@ test('bars hero: the life-split items', () => {
   assert.equal(heroView({ type: 'bars', items: [] }), null);
 });
 
+test('covers hero: the games cover wall fanned, Steam and Riot art only', () => {
+  const ok = [
+    { src: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1/library_600x900.jpg?t=17', alt: 'Fixture Quest' },
+    { src: 'https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Examplor_0.jpg', alt: 'League of Legends' },
+    { src: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3/library_600x900.jpg', alt: 'Sample Tactics' },
+  ];
+  const h = /** @type {any} */ (heroView({ type: 'covers', items: ok }));
+  assert.equal(h.type, 'covers');
+  assert.deepEqual(h.items.map((/** @type {any} */ i) => [i.n, i.alt]), [[0, 'Fixture Quest'], [1, 'League of Legends'], [2, 'Sample Tactics']]);
+  assert.equal(heroView({ type: 'covers', items: ok.slice(0, 2) }), null, 'a fan needs three');
+  assert.equal(heroView({ type: 'covers', items: [...ok.slice(0, 2), { src: 'https://image.tmdb.org/t/p/w342/a.jpg', alt: 'x' }] }), null, 'art hosts only');
+  assert.equal(heroView({ type: 'covers', items: [...ok.slice(0, 2), { src: ok[0].src, alt: '' }] }), null);
+});
+
+test('stubs hero: the live page stubs, newest first, a picture where there is one', () => {
+  const h = /** @type {any} */ (heroView(rowOf('live').hero));
+  assert.equal(h.type, 'stubs');
+  assert.equal(h.count, 3);
+  assert.deepEqual(h.items.map((/** @type {any} */ i) => [i.title, i.kind, i.kindLabel, i.stamp, i.hasPoster]), [
+    ['Sample Band Live', 'gig', 'Gig', 'Oct 2026', true],
+    ['Glasshouse The Musical', 'musical', 'Musical', 'Jul 2026', false],
+    ['A Quiet Revolt', 'theatre', 'Theatre', 'Mar 2026', true],
+  ]);
+  assert.equal(h.items[1].glyph, 'Musical');
+  // the same stub as the page: same kind, same tilt
+  const page = buildSection('live', fixture.sections.live, now, Object.values(fixture.sections.live.years).flat());
+  const pageStub = page.yearRows[0].stubs.find((/** @type {any} */ s) => s.title === 'Sample Band Live');
+  assert.equal(h.items[0].tilt, pageStub.tilt);
+  assert.equal(h.items[0].glyphSize, pageStub.glyphSize);
+  assert.equal(heroView({ type: 'stubs', items: [{ title: 'X', month: '2026-10', form: 'rave' }] })?.items[0].kind, 'other');
+  assert.equal(heroView({ type: 'stubs', items: [{ title: 'X', month: '2026-10', form: 'gig', src: 'http://x.example/a.jpg' }] })?.items[0].hasPoster, false);
+  for (const items of [[], [{ title: '', month: '2026-10' }], [{ title: 'X', month: '2026-13' }], Array(4).fill({ title: 'X', month: '2026-10' }), 'x']) {
+    assert.equal(heroView({ type: 'stubs', items }), null, JSON.stringify(items));
+  }
+});
+
+test('grid hero: the code page commit grid, the last few weeks', () => {
+  const h = /** @type {any} */ (heroView(rowOf('code').hero));
+  assert.equal(h.type, 'grid');
+  assert.equal(h.chart.weeks, 16);
+  assert.equal(h.chart.cells.length, 15 * 7 + 1, 'Monday-aligned, through the given Monday');
+  assert.equal(h.chart.cells.at(-1).day, '2026-11-02');
+  assert.equal(h.chart.total, rowOf('code').hero.days.reduce((/** @type {number} */ s, /** @type {any} */ d) => s + d[1], 0));
+  assert.ok(h.chart.cells.every((/** @type {any} */ c) => c.x + 11 <= h.chart.width && c.y + 11 <= h.chart.height));
+  for (const bad of [{ weeks: 0 }, { weeks: 60 }, { through: 'yesterday' }, { days: [] }, { days: 'x' }]) {
+    assert.equal(heroView({ ...rowOf('code').hero, ...bad }), null, JSON.stringify(bad));
+  }
+});
+
+test('rank hero: tier, LP and the champion of the month', () => {
+  const h = /** @type {any} */ (heroView(rowOf('games').hero));
+  assert.deepEqual(h, { type: 'rank', rank: true, tier: 'Gold II', tierKey: 'gold', lp: '54', queue: 'Ranked solo',
+    icon: 'https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/Jinx.png', champion: 'Jinx' });
+  const base = rowOf('games').hero;
+  assert.equal(heroView({ ...base, division: '', tier: 'master' })?.tier, 'Master');
+  for (const bad of [{ tier: 'WOOD' }, { division: 'V' }, { lp: -1 }, { lp: 'x' }, { icon: 'https://evil.example/a.png' }, { icon: '' }]) {
+    assert.equal(heroView({ ...base, ...bad }), null, JSON.stringify(bad));
+  }
+});
+
 test('unknown hero types draw nothing', () => {
   for (const h of [null, {}, { type: 'video', src: 'https://x.example/a.mp4' }, 'stat']) assert.equal(heroView(h), null);
 });
@@ -100,17 +160,15 @@ test('hero cards: export order, sizes, zig-zag and headlines', () => {
   const hub = buildHub(fixture, fitnessLife, now);
   const cards = hub.hero;
   assert.deepEqual(cards.map((c) => c.name), fixture.hub.rows.map((/** @type {any} */ r) => r.section));
-  assert.deepEqual(cards.map((c) => c.size), ['lg', 'lg', 'md', 'md', 'md', 'md', 'sm', 'sm']);
-  assert.deepEqual(cards.map((c) => c.side), ['left', 'right', '', '', '', '', '', '']);
-  assert.deepEqual(cards.map((c) => c.hero?.type ?? null), ['route', 'stat', 'spark', 'image', 'bars', 'posters', 'stat', null]);
+  assert.deepEqual(cards.map((c) => c.size), ['lg', 'lg', 'lg', 'md', 'md', 'md', 'md', 'sm']);
+  assert.deepEqual(cards.map((c) => c.side), ['left', 'right', 'left', '', '', '', '', '']);
+  assert.deepEqual(cards.map((c) => c.hero?.type ?? null), ['route', 'grid', 'stubs', 'spark', 'rank', 'bars', 'posters', null]);
   // the section's own headline, as the rows had it
   const byName = Object.fromEntries(hub.cards.map((c) => [c.name, c]));
-  // (a stat hero that is the headline's own figure stands in for it)
-  for (const c of cards) if (byName[c.name] && c.name !== 'live') assert.deepEqual(c.headline, byName[c.name].headline, c.name);
+  for (const c of cards) if (byName[c.name]) assert.deepEqual(c.headline, byName[c.name].headline, c.name);
   assert.equal(cards[0].headline?.value, '614');
   assert.equal(cards.find((c) => c.name === 'live')?.title, 'Live');
-  assert.equal(cards.find((c) => c.name === 'live')?.headline, null);
-  assert.equal(cards.find((c) => c.name === 'live')?.hero?.value, byName.live.headline.value, 'the hero agrees with its section');
+  assert.equal(cards.find((c) => c.name === 'live')?.headline?.value, byName.live.headline.value);
   // outings has its own page like the rest (the export's href is /life/live)
   assert.equal(cards.find((c) => c.name === 'live')?.href, '/life/live');
   assert.equal(cards[0].href, '/life/fitness');
@@ -161,7 +219,7 @@ async function renderHub(idx) {
     const lifeHub = buildHub(idx, fitnessLife, now);
     await runSkierTasks([generatePagesTask({
       pagesDir: pages, partialsDir: path.join(REPO, 'personal/partials'), outDir: out, helpers: templateHelpers,
-      additionalVarsFn: () => ({ page: 'life', lifeHub, lifeInsights: lifeInsights(idx), lifePersonal: [], fitnessLife }),
+      additionalVarsFn: () => ({ page: 'life', lifeHub, lifeInsights: lifeInsights(idx), fitnessLife }),
     })], { siteUrl: 'https://james.ripixel.co.uk', cacheHash: 'test', year: 2026 }, []);
     return await fs.readFile(path.join(out, 'life.html'), 'utf8');
   } finally {
@@ -176,18 +234,26 @@ test('the page: a card per row, sized, each hero drawn, heading and insights kep
   assert.ok(html.indexOf('did-you-know') < html.indexOf('hub-grid'));
   assert.doesNotMatch(html, /class="life-index"/);
   const cards = html.match(/<li class="hub-card [^"]*"/g) || [];
-  assert.deepEqual(cards.map((c) => /hub-card--(lg|md|sm)/.exec(c)?.[1]), ['lg', 'lg', 'md', 'md', 'md', 'md', 'sm', 'sm']);
+  assert.deepEqual(cards.map((c) => /hub-card--(lg|md|sm)/.exec(c)?.[1]), ['lg', 'lg', 'lg', 'md', 'md', 'md', 'md', 'sm']);
   // posters: the newest from the Watching wall, fanned, lazy, with alt
   assert.match(html, /<div class="hub-hero__posters">\s*<figure class="hub-hero__poster hub-hero__poster--n0" style="--tilt: [-0-9.]+deg"><img src="https:\/\/image\.tmdb\.org\/t\/p\/w342\/fx-lanterns\.jpg" alt="Lanterns of the Quiet Coast" loading="lazy"/);
   assert.match(cards[0], /hub-card--left hub-card--route life-ink--fitness/);
-  assert.match(cards[1], /hub-card--right hub-card--stat life-ink--code/);
-  // image: lazy, fixed size, alt
-  assert.match(html, /<img class="hub-hero__img" src="\/card_life.png" alt="Space Farm" loading="lazy" decoding="async" width="400" height="600">/);
+  assert.match(cards[1], /hub-card--right hub-card--grid life-ink--code/);
+  assert.match(cards[2], /hub-card--left hub-card--stubs life-ink--live/);
+  // grid: the code page's own cells, in a fixed viewBox
+  assert.match(html, /<svg class="hub-hero__grid" viewBox="0 0 254 116" role="img" aria-label="Commits per day over the last 16 weeks: 239 in all">/);
+  assert.equal((html.match(/<rect class="code-grid__cell code-lv-[0-4]"/g) || []).length, 15 * 7 + 1);
+  // stubs: the live page's ticket, a picture or the kind's glyph
+  assert.match(html, /<ol class="hub-hero__stubs hub-hero__stubs--n3">\s*<li class="stub stub--gig" style="--tilt: [-0-9.]+deg">/);
+  assert.match(html, /<img class="stub__img" src="https:\/\/storage\.googleapis\.com\/[^"]+\.jpg" alt="Sample Band Live" loading="lazy" decoding="async" width="600" height="450">/);
+  assert.match(html, /<span class="stub__glyph stub__glyph--l" aria-hidden="true">Musical<\/span>/);
+  assert.match(html, /<span class="stub__stamp">Jul 2026<\/span>/);
+  // rank: the tier, LP and the champion icon at a fixed size
+  assert.match(html, /<img class="hub-hero__champ" src="https:\/\/ddragon\.leagueoflegends\.com\/cdn\/16\.22\.1\/img\/champion\/Jinx\.png" alt="Jinx" loading="lazy" decoding="async" width="120" height="120">/);
+  assert.match(html, /<p class="hub-hero__tier">Gold II<\/p>\s*<p class="hub-hero__lp"><b>54<\/b> LP · Ranked solo<\/p>/);
   // spark: the shared chart partial, with axes
   assert.match(html, /<figure class="chart">[\s\S]*?class="chart__y"[\s\S]*?class="chart__x"/);
   assert.match(html, /<li style="left:100%">2 Nov<\/li>/);
-  // stat
-  assert.match(html, /<b class="hub-hero__value">212<\/b> <span class="hub-hero__what">commits this month<\/span>/);
   // route: an SVG, no tiles, linked to the full map
   assert.match(html, /<a class="hub-hero__route" href="\/life\/activity\/evening-ride-to-the-reservoir-2026-10-15">\s*<svg class="hub-hero__map"/);
   assert.doesNotMatch(html, /leaflet|route-map\.js/i);
@@ -196,12 +262,26 @@ test('the page: a card per row, sized, each hero drawn, heading and insights kep
   // captions as text, sub-page links
   assert.match(html, /<p class="hub-card__caption">Sci-fi leads the shelf at 48%.<\/p>/);
   assert.match(html, /<a class="hub-card__more" href="\/life\/reading" aria-label="More on Reading">/);
-  // sm rows show no hero, only the caption
+  assert.doesNotMatch(html, /id="life-outings-title"/);
+  // the small print is gone
+  assert.doesNotMatch(html, /life-personal|the small print/);
+});
+
+test('the page draws covers, an image and a stat, and an sm row shows only its caption', async () => {
+  const covers = [1, 2, 3].map((n) => ({ src: `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${n}/library_600x900.jpg`, alt: `Game ${'ABC'[n - 1]}` }));
+  const html = await renderHub({ ...fixture, hub: { rows: [
+    { section: 'games', size: 'md', href: '/life/games', hero: { type: 'covers', items: covers, caption: 'Game A tops the cover wall.' } },
+    { section: 'reading', size: 'md', href: '/life/reading', hero: { type: 'image', src: '/card_life.png', alt: 'Space Farm', caption: 'A book.' } },
+    { section: 'code', size: 'md', href: '/life/code', hero: { type: 'stat', value: 212, unit: '', label: 'commits this month', caption: '212 commits this month.' } },
+    { section: 'live', size: 'sm', href: '/life/live', hero: { type: 'stat', value: 3, unit: '', label: 'live events this year', caption: '3 live events this year.' } },
+  ] } });
+  assert.match(html, /<div class="hub-hero__posters hub-hero__posters--covers">\s*<figure class="hub-hero__poster hub-hero__poster--n0" style="--tilt: [-0-9.]+deg"><img src="https:\/\/shared\.akamai\.steamstatic\.com\/[^"]+" alt="Game A" loading="lazy" decoding="async" width="600" height="900">/);
+  assert.match(html, /<img class="hub-hero__img" src="\/card_life.png" alt="Space Farm" loading="lazy" decoding="async" width="400" height="600">/);
+  assert.match(html, /<b class="hub-hero__value">212<\/b> <span class="hub-hero__what">commits this month<\/span>/);
   const outings = /<li class="hub-card hub-card--sm hub-card--stat life-ink--live">[\s\S]*?<\/li>/.exec(html)?.[0] || '';
   assert.doesNotMatch(outings, /hub-hero/);
   assert.match(outings, /3 live events this year\./);
   assert.match(outings, /href="\/life\/live"/);
-  assert.doesNotMatch(html, /id="life-outings-title"/);
 });
 
 test('the page escapes a caption', async () => {
