@@ -1864,8 +1864,7 @@ a.hub-hero__route:hover .hub-hero__route-cta { background: var(--life-ink); colo
 
 /* the hub card: the newest posters, fanned */
 .hub-hero--posters { align-items: center; }
-.hub-hero__posters { position: relative; width: min(100%, 300px); aspect-ratio: 5 / 4; margin: 8px auto 6px; }
-.hub-card--lg .hub-hero__posters { width: min(100%, 380px); }
+.hub-hero__posters { position: relative; flex: none; width: var(--fan-w); height: var(--fan-h); margin: 0 auto; }
 .hub-hero__poster {
   position: absolute;
   top: 6%;
@@ -2258,4 +2257,134 @@ a.hub-hero__route:hover .hub-hero__route-cta { background: var(--life-ink); colo
   .hub-hero__stubs .stub__ticket { --tear: 22px; --notch: 6px; }
   .hub-hero__stubs .stub__code { width: 26px; height: 10px; }
   .hub-hero__champ { width: 60px; height: 60px; }
+}
+
+/* ─── The hub: every hero fills its card ───────────────────────────────────────
+   The grid's rows are as tall as their tallest card, so a picture sized in pixels left a md card
+   beside a lg one mostly empty. Now the lg card sets the height (its picture is width-driven) and
+   a md card's hero takes what is left: the hero is a size container that grows (flex: 1), with a
+   base aspect ratio for when nothing stretches it (two columns, one column), and the picture is
+   sized from it in cq units, so nothing re-flows when images load. The fan and the rank change
+   shape with the box: a wide fan, a square one, a tall cascade. */
+.hub-card--md .hub-hero--posters,
+.hub-card--md .hub-hero--covers,
+.hub-card--md .hub-hero--rank,
+.hub-card--md .hub-hero--image,
+.hub-card--md .hub-hero--route {
+  container: hubfill / size;
+  aspect-ratio: 5 / 4;
+  align-items: center;
+}
+.hub-card--md .hub-hero--image { aspect-ratio: 1; }
+
+/* the fan: wide by default (and on a lg card), square or a tall cascade as the box asks */
+.hub-hero__posters { --fan-w: min(100%, 380px); --fan-h: auto; aspect-ratio: 5 / 4; }
+.hub-card--md .hub-hero__posters { --fan-w: min(88cqw, (100cqh - 10px) * 1.25); --fan-h: calc(var(--fan-w) * 0.8); aspect-ratio: auto; }
+@container hubfill (aspect-ratio < 1.15) {
+  .hub-card--md .hub-hero__posters { --fan-w: min(88cqw, 100cqh - 24px); --fan-h: var(--fan-w); }
+  .hub-hero__posters .hub-hero__poster { width: 54%; }
+  .hub-hero__posters .hub-hero__poster--n1 { left: 15.3%; top: 6%; }
+  .hub-hero__posters .hub-hero__poster--n2 { left: 30.6%; top: 12%; }
+  .hub-hero__posters .hub-hero__poster--n3 { left: 46%; top: 18%; }
+}
+@container hubfill (aspect-ratio < 0.8) {
+  .hub-card--md .hub-hero__posters { --fan-w: min(88cqw, (100cqh - 34px) / 1.5); --fan-h: calc(var(--fan-w) * 1.5); }
+  .hub-hero__posters .hub-hero__poster { width: 56%; }
+  .hub-hero__posters .hub-hero__poster--n0 { top: 0; }
+  .hub-hero__posters .hub-hero__poster--n1 { left: 14.7%; top: 14.7%; }
+  .hub-hero__posters .hub-hero__poster--n2 { left: 29.3%; top: 29.3%; }
+  .hub-hero__posters .hub-hero__poster--n3 { left: 44%; top: 43%; }
+}
+
+/* the polaroid on a md card: as big as the box allows */
+.hub-card--md .hub-hero--image .hub-hero__frame { flex: none; width: min(100cqw - 18px, (100cqh - 52px) * 2 / 3 + 20px); }
+
+/* the route on a md card: the graph paper fills the box; on a lg card the map is width-driven */
+.hub-card--md .hub-hero--route .hub-hero__route { align-self: stretch; flex: 1 1 auto; min-height: 0; }
+.hub-card--md .hub-hero--route .hub-hero__map { height: 100%; max-height: none; }
+.hub-card--lg .hub-hero__map { max-height: none; }
+
+/* the spark: the chart grows with the card */
+.hub-hero--spark .chart,
+.hub-session .chart { flex: 1 1 auto; display: flex; flex-direction: column; }
+.hub-hero--spark .chart__plot,
+.hub-session .chart__plot { flex: 1 1 auto; grid-template-rows: minmax(var(--chart-h), 1fr) auto; }
+
+/* the rank: the panel fills the box over a row of the top four covers; the champion and the tier
+   scale with it (the champion takes the panel's height less the covers' row: (100cqw - 36px) * 0.375) */
+.hub-card--md .hub-hero--rank { --covers-h: calc((100cqw - 42px) * 0.375 + 4px); justify-content: flex-start; gap: 16px; }
+.hub-card--md .hub-hero__rank { align-self: stretch; flex: 1 0 auto; margin: 0 6px 0 0; gap: 6cqw; padding: 5cqw; }
+.hub-card--md .hub-hero__champ { width: max(56px, min(34cqw, 100cqh - var(--covers-h) - 10cqw - 44px)); height: auto; aspect-ratio: 1; }
+.hub-card--md .hub-hero__tier { font-size: clamp(26px, 10cqw, 60px); }
+.hub-card--md .hub-hero__lp b { font-size: clamp(24px, 7cqw, 40px); }
+@container hubfill (width < 380px) {
+  .hub-card--md .hub-hero__champ-name { display: none; } /* the icon says it; a narrow panel has no room */
+}
+@container hubfill (aspect-ratio < 0.95) {
+  .hub-card--md .hub-hero__rank { flex-direction: column; align-items: flex-start; justify-content: center; }
+  .hub-card--md .hub-hero__champ { width: max(56px, min(44cqw, 100cqh - var(--covers-h) - 10cqw - 190px)); }
+}
+.hub-hero__rank-covers {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  align-self: stretch;
+  flex: none;
+  margin: 0 6px 6px 0;
+  padding: 0;
+  list-style: none;
+}
+.hub-hero__rank-covers li:nth-child(even) { transform: rotate(1.5deg); }
+.hub-hero__rank-covers li:nth-child(odd) { transform: rotate(-1.5deg); }
+.hub-hero__rank-covers img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  background: var(--ink);
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--life-ink);
+  color: transparent;
+}
+
+/* the fitness photo on a lg card: the polaroid on the left, its session on the right (the stats
+   and the heart-rate trace from the site's own fitness data), so the portrait fills the card */
+.hub-card--lg.hub-card--image:has(> .hub-session) {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  grid-template-rows: auto auto 1fr auto;
+  grid-template-areas: "head head" "hero cap" "hero sess" "hero foot";
+  gap: 14px 34px;
+}
+.hub-card--image:has(> .hub-session) > .hub-card__head { grid-area: head; }
+.hub-card--image:has(> .hub-session) > .hub-hero { grid-area: hero; justify-content: flex-start; }
+.hub-card--image:has(> .hub-session) > .hub-card__caption { grid-area: cap; }
+.hub-card--image:has(> .hub-session) > .hub-card__foot { grid-area: foot; }
+.hub-card--lg.hub-card--image:has(> .hub-session) .hub-hero__frame { width: calc(100% - 14px); margin-top: 14px; }
+
+.hub-session { grid-area: sess; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.hub-session__when { margin: 0; font-family: var(--f-mono); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+.hub-session__stats { display: flex; flex-wrap: wrap; gap: 8px 30px; margin: 0; padding: 0; list-style: none; }
+.hub-session__stats b { display: block; font-family: var(--f-disp); font-weight: 400; font-size: clamp(36px, 3.6vw, 54px); line-height: 0.95; color: var(--life-ink); text-shadow: 3px 3px 0 var(--ink); }
+.hub-session__stats small { font-family: var(--f-mono); font-size: 13px; margin-left: 4px; color: var(--ink); text-shadow: none; }
+.hub-session__stats span { font-family: var(--f-mono); font-size: 12px; font-weight: 700; }
+.hub-session .chart { margin-right: 6px; }
+
+/* the slim cards that end the grid share its last row; at two columns an odd card spans both */
+@media (min-width: 1001px) {
+  .hub-card--sm.hub-card--wide3 { grid-column: span 3; }
+  .hub-card--sm.hub-card--wide6 { grid-column: span 6; }
+}
+@media (max-width: 1000px) and (min-width: 641px) {
+  .hub-card--solo { grid-column: span 2; }
+}
+@media (max-width: 640px) {
+  .hub-card--lg.hub-card--image:has(> .hub-session) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-template-areas: "head" "hero" "cap" "sess" "foot";
+  }
+  .hub-card--lg.hub-card--image:has(> .hub-session) .hub-hero__frame { width: min(100% - 14px, 300px); }
+  .hub-hero--spark .chart { --chart-h: 150px; }
 }

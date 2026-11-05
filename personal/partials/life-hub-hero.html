@@ -57,6 +57,7 @@
     {{#if champion}}<p class="hub-hero__champ-name">Champion of the month: {{champion}}</p>{{/if}}
   </div>
 </div>
+{{#if rankCovers}}<ul class="hub-hero__rank-covers">{{#each rankCovers}}<li><img src="{{src}}" alt="{{alt}}" loading="lazy" decoding="async" width="600" height="900"></li>{{/each}}</ul>{{/if}}
 {{/if}}
 {{#if spark}}{{> chart-line chart}}{{/if}}
 {{#if stat}}
