@@ -225,11 +225,14 @@ describe('built /work page', () => {
     assert.match(html, /★/);
   });
 
-  test('the timeline and the stack chart render before the role detail', () => {
+  test('employment first: timeline, role detail, highlights, then the stack (James, 2026-11-05)', () => {
     assert.equal((html.match(/<div class="wt-row(?: wt-row--now)?" style="--c:/g) || []).length, 5);
     assert.match(html, /wt-band wt-band--now" style="left: 69.4%/);
     assert.equal((html.match(/<div class="wt-row wt-row--tech/g) || []).length, work.roster.length);
-    assert.ok(html.indexOf('class="wt wt--tech"') < html.indexOf('<article class="role-card '));
+    const timeline = html.indexOf('id="wt-h"'), detail = html.indexOf('<article class="role-card ');
+    const stack = html.indexOf('class="wt wt--tech"'), highlights = html.indexOf('id="work-highlights-h"');
+    assert.ok(timeline >= 0 && timeline < detail && detail < stack, 'timeline, then roles, then the stack');
+    if (highlights >= 0) assert.ok(detail < highlights && highlights < stack, 'highlights sit between roles and the stack');
     assert.ok(!html.includes('tech-grid'), 'the old roster grid is gone: the chart lists every technology');
   });
 

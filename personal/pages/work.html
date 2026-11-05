@@ -68,39 +68,6 @@
     {{/with}}
     {{/if}}
 
-    {{#if workView.techChart}}
-    <!-- The stack over time: when each technology was used, from the roles' tech lists -->
-    {{#with workView.techChart}}
-    <section class="wt wt--tech" aria-labelledby="wtech-h">
-      <h2 class="tech-roster__heading" id="wtech-h">the stack, <span>over time</span>.</h2>
-      <p class="tech-roster__hint">every technology from the roles below, coloured by where I used it · ★ = using it now · ☆ = not lately</p>
-      <p class="wt-legend">{{#each legend}}<span style="--c: var(--ink-{{ink}})"><i class="{{#if contract}}wt-band--contract{{/if}}"></i>{{company}}</span>{{/each}}</p>
-      <div class="wt-chart">
-        <div class="wt-row wt-row--axis" aria-hidden="true">
-          <span></span>
-          <span class="wt-axis">{{#each axis.ticks}}<span class="wt-axis__tick{{#if odd}} wt-axis__tick--odd{{/if}}" style="left: {{left}}%"><b class="wt-axis__long">{{label}}</b><b class="wt-axis__short">{{short}}</b></span>{{/each}}</span>
-        </div>
-        {{#each groups}}
-        <div class="wt-group">{{label}}</div>
-        {{#each rows}}
-        <div class="wt-row wt-row--tech{{#if current}} wt-row--now{{/if}}">
-          <div class="wt-label wt-label--tech">
-            <span class="wt-label__tech" title="{{name}}">{{name}}</span>
-            <span class="wt-label__star" title="{{#if current}}using now{{else}}not lately{{/if}}">{{#if current}}★{{else}}☆{{/if}}</span>
-            <span class="wt-label__yrs">{{years}}</span>
-          </div>
-          <div class="wt-track wt-track--thin">
-            {{#each ../../axis.ticks}}<i class="wt-grid" style="left: {{left}}%"></i>{{/each}}
-            {{#each spans}}<span class="wt-band{{#if contract}} wt-band--contract{{/if}}" style="left: {{left}}%; width: {{width}}%; --c: var(--ink-{{ink}})" title="{{label}}"></span>{{/each}}
-          </div>
-        </div>
-        {{/each}}
-        {{/each}}
-      </div>
-    </section>
-    {{/with}}
-    {{/if}}
-
     <!-- Roles, newest first -->
     <h2 class="tech-roster__heading work-detail__heading">the <span>detail</span>.</h2>
     <ol class="work-roles">
@@ -153,6 +120,39 @@
         {{/each}}
       </ol>
     </section>
+    {{/if}}
+
+    {{#if workView.techChart}}
+    <!-- The stack over time: when each technology was used, from the roles' tech lists -->
+    {{#with workView.techChart}}
+    <section class="wt wt--tech" aria-labelledby="wtech-h">
+      <h2 class="tech-roster__heading" id="wtech-h">the stack, <span>over time</span>.</h2>
+      <p class="tech-roster__hint">every technology from the roles below, coloured by where I used it · ★ = using it now · ☆ = not lately</p>
+      <p class="wt-legend">{{#each legend}}<span style="--c: var(--ink-{{ink}})"><i class="{{#if contract}}wt-band--contract{{/if}}"></i>{{company}}</span>{{/each}}</p>
+      <div class="wt-chart">
+        <div class="wt-row wt-row--axis" aria-hidden="true">
+          <span></span>
+          <span class="wt-axis">{{#each axis.ticks}}<span class="wt-axis__tick{{#if odd}} wt-axis__tick--odd{{/if}}" style="left: {{left}}%"><b class="wt-axis__long">{{label}}</b><b class="wt-axis__short">{{short}}</b></span>{{/each}}</span>
+        </div>
+        {{#each groups}}
+        <div class="wt-group">{{label}}</div>
+        {{#each rows}}
+        <div class="wt-row wt-row--tech{{#if current}} wt-row--now{{/if}}">
+          <div class="wt-label wt-label--tech">
+            <span class="wt-label__tech" title="{{name}}">{{name}}</span>
+            <span class="wt-label__star" title="{{#if current}}using now{{else}}not lately{{/if}}">{{#if current}}★{{else}}☆{{/if}}</span>
+            <span class="wt-label__yrs">{{years}}</span>
+          </div>
+          <div class="wt-track wt-track--thin">
+            {{#each ../../axis.ticks}}<i class="wt-grid" style="left: {{left}}%"></i>{{/each}}
+            {{#each spans}}<span class="wt-band{{#if contract}} wt-band--contract{{/if}}" style="left: {{left}}%; width: {{width}}%; --c: var(--ink-{{ink}})" title="{{label}}"></span>{{/each}}
+          </div>
+        </div>
+        {{/each}}
+        {{/each}}
+      </div>
+    </section>
+    {{/with}}
     {{/if}}
 
     {{#if workView.salary}}
