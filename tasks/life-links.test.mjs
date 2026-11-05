@@ -105,6 +105,9 @@ describe('built personal site has no trailing-slash internal links', () => {
     assert.ok(await count('index.html') >= 7, 'home: 4 section cards + 3 press cards');
     assert.ok(await count('life.html') >= 1, 'hub cards');
     assert.ok(await count('life/fitness.html') >= 1, 'latest sessions');
+    assert.ok(await count('life/roundups.html') >= 1, 'the roundups timeline tiles');
+    assert.ok(await count('life/sessions.html') >= 1, 'the session cards');
+    assert.doesNotMatch(await fs.readFile(path.join(OUT, 'life', 'roundups.html'), 'utf8'), /rl-link|rl-arrow/, 'the local roundup classes are gone');
   });
 
   test('Atom feed ids and links are slash-less', async () => {

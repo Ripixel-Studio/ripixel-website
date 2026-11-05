@@ -2682,6 +2682,9 @@ body.page-life     .tab-bar__item--fitness  { opacity: 1; }
   transition: translate 160ms ease;
 }
 .card-link:is(:hover, :focus-visible, :has(.card-link__target:focus-visible)) .card-link__arrow::before { translate: 3px 0; }
+/* small tiles (a calendar day): a smaller tab */
+.card-link--small .card-link__arrow { width: 18px; height: 18px; border-width: 1.5px 0 0 1.5px; }
+.card-link--small .card-link__arrow::before { inset: 4px 4px 4px 3px; }
 /* "previous": the same tab, the arrow turned round */
 .card-link--back .card-link__arrow::before { scale: -1 1; }
 .card-link--back:is(:hover, :focus-visible) .card-link__arrow::before { translate: -3px 0; }

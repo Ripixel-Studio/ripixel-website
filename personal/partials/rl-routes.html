@@ -8,10 +8,10 @@
   <ol class="rl-routes">
     {{#each story.routes}}
     <li class="{{typeClass}}">
-      <a class="rl-routes__card rl-link" href="{{href}}">
+      <a class="rl-routes__card card-link" href="{{href}}">
         {{> rl-route this}}
         <span class="rl-routes__cap"><b>{{km}}</b> {{title}}</span>
-        <span class="rl-arrow" aria-hidden="true">→</span>
+        {{> card-arrow}}
       </a>
     </li>
     {{/each}}

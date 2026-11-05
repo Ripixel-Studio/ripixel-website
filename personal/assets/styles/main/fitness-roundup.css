@@ -126,8 +126,7 @@
 .roundup-grid--3      { grid-template-columns: repeat(3, 1fr); }
 
 /* a .zine-card that is a link keeps the ink colour and lifts on hover */
-a.zine-card { color: inherit; display: block; transition: transform 120ms ease, box-shadow 120ms ease; }
-a.zine-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink-section); }
+a.zine-card { color: inherit; display: block; }
 
 /* ─── Effort strip (inline SVG) ────────── */
 .roundup-effort {

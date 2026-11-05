@@ -131,14 +131,12 @@ export const HOVER_ALLOW = {
   'share__open': 'a button (opens the share picker)',
   'corp-cta__btn': 'a button in the footer bridge',
   'fit-more': 'a button-styled link under the latest sessions',
+  'ss-filter': 'the sessions list filter chips (buttons)',
   // Decorative, non-clickable: straighten to be read, never a link (auditHtml checks there is no link inside).
   'games-tile': 'decorative wall tile, straightens to be read',
   'watch-tile': 'decorative wall tile, straightens to be read',
   'stub': 'decorative ticket stub, straightens to be read',
   'ev-collage__tile': 'photo zoom inside its own frame (the image scales, the frame does not move)',
-  // Another agent is redesigning the roundup pages; they adopt card-link there.
-  'zine-card': 'roundup pages (redesign in flight, out of scope here)',
-  'fit-tile': 'the sessions list (redesign in flight, out of scope here)',
 };
 
 /**

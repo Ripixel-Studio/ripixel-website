@@ -5,40 +5,19 @@
    Inks come from fitness-types.css (`fit-type--<key>` sets --type, --type-on, --type-text).
    ========================================= */
 
-/* ---- Clickable vs decorative cards (site rule, 2026-11-05) ---------------------------
-   A clickable card is one link: lift + tilt on hover, pointer, a focus ring, and an arrow
-   tab in its ink that is always there (phones have no hover). Decorative cards may tilt,
-   never lift, never carry the arrow. Reduced motion: no tilt, no translate; the arrow stays.
-   (Local classes until the shared clickable class lands: .rl-link + .rl-arrow.) */
-.rl-link {
-  position: relative;
+/* ---- Clickable vs decorative cards ----------------------------------------------------
+   The site rule lives in styles.css section 20 (.card-link + the card-arrow partial; checked by
+   tasks/card-link.mjs). Here: the roundup cards are links laid out as blocks, and their tab and
+   lift take the session type's ink. */
+:where(.rl-yrmonth__box, .rl-races__row, .rl-sess, .rl-routes__card, .rl-weeks__row, .rl-mosaic__link,
+  .rl-ticket, .rl-tl__card, .ss-card, .roundup-peak).card-link {
   display: block;
   color: inherit;
   text-decoration: none;
-  cursor: pointer;
-  transition: transform 0.14s ease, box-shadow 0.14s ease;
 }
-.rl-link:hover { transform: translate(-2px, -3px) rotate(-0.6deg); z-index: 3; }
-.rl-link:focus-visible { outline: 3px solid var(--ink-blue); outline-offset: 3px; z-index: 3; }
-.rl-arrow {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  z-index: 4;
-  min-width: 22px;
-  padding: 1px 6px 2px;
-  background: var(--type, var(--ink));
-  color: var(--type-on, var(--paper-4));
-  border: 2px solid var(--ink);
-  font-family: var(--f-mono);
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.25;
-  text-align: center;
-  pointer-events: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .rl-link, .rl-link:hover { transition: none; transform: none; }
+:where([class*='rl-'], .ss-card, .roundup-peak).card-link {
+  --card-ink: var(--type, var(--ink));
+  --card-ink-fg: var(--type-on, var(--paper-4));
 }
 
 /* ---- Shared type ------------------------------------------------------------------- */
@@ -191,7 +170,7 @@
 }
 .rl-ticket:nth-child(3n+2) { transform: rotate(0.5deg); }
 .rl-ticket:nth-child(3n) { transform: rotate(-0.4deg); }
-.rl-link.rl-ticket:hover { box-shadow: 8px 9px 0 var(--type, var(--ink)), 10px 11px 0 var(--ink); }
+.rl-ticket.card-link { --card-lift: 8px 9px 0 var(--type, var(--ink)), 10px 11px 0 var(--ink); }
 .rl-ticket__pic { display: block; aspect-ratio: 16 / 10; overflow: hidden; border-bottom: 3px solid var(--ink); background: var(--paper-2); }
 .rl-ticket__pic--route { padding: 14px; color: var(--type); background: var(--ink); }
 .rl-ticket__pic img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; filter: saturate(0.95) contrast(1.05); }
@@ -254,7 +233,7 @@
   box-shadow: 3px 3px 0 var(--type, var(--ink));
   overflow: visible;
 }
-.rl-sess:hover { box-shadow: 6px 7px 0 var(--type, var(--ink)); }
+.rl-sess { --card-lift: 6px 7px 0 var(--type, var(--ink)); }
 .rl-sess__pic { display: block; aspect-ratio: 4 / 3; overflow: hidden; border-bottom: 2.5px solid var(--ink); }
 .rl-sess__pic img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; }
 .rl-sess__body { display: flex; flex-direction: column; gap: 5px; padding: 8px 8px 9px; border-top: 5px solid var(--type, var(--ink)); }
@@ -387,7 +366,6 @@
 .rl-cal__day--on { border-color: var(--ink); background: #fff; }
 .rl-cal__day--mark { border-width: 3px; box-shadow: 3px 3px 0 var(--ink); }
 .rl-cal__link { position: absolute; inset: 0; overflow: hidden; }
-.rl-cal__link .rl-arrow { display: none; }
 .rl-cal__pic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
 .rl-cal__num { position: absolute; top: 3px; left: 5px; font-family: var(--f-disp); font-size: clamp(13px, 1.6vw, 19px); line-height: 1; }
 .rl-cal__day--mark .rl-cal__num { padding: 1px 4px; background: var(--paper-4); border: 1.5px solid var(--ink); top: 2px; left: 2px; }
@@ -418,7 +396,7 @@
   grid-template-columns: 42px minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
-  padding: 7px 30px 7px 8px;
+  padding: 7px 40px 7px 8px; /* right: clear of the arrow tab */
   border: 2px solid var(--ink);
   background: #fff;
 }
@@ -555,7 +533,7 @@ span.rl-weeks__row { border-style: dashed; background: transparent; }
 }
 div.rl-yrmonth__box { border-style: dashed; background: transparent; }
 a.rl-yrmonth__box { box-shadow: 3px 3px 0 var(--ink); }
-a.rl-yrmonth__box:hover { box-shadow: 6px 7px 0 var(--ink); }
+a.rl-yrmonth__box { --card-lift: 6px 7px 0 var(--ink); }
 .rl-yrmonth__pic { display: block; overflow: hidden; border: 2px solid var(--ink); background: var(--paper-2); }
 .rl-yrmonth__pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .rl-yrmonth__bar { position: relative; display: block; background: repeating-linear-gradient(0deg, transparent 0 21px, color-mix(in srgb, var(--ink) 12%, transparent) 21px 22px); }
@@ -611,7 +589,7 @@ a.rl-yrmonth__box:hover { box-shadow: 6px 7px 0 var(--ink); }
 
 /* ---- Older roundup blocks inside the new pages ------------------------------------------- */
 .page-roundup .roundup-section__title { font-size: clamp(30px, 4.4vw, 44px); }
-.page-roundup .roundup-peak.rl-link:hover { box-shadow: 7px 8px 0 var(--ink); }
+.page-roundup .roundup-peak.card-link { --card-lift: 7px 8px 0 var(--ink); }
 .page-roundup .roundup-stack__seg[class*='fit-type--'],
 .page-roundup .roundup-sports__swatch[class*='fit-type--'] { background: var(--type); }
 
@@ -629,8 +607,7 @@ a.rl-yrmonth__box:hover { box-shadow: 6px 7px 0 var(--ink); }
   box-shadow: 4px 4px 0 var(--type, var(--ink));
 }
 .rl-routes li:nth-child(3n+1) .rl-routes__card { transform: rotate(-0.8deg); }
-.rl-routes li:nth-child(3n+1) .rl-routes__card:hover { transform: translate(-2px, -3px) rotate(-1.2deg); }
-.rl-routes__cap { position: absolute; left: 8px; right: 8px; bottom: 6px; font-family: var(--f-mono); font-size: 10px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rl-routes__cap { position: absolute; left: 8px; right: 36px; bottom: 6px; font-family: var(--f-mono); font-size: 10px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rl-routes__cap b { font-family: var(--f-disp); font-size: 16px; font-weight: 400; color: var(--type-text, var(--ink)); }
 
 .rl-whero__routes {
@@ -738,8 +715,7 @@ a.rl-yrmonth__box:hover { box-shadow: 6px 7px 0 var(--ink); }
   background: var(--paper-4);
   box-shadow: 4px 4px 0 var(--type, var(--ink));
 }
-.rl-tl__card:hover { box-shadow: 7px 8px 0 var(--type, var(--ink)), 9px 10px 0 var(--ink); }
-.rl-tl__card .rl-arrow { top: 0; right: 0; }
+.rl-tl__card { --card-lift: 7px 8px 0 var(--type, var(--ink)), 9px 10px 0 var(--ink); }
 
 /* the year card while the year runs, and the month label without its roundup: not links */
 .rl-tl__year-mark {
@@ -796,7 +772,7 @@ a.rl-yrmonth__box:hover { box-shadow: 6px 7px 0 var(--ink); }
   color: var(--paper-4);
   box-shadow: 6px 6px 0 var(--ink);
 }
-.rl-tl__card--month:hover { box-shadow: 9px 10px 0 var(--ink); }
+.rl-tl__card--month { --card-lift: 9px 10px 0 var(--ink); }
 .rl-tl__cover { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 35%; }
 .rl-tl__card--photo.rl-tl__card--month::before {
   content: '';
@@ -823,7 +799,7 @@ a.rl-yrmonth__box:hover { box-shadow: 6px 7px 0 var(--ink); }
   color: var(--paper-4);
   box-shadow: 8px 8px 0 var(--ink-section);
 }
-.rl-tl__card--year:hover { box-shadow: 11px 12px 0 var(--ink-section); }
+.rl-tl__card--year { --card-lift: 11px 12px 0 var(--ink-section); }
 .rl-tl__collage { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(4, 1fr); opacity: 0.4; }
 .rl-tl__collage img { width: 100%; height: 100%; object-fit: cover; mix-blend-mode: luminosity; }
 .rl-tl__card--year > .rl-tl__kicker, .rl-tl__card--year > .rl-tl__year-title, .rl-tl__card--year > .rl-tl__nums, .rl-tl__card--year > .rl-tl__months, .rl-tl__card--year > .rl-tl__top { position: relative; z-index: 1; }
@@ -919,7 +895,7 @@ a.rl-yrmonth__box:hover { box-shadow: 6px 7px 0 var(--ink); }
   border: 2.5px solid var(--ink);
   box-shadow: 4px 4px 0 var(--type, var(--ink));
 }
-.ss-card:hover { box-shadow: 7px 8px 0 var(--type, var(--ink)), 9px 10px 0 var(--ink); }
+.ss-card { --card-lift: 7px 8px 0 var(--type, var(--ink)), 9px 10px 0 var(--ink); }
 .ss-card__pic {
   position: relative;
   display: grid;
