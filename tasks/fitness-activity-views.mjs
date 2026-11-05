@@ -21,7 +21,7 @@
  */
 import path from 'node:path';
 import { athleteWords } from './fitness-words.mjs';
-import { lineChart, niceTicks, formatTick, SECOND_MULTS } from './chart-axes.mjs';
+import { lineChart, niceTicks, formatTick } from './chart-axes.mjs';
 import { buildHyroxHistory, buildRaceView, pbChase, eventUrl } from './fitness-hyrox.mjs';
 import { activityTheme, hybridRaceLabel } from './fitness-theme.mjs';
 import { calorieFigure } from './fitness-calories.mjs';
