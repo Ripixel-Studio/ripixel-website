@@ -16,7 +16,9 @@
       <line x1="9" y1="0" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/>
     </svg>
 
-    {{!-- Live: gigs and other live events seen, by year then month (lifeSections.live). Month precision only. Films are in Watching. --}}
+    {{!-- Live: every live event seen, as a run of torn ticket stubs per year (lifeSections.live).
+          Month precision only; no venue or town. The kind is the export's `form`; a picture is
+          re-hosted by the box (booking mail or Wikimedia Commons, credited). Films are in Watching. --}}
     {{#with section}}
     {{> life-section-head snapTop="SEEN IT" snapAccent="LIVE"}}
     {{#if empty}}
@@ -28,24 +30,54 @@
       {{> life-stats stats}}
     </section>
     {{/if}}
-    {{#if charts.length}}
-    <h2 class="fit-header">year by <span>year</span>.</h2>
-    <div class="life-charts">{{#each charts}}{{> chart-bars}}{{/each}}</div>
+
+    {{#if kinds.length}}
+    <h2 class="fit-header">what kind of <span>night</span>.</h2>
+    <section class="live-kinds" aria-label="Live events by kind">
+      <div class="live-kinds__bar" aria-hidden="true">
+        {{#each kinds}}<span class="live-kinds__part stub--{{key}}" style="flex-grow: {{count}}"></span>{{/each}}
+      </div>
+      <ul class="live-kinds__legend">
+        {{#each kinds}}
+        <li class="live-kinds__chip stub--{{key}}"><b class="live-kinds__count">{{count}}</b><span class="live-kinds__label">{{label}}</span><small class="live-kinds__pct">{{pct}}%</small></li>
+        {{/each}}
+      </ul>
+    </section>
     {{/if}}
+
     {{#if yearRows.length}}
-    <h2 class="fit-header">every <span>one</span>.</h2>
+    <h2 class="fit-header">every <span>stub</span>.</h2>
     {{#each yearRows}}
-    <section class="life-year">
-      <h3 class="life-year__label">{{year}} <small class="outings-count">{{countLabel}}</small></h3>
-      <ol class="outings-months">
-        {{#each months}}
-        <li class="outings-month">
-          <span class="outings-month__name">{{label}}</span>
-          <ul class="outings-month__items">
-            {{#each items}}
-            <li><span class="life-notable__title">{{title}}</span> {{#if kindLabel}}<span class="outings-kind">{{kindLabel}}</span>{{/if}}</li>
-            {{/each}}
-          </ul>
+    <section class="live-year">
+      <header class="live-year__head">
+        <h3 class="life-year__label">{{year}}</h3>
+        <small class="outings-count">{{countLabel}}</small>
+        <span class="live-year__strip" aria-hidden="true">{{#each stubs}}<i class="stub--{{kind}}"></i>{{/each}}</span>
+      </header>
+      <ol class="live-stubs">
+        {{#each stubs}}
+        <li class="stub stub--{{kind}}" style="--tilt: {{tilt}}deg">
+          <div class="stub__shadow">
+          <article class="stub__ticket">
+            <div class="stub__art{{#unless hasPoster}} stub__art--type{{/unless}}">
+              {{#if hasPoster}}
+              <img class="stub__img" src="{{poster}}" alt="{{title}}" loading="lazy" decoding="async" width="600" height="450">
+              {{else}}
+              <span class="stub__glyph stub__glyph--{{glyphSize}}" aria-hidden="true">{{glyph}}</span>
+              {{/if}}
+            </div>
+            <div class="stub__body">
+              <span class="stub__stamp">{{stamp}}</span>
+              <p class="stub__kind">{{kindLabel}}<span> · admit one</span></p>
+              <h4 class="stub__title">{{title}}</h4>
+            </div>
+            <footer class="stub__tear">
+              <span class="stub__no">No. {{no}}</span>
+              <span class="stub__code" aria-hidden="true"></span>
+            </footer>
+          </article>
+          </div>
+          {{#if credit}}<p class="stub__credit">{{credit}}</p>{{/if}}
         </li>
         {{/each}}
       </ol>
@@ -53,6 +85,11 @@
     {{/each}}
     {{else}}
     <p class="life-empty">Nothing has made the list yet.</p>
+    {{/if}}
+
+    {{#if charts.length}}
+    <h2 class="fit-header">year by <span>year</span>.</h2>
+    <div class="life-charts">{{#each charts}}{{> chart-bars}}{{/each}}</div>
     {{/if}}
     {{/if}}
     {{/with}}

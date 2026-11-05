@@ -63,7 +63,7 @@ test('latest notable is newest', () => {
 
 test('live events stay on the live page, cinema films are watching rows with a big-screen flag', () => {
   const gig = fixture.sections.live.notable[0];
-  const hub = buildHub({ ...fixture, sections: { ...fixture.sections, live: { ...fixture.sections.live, notable: [gig] } } }, fitnessLife, now);
+  const hub = buildHub({ ...fixture, sections: { ...fixture.sections, live: { ...fixture.sections.live, notable: [gig], years: { 2026: [gig] } } } }, fitnessLife, now);
   assert.equal(hub.live.length, 1);
   const film = { key: 'f', kind: 'film', title: 'Invented Premiere', month: '2026-10', bigScreen: true };
   const w = buildSection('watching', { staleDays: 0, headline: { value: 1, unit: '', label: 'x' }, notable: [film],
@@ -635,17 +635,93 @@ test('live view: counts, stats and chart from synthetic months', () => {
   assert.equal(by['Longest gap'].sub, 'March 2025 to April 2026');
   assert.equal(by['Busiest year'].value, '2024');
   assert.deepEqual(v.yearRows.map((/** @type {any} */ y) => [y.year, y.total]), [['2026', 1], ['2025', 1], ['2024', 3]]);
-  assert.deepEqual(v.yearRows[2].months.map((/** @type {any} */ m) => m.label), ['July', 'March']);
-  assert.equal(v.yearRows[2].months[0].items[0].kindLabel, '', 'a single kind needs no tag');
   assert.equal(v.charts.length, 1);
   assert.deepEqual(v.charts[0].xTicks.map((/** @type {any} */ t) => t.label), ['2024', '2025', '2026']);
   assert.ok(v.charts[0].yTicks.every((/** @type {any} */ t) => /^\d+$/.test(t.label)));
   assert.doesNotMatch(JSON.stringify(v), /\d{4}-\d{2}-\d{2}/);
-  // a second kind adds a split and tags the rows
-  const mixed = /** @type {any} */ (buildSection('live', { headline: { value: 1, unit: '', label: 'x' } }, new Date('2026-06-01'), [...list, { ...n('Play A', '2026-01'), kind: 'theatre' }]));
-  assert.ok(mixed.stats.some((/** @type {any} */ r) => r.label === 'Shows' && r.value === '1'));
-  assert.equal(mixed.yearRows[0].months.at(-1).items[0].kindLabel, 'show');
+  // no form in an older export: a gig is a gig
+  assert.deepEqual(v.kinds.map((/** @type {any} */ k) => [k.key, k.count, k.pct]), [['gig', 5, 100]]);
 });
+
+test('live view: ticket stubs, newest first, numbered from the first ever', () => {
+  const n = (/** @type {string} */ title, /** @type {string} */ month, /** @type {any} */ extra = {}) => ({ key: title, kind: 'gig', title, month, poster: null, ...extra });
+  const list = [
+    n('Invented Musical', '2025-10', { form: 'musical', poster: 'https://storage.googleapis.com/b/site/james/life/live/0123456789abcdef.jpg', posterCredit: 'A Photographer, CC BY-SA 4.0', posterSource: 'commons' }),
+    n('Invented Band', '2025-03', { form: 'gig', poster: 'javascript:alert(1)' }),
+    n('Invented Comic', '2024-11', { form: 'comedy' }),
+    n('Invented Play', '2025-10', { form: 'theatre', poster: 'https://x.example/p.jpg', posterSource: 'mail' }),
+    n('Invented Thing', '2024-02', { form: 'weird' }),
+  ];
+  const v = /** @type {any} */ (buildSection('live', { headline: { value: 3, unit: '', label: 'x' } }, new Date('2026-06-01'), list));
+  const y25 = v.yearRows.find((/** @type {any} */ y) => y.year === '2025');
+  assert.deepEqual(y25.stubs.map((/** @type {any} */ s) => s.title), ['Invented Musical', 'Invented Play', 'Invented Band']);
+  const m = y25.stubs[0];
+  assert.equal(m.kind, 'musical');
+  assert.equal(m.kindLabel, 'Musical');
+  assert.equal(m.stamp, 'Oct 2025');
+  assert.equal(m.no, '005', 'numbered in the order seen, first ever is 001');
+  assert.equal(m.poster, 'https://storage.googleapis.com/b/site/james/life/live/0123456789abcdef.jpg');
+  assert.equal(m.credit, 'Photo: A Photographer, CC BY-SA 4.0');
+  assert.equal(typeof m.tilt, 'number');
+  assert.equal(y25.stubs[1].credit, '', 'a picture from the booking mail carries no credit line');
+  assert.equal(y25.stubs[2].poster, '', 'an unsafe poster is dropped');
+  assert.equal(y25.stubs[2].hasPoster, false);
+  const all = v.yearRows.flatMap((/** @type {any} */ y) => y.stubs);
+  assert.equal(all.find((/** @type {any} */ s) => s.title === 'Invented Thing').kind, 'other', 'an unknown form is other');
+  assert.equal(all.find((/** @type {any} */ s) => s.title === 'Invented Thing').no, '001');
+  // the breakdown by kind: biggest first, shares sum to 100, every kind has its own ink key
+  assert.equal(v.kinds.reduce((/** @type {number} */ a, /** @type {any} */ k) => a + k.pct, 0), 100);
+  assert.deepEqual(v.kinds.map((/** @type {any} */ k) => k.count), [1, 1, 1, 1, 1]);
+  assert.ok(v.kinds.every((/** @type {any} */ k) => /^(musical|theatre|gig|comedy|festival|classical|other)$/.test(k.key)));
+  assert.deepEqual(y25.kinds.map((/** @type {any} */ k) => k.key).sort(), ['gig', 'musical', 'theatre']);
+  assert.ok(v.stats.some((/** @type {any} */ r) => r.label === 'Pictured' && r.value === '2'));
+});
+
+test('live hub note names the latest night and its kind', () => {
+  const list = [{ key: 'a', kind: 'gig', title: 'Invented Band', month: '2025-03', form: 'gig' }, { key: 'b', kind: 'gig', title: 'Invented Musical', month: '2026-10', form: 'musical' }];
+  const v = buildSection('live', { headline: { value: 1, unit: '', label: 'x' } }, now, list);
+  assert.deepEqual(hubNote('live', v), { label: 'Latest musical', value: 'Invented Musical', href: '' });
+});
+
+test('listening keeps concerts, not musicals or plays', () => {
+  const list = [{ key: 'a', kind: 'gig', title: 'Invented Band', month: '2026-10', form: 'gig' },
+    { key: 'b', kind: 'gig', title: 'Invented Musical', month: '2026-10', form: 'musical' },
+    { key: 'c', kind: 'gig', title: 'Invented Old Act', month: '2026-09' }];
+  const v = /** @type {any} */ (buildSection('listening', fixture.sections.listening, now, list));
+  assert.deepEqual(v.saw.map((/** @type {any} */ s) => s.title).sort(), ['Invented Band', 'Invented Old Act']);
+});
+
+test('the live page draws a stub per event, with or without a picture', async () => {
+  const list = [
+    { key: 'a', kind: 'gig', title: 'Invented Musical', month: '2025-10', form: 'musical', poster: 'https://storage.googleapis.com/b/site/james/life/live/0123456789abcdef.jpg', posterCredit: 'A Photographer, CC BY-SA 4.0', posterSource: 'commons' },
+    { key: 'b', kind: 'gig', title: "Invented Band's Night", month: '2024-03', form: 'gig' },
+  ];
+  const sec = buildSection('live', { headline: { value: 1, unit: '', label: 'live events this year' } }, new Date('2026-06-01'), list);
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'live-page-'));
+  try {
+    const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+    const pages = path.join(tmp, 'pages');
+    await fs.mkdir(pages);
+    await fs.copyFile(path.join(REPO, 'personal/pages/life/live.html'), path.join(pages, 'live.html'));
+    const out = path.join(tmp, 'out');
+    await runSkierTasks([generatePagesTask({
+      pagesDir: pages, partialsDir: path.join(REPO, 'personal/partials'), outDir: out, helpers: templateHelpers,
+      additionalVarsFn: () => ({ page: 'life', section: sec }),
+    })], { siteUrl: 'https://james.ripixel.co.uk', cacheHash: 'test', year: 2026 }, []);
+    const html = await fs.readFile(path.join(out, 'live.html'), 'utf8');
+    assert.equal((html.match(/<li class="stub stub--/g) || []).length, 2);
+    const img = /<img [^>]*class="stub__img"[^>]*>/.exec(html)?.[0] || '';
+    assert.match(img, /alt="Invented Musical"/);
+    assert.match(img, /loading="lazy"/);
+    assert.match(html, /Photo: A Photographer, CC BY-SA 4\.0/);
+    assert.match(html, /stub--gig[\s\S]*?stub__glyph/, 'no picture: the kind in type');
+    assert.match(html, /Invented Band&#x27;s Night/);
+    assert.match(html, /class="live-kinds/);
+    assert.doesNotMatch(html, /\d{4}-\d{2}-\d{2}/);
+  } finally {
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+}, { timeout: 60_000 });
 
 test('live view: nothing seen is an empty list, not a crash', () => {
   const v = /** @type {any} */ (buildSection('live', { headline: { value: 0, unit: '', label: 'live events this year' } }, new Date(), []));

@@ -464,24 +464,63 @@ function gamesView(sec) {
 
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const plural = (/** @type {number} */ n, /** @type {string} */ one_, /** @type {string} */ many) => `${group(n)} ${n === 1 ? one_ : many}`;
-/** Kind codes the box sends for live events -> plural words (anything else reads as "other"). */
-const LIVE_KINDS = /** @type {Record<string, [string, string]>} */ ({ gig: ['gig', 'gigs'], theatre: ['show', 'shows'], comedy: ['comedy night', 'comedy nights'], sport: ['match', 'matches'] });
+/**
+ * The kinds of night (the export's `form`, lifehub/live.py), in the order the breakdown reads
+ * when counts tie. Each has its own riso ink on the page (`stub--<key>`). Exports from before
+ * `form` existed fall back on the item kind: a gig is a gig.
+ */
+export const LIVE_FORMS = /** @type {Record<string, [string, string]>} */ ({
+  gig: ['Gig', 'Gigs'], musical: ['Musical', 'Musicals'], theatre: ['Theatre', 'Theatre'], comedy: ['Comedy', 'Comedy'],
+  festival: ['Festival', 'Festivals'], classical: ['Classical', 'Classical'], other: ['Other', 'Other'],
+});
+/** The word set large on a stub that has no picture. */
+const LIVE_GLYPH = /** @type {Record<string, string>} */ ({ gig: 'Gig', musical: 'Musical', theatre: 'Stage', comedy: 'Comedy', festival: 'Festival', classical: 'Classical', other: 'Live' });
+const LEGACY_KIND = /** @type {Record<string, string>} */ ({ gig: 'gig', theatre: 'theatre', comedy: 'comedy' });
+const CREDIT_MAX = 120;
+/** The kind of a live notable. @param {any} n */
+export const liveForm = (n) => (LIVE_FORMS[String(n?.form)] ? String(n.form) : n?.form ? 'other' : LEGACY_KIND[String(n?.kind)] || 'other');
+/** Concerts, which also belong on Listening. @param {any} n */
+const isConcert = (n) => n?.kind === 'gig' && ['gig', 'festival', 'classical'].includes(liveForm(n));
+
+/** Counts per kind as `[{key, label, count, pct}]`, biggest first, shares summing to 100. @param {{kind: string}[]} items */
+function kindShares(items) {
+  const order = Object.keys(LIVE_FORMS);
+  /** @type {Map<string, number>} */
+  const counts = new Map();
+  for (const i of items) counts.set(i.kind, (counts.get(i.kind) || 0) + 1);
+  const rows = [...counts.entries()].sort((a, b) => b[1] - a[1] || order.indexOf(a[0]) - order.indexOf(b[0]));
+  const total = items.length || 1;
+  // largest remainder, so the bar adds up
+  const raw = rows.map(([, c]) => (c * 100) / total);
+  const pct = raw.map(Math.floor);
+  let left = 100 - pct.reduce((a, b) => a + b, 0);
+  for (const k of raw.map((r, idx) => [r - Math.floor(r), idx]).sort((a, b) => b[0] - a[0]).map((x) => x[1])) {
+    if (left-- <= 0) break;
+    pct[k] += 1;
+  }
+  return rows.map(([key, count], idx) => ({ key, label: LIVE_FORMS[key][count === 1 ? 0 : 1], count, pct: pct[idx] }));
+}
 
 /**
- * /life/live: every gig and live event seen, by year then month (month precision only, as the
- * export holds it), per-year counts, a few computed stats and a per-year chart.
+ * /life/live: every live event seen as a ticket stub, by year (month precision only, as the
+ * export holds it), with a breakdown by kind, a few computed stats and a per-year chart.
  * @param {any[]} notables every live event, de-duplicated (liveNotables)
  */
 function liveView(notables) {
   const items = notables
     .filter((n) => /^\d{4}-(0[1-9]|1[0-2])$/.test(String(n.month || '')))
-    .map((n) => ({ title: String(n.title), month: String(n.month), kind: LIVE_KINDS[String(n.kind)] ? String(n.kind) : 'other' }))
+    .map((n) => {
+      const poster = safeSrc(n.poster);
+      const credit = poster && n.posterCredit ? String(n.posterCredit).replace(/\s+/g, ' ').trim().slice(0, CREDIT_MAX) : '';
+      return { title: String(n.title), month: String(n.month), kind: liveForm(n), poster, credit };
+    })
     .sort((a, b) => b.month.localeCompare(a.month) || a.title.localeCompare(b.title));
   if (!items.length) return null;
-  const kinds = [...new Set(items.map((i) => i.kind))];
-  const kindWord = (/** @type {string} */ k, /** @type {number} */ n) => (LIVE_KINDS[k] ? LIVE_KINDS[k][n === 1 ? 0 : 1] : n === 1 ? 'other event' : 'other events');
   const monthIdx = (/** @type {string} */ m) => +m.slice(0, 4) * 12 + (+m.slice(5, 7) - 1);
   const label = (/** @type {number} */ idx) => `${MONTH_NAMES[idx % 12]} ${Math.floor(idx / 12)}`;
+  // a stub's number: its place in the order seen, the first ever is No. 001
+  const order = [...items].reverse();
+  const digits = Math.max(3, String(items.length).length);
 
   /** @type {Map<string, number>} */
   const perMonth = new Map();
@@ -499,11 +538,16 @@ function liveView(notables) {
   const years = [...new Set(items.map((i) => i.month.slice(0, 4)))].sort((a, b) => b.localeCompare(a));
   const yearRows = years.map((y) => {
     const mine = items.filter((i) => i.month.startsWith(y));
-    const byMonth = [...new Set(mine.map((i) => i.month))].map((m) => ({
-      label: MONTH_NAMES[+m.slice(5, 7) - 1],
-      items: mine.filter((i) => i.month === m).map((i) => ({ title: i.title, kindLabel: kinds.length > 1 ? kindWord(i.kind, 1) : '' })),
-    }));
-    return { year: y, total: mine.length, countLabel: plural(mine.length, 'event', 'events'), months: byMonth };
+    return {
+      year: y, total: mine.length, countLabel: plural(mine.length, 'night out', 'nights out'), kinds: kindShares(mine),
+      stubs: mine.map((i) => ({
+        title: i.title, kind: i.kind, kindLabel: LIVE_FORMS[i.kind][0], glyph: LIVE_GLYPH[i.kind], glyphSize: LIVE_GLYPH[i.kind].length <= 4 ? 's' : LIVE_GLYPH[i.kind].length <= 6 ? 'm' : 'l',
+        stamp: `${MONTHS[+i.month.slice(5, 7) - 1]} ${i.month.slice(0, 4)}`,
+        no: String(order.indexOf(i) + 1).padStart(digits, '0'),
+        poster: i.poster, hasPoster: Boolean(i.poster), credit: i.credit ? `Photo: ${i.credit}` : '',
+        tilt: tiltOf(`${i.title}|${i.month}`) / 2,
+      })),
+    };
   });
 
   // chart: one column per year, empty years in between kept as zeros
@@ -523,11 +567,11 @@ function liveView(notables) {
   }
   const busyYear = [...yearRows].sort((a, b) => b.total - a.total || b.year.localeCompare(a.year))[0];
   stats.push(Object.assign(row('Busiest year', busyYear.year), { sub: plural(busyYear.total, 'event', 'events') }));
-  if (kinds.length > 1) {
-    for (const k of kinds) stats.push(row(kindWord(k, 2)[0].toUpperCase() + kindWord(k, 2).slice(1), group(items.filter((i) => i.kind === k).length)));
-  }
+  const pictured = items.filter((i) => i.poster).length;
+  if (pictured) stats.push(Object.assign(row('Pictured', group(pictured)), { sub: `of ${group(items.length)} stubs` }));
 
-  return { total: items.length, stats, charts, yearRows };
+  const latest = items[0];
+  return { total: items.length, stats, charts, yearRows, kinds: kindShares(items), latest: { title: latest.title, kind: latest.kind, kindLabel: LIVE_FORMS[latest.kind][0] } };
 }
 
 /** @param {any} sec */
@@ -739,7 +783,7 @@ export function buildSection(name, sec, now = new Date(), liveNotables = []) {
         }) : null).filter(Boolean) };
     }
     case 'live':
-      return { ...view, ...(liveView(liveNotables) || { total: 0, stats: [], charts: [], yearRows: [] }) };
+      return { ...view, ...(liveView(liveNotables) || { total: 0, stats: [], charts: [], yearRows: [], kinds: [] }) };
     default:
       return view;
   }
@@ -778,6 +822,10 @@ export function hubNote(name, v) {
     case 'watching':
     case 'listening':
       return latest(v.latest);
+    case 'live': {
+      const l = v.latest;
+      return l && l.title ? { label: `Latest ${l.kind === 'other' ? 'night out' : l.kind === 'theatre' ? 'show' : l.kindLabel.toLowerCase()}`, value: l.title, href: '' } : null;
+    }
     default:
       return null;
   }

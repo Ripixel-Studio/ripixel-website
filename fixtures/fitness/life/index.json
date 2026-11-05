@@ -4024,11 +4024,14 @@
      "title": "Sample Band Live",
      "by": null,
      "season": null,
-     "year": 2026,
+     "year": null,
      "provider": null,
      "month": "2026-10",
      "reason": "Gig",
-     "poster": null
+     "poster": "https://storage.googleapis.com/fitglue-server-prod-showcase-assets/site/james/life/live/0a1b2c3d4e5f6071.jpg",
+     "form": "gig",
+     "posterCredit": "Fixture Photographer, CC BY-SA 4.0",
+     "posterSource": "commons"
     }
    ],
    "years": {
@@ -4039,11 +4042,140 @@
       "title": "Sample Band Live",
       "by": null,
       "season": null,
-      "year": 2026,
+      "year": null,
       "provider": null,
       "month": "2026-10",
       "reason": "Gig",
-      "poster": null
+      "poster": "https://storage.googleapis.com/fitglue-server-prod-showcase-assets/site/james/life/live/0a1b2c3d4e5f6071.jpg",
+      "form": "gig",
+      "posterCredit": "Fixture Photographer, CC BY-SA 4.0",
+      "posterSource": "commons"
+     },
+     {
+      "key": "6f9dfbccd6",
+      "kind": "gig",
+      "title": "Glasshouse The Musical",
+      "by": null,
+      "season": null,
+      "year": null,
+      "provider": null,
+      "month": "2026-07",
+      "reason": "Gig",
+      "poster": null,
+      "form": "musical",
+      "posterCredit": null,
+      "posterSource": null
+     },
+     {
+      "key": "f5088045cc",
+      "kind": "gig",
+      "title": "A Quiet Revolt",
+      "by": null,
+      "season": null,
+      "year": null,
+      "provider": null,
+      "month": "2026-03",
+      "reason": "Gig",
+      "poster": "https://storage.googleapis.com/fitglue-server-prod-showcase-assets/site/james/life/live/1b2c3d4e5f607182.jpg",
+      "form": "theatre",
+      "posterCredit": null,
+      "posterSource": "mail"
+     }
+    ],
+    "2025": [
+     {
+      "key": "63cab5da65",
+      "kind": "gig",
+      "title": "Late Show Laughs",
+      "by": null,
+      "season": null,
+      "year": null,
+      "provider": null,
+      "month": "2025-11",
+      "reason": "Gig",
+      "poster": "https://storage.googleapis.com/fitglue-server-prod-showcase-assets/site/james/life/live/2c3d4e5f60718293.jpg",
+      "form": "comedy",
+      "posterCredit": "Another Fixture Photographer, CC BY 2.0",
+      "posterSource": "commons"
+     },
+     {
+      "key": "f9d2a6dcff",
+      "kind": "gig",
+      "title": "Meadow Weekender",
+      "by": null,
+      "season": null,
+      "year": null,
+      "provider": null,
+      "month": "2025-08",
+      "reason": "Gig",
+      "poster": null,
+      "form": "festival",
+      "posterCredit": null,
+      "posterSource": null
+     },
+     {
+      "key": "f1ddf25711",
+      "kind": "gig",
+      "title": "Night of Strings",
+      "by": null,
+      "season": null,
+      "year": null,
+      "provider": null,
+      "month": "2025-08",
+      "reason": "Gig",
+      "poster": null,
+      "form": "classical",
+      "posterCredit": null,
+      "posterSource": null
+     }
+    ],
+    "2024": [
+     {
+      "key": "3eeff52ebc",
+      "kind": "gig",
+      "title": "Mirror Maze Live Experience",
+      "by": null,
+      "season": null,
+      "year": null,
+      "provider": null,
+      "month": "2024-12",
+      "reason": "Gig",
+      "poster": null,
+      "form": "other",
+      "posterCredit": null,
+      "posterSource": null
+     },
+     {
+      "key": "91df9688ac",
+      "kind": "gig",
+      "title": "The Paper Lanterns",
+      "by": null,
+      "season": null,
+      "year": null,
+      "provider": null,
+      "month": "2024-05",
+      "reason": "Gig",
+      "poster": null,
+      "form": "gig",
+      "posterCredit": null,
+      "posterSource": null
+     }
+    ],
+    "2023": [
+     {
+      "key": "79811c24a0",
+      "kind": "gig",
+      "title": "Window Seat",
+      "by": null,
+      "season": null,
+      "year": null,
+      "provider": null,
+      "month": "2023-02",
+      "reason": "Gig",
+      "poster": null,
+      "form": "musical",
+      "posterCredit": null,
+      "posterSource": null
      }
     ]
    }
