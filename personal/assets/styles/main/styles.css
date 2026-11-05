@@ -1979,14 +1979,14 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
   border: 1.5px solid var(--ink);
   border-radius: 1px;
 }
-.wt-band + .wt-band { border-left-width: 2.5px; }
+.wt-band + .wt-band { border-right-width: 2.5px; }   /* the axis runs back in time: a later role sits left of the earlier one */
 .wt-band--contract {
   background: repeating-linear-gradient(-45deg, var(--c) 0 3px, #fff 3px 6px);
 }
 .wt-band--now { box-shadow: 0 0 0 2px var(--paper-4), 0 0 0 4px var(--c); }
 .wt-band em {
   position: absolute;
-  right: 5px;
+  left: 5px;                                         /* "now" is the left end of the band */
   top: 50%;
   transform: translateY(-50%);
   font-family: var(--f-mono);
