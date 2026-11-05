@@ -479,8 +479,6 @@ const LEGACY_KIND = /** @type {Record<string, string>} */ ({ gig: 'gig', theatre
 const CREDIT_MAX = 120;
 /** The kind of a live notable. @param {any} n */
 export const liveForm = (n) => (LIVE_FORMS[String(n?.form)] ? String(n.form) : n?.form ? 'other' : LEGACY_KIND[String(n?.kind)] || 'other');
-/** Concerts, which also belong on Listening. @param {any} n */
-const isConcert = (n) => n?.kind === 'gig' && ['gig', 'festival', 'classical'].includes(liveForm(n));
 
 /** Counts per kind as `[{key, label, count, pct}]`, biggest first, shares summing to 100. @param {{kind: string}[]} items */
 function kindShares(items) {

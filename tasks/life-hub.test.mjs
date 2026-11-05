@@ -683,14 +683,6 @@ test('live hub note names the latest night and its kind', () => {
   assert.deepEqual(hubNote('live', v), { label: 'Latest musical', value: 'Invented Musical', href: '' });
 });
 
-test('listening keeps concerts, not musicals or plays', () => {
-  const list = [{ key: 'a', kind: 'gig', title: 'Invented Band', month: '2026-10', form: 'gig' },
-    { key: 'b', kind: 'gig', title: 'Invented Musical', month: '2026-10', form: 'musical' },
-    { key: 'c', kind: 'gig', title: 'Invented Old Act', month: '2026-09' }];
-  const v = /** @type {any} */ (buildSection('listening', fixture.sections.listening, now, list));
-  assert.deepEqual(v.saw.map((/** @type {any} */ s) => s.title).sort(), ['Invented Band', 'Invented Old Act']);
-});
-
 test('the live page draws a stub per event, with or without a picture', async () => {
   const list = [
     { key: 'a', kind: 'gig', title: 'Invented Musical', month: '2025-10', form: 'musical', poster: 'https://storage.googleapis.com/b/site/james/life/live/0123456789abcdef.jpg', posterCredit: 'A Photographer, CC BY-SA 4.0', posterSource: 'commons' },
