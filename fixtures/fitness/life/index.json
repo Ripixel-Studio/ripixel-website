@@ -4712,8 +4712,8 @@
     "href": "/life/live",
     "hero": {
      "type": "stat",
-     "caption": "9 live events this year.",
-     "value": 9,
+     "caption": "3 live events this year.",
+     "value": 3,
      "unit": "",
      "label": "live events this year"
     }
