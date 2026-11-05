@@ -1,0 +1,25 @@
+<!-- Context: lifeSections.watching.wallTiles: a year card {yearMark, year, count} before each year's tiles, then tiles [{key, title, kind, series, poster, bigScreen, reason, monthLabel, seasonsLabel,
+     episodes, weight, tilt, ink}] — the poster wall: every film, and every series a rule says he was properly into,
+     newest first. Weight 2 is a 2×2 tile (a whole season binged, a film watched twice). A tile with no poster, or whose
+     poster fails to load, is the title set in type. A cinema trip carries the "big screen" stamp. -->
+<div class="watch-wall-wrap">
+<ol class="watch-wall" aria-label="Films and series, newest first">
+  {{#each this}}
+  {{#if yearMark}}
+  <li class="watch-year"><span class="watch-year__y">{{year}}</span><span class="watch-year__n">{{count}} on the wall</span></li>
+  {{else}}
+  <li class="watch-tile watch-tile--w{{weight}} watch-tile--ink{{ink}}{{#unless poster}} watch-tile--type{{/unless}}{{#if bigScreen}} watch-tile--big{{/if}}" style="--tilt: {{tilt}}deg">
+    <figure class="watch-tile__figure">
+      <span class="watch-tile__name"{{#if poster}} aria-hidden="true"{{/if}}>{{title}}</span>
+      {{#if poster}}<img class="watch-tile__art" src="{{poster}}" alt="{{title}}" loading="lazy" decoding="async" width="342" height="513">{{/if}}
+      {{#if bigScreen}}<span class="watch-tile__stamp">big screen</span>{{/if}}
+      <figcaption class="watch-tile__cap">
+        <span class="watch-tile__when">{{monthLabel}}{{#if seasonsLabel}} · {{seasonsLabel}}{{/if}}</span>
+        {{#if reason}}<span class="watch-tile__why">{{reason}}</span>{{/if}}
+      </figcaption>
+    </figure>
+  </li>
+  {{/if}}
+  {{/each}}
+</ol>
+</div>

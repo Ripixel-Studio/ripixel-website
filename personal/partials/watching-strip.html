@@ -1,0 +1,24 @@
+<!-- Context: lifeSections.watching.strip [{month, label, year, newYear, films, cinema, episodes, videos, counts, posters[{src,
+     title, ink, n}], epPct, vidPct, quiet}] — the last twelve months, oldest first: the month's posters fanned at the top,
+     then TV episodes (red) and YouTube videos (blue) as two bars on the strip's own scale, then the numbers. -->
+<div class="watch-strip-wrap">
+<ol class="watch-strip" aria-label="The last twelve months">
+  {{#each this}}
+  <li class="watch-month{{#if quiet}} watch-month--quiet{{/if}}{{#if newYear}} watch-month--newyear{{/if}}" aria-label="{{label}} {{year}}: {{counts}}">
+    <div class="watch-month__posters" aria-hidden="true">
+      {{#each posters}}<span class="watch-mini watch-mini--n{{n}} watch-mini--ink{{ink}}">{{#if src}}<img src="{{src}}" alt="" loading="lazy" decoding="async" width="92" height="138">{{/if}}<b>{{title}}</b></span>{{/each}}
+    </div>
+    <div class="watch-month__bars" aria-hidden="true">
+      <span class="watch-bar watch-bar--ep" style="--h: {{epPct}}%"></span><span class="watch-bar watch-bar--vid" style="--h: {{vidPct}}%"></span>
+    </div>
+    <div class="watch-month__label">{{label}}{{#if newYear}} <small>{{year}}</small>{{/if}}</div>
+    <dl class="watch-month__counts" aria-hidden="true">
+      <div><dt>films</dt><dd>{{films}}</dd></div>
+      <div><dt>eps</dt><dd>{{episodes}}</dd></div>
+      <div><dt>videos</dt><dd>{{videos}}</dd></div>
+    </dl>
+  </li>
+  {{/each}}
+</ol>
+<p class="watch-key"><span class="watch-key__ep">TV episodes</span> <span class="watch-key__vid">YouTube videos</span> <span>each on its own scale</span></p>
+</div>

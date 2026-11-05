@@ -1,580 +1,4729 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-11-03T06:00:00+00:00",
-  "facts": [
-    {"key": "fx.films", "label": "Films this year", "value": 42, "unit": "films", "tone": "good"},
-    {"key": "fx.streak", "label": "Logging streak", "value": 12, "unit": "days", "tone": "neutral"},
-    {"key": "personal.height", "label": "Height", "value": 180, "unit": "cm", "tone": "neutral"},
-    {"key": "personal.likes", "label": "Likes", "value": ["invented cola", "sample toast"], "tone": "fun"},
-    {"key": "personal.boardgames", "label": "Board games", "value": "keen, rarely wins", "tone": "fun"},
-    {"key": "site.started_year", "label": "Site started", "value": 2019, "unit": "", "tone": "neutral"},
-    {"key": "code.project.fitglue_server.started", "label": "fitglue-server started", "value": "2023-05-14", "unit": "", "tone": "neutral"},
-    {"key": "code.project.fitglue_web.started", "label": "fitglue-web started", "value": "2023-06-02", "unit": "", "tone": "neutral"}
-  ],
-  "sections": {
-    "body": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value":80.1,"unit":"kg","label":"weight"},
-      "latest": {"weightKg":80.1,"bodyFatPct":17.2,"restingHr":52,"hrvMs":68,"vo2Max":null,"spo2Pct":96.8,"breathsPerMin":14.1,"bmi":25.3,"leanMassKg":66.3},
-      "weekly": [
-        {"week":"2026-05-04","weightKg":82.6,"bodyFatPct":18.8,"restingHr":55,"hrvMs":60,"vo2Max":null,"spo2Pct":96.4,"breathsPerMin":14.3,"bmi":26.1,"leanMassKg":67.1},
-        {"week":"2026-05-11","weightKg":82.6,"bodyFatPct":18.8,"restingHr":55,"hrvMs":61,"vo2Max":null,"spo2Pct":96.6,"breathsPerMin":14.4,"bmi":26.1,"leanMassKg":67.1},
-        {"week":"2026-05-18","weightKg":82.6,"bodyFatPct":18.9,"restingHr":55,"hrvMs":63,"vo2Max":null,"spo2Pct":96.5,"breathsPerMin":14.6,"bmi":26.1,"leanMassKg":67},
-        {"week":"2026-05-25","weightKg":82.5,"bodyFatPct":18.7,"restingHr":55,"hrvMs":62,"vo2Max":null,"spo2Pct":96.8,"breathsPerMin":14.7,"bmi":26,"leanMassKg":67.1},
-        {"week":"2026-06-01","weightKg":82.3,"bodyFatPct":18.7,"restingHr":55,"hrvMs":64,"vo2Max":null,"spo2Pct":96.8,"breathsPerMin":14.4,"bmi":26,"leanMassKg":66.9},
-        {"week":"2026-06-08","weightKg":82,"bodyFatPct":18.6,"restingHr":55,"hrvMs":62,"vo2Max":null,"spo2Pct":96.6,"breathsPerMin":14.1,"bmi":25.9,"leanMassKg":66.7},
-        {"week":"2026-06-15","weightKg":81.8,"bodyFatPct":18.3,"restingHr":54,"hrvMs":62,"vo2Max":null,"spo2Pct":96.8,"breathsPerMin":14.1,"bmi":25.8,"leanMassKg":66.8},
-        {"week":"2026-06-22","weightKg":null,"bodyFatPct":null,"restingHr":54,"hrvMs":61,"vo2Max":null,"spo2Pct":96.7,"breathsPerMin":14.1,"bmi":null,"leanMassKg":null},
-        {"week":"2026-06-29","weightKg":81.7,"bodyFatPct":18.1,"restingHr":54,"hrvMs":61,"vo2Max":null,"spo2Pct":96.5,"breathsPerMin":14,"bmi":25.8,"leanMassKg":66.9},
-        {"week":"2026-07-06","weightKg":81.8,"bodyFatPct":18,"restingHr":54,"hrvMs":61,"vo2Max":null,"spo2Pct":96.6,"breathsPerMin":14.2,"bmi":25.8,"leanMassKg":67.1},
-        {"week":"2026-07-13","weightKg":81.9,"bodyFatPct":18.1,"restingHr":53,"hrvMs":61,"vo2Max":null,"spo2Pct":96.3,"breathsPerMin":14.5,"bmi":25.8,"leanMassKg":67.1},
-        {"week":"2026-07-20","weightKg":81.8,"bodyFatPct":18.1,"restingHr":53,"hrvMs":63,"vo2Max":null,"spo2Pct":96.2,"breathsPerMin":14.6,"bmi":25.8,"leanMassKg":67},
-        {"week":"2026-07-27","weightKg":81.5,"bodyFatPct":18.2,"restingHr":53,"hrvMs":63,"vo2Max":null,"spo2Pct":96.3,"breathsPerMin":14.5,"bmi":25.7,"leanMassKg":66.7},
-        {"week":"2026-08-03","weightKg":81.1,"bodyFatPct":18.2,"restingHr":53,"hrvMs":66,"vo2Max":null,"spo2Pct":96,"breathsPerMin":14.5,"bmi":25.6,"leanMassKg":66.3},
-        {"week":"2026-08-10","weightKg":80.9,"bodyFatPct":18,"restingHr":53,"hrvMs":66,"vo2Max":null,"spo2Pct":96,"breathsPerMin":14.4,"bmi":25.5,"leanMassKg":66.3},
-        {"week":"2026-08-17","weightKg":null,"bodyFatPct":null,"restingHr":53,"hrvMs":67,"vo2Max":null,"spo2Pct":96.2,"breathsPerMin":14.1,"bmi":null,"leanMassKg":null},
-        {"week":"2026-08-24","weightKg":81,"bodyFatPct":17.8,"restingHr":54,"hrvMs":67,"vo2Max":null,"spo2Pct":96,"breathsPerMin":13.9,"bmi":25.6,"leanMassKg":66.6},
-        {"week":"2026-08-31","weightKg":81.1,"bodyFatPct":17.6,"restingHr":53,"hrvMs":66,"vo2Max":null,"spo2Pct":96.1,"breathsPerMin":14.1,"bmi":25.6,"leanMassKg":66.8},
-        {"week":"2026-09-07","weightKg":81.1,"bodyFatPct":17.6,"restingHr":54,"hrvMs":66,"vo2Max":null,"spo2Pct":96.4,"breathsPerMin":14.3,"bmi":25.6,"leanMassKg":66.8},
-        {"week":"2026-09-14","weightKg":80.9,"bodyFatPct":17.3,"restingHr":53,"hrvMs":64,"vo2Max":null,"spo2Pct":96.2,"breathsPerMin":14.3,"bmi":25.5,"leanMassKg":66.9},
-        {"week":"2026-09-21","weightKg":80.6,"bodyFatPct":17.4,"restingHr":53,"hrvMs":65,"vo2Max":null,"spo2Pct":96.5,"breathsPerMin":14.5,"bmi":25.4,"leanMassKg":66.6},
-        {"week":"2026-09-28","weightKg":80.3,"bodyFatPct":17.4,"restingHr":53,"hrvMs":65,"vo2Max":null,"spo2Pct":96.7,"breathsPerMin":14.7,"bmi":25.3,"leanMassKg":66.3},
-        {"week":"2026-10-05","weightKg":80.2,"bodyFatPct":17.3,"restingHr":53,"hrvMs":65,"vo2Max":null,"spo2Pct":96.6,"breathsPerMin":14.6,"bmi":25.3,"leanMassKg":66.3},
-        {"week":"2026-10-12","weightKg":80.2,"bodyFatPct":17.5,"restingHr":52,"hrvMs":67,"vo2Max":null,"spo2Pct":96.8,"breathsPerMin":14.3,"bmi":25.3,"leanMassKg":66.2},
-        {"week":"2026-10-19","weightKg":80.2,"bodyFatPct":17.4,"restingHr":52,"hrvMs":67,"vo2Max":null,"spo2Pct":96.8,"breathsPerMin":14.1,"bmi":25.3,"leanMassKg":66.2},
-        {"week":"2026-10-26","weightKg":80.1,"bodyFatPct":17.2,"restingHr":52,"hrvMs":68,"vo2Max":null,"spo2Pct":96.6,"breathsPerMin":14.1,"bmi":25.3,"leanMassKg":66.3}
-      ],
-      "sleep": {"avgMinutes30": 444, "avgMinutes90": 438, "consistencyMinutes": 31,
-        "best": {"date":"2026-10-12","minutes":510}, "worst": {"date":"2026-10-20","minutes":330},
-        "stages30": {"deepPct":17,"lightPct":54,"remPct":22,"wakePct":7},
-        "weekly": [
-          {"week":"2026-05-04","avgMinutes":436,"deepPct":17,"remPct":22},
-          {"week":"2026-05-11","avgMinutes":442,"deepPct":18,"remPct":23},
-          {"week":"2026-05-18","avgMinutes":448,"deepPct":19,"remPct":22},
-          {"week":"2026-05-25","avgMinutes":449,"deepPct":18,"remPct":24},
-          {"week":"2026-06-01","avgMinutes":451,"deepPct":19,"remPct":23},
-          {"week":"2026-06-08","avgMinutes":445,"deepPct":17,"remPct":23},
-          {"week":"2026-06-15","avgMinutes":444,"deepPct":17,"remPct":24},
-          {"week":"2026-06-22","avgMinutes":433,"deepPct":16,"remPct":23},
-          {"week":"2026-06-29","avgMinutes":433,"deepPct":15,"remPct":23},
-          {"week":"2026-07-06","avgMinutes":423,"deepPct":16,"remPct":22},
-          {"week":"2026-07-13","avgMinutes":428,"deepPct":16,"remPct":21},
-          {"week":"2026-07-20","avgMinutes":423,"deepPct":17,"remPct":21},
-          {"week":"2026-07-27","avgMinutes":435,"deepPct":18,"remPct":21},
-          {"week":"2026-08-03","avgMinutes":434,"deepPct":18,"remPct":20},
-          {"week":"2026-08-10","avgMinutes":448,"deepPct":19,"remPct":21},
-          {"week":"2026-08-17","avgMinutes":445,"deepPct":18,"remPct":20},
-          {"week":"2026-08-24","avgMinutes":457,"deepPct":18,"remPct":21},
-          {"week":"2026-08-31","avgMinutes":449,"deepPct":17,"remPct":22},
-          {"week":"2026-09-07","avgMinutes":455,"deepPct":16,"remPct":22},
-          {"week":"2026-09-14","avgMinutes":441,"deepPct":16,"remPct":23},
-          {"week":"2026-09-21","avgMinutes":444,"deepPct":15,"remPct":23},
-          {"week":"2026-09-28","avgMinutes":430,"deepPct":16,"remPct":23},
-          {"week":"2026-10-05","avgMinutes":434,"deepPct":17,"remPct":24},
-          {"week":"2026-10-12","avgMinutes":424,"deepPct":17,"remPct":23},
-          {"week":"2026-10-19","avgMinutes":433,"deepPct":18,"remPct":24},
-          {"week":"2026-10-26","avgMinutes":430,"deepPct":18,"remPct":23}
-        ]},
-      "food": {"avgKcal30": 2450, "avgProteinG30": 148, "avgCarbsG30": 265, "avgFatG30": 82, "avgFibreG30": 31,
-        "proteinPerKg30": 1.8, "split30": {"proteinPct":25,"carbsPct":44,"fatPct":31},
-        "loggedStreakDays": 12, "proteinStreakDays": 5,
-        "weekly": [
-          {"week":"2026-05-04","avgKcal":2450,"avgProteinG":142,"avgCarbsG":265,"avgFatG":82,"avgFibreG":30},
-          {"week":"2026-05-11","avgKcal":2481,"avgProteinG":145,"avgCarbsG":270,"avgFatG":85,"avgFibreG":31},
-          {"week":"2026-05-18","avgKcal":2581,"avgProteinG":145,"avgCarbsG":278,"avgFatG":84,"avgFibreG":32},
-          {"week":"2026-05-25","avgKcal":2541,"avgProteinG":150,"avgCarbsG":281,"avgFatG":84,"avgFibreG":32},
-          {"week":"2026-06-01","avgKcal":2501,"avgProteinG":147,"avgCarbsG":272,"avgFatG":87,"avgFibreG":33},
-          {"week":"2026-06-08","avgKcal":2500,"avgProteinG":150,"avgCarbsG":256,"avgFatG":87,"avgFibreG":31},
-          {"week":"2026-06-15","avgKcal":2382,"avgProteinG":146,"avgCarbsG":246,"avgFatG":85,"avgFibreG":31},
-          {"week":"2026-06-22","avgKcal":2349,"avgProteinG":146,"avgCarbsG":251,"avgFatG":87,"avgFibreG":28},
-          {"week":"2026-06-29","avgKcal":2378,"avgProteinG":145,"avgCarbsG":263,"avgFatG":87,"avgFibreG":29},
-          {"week":"2026-07-06","avgKcal":2340,"avgProteinG":141,"avgCarbsG":270,"avgFatG":83,"avgFibreG":27},
-          {"week":"2026-07-13","avgKcal":2422,"avgProteinG":143,"avgCarbsG":273,"avgFatG":83,"avgFibreG":28},
-          {"week":"2026-07-20","avgKcal":2510,"avgProteinG":139,"avgCarbsG":276,"avgFatG":84,"avgFibreG":28},
-          {"week":"2026-07-27","avgKcal":2500,"avgProteinG":142,"avgCarbsG":277,"avgFatG":81,"avgFibreG":29},
-          {"week":"2026-08-03","avgKcal":2567,"avgProteinG":140,"avgCarbsG":270,"avgFatG":79,"avgFibreG":31},
-          {"week":"2026-08-10","avgKcal":2559,"avgProteinG":144,"avgCarbsG":255,"avgFatG":80,"avgFibreG":31},
-          {"week":"2026-08-17","avgKcal":2458,"avgProteinG":145,"avgCarbsG":245,"avgFatG":79,"avgFibreG":33},
-          {"week":"2026-08-24","avgKcal":2454,"avgProteinG":147,"avgCarbsG":251,"avgFatG":76,"avgFibreG":32},
-          {"week":"2026-08-31","avgKcal":2385,"avgProteinG":151,"avgCarbsG":266,"avgFatG":78,"avgFibreG":33},
-          {"week":"2026-09-07","avgKcal":2315,"avgProteinG":150,"avgCarbsG":275,"avgFatG":79,"avgFibreG":30},
-          {"week":"2026-09-14","avgKcal":2383,"avgProteinG":155,"avgCarbsG":276,"avgFatG":77,"avgFibreG":31},
-          {"week":"2026-09-21","avgKcal":2391,"avgProteinG":152,"avgCarbsG":274,"avgFatG":78,"avgFibreG":28},
-          {"week":"2026-09-28","avgKcal":2427,"avgProteinG":154,"avgCarbsG":273,"avgFatG":81,"avgFibreG":29},
-          {"week":"2026-10-05","avgKcal":2546,"avgProteinG":152,"avgCarbsG":266,"avgFatG":81,"avgFibreG":27},
-          {"week":"2026-10-12","avgKcal":2535,"avgProteinG":150,"avgCarbsG":254,"avgFatG":81,"avgFibreG":28},
-          {"week":"2026-10-19","avgKcal":2534,"avgProteinG":150,"avgCarbsG":246,"avgFatG":85,"avgFibreG":29},
-          {"week":"2026-10-26","avgKcal":2553,"avgProteinG":146,"avgCarbsG":252,"avgFatG":85,"avgFibreG":30}
-        ]},
-      "movement": {"avgSteps30": 9420, "avgAzmWeek4": 186,
-        "weekly": [
-          {"week":"2026-05-04","avgSteps":9100,"azmMinutes":170},
-          {"week":"2026-05-11","avgSteps":9403,"azmMinutes":186},
-          {"week":"2026-05-18","avgSteps":10267,"azmMinutes":195},
-          {"week":"2026-05-25","avgSteps":10286,"azmMinutes":206},
-          {"week":"2026-06-01","avgSteps":9399,"azmMinutes":199},
-          {"week":"2026-06-08","avgSteps":9079,"azmMinutes":201},
-          {"week":"2026-06-15","avgSteps":8893,"azmMinutes":179},
-          {"week":"2026-06-22","avgSteps":8157,"azmMinutes":176},
-          {"week":"2026-06-29","avgSteps":8197,"azmMinutes":148},
-          {"week":"2026-07-06","avgSteps":9190,"azmMinutes":151},
-          {"week":"2026-07-13","avgSteps":9620,"azmMinutes":129},
-          {"week":"2026-07-20","avgSteps":9783,"azmMinutes":146},
-          {"week":"2026-07-27","avgSteps":10478,"azmMinutes":135},
-          {"week":"2026-08-03","avgSteps":10476,"azmMinutes":166},
-          {"week":"2026-08-10","avgSteps":9482,"azmMinutes":160},
-          {"week":"2026-08-17","avgSteps":9044,"azmMinutes":196},
-          {"week":"2026-08-24","avgSteps":9002,"azmMinutes":186},
-          {"week":"2026-08-31","avgSteps":8451,"azmMinutes":214},
-          {"week":"2026-09-07","avgSteps":8512,"azmMinutes":192},
-          {"week":"2026-09-14","avgSteps":9589,"azmMinutes":207},
-          {"week":"2026-09-21","avgSteps":10127,"azmMinutes":173},
-          {"week":"2026-09-28","avgSteps":10144,"azmMinutes":180},
-          {"week":"2026-10-05","avgSteps":10638,"azmMinutes":144},
-          {"week":"2026-10-12","avgSteps":10616,"azmMinutes":154},
-          {"week":"2026-10-19","avgSteps":9563,"azmMinutes":126},
-          {"week":"2026-10-26","avgSteps":9029,"azmMinutes":147}
-        ]},
-      "measurements": {
-        "tape": [
-        {"key": "waistCm", "unit": "cm", "first": {"date":"2026-08-11","value":86.5}, "latest": {"date":"2026-10-30","value":84}, "change": -2.5,
-         "weekly": [{"week":"2026-08-10","value":86.5},{"week":"2026-08-17","value":86.3},{"week":"2026-08-24","value":86.3},{"week":"2026-08-31","value":86},{"week":"2026-09-07","value":null},{"week":"2026-09-14","value":85.4},{"week":"2026-09-21","value":85.1},{"week":"2026-09-28","value":84.8},{"week":"2026-10-05","value":84.4},{"week":"2026-10-12","value":84.3},{"week":"2026-10-19","value":84},{"week":"2026-10-26","value":84}]},
-        {"key": "chestCm", "unit": "cm", "first": {"date":"2026-08-11","value":101}, "latest": {"date":"2026-10-30","value":102}, "change": 1,
-         "weekly": [{"week":"2026-08-10","value":101},{"week":"2026-08-17","value":101.1},{"week":"2026-08-24","value":101.4},{"week":"2026-08-31","value":101.4},{"week":"2026-09-07","value":null},{"week":"2026-09-14","value":101.5},{"week":"2026-09-21","value":101.5},{"week":"2026-09-28","value":101.6},{"week":"2026-10-05","value":101.5},{"week":"2026-10-12","value":101.7},{"week":"2026-10-19","value":101.8},{"week":"2026-10-26","value":102}]},
-        {"key": "armRCm", "unit": "cm", "first": {"date":"2026-08-11","value":35.5}, "latest": {"date":"2026-10-30","value":36.2}, "change": 0.7,
-         "weekly": [{"week":"2026-08-10","value":35.5},{"week":"2026-08-17","value":35.6},{"week":"2026-08-24","value":35.7},{"week":"2026-08-31","value":35.7},{"week":"2026-09-07","value":null},{"week":"2026-09-14","value":35.8},{"week":"2026-09-21","value":35.9},{"week":"2026-09-28","value":35.9},{"week":"2026-10-05","value":35.9},{"week":"2026-10-12","value":36},{"week":"2026-10-19","value":36.1},{"week":"2026-10-26","value":36.2}]}],
-        "scale": [
-        {"key": "musclePct", "unit": "%", "first": {"date":"2026-08-11","value":44.1}, "latest": {"date":"2026-10-30","value":45.0}, "change": 0.9,
-         "weekly": [{"week":"2026-08-10","value":44.1},{"week":"2026-08-17","value":44.2},{"week":"2026-08-24","value":44.3},{"week":"2026-08-31","value":44.3},{"week":"2026-09-07","value":null},{"week":"2026-09-14","value":44.5},{"week":"2026-09-21","value":44.6},{"week":"2026-09-28","value":44.7},{"week":"2026-10-05","value":44.8},{"week":"2026-10-12","value":44.8},{"week":"2026-10-19","value":44.9},{"week":"2026-10-26","value":45.0}]},
-        {"key": "leanMassKg", "unit": "kg", "first": {"date":"2026-08-11","value":62.1}, "latest": {"date":"2026-10-30","value":62.9}, "change": 0.8,
-         "weekly": [{"week":"2026-08-10","value":62.1},{"week":"2026-08-17","value":62.2},{"week":"2026-08-24","value":62.2},{"week":"2026-08-31","value":62.3},{"week":"2026-09-07","value":null},{"week":"2026-09-14","value":62.5},{"week":"2026-09-21","value":62.5},{"week":"2026-09-28","value":62.6},{"week":"2026-10-05","value":62.7},{"week":"2026-10-12","value":62.8},{"week":"2026-10-19","value":62.8},{"week":"2026-10-26","value":62.9}]},
-        {"key": "metabolicAgeYears", "unit": "yrs", "first": {"date":"2026-08-11","value":36}, "latest": {"date":"2026-10-30","value":34}, "change": -2,
-         "weekly": [{"week":"2026-08-10","value":36},{"week":"2026-08-17","value":36},{"week":"2026-08-24","value":36},{"week":"2026-08-31","value":35},{"week":"2026-09-07","value":null},{"week":"2026-09-14","value":35},{"week":"2026-09-21","value":35},{"week":"2026-09-28","value":35},{"week":"2026-10-05","value":35},{"week":"2026-10-12","value":34},{"week":"2026-10-19","value":34},{"week":"2026-10-26","value":34}]},
-        {"key": "waterPct", "unit": "%", "first": {"date":"2026-08-11","value":57.8}, "latest": {"date":"2026-10-30","value":58.6}, "change": 0.8,
-         "weekly": [{"week":"2026-08-10","value":57.8},{"week":"2026-08-17","value":57.9},{"week":"2026-08-24","value":58.1},{"week":"2026-08-31","value":58.1},{"week":"2026-09-07","value":null},{"week":"2026-09-14","value":58.2},{"week":"2026-09-21","value":58.2},{"week":"2026-09-28","value":58.3},{"week":"2026-10-05","value":58.2},{"week":"2026-10-12","value":58.3},{"week":"2026-10-19","value":58.4},{"week":"2026-10-26","value":58.6}]},
-        {"key": "visceral", "unit": "", "first": {"date":"2026-08-11","value":8}, "latest": {"date":"2026-10-30","value":7}, "change": -1,
-         "weekly": [{"week":"2026-08-10","value":8},{"week":"2026-08-17","value":8},{"week":"2026-08-24","value":8},{"week":"2026-08-31","value":8},{"week":"2026-09-07","value":null},{"week":"2026-09-14","value":8},{"week":"2026-09-21","value":8},{"week":"2026-09-28","value":7},{"week":"2026-10-05","value":7},{"week":"2026-10-12","value":7},{"week":"2026-10-19","value":7},{"week":"2026-10-26","value":7}]}]}},
-    "games": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value": 148, "unit": "h", "label": "of League this year"},
-      "hoursTotal": 1840, "allTime": {"steam": 1228, "league": 612, "leagueSince": "2019-03", "idle": 816},
-      "year": {"league": 148, "leagueGames": 231, "steamSince": "2026-10-20", "steamSinceTracking": 9.5}, "steam2Weeks": 6.5,
-      "multiplayerHours": 920, "backlog": 14,
-      "clock": {"weekday": [4.5, 1.9, 0.6, 0.2, 0.0, 0.0, 0.0, 0.0, 0.0, null, null, null, null, null, null, null, null, 1.9, 4.5, 8.5, 12.4, 14.0, 12.4, 8.5], "weekdayDaytime": 6.0,
-                "weekend": [2.9, 1.2, 0.4, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3.0, 3.0, 3.0, 3.1, 3.4, 4.2, 2.9, 5.5, 7.9, 9.0, 7.9, 5.5], "leagueSince": "2019-03", "steamSince": "2026-10-20"},
-      "yearWeeks": [
-        {"week": "2026-01-01", "league": 4.0, "steam": 0, "total": 4.0},
-        {"week": "2026-01-08", "league": 7.5, "steam": 0, "total": 7.5},
-        {"week": "2026-01-15", "league": 11.5, "steam": 0, "total": 11.5},
-        {"week": "2026-01-22", "league": 15.8, "steam": 0, "total": 15.8},
-        {"week": "2026-01-29", "league": 20.5, "steam": 0, "total": 20.5},
-        {"week": "2026-02-05", "league": 26.4, "steam": 0, "total": 26.4},
-        {"week": "2026-02-12", "league": 31.4, "steam": 0, "total": 31.4},
-        {"week": "2026-02-19", "league": 36.4, "steam": 0, "total": 36.4},
-        {"week": "2026-02-26", "league": 41.2, "steam": 0, "total": 41.2},
-        {"week": "2026-03-05", "league": 45.7, "steam": 0, "total": 45.7},
-        {"week": "2026-03-12", "league": 50.9, "steam": 0, "total": 50.9},
-        {"week": "2026-03-19", "league": 54.7, "steam": 0, "total": 54.7},
-        {"week": "2026-03-26", "league": 58.0, "steam": 0, "total": 58.0},
-        {"week": "2026-04-02", "league": 60.8, "steam": 0, "total": 60.8},
-        {"week": "2026-04-09", "league": 63.1, "steam": 0, "total": 63.1},
-        {"week": "2026-04-16", "league": 65.9, "steam": 0, "total": 65.9},
-        {"week": "2026-04-23", "league": 67.4, "steam": 0, "total": 67.4},
-        {"week": "2026-04-30", "league": 68.6, "steam": 0, "total": 68.6},
-        {"week": "2026-05-07", "league": 69.7, "steam": 0, "total": 69.7},
-        {"week": "2026-05-14", "league": 70.7, "steam": 0, "total": 70.7},
-        {"week": "2026-05-21", "league": 72.7, "steam": 0, "total": 72.7},
-        {"week": "2026-05-28", "league": 74.0, "steam": 0, "total": 74.0},
-        {"week": "2026-06-04", "league": 75.6, "steam": 0, "total": 75.6},
-        {"week": "2026-06-11", "league": 77.6, "steam": 0, "total": 77.6},
-        {"week": "2026-06-18", "league": 80.0, "steam": 0, "total": 80.0},
-        {"week": "2026-06-25", "league": 84.0, "steam": 0, "total": 84.0},
-        {"week": "2026-07-02", "league": 87.4, "steam": 0, "total": 87.4},
-        {"week": "2026-07-09", "league": 91.3, "steam": 0, "total": 91.3},
-        {"week": "2026-07-16", "league": 95.6, "steam": 0, "total": 95.6},
-        {"week": "2026-07-23", "league": 100.3, "steam": 0, "total": 100.3},
-        {"week": "2026-07-30", "league": 106.1, "steam": 0, "total": 106.1},
-        {"week": "2026-08-06", "league": 111.1, "steam": 0, "total": 111.1},
-        {"week": "2026-08-13", "league": 116.1, "steam": 0, "total": 116.1},
-        {"week": "2026-08-20", "league": 121.0, "steam": 0, "total": 121.0},
-        {"week": "2026-08-27", "league": 125.5, "steam": 0, "total": 125.5},
-        {"week": "2026-09-03", "league": 130.8, "steam": 0, "total": 130.8},
-        {"week": "2026-09-10", "league": 134.6, "steam": 0, "total": 134.6},
-        {"week": "2026-09-17", "league": 138.0, "steam": 0, "total": 138.0},
-        {"week": "2026-09-24", "league": 140.8, "steam": 0, "total": 140.8},
-        {"week": "2026-10-01", "league": 143.2, "steam": 0, "total": 143.2},
-        {"week": "2026-10-08", "league": 146.1, "steam": 0, "total": 146.1},
-        {"week": "2026-10-15", "league": 147.6, "steam": 2, "total": 149.6},
-        {"week": "2026-10-22", "league": 148.9, "steam": 4, "total": 152.9},
-        {"week": "2026-10-29", "league": 149.9, "steam": 6, "total": 155.9}
-      ],
-      "fun": {"longestSession": {"games": 9, "hours": 5.6, "day": "2026-02-14", "wins": 5}, "biggestDay": {"day": "2026-02-14", "hours": 6.1, "games": 10},
-              "longestGame": {"minutes": 52, "champion": "MissFortune", "won": true, "day": "2026-06-03"},
-              "modes": [{"mode": "ARAM", "games": 120, "hours": 44.0}, {"mode": "Draft", "games": 80, "hours": 40.5}, {"mode": "Ranked flex", "games": 21, "hours": 11.2}, {"mode": "Arena", "games": 10, "hours": 3.1}],
-              "championByMonth": [{"month": "2026-01", "champion": "Examplor", "games": 9, "of": 21, "icon": ""}, {"month": "2026-02", "champion": "Lux", "games": 12, "of": 24, "icon": "https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/Lux.png"}, {"month": "2026-03", "champion": "Examplor", "games": 7, "of": 19, "icon": ""}, {"month": "2026-04", "champion": "Jinx", "games": 15, "of": 27, "icon": "https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/Jinx.png"}, {"month": "2026-05", "champion": "Jinx", "games": 11, "of": 23, "icon": "https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/Jinx.png"}, {"month": "2026-06", "champion": "Caitlyn", "games": 8, "of": 20, "icon": "https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/Caitlyn.png"}, {"month": "2026-07", "champion": "Lux", "games": 6, "of": 18, "icon": "https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/Lux.png"}, {"month": "2026-08", "champion": "Examplor", "games": 10, "of": 22, "icon": ""}, {"month": "2026-09", "champion": "Miss Fortune", "games": 9, "of": 21, "icon": "https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/MissFortune.png"}, {"month": "2026-10", "champion": "Jinx", "games": 13, "of": 25, "icon": "https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/Jinx.png"}, {"month": "2026-11", "champion": "Examplor", "games": 4, "of": 16, "icon": ""}],
-              "winByBand": [{"band": "daytime", "games": 12, "winRate": 50}, {"band": "evening", "games": 150, "winRate": 53}, {"band": "late", "games": 60, "winRate": 47}, {"band": "small", "games": 9, "winRate": 33}]},
-      "wall": [
-        {"key": "league", "name": "League of Legends", "art": "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Examplor_0.jpg", "weight": 4, "source": "league", "quip": "One more game. It is never one more game.", "idle": false, "claim": "most-by-far"},
-        {"key": "100001", "name": "Fixture Quest", "art": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/100001/library_600x900.jpg", "weight": 4, "source": "steam", "quip": "Two hundred hours and I still skip the tutorial.", "idle": false, "claim": null},
-        {"key": "100002", "name": "Placeholder Racers", "art": "", "weight": 4, "source": "steam", "quip": null, "idle": false, "claim": null},
-        {"key": "100003", "name": "Sample Tactics", "art": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/100003/library_600x900.jpg", "weight": 3, "source": "steam", "quip": null, "idle": false, "claim": null},
-        {"key": "100004", "name": "The Synthetic Kingdoms: Definitive Edition", "art": "", "weight": 3, "source": "steam", "quip": "Just one more turn, said every Tuesday.", "idle": false, "claim": null},
-        {"key": "100005", "name": "Mock Orbit", "art": "", "weight": 3, "source": "steam", "quip": null, "idle": false, "claim": null},
-        {"key": "100006", "name": "Stub Siege", "art": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/100006/library_600x900.jpg", "weight": 2, "source": "steam", "quip": null, "idle": false, "claim": null},
-        {"key": "100007", "name": "Lorem Ipsum Tycoon", "art": "", "weight": 2, "source": "steam", "quip": null, "idle": false, "claim": null},
-        {"key": "100008", "name": "Dummy Dungeon II", "art": "", "weight": 2, "source": "steam", "quip": null, "idle": false, "claim": null},
-        {"key": "100009", "name": "Example Engineers", "art": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/100009/library_600x900.jpg", "weight": 2, "source": "steam", "quip": null, "idle": false, "claim": null},
-        {"key": "100010", "name": "Test Harness Heroes", "art": "", "weight": 1, "source": "steam", "quip": null, "idle": false, "claim": null},
-        {"key": "100011", "name": "Null Pointer", "art": "", "weight": 1, "source": "steam", "quip": null, "idle": false, "claim": null},
-        {"key": "100012", "name": "Fake Frontier", "art": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/100012/library_600x900.jpg", "weight": 1, "source": "steam", "quip": null, "idle": false, "claim": null},
-        {"key": "100013", "name": "Proto Portals", "art": "", "weight": 1, "source": "steam", "quip": null, "idle": false, "claim": null},
-        {"key": "100014", "name": "Placeholder Idler", "art": "", "weight": 1, "source": "steam", "quip": null, "idle": true, "claim": null}],
-      "recent": [{"name": "Sample Tactics", "hours": 6.5, "art": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/100003/library_600x900.jpg"}, {"name": "Fixture Quest", "hours": 12, "art": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/100001/library_600x900.jpg"}, {"name": "Placeholder Racers", "hours": 2.1, "art": ""}],
-      "achievements": {"unlocked": 120, "total": 300,
-        "rarest": [{"game": "Fixture Quest", "name": "Flawless Fixture", "pct": 1.2}, {"game": "Sample Tactics", "name": "No Units Lost", "pct": 2.8}, {"game": "Mock Orbit", "name": "Escape Velocity", "pct": 4.0}, {"game": "Stub Siege", "name": "Held the Wall", "pct": 6.3}, {"game": "Fixture Quest", "name": "Speedrunner", "pct": 9.9}],
-        "completion": [{"game": "Fixture Quest", "unlocked": 40, "total": 50, "pct": 80}, {"game": "Placeholder Racers", "unlocked": 22, "total": 88, "pct": 25}, {"game": "Sample Tactics", "unlocked": 30, "total": 45, "pct": 67}, {"game": "Mock Orbit", "unlocked": 3, "total": 60, "pct": 5}, {"game": "Stub Siege", "unlocked": 25, "total": 25, "pct": 100}]},
-      "league": {"rank": {"queue": "solo", "tier": "GOLD", "division": "II", "lp": 54, "wins": 34, "losses": 28},
-        "mains": [
-          {"champion": "Examplor", "level": 7, "points": 412345, "splash": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Examplor_0.jpg", "loading": "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Examplor_0.jpg"},
-          {"champion": "Fixtura", "level": 6, "points": 188210, "splash": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Fixtura_0.jpg", "loading": "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Fixtura_0.jpg"},
-          {"champion": "Mockwyn", "level": 5, "points": 96400, "splash": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Mockwyn_0.jpg", "loading": "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Mockwyn_0.jpg"},
-          {"champion": "Stubbard", "level": 5, "points": 71230, "splash": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Stubbard_0.jpg", "loading": "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Stubbard_0.jpg"},
-          {"champion": "Placeholdra", "level": 4, "points": 40118, "splash": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Placeholdra_0.jpg", "loading": "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Placeholdra_0.jpg"}],
-        "recent": {"games": 20, "winRate": 55, "kda": 3.12, "pool": [{"champion": "Examplor", "games": 8, "winRate": 63}, {"champion": "Fixtura", "games": 5, "winRate": 40}, {"champion": "Mockwyn", "games": 4, "winRate": 50}, {"champion": "Stubbard", "games": 2, "winRate": 100}, {"champion": "Placeholdra", "games": 1, "winRate": 0}]},
-        "lifetime": {"games": 1284, "hours": 612, "since": "2019-03"}}},
-    "code": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value": 671, "unit": "", "label": "commits this year"},
-      "projects": [
-        {"key": "a1c0de0001", "name": "sample-tool", "description": "A small invented command-line helper that tidies folders of sample files.", "descriptionBy": "github",
-         "status": "active", "fromYear": 2025, "toYear": null, "started": "2025-08-02", "lastCommit": "2026-10", "commits": 1212, "languages": ["Python", "Shell"], "languageShare": [78, 22],
-         "url": "https://github.com/Ripixel-Studio/sample-tool"},
-        {"key": "a1c0de0002", "name": "quiet-ledger", "description": null, "descriptionBy": null,
-         "status": "active", "fromYear": 2024, "toYear": null, "started": "2024-02-11", "lastCommit": "2026-09", "commits": 340, "languages": ["TypeScript", "CSS"], "languageShare": [86, 14],
-         "url": null},
-        {"key": "a1c0de0005", "name": "tide-tables", "description": "A made-up dashboard that charts imaginary tide times for a pretend harbour, mostly to try out a new chart library.", "descriptionBy": "ai",
-         "status": "active", "fromYear": 2023, "toYear": null, "started": "2023-04-18", "lastCommit": "2026-11", "commits": 642, "languages": ["TypeScript", "Go", "CSS", "HTML"], "languageShare": [58, 27, 9, 4],
-         "url": "https://github.com/ripixel/tide-tables"},
-        {"key": "a1c0de0006", "name": "pixel-kiln", "description": "Invented sprite baker: turns folders of drawings into sprite sheets.", "descriptionBy": "github",
-         "status": "active", "fromYear": 2021, "toYear": null, "started": "2021-09-30", "lastCommit": "2026-08", "commits": 187, "languages": ["Rust", "Shell"], "languageShare": [91, 9],
-         "url": "https://github.com/Ripixel-Studio/pixel-kiln"},
-        {"key": "a1c0de0007", "name": "spare-parts", "description": null, "descriptionBy": null,
-         "status": "active", "fromYear": 2024, "toYear": null, "started": "2024-06-12", "lastCommit": "2026-07", "commits": 23, "languages": ["Python", "Dockerfile", "Shell"], "languageShare": [80, 12, 8],
-         "url": null},
-        {"key": "a1c0de0008", "name": "night-bus", "description": "A fixture timetable scraper for a fictional bus route. Runs on a timer and sends a nudge.", "descriptionBy": "ai",
-         "status": "active", "fromYear": 2024, "toYear": null, "started": "2024-11-02", "lastCommit": "2026-06", "commits": 94, "languages": ["JavaScript", "HTML", "CSS"], "languageShare": [70, 20, 10],
-         "url": "https://github.com/ripixel/night-bus"},
-        {"key": "a1c0de0003", "name": "paper-lantern", "description": "An invented static gallery generator, built to learn templating.", "descriptionBy": "ai",
-         "status": "retired", "fromYear": 2019, "toYear": 2023, "started": "2019-04-20", "lastCommit": "2023-06", "commits": 480, "languages": ["JavaScript", "HTML"], "languageShare": [64, 36],
-         "url": "https://github.com/Ripixel-Studio/paper-lantern"},
-        {"key": "a1c0de0004", "name": "old-orbit", "description": null, "descriptionBy": null,
-         "status": "retired", "fromYear": 2016, "toYear": 2019, "started": "2016-01-09", "lastCommit": "2019-11", "commits": 95, "languages": ["Java"], "languageShare": [100],
-         "url": "https://github.com/ripixel/old-orbit"}],
-      "languagesByYear": {"2022": {"JavaScript": 50.0, "HTML": 20.0, "CSS": 15.0, "Java": 10.0, "Shell": 5.0},
-                          "2023": {"JavaScript": 45.0, "TypeScript": 25.0, "HTML": 15.0, "CSS": 10.0, "Python": 5.0},
-                          "2024": {"TypeScript": 55.0, "CSS": 15.0, "JavaScript": 15.0, "Go": 10.0, "Shell": 5.0},
-                          "2025": {"TypeScript": 40.0, "Python": 35.0, "Go": 15.0, "CSS": 5.0, "Shell": 5.0},
-                          "2026": {"Python": 39.5, "TypeScript": 35.0, "Go": 15.0, "Rust": 6.5, "Shell": 4.0}},
-      "commitsByMonth": [{"month": "2025-06", "n": 3}, {"month": "2025-07", "n": 41}, {"month": "2025-08", "n": 12}, {"month": "2025-09", "n": 26},
-                         {"month": "2025-11", "n": 89}, {"month": "2025-12", "n": 144}, {"month": "2026-01", "n": 133}, {"month": "2026-02", "n": 33},
-                         {"month": "2026-03", "n": 26}, {"month": "2026-04", "n": 11}, {"month": "2026-05", "n": 108}, {"month": "2026-06", "n": 77},
-                         {"month": "2026-07", "n": 70}, {"month": "2026-08", "n": 25}, {"month": "2026-09", "n": 10}, {"month": "2026-10", "n": 134},
-                         {"month": "2026-11", "n": 44}],
-      "commitsByDay": [{"day": "2025-10-28", "n": 1}, {"day": "2025-10-30", "n": 4}, {"day": "2025-10-31", "n": 1}, {"day": "2025-11-01", "n": 1}, {"day": "2025-11-02", "n": 1},
-                       {"day": "2025-11-03", "n": 3}, {"day": "2025-11-05", "n": 1}, {"day": "2025-11-08", "n": 3}, {"day": "2025-11-10", "n": 12}, {"day": "2025-11-11", "n": 1},
-                       {"day": "2025-11-12", "n": 2}, {"day": "2025-11-14", "n": 5}, {"day": "2025-11-15", "n": 2}, {"day": "2025-11-16", "n": 1}, {"day": "2025-11-17", "n": 1},
-                       {"day": "2025-11-19", "n": 2}, {"day": "2025-11-20", "n": 3}, {"day": "2025-11-21", "n": 9}, {"day": "2025-11-22", "n": 1}, {"day": "2025-11-23", "n": 4},
-                       {"day": "2025-11-26", "n": 24}, {"day": "2025-11-27", "n": 3}, {"day": "2025-11-29", "n": 4}, {"day": "2025-11-30", "n": 6}, {"day": "2025-12-02", "n": 13},
-                       {"day": "2025-12-03", "n": 7}, {"day": "2025-12-04", "n": 5}, {"day": "2025-12-05", "n": 11}, {"day": "2025-12-07", "n": 7}, {"day": "2025-12-08", "n": 7},
-                       {"day": "2025-12-12", "n": 3}, {"day": "2025-12-13", "n": 1}, {"day": "2025-12-14", "n": 1}, {"day": "2025-12-15", "n": 1}, {"day": "2025-12-17", "n": 1},
-                       {"day": "2025-12-18", "n": 13}, {"day": "2025-12-19", "n": 3}, {"day": "2025-12-20", "n": 13}, {"day": "2025-12-21", "n": 12}, {"day": "2025-12-22", "n": 3},
-                       {"day": "2025-12-23", "n": 14}, {"day": "2025-12-25", "n": 1}, {"day": "2025-12-26", "n": 1}, {"day": "2025-12-27", "n": 5}, {"day": "2025-12-28", "n": 1},
-                       {"day": "2025-12-29", "n": 2}, {"day": "2025-12-30", "n": 19}, {"day": "2026-01-01", "n": 6}, {"day": "2026-01-02", "n": 1}, {"day": "2026-01-03", "n": 10},
-                       {"day": "2026-01-04", "n": 10}, {"day": "2026-01-05", "n": 3}, {"day": "2026-01-06", "n": 6}, {"day": "2026-01-07", "n": 1}, {"day": "2026-01-08", "n": 1},
-                       {"day": "2026-01-09", "n": 1}, {"day": "2026-01-10", "n": 1}, {"day": "2026-01-11", "n": 3}, {"day": "2026-01-12", "n": 14}, {"day": "2026-01-13", "n": 1},
-                       {"day": "2026-01-14", "n": 2}, {"day": "2026-01-15", "n": 1}, {"day": "2026-01-17", "n": 4}, {"day": "2026-01-18", "n": 1}, {"day": "2026-01-19", "n": 2},
-                       {"day": "2026-01-20", "n": 12}, {"day": "2026-01-21", "n": 1}, {"day": "2026-01-23", "n": 1}, {"day": "2026-01-24", "n": 1}, {"day": "2026-01-25", "n": 26},
-                       {"day": "2026-01-28", "n": 3}, {"day": "2026-01-29", "n": 10}, {"day": "2026-01-30", "n": 10}, {"day": "2026-01-31", "n": 1}, {"day": "2026-02-07", "n": 3},
-                       {"day": "2026-02-08", "n": 1}, {"day": "2026-02-09", "n": 1}, {"day": "2026-02-10", "n": 5}, {"day": "2026-02-16", "n": 1}, {"day": "2026-02-17", "n": 1},
-                       {"day": "2026-02-18", "n": 4}, {"day": "2026-02-21", "n": 5}, {"day": "2026-02-23", "n": 5}, {"day": "2026-02-28", "n": 7}, {"day": "2026-03-08", "n": 1},
-                       {"day": "2026-03-09", "n": 8}, {"day": "2026-03-11", "n": 6}, {"day": "2026-03-16", "n": 1}, {"day": "2026-03-24", "n": 1}, {"day": "2026-03-28", "n": 1},
-                       {"day": "2026-03-29", "n": 8}, {"day": "2026-04-08", "n": 1}, {"day": "2026-04-10", "n": 5}, {"day": "2026-04-11", "n": 2}, {"day": "2026-04-18", "n": 2},
-                       {"day": "2026-04-19", "n": 1}, {"day": "2026-05-01", "n": 4}, {"day": "2026-05-03", "n": 12}, {"day": "2026-05-05", "n": 5}, {"day": "2026-05-08", "n": 1},
-                       {"day": "2026-05-09", "n": 1}, {"day": "2026-05-10", "n": 1}, {"day": "2026-05-14", "n": 7}, {"day": "2026-05-16", "n": 13}, {"day": "2026-05-18", "n": 18},
-                       {"day": "2026-05-19", "n": 4}, {"day": "2026-05-22", "n": 3}, {"day": "2026-05-23", "n": 2}, {"day": "2026-05-24", "n": 2}, {"day": "2026-05-26", "n": 5},
-                       {"day": "2026-05-27", "n": 1}, {"day": "2026-05-28", "n": 6}, {"day": "2026-05-29", "n": 1}, {"day": "2026-05-31", "n": 22}, {"day": "2026-06-01", "n": 1},
-                       {"day": "2026-06-02", "n": 8}, {"day": "2026-06-03", "n": 1}, {"day": "2026-06-04", "n": 13}, {"day": "2026-06-06", "n": 1}, {"day": "2026-06-10", "n": 1},
-                       {"day": "2026-06-12", "n": 1}, {"day": "2026-06-14", "n": 9}, {"day": "2026-06-15", "n": 10}, {"day": "2026-06-16", "n": 11}, {"day": "2026-06-17", "n": 2},
-                       {"day": "2026-06-20", "n": 1}, {"day": "2026-06-21", "n": 1}, {"day": "2026-06-22", "n": 1}, {"day": "2026-06-23", "n": 1}, {"day": "2026-06-24", "n": 2},
-                       {"day": "2026-06-26", "n": 3}, {"day": "2026-06-27", "n": 2}, {"day": "2026-06-28", "n": 1}, {"day": "2026-06-29", "n": 7}, {"day": "2026-07-01", "n": 3},
-                       {"day": "2026-07-03", "n": 9}, {"day": "2026-07-04", "n": 3}, {"day": "2026-07-06", "n": 3}, {"day": "2026-07-09", "n": 9}, {"day": "2026-07-11", "n": 2},
-                       {"day": "2026-07-12", "n": 1}, {"day": "2026-07-13", "n": 1}, {"day": "2026-07-15", "n": 1}, {"day": "2026-07-16", "n": 9}, {"day": "2026-07-18", "n": 1},
-                       {"day": "2026-07-19", "n": 1}, {"day": "2026-07-20", "n": 1}, {"day": "2026-07-21", "n": 1}, {"day": "2026-07-25", "n": 17}, {"day": "2026-07-26", "n": 2},
-                       {"day": "2026-07-27", "n": 2}, {"day": "2026-07-30", "n": 3}, {"day": "2026-07-31", "n": 1}, {"day": "2026-08-01", "n": 1}, {"day": "2026-08-02", "n": 1},
-                       {"day": "2026-08-04", "n": 3}, {"day": "2026-08-13", "n": 4}, {"day": "2026-08-15", "n": 6}, {"day": "2026-08-20", "n": 2}, {"day": "2026-08-29", "n": 1},
-                       {"day": "2026-08-30", "n": 1}, {"day": "2026-08-31", "n": 6}, {"day": "2026-09-06", "n": 4}, {"day": "2026-09-11", "n": 3}, {"day": "2026-09-13", "n": 1},
-                       {"day": "2026-09-25", "n": 1}, {"day": "2026-09-30", "n": 1}, {"day": "2026-10-01", "n": 6}, {"day": "2026-10-03", "n": 1}, {"day": "2026-10-04", "n": 3},
-                       {"day": "2026-10-05", "n": 1}, {"day": "2026-10-07", "n": 21}, {"day": "2026-10-09", "n": 3}, {"day": "2026-10-12", "n": 1}, {"day": "2026-10-13", "n": 16},
-                       {"day": "2026-10-14", "n": 4}, {"day": "2026-10-15", "n": 4}, {"day": "2026-10-17", "n": 9}, {"day": "2026-10-18", "n": 12}, {"day": "2026-10-20", "n": 12},
-                       {"day": "2026-10-21", "n": 1}, {"day": "2026-10-22", "n": 3}, {"day": "2026-10-23", "n": 2}, {"day": "2026-10-24", "n": 2}, {"day": "2026-10-25", "n": 10},
-                       {"day": "2026-10-26", "n": 7}, {"day": "2026-10-28", "n": 14}, {"day": "2026-10-31", "n": 2}, {"day": "2026-11-01", "n": 41}, {"day": "2026-11-02", "n": 2},
-                       {"day": "2026-11-03", "n": 1}],
-      "languagesNow": ["Python", "TypeScript", "Go"]},
-    "watching": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value": 42, "unit": "", "label": "films watched this year"},
-      "notable": [{"key": "a1b2c3d4e5", "kind": "film", "title": "The Invented Harbour", "by": null, "season": null, "year": 2024, "provider": "Fixture Cinema", "month": "2026-10", "reason": "Rewatched twice", "poster": null}],
-      "totals": {"month": {"films": 4, "episodes": 9, "videos": 6, "hours": 18}, "year": {"films": 42, "episodes": 160, "videos": 90, "hours": 310}},
-      "years": {"2026": [{"key": "a1b2c3d4e5", "kind": "film", "title": "The Invented Harbour", "by": null, "season": null, "year": 2024, "provider": "Fixture Cinema", "month": "2026-10", "reason": "Rewatched twice", "poster": null}]}},
-    "listening": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value": 3400, "unit": "", "label": "tracks this year"},
-      "notable": [{"key": "f6e5d4c3b2", "kind": "album", "title": "Sample Echoes", "by": "The Placeholders", "season": null, "year": 2025, "provider": "Fixture Music", "month": "2026-10", "reason": "On repeat", "poster": null}],
-      "totals": {"month": {"tracks": 310, "podcastEpisodes": 12, "audiobookHours": 6}, "year": {"tracks": 3400, "podcastEpisodes": 120, "audiobookHours": 52}},
-      "years": {"2026": [{"key": "f6e5d4c3b2", "kind": "album", "title": "Sample Echoes", "by": "The Placeholders", "season": null, "year": 2025, "provider": "Fixture Music", "month": "2026-10", "reason": "On repeat", "poster": null}]}},
-    "reading": {"updated": "2026-10-30", "staleDays": 4, "headline": {"value": 9, "unit": "", "label": "books finished this year"},
-      "notable": [{"key": "0a9b8c7d6e", "kind": "book", "title": "A Made-Up Almanac", "by": "Ada Example", "season": null, "year": 2023, "provider": "Fixture Books", "month": "2026-10", "reason": "Finished", "poster": null}],
-      "totals": {"month": {"books": 1, "pages": 320}, "year": {"books": 9, "pages": 2900}},
-      "years": {"2026": [{"key": "0a9b8c7d6e", "kind": "book", "title": "A Made-Up Almanac", "by": "Ada Example", "season": null, "year": 2023, "provider": "Fixture Books", "month": "2026-10", "reason": "Finished", "poster": null}]},
-      "current": [{"title": "Another Invented Volume", "by": "Sam Sample", "progress": 0.4}]},
-    "live": {"updated": "2026-11-03", "staleDays": 0, "headline": {"value": 3, "unit": "", "label": "live events this year"},
-      "notable": [{"key": "1122334455", "kind": "gig", "title": "Sample Band Live", "by": null, "season": null, "year": 2026, "provider": null, "month": "2026-10", "reason": "Gig", "poster": null}],
-      "years": {"2026": [{"key": "1122334455", "kind": "gig", "title": "Sample Band Live", "by": null, "season": null, "year": 2026, "provider": null, "month": "2026-10", "reason": "Gig", "poster": null}]}},
-    "work": {
-      "updated": "2026-11-03",
-      "staleDays": 0,
-      "stats": {
-        "yearsShipping": 11,
-        "employers": 4,
-        "contracting": 1,
-        "technologies": 21
-      },
-      "roles": [
-        {
-          "id": "fx-role-7",
-          "company": "Monzo",
-          "title": "Senior staff software engineer",
-          "team": "Borrowing",
-          "from": "2023-05",
-          "to": null,
-          "kind": "employment",
-          "body": "Fixture text: looking after a lending product team. Invented for the build.",
-          "tech": [
-            "go",
-            "typescript",
-            "kubernetes",
-            "aws",
-            "kafka",
-            "graphql",
-            "circleci"
-          ],
-          "period": "may 2023 — present"
-        },
-        {
-          "id": "fx-role-6",
-          "company": "Deliveroo",
-          "title": "Staff software engineer",
-          "team": "Care",
-          "from": "2022-07",
-          "to": "2023-05",
-          "kind": "employment",
-          "body": "Fixture text: a bigger remit across several teams.\n\nA second invented paragraph.",
-          "tech": [
-            "typescript",
-            "scala",
-            "go",
-            "aws",
-            "datadog",
-            "graphql"
-          ],
-          "period": "jul 2022 — may 2023"
-        },
-        {
-          "id": "fx-role-5",
-          "company": "Deliveroo",
-          "title": "Senior software engineer",
-          "team": "Care",
-          "from": "2020-12",
-          "to": "2022-06",
-          "kind": "employment",
-          "body": "Fixture text: services front and back.",
-          "tech": [
-            "typescript",
-            "scala",
-            "react",
-            "aws",
-            "kafka"
-          ],
-          "period": "dec 2020 — jun 2022"
-        },
-        {
-          "id": "fx-role-4",
-          "company": "DVELP",
-          "title": "Senior software engineer",
-          "note": "acting head of engineering for the last six months",
-          "from": "2019-06",
-          "to": "2020-11",
-          "kind": "employment",
-          "body": "Fixture text: client delivery.",
-          "tech": [
-            "typescript",
-            "node",
-            "twilio flex",
-            "gcp",
-            "react"
-          ],
-          "period": "jun 2019 — nov 2020"
-        },
-        {
-          "id": "fx-role-3",
-          "company": "Example Contracting",
-          "title": "Contract software engineer",
-          "from": "2019-02",
-          "to": "2019-05",
-          "kind": "contract",
-          "body": "Fixture text: a short contract.",
-          "tech": [
-            "typescript",
-            "gatsby",
-            "prismic"
-          ],
-          "period": "feb 2019 — may 2019"
-        },
-        {
-          "id": "fx-role-2",
-          "company": "Sky Betting & Gaming",
-          "title": "Senior software engineer",
-          "team": "Vegas",
-          "from": "2017-11",
-          "to": "2019-01",
-          "kind": "employment",
-          "body": "Fixture text: promoted and planning more.",
-          "tech": [
-            "typescript",
-            "react",
-            "php",
-            "redux",
-            "docker",
-            "jenkins"
-          ],
-          "period": "nov 2017 — jan 2019"
-        },
-        {
-          "id": "fx-role-1",
-          "company": "Sky Betting & Gaming",
-          "title": "Software engineer",
-          "team": "Vegas",
-          "from": "2015-11",
-          "to": "2017-10",
-          "kind": "employment",
-          "body": "Fixture text: a first full-time job.",
-          "tech": [
-            "javascript",
-            "php",
-            "symfony",
-            "redux",
-            "docker",
-            "jenkins"
-          ],
-          "period": "nov 2015 — oct 2017"
-        }
-      ],
-      "roster": [
-        {
-          "name": "go",
-          "current": true
-        },
-        {
-          "name": "typescript",
-          "current": true
-        },
-        {
-          "name": "kubernetes",
-          "current": true
-        },
-        {
-          "name": "aws",
-          "current": true
-        },
-        {
-          "name": "kafka",
-          "current": true
-        },
-        {
-          "name": "graphql",
-          "current": true
-        },
-        {
-          "name": "circleci",
-          "current": true
-        },
-        {
-          "name": "scala",
-          "current": false
-        },
-        {
-          "name": "react",
-          "current": false
-        },
-        {
-          "name": "node",
-          "current": false
-        },
-        {
-          "name": "twilio flex",
-          "current": false
-        },
-        {
-          "name": "gatsby",
-          "current": false
-        },
-        {
-          "name": "php",
-          "current": false
-        },
-        {
-          "name": "javascript",
-          "current": false
-        },
-        {
-          "name": "symfony",
-          "current": false
-        },
-        {
-          "name": "datadog",
-          "current": false
-        },
-        {
-          "name": "gcp",
-          "current": false
-        },
-        {
-          "name": "prismic",
-          "current": false
-        },
-        {
-          "name": "redux",
-          "current": false
-        },
-        {
-          "name": "docker",
-          "current": false
-        },
-        {
-          "name": "jenkins",
-          "current": false
-        }
-      ],
-      "highlights": [
-        {"label": "Placeholder keynote", "detail": "Invented talk about sample widgets", "year": "2018", "url": "https://example.com/keynote"},
-        {"label": "Fixture certificate", "detail": null, "year": "2021", "url": null},
-        {"label": "Made-up library", "detail": "A toy package nobody needs", "year": null, "url": "https://example.com/lib"},
-        {"label": "Bare highlight", "detail": null, "year": null, "url": null}
-      ]
-    }
+ "schemaVersion": 1,
+ "generatedAt": "2026-11-03T06:00:00+00:00",
+ "facts": [
+  {
+   "key": "fx.films",
+   "label": "Films this year",
+   "value": 42,
+   "unit": "films",
+   "tone": "good"
   },
-  "insights": [
-    {"id":"3c9e1f0a7b","kind":"sleep_after_hard","text":"Sleeps 38 min less after a hard session than after an easy day.","section":"body","week":"2026-11-02"},
-    {"id":"8d2b6e4c1f","kind":"volume_vs_bodyweight","text":"Lifted 375× bodyweight in the last 30 days.","section":"fitness","week":"2026-10-26"}
-  ],
-  "hub": {"generatedAt": "2026-11-04", "rows": [
-    {"section":"fitness","size":"lg","href":"/life/fitness","hero":{"type":"route","caption":"6.2 km of fresh line, legs mostly intact.","slug":"evening-ride-to-the-reservoir-2026-10-15","points":[[52.9,-1.2],[52.901,-1.1989],[52.90199,-1.1978],[52.90297,-1.1967],[52.90394,-1.1956],[52.90488,-1.1945],[52.9058,-1.1934],[52.90669,-1.1923],[52.90756,-1.1912],[52.90841,-1.1901],[52.90924,-1.189],[52.91005,-1.1879],[52.91086,-1.1868],[52.91166,-1.1857],[52.91246,-1.1846],[52.91327,-1.1835],[52.9141,-1.1824],[52.91494,-1.1813],[52.91581,-1.1802],[52.9167,-1.1791],[52.91762,-1.178],[52.91856,-1.1769],[52.91952,-1.1758],[52.9205,-1.1747],[52.92149,-1.1736],[52.92249,-1.1725],[52.92349,-1.1714],[52.92448,-1.1703],[52.92546,-1.1692],[52.92643,-1.1681],[52.92738,-1.167],[52.9283,-1.1659],[52.9292,-1.1648],[52.93007,-1.1637],[52.93092,-1.1626],[52.93175,-1.1615],[52.93256,-1.1604],[52.93337,-1.1593],[52.93417,-1.1582],[52.93497,-1.1571],[52.93578,-1.156],[52.93661,-1.1549],[52.93745,-1.1538],[52.93831,-1.1527],[52.9392,-1.1516],[52.94011,-1.1505],[52.94105,-1.1494],[52.94201,-1.1483],[52.94299,-1.1472],[52.94398,-1.1461],[52.94497,-1.145],[52.94597,-1.1439],[52.94697,-1.1428],[52.94795,-1.1417],[52.94892,-1.1406],[52.94987,-1.1395],[52.9508,-1.1384],[52.9517,-1.1373],[52.95257,-1.1362],[52.95343,-1.1351]]}},
-    {"section":"code","size":"lg","href":"/life/code","hero":{"type":"stat","caption":"212 commits this month. The keyboard is fine. Probably.","value":212,"unit":"","label":"commits this month"}},
-    {"section":"body","size":"md","href":"/life/body","hero":{"type":"spark","caption":"Sleep at 7.1 h, up 0.4 over 12 weeks. Bedtime finally won.","points":[["2026-W34",6.7],["2026-W35",6.7],["2026-W36",6.8],["2026-W37",6.8],["2026-W38",6.8],["2026-W39",6.9],["2026-W40",6.9],["2026-W41",6.9],["2026-W42",7.0],["2026-W43",7.0],["2026-W44",7.0],["2026-W45",7.1]],"unit":"h","label":"sleep"}},
-    {"section":"games","size":"md","href":"/life/games","hero":{"type":"image","caption":"410 hours of Space Farm, all time. No regrets.","src":"/card_life.png","alt":"Space Farm"}},
-    {"section":"reading","size":"md","href":"/life/reading","hero":{"type":"bars","caption":"Sci-fi leads the shelf at 48%.","items":[{"label":"Sci-fi","pct":48},{"label":"Fantasy","pct":30},{"label":"Non-fiction","pct":22}]}},
-    {"section":"live","size":"sm","href":"/life/live","hero":{"type":"stat","caption":"3 live events this year.","value":3,"unit":"","label":"live events this year"}},
-    {"section":"watching","size":"sm","href":"/life/watching","hero":null},
-    {"section":"listening","size":"sm","href":"/life/listening","hero":null}
-  ]}
+  {
+   "key": "fx.streak",
+   "label": "Logging streak",
+   "value": 12,
+   "unit": "days",
+   "tone": "neutral"
+  },
+  {
+   "key": "personal.height",
+   "label": "Height",
+   "value": 180,
+   "unit": "cm",
+   "tone": "neutral"
+  },
+  {
+   "key": "personal.likes",
+   "label": "Likes",
+   "value": [
+    "invented cola",
+    "sample toast"
+   ],
+   "tone": "fun"
+  },
+  {
+   "key": "personal.boardgames",
+   "label": "Board games",
+   "value": "keen, rarely wins",
+   "tone": "fun"
+  },
+  {
+   "key": "site.started_year",
+   "label": "Site started",
+   "value": 2019,
+   "unit": "",
+   "tone": "neutral"
+  },
+  {
+   "key": "code.project.fitglue_server.started",
+   "label": "fitglue-server started",
+   "value": "2023-05-14",
+   "unit": "",
+   "tone": "neutral"
+  },
+  {
+   "key": "code.project.fitglue_web.started",
+   "label": "fitglue-web started",
+   "value": "2023-06-02",
+   "unit": "",
+   "tone": "neutral"
+  }
+ ],
+ "sections": {
+  "body": {
+   "updated": "2026-11-03",
+   "staleDays": 0,
+   "headline": {
+    "value": 80.1,
+    "unit": "kg",
+    "label": "weight"
+   },
+   "latest": {
+    "weightKg": 80.1,
+    "bodyFatPct": 17.2,
+    "restingHr": 52,
+    "hrvMs": 68,
+    "vo2Max": null,
+    "spo2Pct": 96.8,
+    "breathsPerMin": 14.1,
+    "bmi": 25.3,
+    "leanMassKg": 66.3
+   },
+   "weekly": [
+    {
+     "week": "2026-05-04",
+     "weightKg": 82.6,
+     "bodyFatPct": 18.8,
+     "restingHr": 55,
+     "hrvMs": 60,
+     "vo2Max": null,
+     "spo2Pct": 96.4,
+     "breathsPerMin": 14.3,
+     "bmi": 26.1,
+     "leanMassKg": 67.1
+    },
+    {
+     "week": "2026-05-11",
+     "weightKg": 82.6,
+     "bodyFatPct": 18.8,
+     "restingHr": 55,
+     "hrvMs": 61,
+     "vo2Max": null,
+     "spo2Pct": 96.6,
+     "breathsPerMin": 14.4,
+     "bmi": 26.1,
+     "leanMassKg": 67.1
+    },
+    {
+     "week": "2026-05-18",
+     "weightKg": 82.6,
+     "bodyFatPct": 18.9,
+     "restingHr": 55,
+     "hrvMs": 63,
+     "vo2Max": null,
+     "spo2Pct": 96.5,
+     "breathsPerMin": 14.6,
+     "bmi": 26.1,
+     "leanMassKg": 67
+    },
+    {
+     "week": "2026-05-25",
+     "weightKg": 82.5,
+     "bodyFatPct": 18.7,
+     "restingHr": 55,
+     "hrvMs": 62,
+     "vo2Max": null,
+     "spo2Pct": 96.8,
+     "breathsPerMin": 14.7,
+     "bmi": 26,
+     "leanMassKg": 67.1
+    },
+    {
+     "week": "2026-06-01",
+     "weightKg": 82.3,
+     "bodyFatPct": 18.7,
+     "restingHr": 55,
+     "hrvMs": 64,
+     "vo2Max": null,
+     "spo2Pct": 96.8,
+     "breathsPerMin": 14.4,
+     "bmi": 26,
+     "leanMassKg": 66.9
+    },
+    {
+     "week": "2026-06-08",
+     "weightKg": 82,
+     "bodyFatPct": 18.6,
+     "restingHr": 55,
+     "hrvMs": 62,
+     "vo2Max": null,
+     "spo2Pct": 96.6,
+     "breathsPerMin": 14.1,
+     "bmi": 25.9,
+     "leanMassKg": 66.7
+    },
+    {
+     "week": "2026-06-15",
+     "weightKg": 81.8,
+     "bodyFatPct": 18.3,
+     "restingHr": 54,
+     "hrvMs": 62,
+     "vo2Max": null,
+     "spo2Pct": 96.8,
+     "breathsPerMin": 14.1,
+     "bmi": 25.8,
+     "leanMassKg": 66.8
+    },
+    {
+     "week": "2026-06-22",
+     "weightKg": null,
+     "bodyFatPct": null,
+     "restingHr": 54,
+     "hrvMs": 61,
+     "vo2Max": null,
+     "spo2Pct": 96.7,
+     "breathsPerMin": 14.1,
+     "bmi": null,
+     "leanMassKg": null
+    },
+    {
+     "week": "2026-06-29",
+     "weightKg": 81.7,
+     "bodyFatPct": 18.1,
+     "restingHr": 54,
+     "hrvMs": 61,
+     "vo2Max": null,
+     "spo2Pct": 96.5,
+     "breathsPerMin": 14,
+     "bmi": 25.8,
+     "leanMassKg": 66.9
+    },
+    {
+     "week": "2026-07-06",
+     "weightKg": 81.8,
+     "bodyFatPct": 18,
+     "restingHr": 54,
+     "hrvMs": 61,
+     "vo2Max": null,
+     "spo2Pct": 96.6,
+     "breathsPerMin": 14.2,
+     "bmi": 25.8,
+     "leanMassKg": 67.1
+    },
+    {
+     "week": "2026-07-13",
+     "weightKg": 81.9,
+     "bodyFatPct": 18.1,
+     "restingHr": 53,
+     "hrvMs": 61,
+     "vo2Max": null,
+     "spo2Pct": 96.3,
+     "breathsPerMin": 14.5,
+     "bmi": 25.8,
+     "leanMassKg": 67.1
+    },
+    {
+     "week": "2026-07-20",
+     "weightKg": 81.8,
+     "bodyFatPct": 18.1,
+     "restingHr": 53,
+     "hrvMs": 63,
+     "vo2Max": null,
+     "spo2Pct": 96.2,
+     "breathsPerMin": 14.6,
+     "bmi": 25.8,
+     "leanMassKg": 67
+    },
+    {
+     "week": "2026-07-27",
+     "weightKg": 81.5,
+     "bodyFatPct": 18.2,
+     "restingHr": 53,
+     "hrvMs": 63,
+     "vo2Max": null,
+     "spo2Pct": 96.3,
+     "breathsPerMin": 14.5,
+     "bmi": 25.7,
+     "leanMassKg": 66.7
+    },
+    {
+     "week": "2026-08-03",
+     "weightKg": 81.1,
+     "bodyFatPct": 18.2,
+     "restingHr": 53,
+     "hrvMs": 66,
+     "vo2Max": null,
+     "spo2Pct": 96,
+     "breathsPerMin": 14.5,
+     "bmi": 25.6,
+     "leanMassKg": 66.3
+    },
+    {
+     "week": "2026-08-10",
+     "weightKg": 80.9,
+     "bodyFatPct": 18,
+     "restingHr": 53,
+     "hrvMs": 66,
+     "vo2Max": null,
+     "spo2Pct": 96,
+     "breathsPerMin": 14.4,
+     "bmi": 25.5,
+     "leanMassKg": 66.3
+    },
+    {
+     "week": "2026-08-17",
+     "weightKg": null,
+     "bodyFatPct": null,
+     "restingHr": 53,
+     "hrvMs": 67,
+     "vo2Max": null,
+     "spo2Pct": 96.2,
+     "breathsPerMin": 14.1,
+     "bmi": null,
+     "leanMassKg": null
+    },
+    {
+     "week": "2026-08-24",
+     "weightKg": 81,
+     "bodyFatPct": 17.8,
+     "restingHr": 54,
+     "hrvMs": 67,
+     "vo2Max": null,
+     "spo2Pct": 96,
+     "breathsPerMin": 13.9,
+     "bmi": 25.6,
+     "leanMassKg": 66.6
+    },
+    {
+     "week": "2026-08-31",
+     "weightKg": 81.1,
+     "bodyFatPct": 17.6,
+     "restingHr": 53,
+     "hrvMs": 66,
+     "vo2Max": null,
+     "spo2Pct": 96.1,
+     "breathsPerMin": 14.1,
+     "bmi": 25.6,
+     "leanMassKg": 66.8
+    },
+    {
+     "week": "2026-09-07",
+     "weightKg": 81.1,
+     "bodyFatPct": 17.6,
+     "restingHr": 54,
+     "hrvMs": 66,
+     "vo2Max": null,
+     "spo2Pct": 96.4,
+     "breathsPerMin": 14.3,
+     "bmi": 25.6,
+     "leanMassKg": 66.8
+    },
+    {
+     "week": "2026-09-14",
+     "weightKg": 80.9,
+     "bodyFatPct": 17.3,
+     "restingHr": 53,
+     "hrvMs": 64,
+     "vo2Max": null,
+     "spo2Pct": 96.2,
+     "breathsPerMin": 14.3,
+     "bmi": 25.5,
+     "leanMassKg": 66.9
+    },
+    {
+     "week": "2026-09-21",
+     "weightKg": 80.6,
+     "bodyFatPct": 17.4,
+     "restingHr": 53,
+     "hrvMs": 65,
+     "vo2Max": null,
+     "spo2Pct": 96.5,
+     "breathsPerMin": 14.5,
+     "bmi": 25.4,
+     "leanMassKg": 66.6
+    },
+    {
+     "week": "2026-09-28",
+     "weightKg": 80.3,
+     "bodyFatPct": 17.4,
+     "restingHr": 53,
+     "hrvMs": 65,
+     "vo2Max": null,
+     "spo2Pct": 96.7,
+     "breathsPerMin": 14.7,
+     "bmi": 25.3,
+     "leanMassKg": 66.3
+    },
+    {
+     "week": "2026-10-05",
+     "weightKg": 80.2,
+     "bodyFatPct": 17.3,
+     "restingHr": 53,
+     "hrvMs": 65,
+     "vo2Max": null,
+     "spo2Pct": 96.6,
+     "breathsPerMin": 14.6,
+     "bmi": 25.3,
+     "leanMassKg": 66.3
+    },
+    {
+     "week": "2026-10-12",
+     "weightKg": 80.2,
+     "bodyFatPct": 17.5,
+     "restingHr": 52,
+     "hrvMs": 67,
+     "vo2Max": null,
+     "spo2Pct": 96.8,
+     "breathsPerMin": 14.3,
+     "bmi": 25.3,
+     "leanMassKg": 66.2
+    },
+    {
+     "week": "2026-10-19",
+     "weightKg": 80.2,
+     "bodyFatPct": 17.4,
+     "restingHr": 52,
+     "hrvMs": 67,
+     "vo2Max": null,
+     "spo2Pct": 96.8,
+     "breathsPerMin": 14.1,
+     "bmi": 25.3,
+     "leanMassKg": 66.2
+    },
+    {
+     "week": "2026-10-26",
+     "weightKg": 80.1,
+     "bodyFatPct": 17.2,
+     "restingHr": 52,
+     "hrvMs": 68,
+     "vo2Max": null,
+     "spo2Pct": 96.6,
+     "breathsPerMin": 14.1,
+     "bmi": 25.3,
+     "leanMassKg": 66.3
+    }
+   ],
+   "sleep": {
+    "avgMinutes30": 444,
+    "avgMinutes90": 438,
+    "consistencyMinutes": 31,
+    "best": {
+     "date": "2026-10-12",
+     "minutes": 510
+    },
+    "worst": {
+     "date": "2026-10-20",
+     "minutes": 330
+    },
+    "stages30": {
+     "deepPct": 17,
+     "lightPct": 54,
+     "remPct": 22,
+     "wakePct": 7
+    },
+    "weekly": [
+     {
+      "week": "2026-05-04",
+      "avgMinutes": 436,
+      "deepPct": 17,
+      "remPct": 22
+     },
+     {
+      "week": "2026-05-11",
+      "avgMinutes": 442,
+      "deepPct": 18,
+      "remPct": 23
+     },
+     {
+      "week": "2026-05-18",
+      "avgMinutes": 448,
+      "deepPct": 19,
+      "remPct": 22
+     },
+     {
+      "week": "2026-05-25",
+      "avgMinutes": 449,
+      "deepPct": 18,
+      "remPct": 24
+     },
+     {
+      "week": "2026-06-01",
+      "avgMinutes": 451,
+      "deepPct": 19,
+      "remPct": 23
+     },
+     {
+      "week": "2026-06-08",
+      "avgMinutes": 445,
+      "deepPct": 17,
+      "remPct": 23
+     },
+     {
+      "week": "2026-06-15",
+      "avgMinutes": 444,
+      "deepPct": 17,
+      "remPct": 24
+     },
+     {
+      "week": "2026-06-22",
+      "avgMinutes": 433,
+      "deepPct": 16,
+      "remPct": 23
+     },
+     {
+      "week": "2026-06-29",
+      "avgMinutes": 433,
+      "deepPct": 15,
+      "remPct": 23
+     },
+     {
+      "week": "2026-07-06",
+      "avgMinutes": 423,
+      "deepPct": 16,
+      "remPct": 22
+     },
+     {
+      "week": "2026-07-13",
+      "avgMinutes": 428,
+      "deepPct": 16,
+      "remPct": 21
+     },
+     {
+      "week": "2026-07-20",
+      "avgMinutes": 423,
+      "deepPct": 17,
+      "remPct": 21
+     },
+     {
+      "week": "2026-07-27",
+      "avgMinutes": 435,
+      "deepPct": 18,
+      "remPct": 21
+     },
+     {
+      "week": "2026-08-03",
+      "avgMinutes": 434,
+      "deepPct": 18,
+      "remPct": 20
+     },
+     {
+      "week": "2026-08-10",
+      "avgMinutes": 448,
+      "deepPct": 19,
+      "remPct": 21
+     },
+     {
+      "week": "2026-08-17",
+      "avgMinutes": 445,
+      "deepPct": 18,
+      "remPct": 20
+     },
+     {
+      "week": "2026-08-24",
+      "avgMinutes": 457,
+      "deepPct": 18,
+      "remPct": 21
+     },
+     {
+      "week": "2026-08-31",
+      "avgMinutes": 449,
+      "deepPct": 17,
+      "remPct": 22
+     },
+     {
+      "week": "2026-09-07",
+      "avgMinutes": 455,
+      "deepPct": 16,
+      "remPct": 22
+     },
+     {
+      "week": "2026-09-14",
+      "avgMinutes": 441,
+      "deepPct": 16,
+      "remPct": 23
+     },
+     {
+      "week": "2026-09-21",
+      "avgMinutes": 444,
+      "deepPct": 15,
+      "remPct": 23
+     },
+     {
+      "week": "2026-09-28",
+      "avgMinutes": 430,
+      "deepPct": 16,
+      "remPct": 23
+     },
+     {
+      "week": "2026-10-05",
+      "avgMinutes": 434,
+      "deepPct": 17,
+      "remPct": 24
+     },
+     {
+      "week": "2026-10-12",
+      "avgMinutes": 424,
+      "deepPct": 17,
+      "remPct": 23
+     },
+     {
+      "week": "2026-10-19",
+      "avgMinutes": 433,
+      "deepPct": 18,
+      "remPct": 24
+     },
+     {
+      "week": "2026-10-26",
+      "avgMinutes": 430,
+      "deepPct": 18,
+      "remPct": 23
+     }
+    ]
+   },
+   "food": {
+    "avgKcal30": 2450,
+    "avgProteinG30": 148,
+    "avgCarbsG30": 265,
+    "avgFatG30": 82,
+    "avgFibreG30": 31,
+    "proteinPerKg30": 1.8,
+    "split30": {
+     "proteinPct": 25,
+     "carbsPct": 44,
+     "fatPct": 31
+    },
+    "loggedStreakDays": 12,
+    "proteinStreakDays": 5,
+    "weekly": [
+     {
+      "week": "2026-05-04",
+      "avgKcal": 2450,
+      "avgProteinG": 142,
+      "avgCarbsG": 265,
+      "avgFatG": 82,
+      "avgFibreG": 30
+     },
+     {
+      "week": "2026-05-11",
+      "avgKcal": 2481,
+      "avgProteinG": 145,
+      "avgCarbsG": 270,
+      "avgFatG": 85,
+      "avgFibreG": 31
+     },
+     {
+      "week": "2026-05-18",
+      "avgKcal": 2581,
+      "avgProteinG": 145,
+      "avgCarbsG": 278,
+      "avgFatG": 84,
+      "avgFibreG": 32
+     },
+     {
+      "week": "2026-05-25",
+      "avgKcal": 2541,
+      "avgProteinG": 150,
+      "avgCarbsG": 281,
+      "avgFatG": 84,
+      "avgFibreG": 32
+     },
+     {
+      "week": "2026-06-01",
+      "avgKcal": 2501,
+      "avgProteinG": 147,
+      "avgCarbsG": 272,
+      "avgFatG": 87,
+      "avgFibreG": 33
+     },
+     {
+      "week": "2026-06-08",
+      "avgKcal": 2500,
+      "avgProteinG": 150,
+      "avgCarbsG": 256,
+      "avgFatG": 87,
+      "avgFibreG": 31
+     },
+     {
+      "week": "2026-06-15",
+      "avgKcal": 2382,
+      "avgProteinG": 146,
+      "avgCarbsG": 246,
+      "avgFatG": 85,
+      "avgFibreG": 31
+     },
+     {
+      "week": "2026-06-22",
+      "avgKcal": 2349,
+      "avgProteinG": 146,
+      "avgCarbsG": 251,
+      "avgFatG": 87,
+      "avgFibreG": 28
+     },
+     {
+      "week": "2026-06-29",
+      "avgKcal": 2378,
+      "avgProteinG": 145,
+      "avgCarbsG": 263,
+      "avgFatG": 87,
+      "avgFibreG": 29
+     },
+     {
+      "week": "2026-07-06",
+      "avgKcal": 2340,
+      "avgProteinG": 141,
+      "avgCarbsG": 270,
+      "avgFatG": 83,
+      "avgFibreG": 27
+     },
+     {
+      "week": "2026-07-13",
+      "avgKcal": 2422,
+      "avgProteinG": 143,
+      "avgCarbsG": 273,
+      "avgFatG": 83,
+      "avgFibreG": 28
+     },
+     {
+      "week": "2026-07-20",
+      "avgKcal": 2510,
+      "avgProteinG": 139,
+      "avgCarbsG": 276,
+      "avgFatG": 84,
+      "avgFibreG": 28
+     },
+     {
+      "week": "2026-07-27",
+      "avgKcal": 2500,
+      "avgProteinG": 142,
+      "avgCarbsG": 277,
+      "avgFatG": 81,
+      "avgFibreG": 29
+     },
+     {
+      "week": "2026-08-03",
+      "avgKcal": 2567,
+      "avgProteinG": 140,
+      "avgCarbsG": 270,
+      "avgFatG": 79,
+      "avgFibreG": 31
+     },
+     {
+      "week": "2026-08-10",
+      "avgKcal": 2559,
+      "avgProteinG": 144,
+      "avgCarbsG": 255,
+      "avgFatG": 80,
+      "avgFibreG": 31
+     },
+     {
+      "week": "2026-08-17",
+      "avgKcal": 2458,
+      "avgProteinG": 145,
+      "avgCarbsG": 245,
+      "avgFatG": 79,
+      "avgFibreG": 33
+     },
+     {
+      "week": "2026-08-24",
+      "avgKcal": 2454,
+      "avgProteinG": 147,
+      "avgCarbsG": 251,
+      "avgFatG": 76,
+      "avgFibreG": 32
+     },
+     {
+      "week": "2026-08-31",
+      "avgKcal": 2385,
+      "avgProteinG": 151,
+      "avgCarbsG": 266,
+      "avgFatG": 78,
+      "avgFibreG": 33
+     },
+     {
+      "week": "2026-09-07",
+      "avgKcal": 2315,
+      "avgProteinG": 150,
+      "avgCarbsG": 275,
+      "avgFatG": 79,
+      "avgFibreG": 30
+     },
+     {
+      "week": "2026-09-14",
+      "avgKcal": 2383,
+      "avgProteinG": 155,
+      "avgCarbsG": 276,
+      "avgFatG": 77,
+      "avgFibreG": 31
+     },
+     {
+      "week": "2026-09-21",
+      "avgKcal": 2391,
+      "avgProteinG": 152,
+      "avgCarbsG": 274,
+      "avgFatG": 78,
+      "avgFibreG": 28
+     },
+     {
+      "week": "2026-09-28",
+      "avgKcal": 2427,
+      "avgProteinG": 154,
+      "avgCarbsG": 273,
+      "avgFatG": 81,
+      "avgFibreG": 29
+     },
+     {
+      "week": "2026-10-05",
+      "avgKcal": 2546,
+      "avgProteinG": 152,
+      "avgCarbsG": 266,
+      "avgFatG": 81,
+      "avgFibreG": 27
+     },
+     {
+      "week": "2026-10-12",
+      "avgKcal": 2535,
+      "avgProteinG": 150,
+      "avgCarbsG": 254,
+      "avgFatG": 81,
+      "avgFibreG": 28
+     },
+     {
+      "week": "2026-10-19",
+      "avgKcal": 2534,
+      "avgProteinG": 150,
+      "avgCarbsG": 246,
+      "avgFatG": 85,
+      "avgFibreG": 29
+     },
+     {
+      "week": "2026-10-26",
+      "avgKcal": 2553,
+      "avgProteinG": 146,
+      "avgCarbsG": 252,
+      "avgFatG": 85,
+      "avgFibreG": 30
+     }
+    ]
+   },
+   "movement": {
+    "avgSteps30": 9420,
+    "avgAzmWeek4": 186,
+    "weekly": [
+     {
+      "week": "2026-05-04",
+      "avgSteps": 9100,
+      "azmMinutes": 170
+     },
+     {
+      "week": "2026-05-11",
+      "avgSteps": 9403,
+      "azmMinutes": 186
+     },
+     {
+      "week": "2026-05-18",
+      "avgSteps": 10267,
+      "azmMinutes": 195
+     },
+     {
+      "week": "2026-05-25",
+      "avgSteps": 10286,
+      "azmMinutes": 206
+     },
+     {
+      "week": "2026-06-01",
+      "avgSteps": 9399,
+      "azmMinutes": 199
+     },
+     {
+      "week": "2026-06-08",
+      "avgSteps": 9079,
+      "azmMinutes": 201
+     },
+     {
+      "week": "2026-06-15",
+      "avgSteps": 8893,
+      "azmMinutes": 179
+     },
+     {
+      "week": "2026-06-22",
+      "avgSteps": 8157,
+      "azmMinutes": 176
+     },
+     {
+      "week": "2026-06-29",
+      "avgSteps": 8197,
+      "azmMinutes": 148
+     },
+     {
+      "week": "2026-07-06",
+      "avgSteps": 9190,
+      "azmMinutes": 151
+     },
+     {
+      "week": "2026-07-13",
+      "avgSteps": 9620,
+      "azmMinutes": 129
+     },
+     {
+      "week": "2026-07-20",
+      "avgSteps": 9783,
+      "azmMinutes": 146
+     },
+     {
+      "week": "2026-07-27",
+      "avgSteps": 10478,
+      "azmMinutes": 135
+     },
+     {
+      "week": "2026-08-03",
+      "avgSteps": 10476,
+      "azmMinutes": 166
+     },
+     {
+      "week": "2026-08-10",
+      "avgSteps": 9482,
+      "azmMinutes": 160
+     },
+     {
+      "week": "2026-08-17",
+      "avgSteps": 9044,
+      "azmMinutes": 196
+     },
+     {
+      "week": "2026-08-24",
+      "avgSteps": 9002,
+      "azmMinutes": 186
+     },
+     {
+      "week": "2026-08-31",
+      "avgSteps": 8451,
+      "azmMinutes": 214
+     },
+     {
+      "week": "2026-09-07",
+      "avgSteps": 8512,
+      "azmMinutes": 192
+     },
+     {
+      "week": "2026-09-14",
+      "avgSteps": 9589,
+      "azmMinutes": 207
+     },
+     {
+      "week": "2026-09-21",
+      "avgSteps": 10127,
+      "azmMinutes": 173
+     },
+     {
+      "week": "2026-09-28",
+      "avgSteps": 10144,
+      "azmMinutes": 180
+     },
+     {
+      "week": "2026-10-05",
+      "avgSteps": 10638,
+      "azmMinutes": 144
+     },
+     {
+      "week": "2026-10-12",
+      "avgSteps": 10616,
+      "azmMinutes": 154
+     },
+     {
+      "week": "2026-10-19",
+      "avgSteps": 9563,
+      "azmMinutes": 126
+     },
+     {
+      "week": "2026-10-26",
+      "avgSteps": 9029,
+      "azmMinutes": 147
+     }
+    ]
+   },
+   "measurements": {
+    "tape": [
+     {
+      "key": "waistCm",
+      "unit": "cm",
+      "first": {
+       "date": "2026-08-11",
+       "value": 86.5
+      },
+      "latest": {
+       "date": "2026-10-30",
+       "value": 84
+      },
+      "change": -2.5,
+      "weekly": [
+       {
+        "week": "2026-08-10",
+        "value": 86.5
+       },
+       {
+        "week": "2026-08-17",
+        "value": 86.3
+       },
+       {
+        "week": "2026-08-24",
+        "value": 86.3
+       },
+       {
+        "week": "2026-08-31",
+        "value": 86
+       },
+       {
+        "week": "2026-09-07",
+        "value": null
+       },
+       {
+        "week": "2026-09-14",
+        "value": 85.4
+       },
+       {
+        "week": "2026-09-21",
+        "value": 85.1
+       },
+       {
+        "week": "2026-09-28",
+        "value": 84.8
+       },
+       {
+        "week": "2026-10-05",
+        "value": 84.4
+       },
+       {
+        "week": "2026-10-12",
+        "value": 84.3
+       },
+       {
+        "week": "2026-10-19",
+        "value": 84
+       },
+       {
+        "week": "2026-10-26",
+        "value": 84
+       }
+      ]
+     },
+     {
+      "key": "chestCm",
+      "unit": "cm",
+      "first": {
+       "date": "2026-08-11",
+       "value": 101
+      },
+      "latest": {
+       "date": "2026-10-30",
+       "value": 102
+      },
+      "change": 1,
+      "weekly": [
+       {
+        "week": "2026-08-10",
+        "value": 101
+       },
+       {
+        "week": "2026-08-17",
+        "value": 101.1
+       },
+       {
+        "week": "2026-08-24",
+        "value": 101.4
+       },
+       {
+        "week": "2026-08-31",
+        "value": 101.4
+       },
+       {
+        "week": "2026-09-07",
+        "value": null
+       },
+       {
+        "week": "2026-09-14",
+        "value": 101.5
+       },
+       {
+        "week": "2026-09-21",
+        "value": 101.5
+       },
+       {
+        "week": "2026-09-28",
+        "value": 101.6
+       },
+       {
+        "week": "2026-10-05",
+        "value": 101.5
+       },
+       {
+        "week": "2026-10-12",
+        "value": 101.7
+       },
+       {
+        "week": "2026-10-19",
+        "value": 101.8
+       },
+       {
+        "week": "2026-10-26",
+        "value": 102
+       }
+      ]
+     },
+     {
+      "key": "armRCm",
+      "unit": "cm",
+      "first": {
+       "date": "2026-08-11",
+       "value": 35.5
+      },
+      "latest": {
+       "date": "2026-10-30",
+       "value": 36.2
+      },
+      "change": 0.7,
+      "weekly": [
+       {
+        "week": "2026-08-10",
+        "value": 35.5
+       },
+       {
+        "week": "2026-08-17",
+        "value": 35.6
+       },
+       {
+        "week": "2026-08-24",
+        "value": 35.7
+       },
+       {
+        "week": "2026-08-31",
+        "value": 35.7
+       },
+       {
+        "week": "2026-09-07",
+        "value": null
+       },
+       {
+        "week": "2026-09-14",
+        "value": 35.8
+       },
+       {
+        "week": "2026-09-21",
+        "value": 35.9
+       },
+       {
+        "week": "2026-09-28",
+        "value": 35.9
+       },
+       {
+        "week": "2026-10-05",
+        "value": 35.9
+       },
+       {
+        "week": "2026-10-12",
+        "value": 36
+       },
+       {
+        "week": "2026-10-19",
+        "value": 36.1
+       },
+       {
+        "week": "2026-10-26",
+        "value": 36.2
+       }
+      ]
+     }
+    ],
+    "scale": [
+     {
+      "key": "musclePct",
+      "unit": "%",
+      "first": {
+       "date": "2026-08-11",
+       "value": 44.1
+      },
+      "latest": {
+       "date": "2026-10-30",
+       "value": 45.0
+      },
+      "change": 0.9,
+      "weekly": [
+       {
+        "week": "2026-08-10",
+        "value": 44.1
+       },
+       {
+        "week": "2026-08-17",
+        "value": 44.2
+       },
+       {
+        "week": "2026-08-24",
+        "value": 44.3
+       },
+       {
+        "week": "2026-08-31",
+        "value": 44.3
+       },
+       {
+        "week": "2026-09-07",
+        "value": null
+       },
+       {
+        "week": "2026-09-14",
+        "value": 44.5
+       },
+       {
+        "week": "2026-09-21",
+        "value": 44.6
+       },
+       {
+        "week": "2026-09-28",
+        "value": 44.7
+       },
+       {
+        "week": "2026-10-05",
+        "value": 44.8
+       },
+       {
+        "week": "2026-10-12",
+        "value": 44.8
+       },
+       {
+        "week": "2026-10-19",
+        "value": 44.9
+       },
+       {
+        "week": "2026-10-26",
+        "value": 45.0
+       }
+      ]
+     },
+     {
+      "key": "leanMassKg",
+      "unit": "kg",
+      "first": {
+       "date": "2026-08-11",
+       "value": 62.1
+      },
+      "latest": {
+       "date": "2026-10-30",
+       "value": 62.9
+      },
+      "change": 0.8,
+      "weekly": [
+       {
+        "week": "2026-08-10",
+        "value": 62.1
+       },
+       {
+        "week": "2026-08-17",
+        "value": 62.2
+       },
+       {
+        "week": "2026-08-24",
+        "value": 62.2
+       },
+       {
+        "week": "2026-08-31",
+        "value": 62.3
+       },
+       {
+        "week": "2026-09-07",
+        "value": null
+       },
+       {
+        "week": "2026-09-14",
+        "value": 62.5
+       },
+       {
+        "week": "2026-09-21",
+        "value": 62.5
+       },
+       {
+        "week": "2026-09-28",
+        "value": 62.6
+       },
+       {
+        "week": "2026-10-05",
+        "value": 62.7
+       },
+       {
+        "week": "2026-10-12",
+        "value": 62.8
+       },
+       {
+        "week": "2026-10-19",
+        "value": 62.8
+       },
+       {
+        "week": "2026-10-26",
+        "value": 62.9
+       }
+      ]
+     },
+     {
+      "key": "metabolicAgeYears",
+      "unit": "yrs",
+      "first": {
+       "date": "2026-08-11",
+       "value": 36
+      },
+      "latest": {
+       "date": "2026-10-30",
+       "value": 34
+      },
+      "change": -2,
+      "weekly": [
+       {
+        "week": "2026-08-10",
+        "value": 36
+       },
+       {
+        "week": "2026-08-17",
+        "value": 36
+       },
+       {
+        "week": "2026-08-24",
+        "value": 36
+       },
+       {
+        "week": "2026-08-31",
+        "value": 35
+       },
+       {
+        "week": "2026-09-07",
+        "value": null
+       },
+       {
+        "week": "2026-09-14",
+        "value": 35
+       },
+       {
+        "week": "2026-09-21",
+        "value": 35
+       },
+       {
+        "week": "2026-09-28",
+        "value": 35
+       },
+       {
+        "week": "2026-10-05",
+        "value": 35
+       },
+       {
+        "week": "2026-10-12",
+        "value": 34
+       },
+       {
+        "week": "2026-10-19",
+        "value": 34
+       },
+       {
+        "week": "2026-10-26",
+        "value": 34
+       }
+      ]
+     },
+     {
+      "key": "waterPct",
+      "unit": "%",
+      "first": {
+       "date": "2026-08-11",
+       "value": 57.8
+      },
+      "latest": {
+       "date": "2026-10-30",
+       "value": 58.6
+      },
+      "change": 0.8,
+      "weekly": [
+       {
+        "week": "2026-08-10",
+        "value": 57.8
+       },
+       {
+        "week": "2026-08-17",
+        "value": 57.9
+       },
+       {
+        "week": "2026-08-24",
+        "value": 58.1
+       },
+       {
+        "week": "2026-08-31",
+        "value": 58.1
+       },
+       {
+        "week": "2026-09-07",
+        "value": null
+       },
+       {
+        "week": "2026-09-14",
+        "value": 58.2
+       },
+       {
+        "week": "2026-09-21",
+        "value": 58.2
+       },
+       {
+        "week": "2026-09-28",
+        "value": 58.3
+       },
+       {
+        "week": "2026-10-05",
+        "value": 58.2
+       },
+       {
+        "week": "2026-10-12",
+        "value": 58.3
+       },
+       {
+        "week": "2026-10-19",
+        "value": 58.4
+       },
+       {
+        "week": "2026-10-26",
+        "value": 58.6
+       }
+      ]
+     },
+     {
+      "key": "visceral",
+      "unit": "",
+      "first": {
+       "date": "2026-08-11",
+       "value": 8
+      },
+      "latest": {
+       "date": "2026-10-30",
+       "value": 7
+      },
+      "change": -1,
+      "weekly": [
+       {
+        "week": "2026-08-10",
+        "value": 8
+       },
+       {
+        "week": "2026-08-17",
+        "value": 8
+       },
+       {
+        "week": "2026-08-24",
+        "value": 8
+       },
+       {
+        "week": "2026-08-31",
+        "value": 8
+       },
+       {
+        "week": "2026-09-07",
+        "value": null
+       },
+       {
+        "week": "2026-09-14",
+        "value": 8
+       },
+       {
+        "week": "2026-09-21",
+        "value": 8
+       },
+       {
+        "week": "2026-09-28",
+        "value": 7
+       },
+       {
+        "week": "2026-10-05",
+        "value": 7
+       },
+       {
+        "week": "2026-10-12",
+        "value": 7
+       },
+       {
+        "week": "2026-10-19",
+        "value": 7
+       },
+       {
+        "week": "2026-10-26",
+        "value": 7
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "games": {
+   "updated": "2026-11-03",
+   "staleDays": 0,
+   "headline": {
+    "value": 148,
+    "unit": "h",
+    "label": "of League this year"
+   },
+   "hoursTotal": 1840,
+   "allTime": {
+    "steam": 1228,
+    "league": 612,
+    "leagueSince": "2019-03",
+    "idle": 816
+   },
+   "year": {
+    "league": 148,
+    "leagueGames": 231,
+    "steamSince": "2026-10-20",
+    "steamSinceTracking": 9.5
+   },
+   "steam2Weeks": 6.5,
+   "multiplayerHours": 920,
+   "backlog": 14,
+   "clock": {
+    "weekday": [
+     4.5,
+     1.9,
+     0.6,
+     0.2,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     1.9,
+     4.5,
+     8.5,
+     12.4,
+     14.0,
+     12.4,
+     8.5
+    ],
+    "weekdayDaytime": 6.0,
+    "weekend": [
+     2.9,
+     1.2,
+     0.4,
+     0.1,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     3.0,
+     3.0,
+     3.0,
+     3.1,
+     3.4,
+     4.2,
+     2.9,
+     5.5,
+     7.9,
+     9.0,
+     7.9,
+     5.5
+    ],
+    "leagueSince": "2019-03",
+    "steamSince": "2026-10-20"
+   },
+   "yearWeeks": [
+    {
+     "week": "2026-01-01",
+     "league": 4.0,
+     "steam": 0,
+     "total": 4.0
+    },
+    {
+     "week": "2026-01-08",
+     "league": 7.5,
+     "steam": 0,
+     "total": 7.5
+    },
+    {
+     "week": "2026-01-15",
+     "league": 11.5,
+     "steam": 0,
+     "total": 11.5
+    },
+    {
+     "week": "2026-01-22",
+     "league": 15.8,
+     "steam": 0,
+     "total": 15.8
+    },
+    {
+     "week": "2026-01-29",
+     "league": 20.5,
+     "steam": 0,
+     "total": 20.5
+    },
+    {
+     "week": "2026-02-05",
+     "league": 26.4,
+     "steam": 0,
+     "total": 26.4
+    },
+    {
+     "week": "2026-02-12",
+     "league": 31.4,
+     "steam": 0,
+     "total": 31.4
+    },
+    {
+     "week": "2026-02-19",
+     "league": 36.4,
+     "steam": 0,
+     "total": 36.4
+    },
+    {
+     "week": "2026-02-26",
+     "league": 41.2,
+     "steam": 0,
+     "total": 41.2
+    },
+    {
+     "week": "2026-03-05",
+     "league": 45.7,
+     "steam": 0,
+     "total": 45.7
+    },
+    {
+     "week": "2026-03-12",
+     "league": 50.9,
+     "steam": 0,
+     "total": 50.9
+    },
+    {
+     "week": "2026-03-19",
+     "league": 54.7,
+     "steam": 0,
+     "total": 54.7
+    },
+    {
+     "week": "2026-03-26",
+     "league": 58.0,
+     "steam": 0,
+     "total": 58.0
+    },
+    {
+     "week": "2026-04-02",
+     "league": 60.8,
+     "steam": 0,
+     "total": 60.8
+    },
+    {
+     "week": "2026-04-09",
+     "league": 63.1,
+     "steam": 0,
+     "total": 63.1
+    },
+    {
+     "week": "2026-04-16",
+     "league": 65.9,
+     "steam": 0,
+     "total": 65.9
+    },
+    {
+     "week": "2026-04-23",
+     "league": 67.4,
+     "steam": 0,
+     "total": 67.4
+    },
+    {
+     "week": "2026-04-30",
+     "league": 68.6,
+     "steam": 0,
+     "total": 68.6
+    },
+    {
+     "week": "2026-05-07",
+     "league": 69.7,
+     "steam": 0,
+     "total": 69.7
+    },
+    {
+     "week": "2026-05-14",
+     "league": 70.7,
+     "steam": 0,
+     "total": 70.7
+    },
+    {
+     "week": "2026-05-21",
+     "league": 72.7,
+     "steam": 0,
+     "total": 72.7
+    },
+    {
+     "week": "2026-05-28",
+     "league": 74.0,
+     "steam": 0,
+     "total": 74.0
+    },
+    {
+     "week": "2026-06-04",
+     "league": 75.6,
+     "steam": 0,
+     "total": 75.6
+    },
+    {
+     "week": "2026-06-11",
+     "league": 77.6,
+     "steam": 0,
+     "total": 77.6
+    },
+    {
+     "week": "2026-06-18",
+     "league": 80.0,
+     "steam": 0,
+     "total": 80.0
+    },
+    {
+     "week": "2026-06-25",
+     "league": 84.0,
+     "steam": 0,
+     "total": 84.0
+    },
+    {
+     "week": "2026-07-02",
+     "league": 87.4,
+     "steam": 0,
+     "total": 87.4
+    },
+    {
+     "week": "2026-07-09",
+     "league": 91.3,
+     "steam": 0,
+     "total": 91.3
+    },
+    {
+     "week": "2026-07-16",
+     "league": 95.6,
+     "steam": 0,
+     "total": 95.6
+    },
+    {
+     "week": "2026-07-23",
+     "league": 100.3,
+     "steam": 0,
+     "total": 100.3
+    },
+    {
+     "week": "2026-07-30",
+     "league": 106.1,
+     "steam": 0,
+     "total": 106.1
+    },
+    {
+     "week": "2026-08-06",
+     "league": 111.1,
+     "steam": 0,
+     "total": 111.1
+    },
+    {
+     "week": "2026-08-13",
+     "league": 116.1,
+     "steam": 0,
+     "total": 116.1
+    },
+    {
+     "week": "2026-08-20",
+     "league": 121.0,
+     "steam": 0,
+     "total": 121.0
+    },
+    {
+     "week": "2026-08-27",
+     "league": 125.5,
+     "steam": 0,
+     "total": 125.5
+    },
+    {
+     "week": "2026-09-03",
+     "league": 130.8,
+     "steam": 0,
+     "total": 130.8
+    },
+    {
+     "week": "2026-09-10",
+     "league": 134.6,
+     "steam": 0,
+     "total": 134.6
+    },
+    {
+     "week": "2026-09-17",
+     "league": 138.0,
+     "steam": 0,
+     "total": 138.0
+    },
+    {
+     "week": "2026-09-24",
+     "league": 140.8,
+     "steam": 0,
+     "total": 140.8
+    },
+    {
+     "week": "2026-10-01",
+     "league": 143.2,
+     "steam": 0,
+     "total": 143.2
+    },
+    {
+     "week": "2026-10-08",
+     "league": 146.1,
+     "steam": 0,
+     "total": 146.1
+    },
+    {
+     "week": "2026-10-15",
+     "league": 147.6,
+     "steam": 2,
+     "total": 149.6
+    },
+    {
+     "week": "2026-10-22",
+     "league": 148.9,
+     "steam": 4,
+     "total": 152.9
+    },
+    {
+     "week": "2026-10-29",
+     "league": 149.9,
+     "steam": 6,
+     "total": 155.9
+    }
+   ],
+   "fun": {
+    "longestSession": {
+     "games": 9,
+     "hours": 5.6,
+     "day": "2026-02-14",
+     "wins": 5
+    },
+    "biggestDay": {
+     "day": "2026-02-14",
+     "hours": 6.1,
+     "games": 10
+    },
+    "longestGame": {
+     "minutes": 52,
+     "champion": "MissFortune",
+     "won": true,
+     "day": "2026-06-03"
+    },
+    "modes": [
+     {
+      "mode": "ARAM",
+      "games": 120,
+      "hours": 44.0
+     },
+     {
+      "mode": "Draft",
+      "games": 80,
+      "hours": 40.5
+     },
+     {
+      "mode": "Ranked flex",
+      "games": 21,
+      "hours": 11.2
+     },
+     {
+      "mode": "Arena",
+      "games": 10,
+      "hours": 3.1
+     }
+    ],
+    "championByMonth": [
+     {
+      "month": "2026-01",
+      "champion": "Examplor",
+      "games": 9,
+      "of": 21,
+      "icon": ""
+     },
+     {
+      "month": "2026-02",
+      "champion": "Lux",
+      "games": 12,
+      "of": 24,
+      "icon": "https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/Lux.png"
+     },
+     {
+      "month": "2026-03",
+      "champion": "Examplor",
+      "games": 7,
+      "of": 19,
+      "icon": ""
+     },
+     {
+      "month": "2026-04",
+      "champion": "Jinx",
+      "games": 15,
+      "of": 27,
+      "icon": "https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/Jinx.png"
+     },
+     {
+      "month": "2026-05",
+      "champion": "Jinx",
+      "games": 11,
+      "of": 23,
+      "icon": "https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/Jinx.png"
+     },
+     {
+      "month": "2026-06",
+      "champion": "Caitlyn",
+      "games": 8,
+      "of": 20,
+      "icon": "https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/Caitlyn.png"
+     },
+     {
+      "month": "2026-07",
+      "champion": "Lux",
+      "games": 6,
+      "of": 18,
+      "icon": "https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/Lux.png"
+     },
+     {
+      "month": "2026-08",
+      "champion": "Examplor",
+      "games": 10,
+      "of": 22,
+      "icon": ""
+     },
+     {
+      "month": "2026-09",
+      "champion": "Miss Fortune",
+      "games": 9,
+      "of": 21,
+      "icon": "https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/MissFortune.png"
+     },
+     {
+      "month": "2026-10",
+      "champion": "Jinx",
+      "games": 13,
+      "of": 25,
+      "icon": "https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/Jinx.png"
+     },
+     {
+      "month": "2026-11",
+      "champion": "Examplor",
+      "games": 4,
+      "of": 16,
+      "icon": ""
+     }
+    ],
+    "winByBand": [
+     {
+      "band": "daytime",
+      "games": 12,
+      "winRate": 50
+     },
+     {
+      "band": "evening",
+      "games": 150,
+      "winRate": 53
+     },
+     {
+      "band": "late",
+      "games": 60,
+      "winRate": 47
+     },
+     {
+      "band": "small",
+      "games": 9,
+      "winRate": 33
+     }
+    ]
+   },
+   "wall": [
+    {
+     "key": "league",
+     "name": "League of Legends",
+     "art": "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Examplor_0.jpg",
+     "weight": 4,
+     "source": "league",
+     "quip": "One more game. It is never one more game.",
+     "idle": false,
+     "claim": "most-by-far"
+    },
+    {
+     "key": "100001",
+     "name": "Fixture Quest",
+     "art": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/100001/library_600x900.jpg",
+     "weight": 4,
+     "source": "steam",
+     "quip": "Two hundred hours and I still skip the tutorial.",
+     "idle": false,
+     "claim": null
+    },
+    {
+     "key": "100002",
+     "name": "Placeholder Racers",
+     "art": "",
+     "weight": 4,
+     "source": "steam",
+     "quip": null,
+     "idle": false,
+     "claim": null
+    },
+    {
+     "key": "100003",
+     "name": "Sample Tactics",
+     "art": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/100003/library_600x900.jpg",
+     "weight": 3,
+     "source": "steam",
+     "quip": null,
+     "idle": false,
+     "claim": null
+    },
+    {
+     "key": "100004",
+     "name": "The Synthetic Kingdoms: Definitive Edition",
+     "art": "",
+     "weight": 3,
+     "source": "steam",
+     "quip": "Just one more turn, said every Tuesday.",
+     "idle": false,
+     "claim": null
+    },
+    {
+     "key": "100005",
+     "name": "Mock Orbit",
+     "art": "",
+     "weight": 3,
+     "source": "steam",
+     "quip": null,
+     "idle": false,
+     "claim": null
+    },
+    {
+     "key": "100006",
+     "name": "Stub Siege",
+     "art": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/100006/library_600x900.jpg",
+     "weight": 2,
+     "source": "steam",
+     "quip": null,
+     "idle": false,
+     "claim": null
+    },
+    {
+     "key": "100007",
+     "name": "Lorem Ipsum Tycoon",
+     "art": "",
+     "weight": 2,
+     "source": "steam",
+     "quip": null,
+     "idle": false,
+     "claim": null
+    },
+    {
+     "key": "100008",
+     "name": "Dummy Dungeon II",
+     "art": "",
+     "weight": 2,
+     "source": "steam",
+     "quip": null,
+     "idle": false,
+     "claim": null
+    },
+    {
+     "key": "100009",
+     "name": "Example Engineers",
+     "art": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/100009/library_600x900.jpg",
+     "weight": 2,
+     "source": "steam",
+     "quip": null,
+     "idle": false,
+     "claim": null
+    },
+    {
+     "key": "100010",
+     "name": "Test Harness Heroes",
+     "art": "",
+     "weight": 1,
+     "source": "steam",
+     "quip": null,
+     "idle": false,
+     "claim": null
+    },
+    {
+     "key": "100011",
+     "name": "Null Pointer",
+     "art": "",
+     "weight": 1,
+     "source": "steam",
+     "quip": null,
+     "idle": false,
+     "claim": null
+    },
+    {
+     "key": "100012",
+     "name": "Fake Frontier",
+     "art": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/100012/library_600x900.jpg",
+     "weight": 1,
+     "source": "steam",
+     "quip": null,
+     "idle": false,
+     "claim": null
+    },
+    {
+     "key": "100013",
+     "name": "Proto Portals",
+     "art": "",
+     "weight": 1,
+     "source": "steam",
+     "quip": null,
+     "idle": false,
+     "claim": null
+    },
+    {
+     "key": "100014",
+     "name": "Placeholder Idler",
+     "art": "",
+     "weight": 1,
+     "source": "steam",
+     "quip": null,
+     "idle": true,
+     "claim": null
+    }
+   ],
+   "recent": [
+    {
+     "name": "Sample Tactics",
+     "hours": 6.5,
+     "art": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/100003/library_600x900.jpg"
+    },
+    {
+     "name": "Fixture Quest",
+     "hours": 12,
+     "art": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/100001/library_600x900.jpg"
+    },
+    {
+     "name": "Placeholder Racers",
+     "hours": 2.1,
+     "art": ""
+    }
+   ],
+   "achievements": {
+    "unlocked": 120,
+    "total": 300,
+    "rarest": [
+     {
+      "game": "Fixture Quest",
+      "name": "Flawless Fixture",
+      "pct": 1.2
+     },
+     {
+      "game": "Sample Tactics",
+      "name": "No Units Lost",
+      "pct": 2.8
+     },
+     {
+      "game": "Mock Orbit",
+      "name": "Escape Velocity",
+      "pct": 4.0
+     },
+     {
+      "game": "Stub Siege",
+      "name": "Held the Wall",
+      "pct": 6.3
+     },
+     {
+      "game": "Fixture Quest",
+      "name": "Speedrunner",
+      "pct": 9.9
+     }
+    ],
+    "completion": [
+     {
+      "game": "Fixture Quest",
+      "unlocked": 40,
+      "total": 50,
+      "pct": 80
+     },
+     {
+      "game": "Placeholder Racers",
+      "unlocked": 22,
+      "total": 88,
+      "pct": 25
+     },
+     {
+      "game": "Sample Tactics",
+      "unlocked": 30,
+      "total": 45,
+      "pct": 67
+     },
+     {
+      "game": "Mock Orbit",
+      "unlocked": 3,
+      "total": 60,
+      "pct": 5
+     },
+     {
+      "game": "Stub Siege",
+      "unlocked": 25,
+      "total": 25,
+      "pct": 100
+     }
+    ]
+   },
+   "league": {
+    "rank": {
+     "queue": "solo",
+     "tier": "GOLD",
+     "division": "II",
+     "lp": 54,
+     "wins": 34,
+     "losses": 28
+    },
+    "mains": [
+     {
+      "champion": "Examplor",
+      "level": 7,
+      "points": 412345,
+      "splash": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Examplor_0.jpg",
+      "loading": "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Examplor_0.jpg"
+     },
+     {
+      "champion": "Fixtura",
+      "level": 6,
+      "points": 188210,
+      "splash": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Fixtura_0.jpg",
+      "loading": "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Fixtura_0.jpg"
+     },
+     {
+      "champion": "Mockwyn",
+      "level": 5,
+      "points": 96400,
+      "splash": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Mockwyn_0.jpg",
+      "loading": "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Mockwyn_0.jpg"
+     },
+     {
+      "champion": "Stubbard",
+      "level": 5,
+      "points": 71230,
+      "splash": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Stubbard_0.jpg",
+      "loading": "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Stubbard_0.jpg"
+     },
+     {
+      "champion": "Placeholdra",
+      "level": 4,
+      "points": 40118,
+      "splash": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Placeholdra_0.jpg",
+      "loading": "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Placeholdra_0.jpg"
+     }
+    ],
+    "recent": {
+     "games": 20,
+     "winRate": 55,
+     "kda": 3.12,
+     "pool": [
+      {
+       "champion": "Examplor",
+       "games": 8,
+       "winRate": 63
+      },
+      {
+       "champion": "Fixtura",
+       "games": 5,
+       "winRate": 40
+      },
+      {
+       "champion": "Mockwyn",
+       "games": 4,
+       "winRate": 50
+      },
+      {
+       "champion": "Stubbard",
+       "games": 2,
+       "winRate": 100
+      },
+      {
+       "champion": "Placeholdra",
+       "games": 1,
+       "winRate": 0
+      }
+     ]
+    },
+    "lifetime": {
+     "games": 1284,
+     "hours": 612,
+     "since": "2019-03"
+    }
+   }
+  },
+  "code": {
+   "updated": "2026-11-03",
+   "staleDays": 0,
+   "headline": {
+    "value": 671,
+    "unit": "",
+    "label": "commits this year"
+   },
+   "projects": [
+    {
+     "key": "a1c0de0001",
+     "name": "sample-tool",
+     "description": "A small invented command-line helper that tidies folders of sample files.",
+     "descriptionBy": "github",
+     "status": "active",
+     "fromYear": 2025,
+     "toYear": null,
+     "started": "2025-08-02",
+     "lastCommit": "2026-10",
+     "commits": 1212,
+     "languages": [
+      "Python",
+      "Shell"
+     ],
+     "languageShare": [
+      78,
+      22
+     ],
+     "url": "https://github.com/Ripixel-Studio/sample-tool"
+    },
+    {
+     "key": "a1c0de0002",
+     "name": "quiet-ledger",
+     "description": null,
+     "descriptionBy": null,
+     "status": "active",
+     "fromYear": 2024,
+     "toYear": null,
+     "started": "2024-02-11",
+     "lastCommit": "2026-09",
+     "commits": 340,
+     "languages": [
+      "TypeScript",
+      "CSS"
+     ],
+     "languageShare": [
+      86,
+      14
+     ],
+     "url": null
+    },
+    {
+     "key": "a1c0de0005",
+     "name": "tide-tables",
+     "description": "A made-up dashboard that charts imaginary tide times for a pretend harbour, mostly to try out a new chart library.",
+     "descriptionBy": "ai",
+     "status": "active",
+     "fromYear": 2023,
+     "toYear": null,
+     "started": "2023-04-18",
+     "lastCommit": "2026-11",
+     "commits": 642,
+     "languages": [
+      "TypeScript",
+      "Go",
+      "CSS",
+      "HTML"
+     ],
+     "languageShare": [
+      58,
+      27,
+      9,
+      4
+     ],
+     "url": "https://github.com/ripixel/tide-tables"
+    },
+    {
+     "key": "a1c0de0006",
+     "name": "pixel-kiln",
+     "description": "Invented sprite baker: turns folders of drawings into sprite sheets.",
+     "descriptionBy": "github",
+     "status": "active",
+     "fromYear": 2021,
+     "toYear": null,
+     "started": "2021-09-30",
+     "lastCommit": "2026-08",
+     "commits": 187,
+     "languages": [
+      "Rust",
+      "Shell"
+     ],
+     "languageShare": [
+      91,
+      9
+     ],
+     "url": "https://github.com/Ripixel-Studio/pixel-kiln"
+    },
+    {
+     "key": "a1c0de0007",
+     "name": "spare-parts",
+     "description": null,
+     "descriptionBy": null,
+     "status": "active",
+     "fromYear": 2024,
+     "toYear": null,
+     "started": "2024-06-12",
+     "lastCommit": "2026-07",
+     "commits": 23,
+     "languages": [
+      "Python",
+      "Dockerfile",
+      "Shell"
+     ],
+     "languageShare": [
+      80,
+      12,
+      8
+     ],
+     "url": null
+    },
+    {
+     "key": "a1c0de0008",
+     "name": "night-bus",
+     "description": "A fixture timetable scraper for a fictional bus route. Runs on a timer and sends a nudge.",
+     "descriptionBy": "ai",
+     "status": "active",
+     "fromYear": 2024,
+     "toYear": null,
+     "started": "2024-11-02",
+     "lastCommit": "2026-06",
+     "commits": 94,
+     "languages": [
+      "JavaScript",
+      "HTML",
+      "CSS"
+     ],
+     "languageShare": [
+      70,
+      20,
+      10
+     ],
+     "url": "https://github.com/ripixel/night-bus"
+    },
+    {
+     "key": "a1c0de0003",
+     "name": "paper-lantern",
+     "description": "An invented static gallery generator, built to learn templating.",
+     "descriptionBy": "ai",
+     "status": "retired",
+     "fromYear": 2019,
+     "toYear": 2023,
+     "started": "2019-04-20",
+     "lastCommit": "2023-06",
+     "commits": 480,
+     "languages": [
+      "JavaScript",
+      "HTML"
+     ],
+     "languageShare": [
+      64,
+      36
+     ],
+     "url": "https://github.com/Ripixel-Studio/paper-lantern"
+    },
+    {
+     "key": "a1c0de0004",
+     "name": "old-orbit",
+     "description": null,
+     "descriptionBy": null,
+     "status": "retired",
+     "fromYear": 2016,
+     "toYear": 2019,
+     "started": "2016-01-09",
+     "lastCommit": "2019-11",
+     "commits": 95,
+     "languages": [
+      "Java"
+     ],
+     "languageShare": [
+      100
+     ],
+     "url": "https://github.com/ripixel/old-orbit"
+    }
+   ],
+   "languagesByYear": {
+    "2022": {
+     "JavaScript": 50.0,
+     "HTML": 20.0,
+     "CSS": 15.0,
+     "Java": 10.0,
+     "Shell": 5.0
+    },
+    "2023": {
+     "JavaScript": 45.0,
+     "TypeScript": 25.0,
+     "HTML": 15.0,
+     "CSS": 10.0,
+     "Python": 5.0
+    },
+    "2024": {
+     "TypeScript": 55.0,
+     "CSS": 15.0,
+     "JavaScript": 15.0,
+     "Go": 10.0,
+     "Shell": 5.0
+    },
+    "2025": {
+     "TypeScript": 40.0,
+     "Python": 35.0,
+     "Go": 15.0,
+     "CSS": 5.0,
+     "Shell": 5.0
+    },
+    "2026": {
+     "Python": 39.5,
+     "TypeScript": 35.0,
+     "Go": 15.0,
+     "Rust": 6.5,
+     "Shell": 4.0
+    }
+   },
+   "commitsByMonth": [
+    {
+     "month": "2025-06",
+     "n": 3
+    },
+    {
+     "month": "2025-07",
+     "n": 41
+    },
+    {
+     "month": "2025-08",
+     "n": 12
+    },
+    {
+     "month": "2025-09",
+     "n": 26
+    },
+    {
+     "month": "2025-11",
+     "n": 89
+    },
+    {
+     "month": "2025-12",
+     "n": 144
+    },
+    {
+     "month": "2026-01",
+     "n": 133
+    },
+    {
+     "month": "2026-02",
+     "n": 33
+    },
+    {
+     "month": "2026-03",
+     "n": 26
+    },
+    {
+     "month": "2026-04",
+     "n": 11
+    },
+    {
+     "month": "2026-05",
+     "n": 108
+    },
+    {
+     "month": "2026-06",
+     "n": 77
+    },
+    {
+     "month": "2026-07",
+     "n": 70
+    },
+    {
+     "month": "2026-08",
+     "n": 25
+    },
+    {
+     "month": "2026-09",
+     "n": 10
+    },
+    {
+     "month": "2026-10",
+     "n": 134
+    },
+    {
+     "month": "2026-11",
+     "n": 44
+    }
+   ],
+   "commitsByDay": [
+    {
+     "day": "2025-10-28",
+     "n": 1
+    },
+    {
+     "day": "2025-10-30",
+     "n": 4
+    },
+    {
+     "day": "2025-10-31",
+     "n": 1
+    },
+    {
+     "day": "2025-11-01",
+     "n": 1
+    },
+    {
+     "day": "2025-11-02",
+     "n": 1
+    },
+    {
+     "day": "2025-11-03",
+     "n": 3
+    },
+    {
+     "day": "2025-11-05",
+     "n": 1
+    },
+    {
+     "day": "2025-11-08",
+     "n": 3
+    },
+    {
+     "day": "2025-11-10",
+     "n": 12
+    },
+    {
+     "day": "2025-11-11",
+     "n": 1
+    },
+    {
+     "day": "2025-11-12",
+     "n": 2
+    },
+    {
+     "day": "2025-11-14",
+     "n": 5
+    },
+    {
+     "day": "2025-11-15",
+     "n": 2
+    },
+    {
+     "day": "2025-11-16",
+     "n": 1
+    },
+    {
+     "day": "2025-11-17",
+     "n": 1
+    },
+    {
+     "day": "2025-11-19",
+     "n": 2
+    },
+    {
+     "day": "2025-11-20",
+     "n": 3
+    },
+    {
+     "day": "2025-11-21",
+     "n": 9
+    },
+    {
+     "day": "2025-11-22",
+     "n": 1
+    },
+    {
+     "day": "2025-11-23",
+     "n": 4
+    },
+    {
+     "day": "2025-11-26",
+     "n": 24
+    },
+    {
+     "day": "2025-11-27",
+     "n": 3
+    },
+    {
+     "day": "2025-11-29",
+     "n": 4
+    },
+    {
+     "day": "2025-11-30",
+     "n": 6
+    },
+    {
+     "day": "2025-12-02",
+     "n": 13
+    },
+    {
+     "day": "2025-12-03",
+     "n": 7
+    },
+    {
+     "day": "2025-12-04",
+     "n": 5
+    },
+    {
+     "day": "2025-12-05",
+     "n": 11
+    },
+    {
+     "day": "2025-12-07",
+     "n": 7
+    },
+    {
+     "day": "2025-12-08",
+     "n": 7
+    },
+    {
+     "day": "2025-12-12",
+     "n": 3
+    },
+    {
+     "day": "2025-12-13",
+     "n": 1
+    },
+    {
+     "day": "2025-12-14",
+     "n": 1
+    },
+    {
+     "day": "2025-12-15",
+     "n": 1
+    },
+    {
+     "day": "2025-12-17",
+     "n": 1
+    },
+    {
+     "day": "2025-12-18",
+     "n": 13
+    },
+    {
+     "day": "2025-12-19",
+     "n": 3
+    },
+    {
+     "day": "2025-12-20",
+     "n": 13
+    },
+    {
+     "day": "2025-12-21",
+     "n": 12
+    },
+    {
+     "day": "2025-12-22",
+     "n": 3
+    },
+    {
+     "day": "2025-12-23",
+     "n": 14
+    },
+    {
+     "day": "2025-12-25",
+     "n": 1
+    },
+    {
+     "day": "2025-12-26",
+     "n": 1
+    },
+    {
+     "day": "2025-12-27",
+     "n": 5
+    },
+    {
+     "day": "2025-12-28",
+     "n": 1
+    },
+    {
+     "day": "2025-12-29",
+     "n": 2
+    },
+    {
+     "day": "2025-12-30",
+     "n": 19
+    },
+    {
+     "day": "2026-01-01",
+     "n": 6
+    },
+    {
+     "day": "2026-01-02",
+     "n": 1
+    },
+    {
+     "day": "2026-01-03",
+     "n": 10
+    },
+    {
+     "day": "2026-01-04",
+     "n": 10
+    },
+    {
+     "day": "2026-01-05",
+     "n": 3
+    },
+    {
+     "day": "2026-01-06",
+     "n": 6
+    },
+    {
+     "day": "2026-01-07",
+     "n": 1
+    },
+    {
+     "day": "2026-01-08",
+     "n": 1
+    },
+    {
+     "day": "2026-01-09",
+     "n": 1
+    },
+    {
+     "day": "2026-01-10",
+     "n": 1
+    },
+    {
+     "day": "2026-01-11",
+     "n": 3
+    },
+    {
+     "day": "2026-01-12",
+     "n": 14
+    },
+    {
+     "day": "2026-01-13",
+     "n": 1
+    },
+    {
+     "day": "2026-01-14",
+     "n": 2
+    },
+    {
+     "day": "2026-01-15",
+     "n": 1
+    },
+    {
+     "day": "2026-01-17",
+     "n": 4
+    },
+    {
+     "day": "2026-01-18",
+     "n": 1
+    },
+    {
+     "day": "2026-01-19",
+     "n": 2
+    },
+    {
+     "day": "2026-01-20",
+     "n": 12
+    },
+    {
+     "day": "2026-01-21",
+     "n": 1
+    },
+    {
+     "day": "2026-01-23",
+     "n": 1
+    },
+    {
+     "day": "2026-01-24",
+     "n": 1
+    },
+    {
+     "day": "2026-01-25",
+     "n": 26
+    },
+    {
+     "day": "2026-01-28",
+     "n": 3
+    },
+    {
+     "day": "2026-01-29",
+     "n": 10
+    },
+    {
+     "day": "2026-01-30",
+     "n": 10
+    },
+    {
+     "day": "2026-01-31",
+     "n": 1
+    },
+    {
+     "day": "2026-02-07",
+     "n": 3
+    },
+    {
+     "day": "2026-02-08",
+     "n": 1
+    },
+    {
+     "day": "2026-02-09",
+     "n": 1
+    },
+    {
+     "day": "2026-02-10",
+     "n": 5
+    },
+    {
+     "day": "2026-02-16",
+     "n": 1
+    },
+    {
+     "day": "2026-02-17",
+     "n": 1
+    },
+    {
+     "day": "2026-02-18",
+     "n": 4
+    },
+    {
+     "day": "2026-02-21",
+     "n": 5
+    },
+    {
+     "day": "2026-02-23",
+     "n": 5
+    },
+    {
+     "day": "2026-02-28",
+     "n": 7
+    },
+    {
+     "day": "2026-03-08",
+     "n": 1
+    },
+    {
+     "day": "2026-03-09",
+     "n": 8
+    },
+    {
+     "day": "2026-03-11",
+     "n": 6
+    },
+    {
+     "day": "2026-03-16",
+     "n": 1
+    },
+    {
+     "day": "2026-03-24",
+     "n": 1
+    },
+    {
+     "day": "2026-03-28",
+     "n": 1
+    },
+    {
+     "day": "2026-03-29",
+     "n": 8
+    },
+    {
+     "day": "2026-04-08",
+     "n": 1
+    },
+    {
+     "day": "2026-04-10",
+     "n": 5
+    },
+    {
+     "day": "2026-04-11",
+     "n": 2
+    },
+    {
+     "day": "2026-04-18",
+     "n": 2
+    },
+    {
+     "day": "2026-04-19",
+     "n": 1
+    },
+    {
+     "day": "2026-05-01",
+     "n": 4
+    },
+    {
+     "day": "2026-05-03",
+     "n": 12
+    },
+    {
+     "day": "2026-05-05",
+     "n": 5
+    },
+    {
+     "day": "2026-05-08",
+     "n": 1
+    },
+    {
+     "day": "2026-05-09",
+     "n": 1
+    },
+    {
+     "day": "2026-05-10",
+     "n": 1
+    },
+    {
+     "day": "2026-05-14",
+     "n": 7
+    },
+    {
+     "day": "2026-05-16",
+     "n": 13
+    },
+    {
+     "day": "2026-05-18",
+     "n": 18
+    },
+    {
+     "day": "2026-05-19",
+     "n": 4
+    },
+    {
+     "day": "2026-05-22",
+     "n": 3
+    },
+    {
+     "day": "2026-05-23",
+     "n": 2
+    },
+    {
+     "day": "2026-05-24",
+     "n": 2
+    },
+    {
+     "day": "2026-05-26",
+     "n": 5
+    },
+    {
+     "day": "2026-05-27",
+     "n": 1
+    },
+    {
+     "day": "2026-05-28",
+     "n": 6
+    },
+    {
+     "day": "2026-05-29",
+     "n": 1
+    },
+    {
+     "day": "2026-05-31",
+     "n": 22
+    },
+    {
+     "day": "2026-06-01",
+     "n": 1
+    },
+    {
+     "day": "2026-06-02",
+     "n": 8
+    },
+    {
+     "day": "2026-06-03",
+     "n": 1
+    },
+    {
+     "day": "2026-06-04",
+     "n": 13
+    },
+    {
+     "day": "2026-06-06",
+     "n": 1
+    },
+    {
+     "day": "2026-06-10",
+     "n": 1
+    },
+    {
+     "day": "2026-06-12",
+     "n": 1
+    },
+    {
+     "day": "2026-06-14",
+     "n": 9
+    },
+    {
+     "day": "2026-06-15",
+     "n": 10
+    },
+    {
+     "day": "2026-06-16",
+     "n": 11
+    },
+    {
+     "day": "2026-06-17",
+     "n": 2
+    },
+    {
+     "day": "2026-06-20",
+     "n": 1
+    },
+    {
+     "day": "2026-06-21",
+     "n": 1
+    },
+    {
+     "day": "2026-06-22",
+     "n": 1
+    },
+    {
+     "day": "2026-06-23",
+     "n": 1
+    },
+    {
+     "day": "2026-06-24",
+     "n": 2
+    },
+    {
+     "day": "2026-06-26",
+     "n": 3
+    },
+    {
+     "day": "2026-06-27",
+     "n": 2
+    },
+    {
+     "day": "2026-06-28",
+     "n": 1
+    },
+    {
+     "day": "2026-06-29",
+     "n": 7
+    },
+    {
+     "day": "2026-07-01",
+     "n": 3
+    },
+    {
+     "day": "2026-07-03",
+     "n": 9
+    },
+    {
+     "day": "2026-07-04",
+     "n": 3
+    },
+    {
+     "day": "2026-07-06",
+     "n": 3
+    },
+    {
+     "day": "2026-07-09",
+     "n": 9
+    },
+    {
+     "day": "2026-07-11",
+     "n": 2
+    },
+    {
+     "day": "2026-07-12",
+     "n": 1
+    },
+    {
+     "day": "2026-07-13",
+     "n": 1
+    },
+    {
+     "day": "2026-07-15",
+     "n": 1
+    },
+    {
+     "day": "2026-07-16",
+     "n": 9
+    },
+    {
+     "day": "2026-07-18",
+     "n": 1
+    },
+    {
+     "day": "2026-07-19",
+     "n": 1
+    },
+    {
+     "day": "2026-07-20",
+     "n": 1
+    },
+    {
+     "day": "2026-07-21",
+     "n": 1
+    },
+    {
+     "day": "2026-07-25",
+     "n": 17
+    },
+    {
+     "day": "2026-07-26",
+     "n": 2
+    },
+    {
+     "day": "2026-07-27",
+     "n": 2
+    },
+    {
+     "day": "2026-07-30",
+     "n": 3
+    },
+    {
+     "day": "2026-07-31",
+     "n": 1
+    },
+    {
+     "day": "2026-08-01",
+     "n": 1
+    },
+    {
+     "day": "2026-08-02",
+     "n": 1
+    },
+    {
+     "day": "2026-08-04",
+     "n": 3
+    },
+    {
+     "day": "2026-08-13",
+     "n": 4
+    },
+    {
+     "day": "2026-08-15",
+     "n": 6
+    },
+    {
+     "day": "2026-08-20",
+     "n": 2
+    },
+    {
+     "day": "2026-08-29",
+     "n": 1
+    },
+    {
+     "day": "2026-08-30",
+     "n": 1
+    },
+    {
+     "day": "2026-08-31",
+     "n": 6
+    },
+    {
+     "day": "2026-09-06",
+     "n": 4
+    },
+    {
+     "day": "2026-09-11",
+     "n": 3
+    },
+    {
+     "day": "2026-09-13",
+     "n": 1
+    },
+    {
+     "day": "2026-09-25",
+     "n": 1
+    },
+    {
+     "day": "2026-09-30",
+     "n": 1
+    },
+    {
+     "day": "2026-10-01",
+     "n": 6
+    },
+    {
+     "day": "2026-10-03",
+     "n": 1
+    },
+    {
+     "day": "2026-10-04",
+     "n": 3
+    },
+    {
+     "day": "2026-10-05",
+     "n": 1
+    },
+    {
+     "day": "2026-10-07",
+     "n": 21
+    },
+    {
+     "day": "2026-10-09",
+     "n": 3
+    },
+    {
+     "day": "2026-10-12",
+     "n": 1
+    },
+    {
+     "day": "2026-10-13",
+     "n": 16
+    },
+    {
+     "day": "2026-10-14",
+     "n": 4
+    },
+    {
+     "day": "2026-10-15",
+     "n": 4
+    },
+    {
+     "day": "2026-10-17",
+     "n": 9
+    },
+    {
+     "day": "2026-10-18",
+     "n": 12
+    },
+    {
+     "day": "2026-10-20",
+     "n": 12
+    },
+    {
+     "day": "2026-10-21",
+     "n": 1
+    },
+    {
+     "day": "2026-10-22",
+     "n": 3
+    },
+    {
+     "day": "2026-10-23",
+     "n": 2
+    },
+    {
+     "day": "2026-10-24",
+     "n": 2
+    },
+    {
+     "day": "2026-10-25",
+     "n": 10
+    },
+    {
+     "day": "2026-10-26",
+     "n": 7
+    },
+    {
+     "day": "2026-10-28",
+     "n": 14
+    },
+    {
+     "day": "2026-10-31",
+     "n": 2
+    },
+    {
+     "day": "2026-11-01",
+     "n": 41
+    },
+    {
+     "day": "2026-11-02",
+     "n": 2
+    },
+    {
+     "day": "2026-11-03",
+     "n": 1
+    }
+   ],
+   "languagesNow": [
+    "Python",
+    "TypeScript",
+    "Go"
+   ]
+  },
+  "watching": {
+   "updated": "2026-11-03",
+   "staleDays": 0,
+   "headline": {
+    "value": 8,
+    "unit": "",
+    "label": "films watched this year"
+   },
+   "notable": [
+    {
+     "key": "a1b2c3d4e5",
+     "kind": "film",
+     "title": "The Invented Harbour",
+     "by": null,
+     "season": null,
+     "year": 2024,
+     "provider": "Fixture Cinema",
+     "month": "2026-10",
+     "reason": "Rewatched twice",
+     "poster": null
+    }
+   ],
+   "totals": {
+    "month": {
+     "films": 0,
+     "episodes": 3,
+     "videos": 11,
+     "hours": null,
+     "cinema": 0,
+     "channels": 7,
+     "youtubeDays": 3
+    },
+    "year": {
+     "films": 8,
+     "episodes": 80,
+     "videos": 973,
+     "hours": 81.5,
+     "cinema": 6,
+     "channels": 474,
+     "youtubeDays": 211,
+     "hoursEstimated": true
+    }
+   },
+   "years": {
+    "2026": [
+     {
+      "key": "a1b2c3d4e5",
+      "kind": "film",
+      "title": "The Invented Harbour",
+      "by": null,
+      "season": null,
+      "year": 2024,
+      "provider": "Fixture Cinema",
+      "month": "2026-10",
+      "reason": "Rewatched twice",
+      "poster": null
+     }
+    ]
+   },
+   "wall": [
+    {
+     "key": "aa00000001",
+     "kind": "series",
+     "title": "Lanterns of the Quiet Coast",
+     "year": null,
+     "poster": "https://image.tmdb.org/t/p/w342/fx-lanterns.jpg",
+     "bigScreen": false,
+     "provider": "netflix",
+     "month": "2026-11",
+     "firstMonth": "2026-10",
+     "seasons": [
+      1
+     ],
+     "episodes": 10,
+     "reason": "binged season 1 in 4 days",
+     "weight": 2
+    },
+    {
+     "key": "a1b2c3d4e5",
+     "kind": "film",
+     "title": "The Invented Harbour",
+     "year": 2024,
+     "poster": "https://image.tmdb.org/t/p/w342/fx-harbour.jpg",
+     "bigScreen": false,
+     "provider": "netflix",
+     "month": "2026-10",
+     "reason": "watched twice",
+     "weight": 2
+    },
+    {
+     "key": "aa00000002",
+     "kind": "series",
+     "title": "Placeholder High",
+     "year": null,
+     "poster": "https://image.tmdb.org/t/p/w342/fx-high.jpg",
+     "bigScreen": false,
+     "provider": "netflix",
+     "month": "2026-10",
+     "firstMonth": "2026-10",
+     "seasons": [
+      1
+     ],
+     "episodes": 12,
+     "reason": "binged 8 episodes in 4 days",
+     "weight": 1
+    },
+    {
+     "key": "aa00000003",
+     "kind": "film",
+     "title": "Fixture Falls",
+     "year": 2026,
+     "poster": "https://image.tmdb.org/t/p/w342/fx-falls.jpg",
+     "bigScreen": true,
+     "provider": null,
+     "month": "2026-08",
+     "reason": "on the big screen",
+     "weight": 1
+    },
+    {
+     "key": "aa00000004",
+     "kind": "film",
+     "title": "Sample Rocket",
+     "year": 2026,
+     "poster": "https://image.tmdb.org/t/p/w342/fx-rocket.jpg",
+     "bigScreen": true,
+     "provider": null,
+     "month": "2026-08",
+     "reason": "on the big screen",
+     "weight": 1
+    },
+    {
+     "key": "aa00000005",
+     "kind": "series",
+     "title": "Sample Precinct",
+     "year": null,
+     "poster": "https://image.tmdb.org/t/p/w342/fx-precinct.jpg",
+     "bigScreen": false,
+     "provider": "netflix",
+     "month": "2026-08",
+     "firstMonth": "2026-08",
+     "seasons": [
+      7,
+      8
+     ],
+     "episodes": 20,
+     "reason": "binged season 8 in 3 days",
+     "weight": 2
+    },
+    {
+     "key": "aa00000006",
+     "kind": "series",
+     "title": "Long Voyage Pirates",
+     "year": null,
+     "poster": "https://image.tmdb.org/t/p/w342/fx-pirates.jpg",
+     "bigScreen": false,
+     "provider": "netflix",
+     "month": "2026-07",
+     "firstMonth": "2026-06",
+     "seasons": [
+      1,
+      2
+     ],
+     "episodes": 9,
+     "reason": "came back across 5 weeks, 6 episodes",
+     "weight": 1
+    },
+    {
+     "key": "aa00000007",
+     "kind": "film",
+     "title": "A Film With No Poster",
+     "year": 2025,
+     "poster": "https://cdn.example.com/x.jpg",
+     "bigScreen": false,
+     "provider": "netflix",
+     "month": "2026-06",
+     "reason": "streamed on Netflix",
+     "weight": 1
+    },
+    {
+     "key": "aa00000008",
+     "kind": "film",
+     "title": "The Paper Moon Landing",
+     "year": 2026,
+     "poster": "https://image.tmdb.org/t/p/w342/fx-moon.jpg",
+     "bigScreen": true,
+     "provider": null,
+     "month": "2026-05",
+     "reason": "on the big screen",
+     "weight": 1
+    },
+    {
+     "key": "aa00000009",
+     "kind": "film",
+     "title": "Mostly Typeset",
+     "year": 2025,
+     "poster": null,
+     "bigScreen": false,
+     "provider": "netflix",
+     "month": "2026-04",
+     "reason": "streamed on Netflix",
+     "weight": 1
+    },
+    {
+     "key": "aa00000010",
+     "kind": "series",
+     "title": "The Envoy",
+     "year": null,
+     "poster": "https://image.tmdb.org/t/p/w342/fx-envoy.jpg",
+     "bigScreen": false,
+     "provider": "netflix",
+     "month": "2025-11",
+     "firstMonth": "2025-10",
+     "seasons": [
+      3
+     ],
+     "episodes": 8,
+     "reason": "binged season 3 in a week",
+     "weight": 2
+    },
+    {
+     "key": "aa00000011",
+     "kind": "film",
+     "title": "Placeholder Nights",
+     "year": 2025,
+     "poster": "https://image.tmdb.org/t/p/w342/fx-nights.jpg",
+     "bigScreen": true,
+     "provider": null,
+     "month": "2025-08",
+     "reason": "on the big screen",
+     "weight": 1
+    },
+    {
+     "key": "aa00000012",
+     "kind": "film",
+     "title": "Invented Robots",
+     "year": 2024,
+     "poster": "https://image.tmdb.org/t/p/w342/fx-robots.jpg",
+     "bigScreen": true,
+     "provider": null,
+     "month": "2024-10",
+     "reason": "on the big screen",
+     "weight": 1
+    },
+    {
+     "key": "aa00000013",
+     "kind": "film",
+     "title": "Dune Sample",
+     "year": 2021,
+     "poster": "https://image.tmdb.org/t/p/w342/fx-dune.jpg",
+     "bigScreen": true,
+     "provider": null,
+     "month": "2021-10",
+     "reason": "on the big screen",
+     "weight": 1
+    }
+   ],
+   "strip": [
+    {
+     "month": "2025-12",
+     "films": 1,
+     "cinema": 0,
+     "episodes": 2,
+     "videos": 155,
+     "keys": []
+    },
+    {
+     "month": "2026-01",
+     "films": 1,
+     "cinema": 1,
+     "episodes": 1,
+     "videos": 118,
+     "keys": []
+    },
+    {
+     "month": "2026-02",
+     "films": 0,
+     "cinema": 0,
+     "episodes": 2,
+     "videos": 57,
+     "keys": []
+    },
+    {
+     "month": "2026-03",
+     "films": 0,
+     "cinema": 0,
+     "episodes": 0,
+     "videos": 0,
+     "keys": []
+    },
+    {
+     "month": "2026-04",
+     "films": 1,
+     "cinema": 0,
+     "episodes": 2,
+     "videos": 39,
+     "keys": [
+      "aa00000009"
+     ]
+    },
+    {
+     "month": "2026-05",
+     "films": 3,
+     "cinema": 2,
+     "episodes": 0,
+     "videos": 59,
+     "keys": [
+      "aa00000008"
+     ]
+    },
+    {
+     "month": "2026-06",
+     "films": 1,
+     "cinema": 1,
+     "episodes": 9,
+     "videos": 174,
+     "keys": [
+      "aa00000007",
+      "aa00000006"
+     ]
+    },
+    {
+     "month": "2026-07",
+     "films": 0,
+     "cinema": 0,
+     "episodes": 13,
+     "videos": 237,
+     "keys": [
+      "aa00000006"
+     ]
+    },
+    {
+     "month": "2026-08",
+     "films": 2,
+     "cinema": 2,
+     "episodes": 20,
+     "videos": 92,
+     "keys": [
+      "aa00000003",
+      "aa00000004",
+      "aa00000005"
+     ]
+    },
+    {
+     "month": "2026-09",
+     "films": 0,
+     "cinema": 0,
+     "episodes": 3,
+     "videos": 64,
+     "keys": []
+    },
+    {
+     "month": "2026-10",
+     "films": 1,
+     "cinema": 0,
+     "episodes": 27,
+     "videos": 100,
+     "keys": [
+      "aa00000001",
+      "a1b2c3d4e5",
+      "aa00000002"
+     ]
+    },
+    {
+     "month": "2026-11",
+     "films": 0,
+     "cinema": 0,
+     "episodes": 3,
+     "videos": 11,
+     "keys": [
+      "aa00000001"
+     ]
+    }
+   ],
+   "channels": [
+    {
+     "key": "cc00000001",
+     "title": "Shed Days",
+     "avatar": "https://yt3.ggpht.com/fx-shed=s176-c-k-c0x00ffffff-no-rj",
+     "thumbs": [
+      "https://i.ytimg.com/vi/fxshed00000/mqdefault.jpg",
+      "https://i.ytimg.com/vi/fxshed00001/mqdefault.jpg",
+      "https://i.ytimg.com/vi/fxshed00002/mqdefault.jpg"
+     ],
+     "days": 68,
+     "views": 74,
+     "share": 5,
+     "since": "2025-10",
+     "lastMonth": "2026-11",
+     "rule": "habit",
+     "reason": "watched most weeks since March",
+     "rhythm": [
+      2,
+      0,
+      4,
+      3,
+      3,
+      2,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      2,
+      4,
+      0,
+      0,
+      0,
+      0,
+      2,
+      2,
+      3,
+      1,
+      1,
+      0
+     ]
+    },
+    {
+     "key": "cc00000002",
+     "title": "Crumb Club",
+     "avatar": null,
+     "thumbs": [
+      "https://i.ytimg.com/vi/fxcrumb0000/mqdefault.jpg",
+      "https://i.ytimg.com/vi/fxcrumb0001/mqdefault.jpg"
+     ],
+     "days": 36,
+     "views": 52,
+     "share": 4,
+     "since": "2026-06",
+     "lastMonth": "2026-11",
+     "rule": "habit",
+     "reason": "watched most weeks since June",
+     "rhythm": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      2,
+      5,
+      6,
+      4,
+      3,
+      0,
+      2,
+      2,
+      0,
+      0,
+      0,
+      0,
+      2,
+      2,
+      1,
+      1,
+      1,
+      0,
+      1,
+      2
+     ]
+    },
+    {
+     "key": "cc00000003",
+     "title": "Pocket Physics",
+     "avatar": "https://yt3.ggpht.com/fx-pocket=s176-c-k-c0x00ffffff-no-rj",
+     "thumbs": [],
+     "days": 9,
+     "views": 14,
+     "share": 1,
+     "since": "2026-10",
+     "lastMonth": "2026-11",
+     "rule": "new",
+     "reason": "new since October, already on 9 days",
+     "rhythm": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      3,
+      3,
+      2
+     ]
+    },
+    {
+     "key": "cc00000004",
+     "title": "Night Owl Workshop",
+     "avatar": null,
+     "thumbs": [],
+     "days": 21,
+     "views": 24,
+     "share": 2,
+     "since": "2025-10",
+     "lastMonth": "2026-07",
+     "rule": "habit",
+     "reason": "on 21 days across 8 months",
+     "rhythm": [
+      0,
+      0,
+      1,
+      0,
+      3,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "key": "cc00000005",
+     "title": "The Placeholder Show",
+     "avatar": null,
+     "thumbs": [
+      "https://i.ytimg.com/vi/fxplace0001/mqdefault.jpg"
+     ],
+     "days": 7,
+     "views": 26,
+     "share": 2,
+     "since": "2025-11",
+     "lastMonth": "2025-12",
+     "rule": "binge",
+     "reason": "binged 25 videos in 3 weeks",
+     "rhythm": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  "listening": {
+   "updated": "2026-11-03",
+   "staleDays": 0,
+   "headline": {
+    "value": 3400,
+    "unit": "",
+    "label": "tracks this year"
+   },
+   "notable": [
+    {
+     "key": "f6e5d4c3b2",
+     "kind": "album",
+     "title": "Sample Echoes",
+     "by": "The Placeholders",
+     "season": null,
+     "year": 2025,
+     "provider": "Fixture Music",
+     "month": "2026-10",
+     "reason": "On repeat",
+     "poster": null
+    }
+   ],
+   "totals": {
+    "month": {
+     "tracks": 310,
+     "podcastEpisodes": 12,
+     "audiobookHours": 6
+    },
+    "year": {
+     "tracks": 3400,
+     "podcastEpisodes": 120,
+     "audiobookHours": 52
+    }
+   },
+   "years": {
+    "2026": [
+     {
+      "key": "f6e5d4c3b2",
+      "kind": "album",
+      "title": "Sample Echoes",
+      "by": "The Placeholders",
+      "season": null,
+      "year": 2025,
+      "provider": "Fixture Music",
+      "month": "2026-10",
+      "reason": "On repeat",
+      "poster": null
+     }
+    ]
+   }
+  },
+  "reading": {
+   "updated": "2026-10-30",
+   "staleDays": 4,
+   "headline": {
+    "value": 9,
+    "unit": "",
+    "label": "books finished this year"
+   },
+   "notable": [
+    {
+     "key": "0a9b8c7d6e",
+     "kind": "book",
+     "title": "A Made-Up Almanac",
+     "by": "Ada Example",
+     "season": null,
+     "year": 2023,
+     "provider": "Fixture Books",
+     "month": "2026-10",
+     "reason": "Finished",
+     "poster": null
+    }
+   ],
+   "totals": {
+    "month": {
+     "books": 1,
+     "pages": 320
+    },
+    "year": {
+     "books": 9,
+     "pages": 2900
+    }
+   },
+   "years": {
+    "2026": [
+     {
+      "key": "0a9b8c7d6e",
+      "kind": "book",
+      "title": "A Made-Up Almanac",
+      "by": "Ada Example",
+      "season": null,
+      "year": 2023,
+      "provider": "Fixture Books",
+      "month": "2026-10",
+      "reason": "Finished",
+      "poster": null
+     }
+    ]
+   },
+   "current": [
+    {
+     "title": "Another Invented Volume",
+     "by": "Sam Sample",
+     "progress": 0.4
+    }
+   ]
+  },
+  "live": {
+   "updated": "2026-11-03",
+   "staleDays": 0,
+   "headline": {
+    "value": 3,
+    "unit": "",
+    "label": "live events this year"
+   },
+   "notable": [
+    {
+     "key": "1122334455",
+     "kind": "gig",
+     "title": "Sample Band Live",
+     "by": null,
+     "season": null,
+     "year": 2026,
+     "provider": null,
+     "month": "2026-10",
+     "reason": "Gig",
+     "poster": null
+    }
+   ],
+   "years": {
+    "2026": [
+     {
+      "key": "1122334455",
+      "kind": "gig",
+      "title": "Sample Band Live",
+      "by": null,
+      "season": null,
+      "year": 2026,
+      "provider": null,
+      "month": "2026-10",
+      "reason": "Gig",
+      "poster": null
+     }
+    ]
+   }
+  },
+  "work": {
+   "updated": "2026-11-03",
+   "staleDays": 0,
+   "stats": {
+    "yearsShipping": 11,
+    "employers": 4,
+    "contracting": 1,
+    "technologies": 21
+   },
+   "roles": [
+    {
+     "id": "fx-role-7",
+     "company": "Monzo",
+     "title": "Senior staff software engineer",
+     "team": "Borrowing",
+     "from": "2023-05",
+     "to": null,
+     "kind": "employment",
+     "body": "Fixture text: looking after a lending product team. Invented for the build.",
+     "tech": [
+      "go",
+      "typescript",
+      "kubernetes",
+      "aws",
+      "kafka",
+      "graphql",
+      "circleci"
+     ],
+     "period": "may 2023 — present"
+    },
+    {
+     "id": "fx-role-6",
+     "company": "Deliveroo",
+     "title": "Staff software engineer",
+     "team": "Care",
+     "from": "2022-07",
+     "to": "2023-05",
+     "kind": "employment",
+     "body": "Fixture text: a bigger remit across several teams.\n\nA second invented paragraph.",
+     "tech": [
+      "typescript",
+      "scala",
+      "go",
+      "aws",
+      "datadog",
+      "graphql"
+     ],
+     "period": "jul 2022 — may 2023"
+    },
+    {
+     "id": "fx-role-5",
+     "company": "Deliveroo",
+     "title": "Senior software engineer",
+     "team": "Care",
+     "from": "2020-12",
+     "to": "2022-06",
+     "kind": "employment",
+     "body": "Fixture text: services front and back.",
+     "tech": [
+      "typescript",
+      "scala",
+      "react",
+      "aws",
+      "kafka"
+     ],
+     "period": "dec 2020 — jun 2022"
+    },
+    {
+     "id": "fx-role-4",
+     "company": "DVELP",
+     "title": "Senior software engineer",
+     "note": "acting head of engineering for the last six months",
+     "from": "2019-06",
+     "to": "2020-11",
+     "kind": "employment",
+     "body": "Fixture text: client delivery.",
+     "tech": [
+      "typescript",
+      "node",
+      "twilio flex",
+      "gcp",
+      "react"
+     ],
+     "period": "jun 2019 — nov 2020"
+    },
+    {
+     "id": "fx-role-3",
+     "company": "Example Contracting",
+     "title": "Contract software engineer",
+     "from": "2019-02",
+     "to": "2019-05",
+     "kind": "contract",
+     "body": "Fixture text: a short contract.",
+     "tech": [
+      "typescript",
+      "gatsby",
+      "prismic"
+     ],
+     "period": "feb 2019 — may 2019"
+    },
+    {
+     "id": "fx-role-2",
+     "company": "Sky Betting & Gaming",
+     "title": "Senior software engineer",
+     "team": "Vegas",
+     "from": "2017-11",
+     "to": "2019-01",
+     "kind": "employment",
+     "body": "Fixture text: promoted and planning more.",
+     "tech": [
+      "typescript",
+      "react",
+      "php",
+      "redux",
+      "docker",
+      "jenkins"
+     ],
+     "period": "nov 2017 — jan 2019"
+    },
+    {
+     "id": "fx-role-1",
+     "company": "Sky Betting & Gaming",
+     "title": "Software engineer",
+     "team": "Vegas",
+     "from": "2015-11",
+     "to": "2017-10",
+     "kind": "employment",
+     "body": "Fixture text: a first full-time job.",
+     "tech": [
+      "javascript",
+      "php",
+      "symfony",
+      "redux",
+      "docker",
+      "jenkins"
+     ],
+     "period": "nov 2015 — oct 2017"
+    }
+   ],
+   "roster": [
+    {
+     "name": "go",
+     "current": true
+    },
+    {
+     "name": "typescript",
+     "current": true
+    },
+    {
+     "name": "kubernetes",
+     "current": true
+    },
+    {
+     "name": "aws",
+     "current": true
+    },
+    {
+     "name": "kafka",
+     "current": true
+    },
+    {
+     "name": "graphql",
+     "current": true
+    },
+    {
+     "name": "circleci",
+     "current": true
+    },
+    {
+     "name": "scala",
+     "current": false
+    },
+    {
+     "name": "react",
+     "current": false
+    },
+    {
+     "name": "node",
+     "current": false
+    },
+    {
+     "name": "twilio flex",
+     "current": false
+    },
+    {
+     "name": "gatsby",
+     "current": false
+    },
+    {
+     "name": "php",
+     "current": false
+    },
+    {
+     "name": "javascript",
+     "current": false
+    },
+    {
+     "name": "symfony",
+     "current": false
+    },
+    {
+     "name": "datadog",
+     "current": false
+    },
+    {
+     "name": "gcp",
+     "current": false
+    },
+    {
+     "name": "prismic",
+     "current": false
+    },
+    {
+     "name": "redux",
+     "current": false
+    },
+    {
+     "name": "docker",
+     "current": false
+    },
+    {
+     "name": "jenkins",
+     "current": false
+    }
+   ],
+   "highlights": [
+    {
+     "label": "Placeholder keynote",
+     "detail": "Invented talk about sample widgets",
+     "year": "2018",
+     "url": "https://example.com/keynote"
+    },
+    {
+     "label": "Fixture certificate",
+     "detail": null,
+     "year": "2021",
+     "url": null
+    },
+    {
+     "label": "Made-up library",
+     "detail": "A toy package nobody needs",
+     "year": null,
+     "url": "https://example.com/lib"
+    },
+    {
+     "label": "Bare highlight",
+     "detail": null,
+     "year": null,
+     "url": null
+    }
+   ]
+  }
+ },
+ "insights": [
+  {
+   "id": "3c9e1f0a7b",
+   "kind": "sleep_after_hard",
+   "text": "Sleeps 38 min less after a hard session than after an easy day.",
+   "section": "body",
+   "week": "2026-11-02"
+  },
+  {
+   "id": "8d2b6e4c1f",
+   "kind": "volume_vs_bodyweight",
+   "text": "Lifted 375× bodyweight in the last 30 days.",
+   "section": "fitness",
+   "week": "2026-10-26"
+  }
+ ],
+ "hub": {
+  "generatedAt": "2026-11-04",
+  "rows": [
+   {
+    "section": "fitness",
+    "size": "lg",
+    "href": "/life/fitness",
+    "hero": {
+     "type": "route",
+     "caption": "6.2 km of fresh line, legs mostly intact.",
+     "slug": "evening-ride-to-the-reservoir-2026-10-15",
+     "points": [
+      [
+       52.9,
+       -1.2
+      ],
+      [
+       52.901,
+       -1.1989
+      ],
+      [
+       52.90199,
+       -1.1978
+      ],
+      [
+       52.90297,
+       -1.1967
+      ],
+      [
+       52.90394,
+       -1.1956
+      ],
+      [
+       52.90488,
+       -1.1945
+      ],
+      [
+       52.9058,
+       -1.1934
+      ],
+      [
+       52.90669,
+       -1.1923
+      ],
+      [
+       52.90756,
+       -1.1912
+      ],
+      [
+       52.90841,
+       -1.1901
+      ],
+      [
+       52.90924,
+       -1.189
+      ],
+      [
+       52.91005,
+       -1.1879
+      ],
+      [
+       52.91086,
+       -1.1868
+      ],
+      [
+       52.91166,
+       -1.1857
+      ],
+      [
+       52.91246,
+       -1.1846
+      ],
+      [
+       52.91327,
+       -1.1835
+      ],
+      [
+       52.9141,
+       -1.1824
+      ],
+      [
+       52.91494,
+       -1.1813
+      ],
+      [
+       52.91581,
+       -1.1802
+      ],
+      [
+       52.9167,
+       -1.1791
+      ],
+      [
+       52.91762,
+       -1.178
+      ],
+      [
+       52.91856,
+       -1.1769
+      ],
+      [
+       52.91952,
+       -1.1758
+      ],
+      [
+       52.9205,
+       -1.1747
+      ],
+      [
+       52.92149,
+       -1.1736
+      ],
+      [
+       52.92249,
+       -1.1725
+      ],
+      [
+       52.92349,
+       -1.1714
+      ],
+      [
+       52.92448,
+       -1.1703
+      ],
+      [
+       52.92546,
+       -1.1692
+      ],
+      [
+       52.92643,
+       -1.1681
+      ],
+      [
+       52.92738,
+       -1.167
+      ],
+      [
+       52.9283,
+       -1.1659
+      ],
+      [
+       52.9292,
+       -1.1648
+      ],
+      [
+       52.93007,
+       -1.1637
+      ],
+      [
+       52.93092,
+       -1.1626
+      ],
+      [
+       52.93175,
+       -1.1615
+      ],
+      [
+       52.93256,
+       -1.1604
+      ],
+      [
+       52.93337,
+       -1.1593
+      ],
+      [
+       52.93417,
+       -1.1582
+      ],
+      [
+       52.93497,
+       -1.1571
+      ],
+      [
+       52.93578,
+       -1.156
+      ],
+      [
+       52.93661,
+       -1.1549
+      ],
+      [
+       52.93745,
+       -1.1538
+      ],
+      [
+       52.93831,
+       -1.1527
+      ],
+      [
+       52.9392,
+       -1.1516
+      ],
+      [
+       52.94011,
+       -1.1505
+      ],
+      [
+       52.94105,
+       -1.1494
+      ],
+      [
+       52.94201,
+       -1.1483
+      ],
+      [
+       52.94299,
+       -1.1472
+      ],
+      [
+       52.94398,
+       -1.1461
+      ],
+      [
+       52.94497,
+       -1.145
+      ],
+      [
+       52.94597,
+       -1.1439
+      ],
+      [
+       52.94697,
+       -1.1428
+      ],
+      [
+       52.94795,
+       -1.1417
+      ],
+      [
+       52.94892,
+       -1.1406
+      ],
+      [
+       52.94987,
+       -1.1395
+      ],
+      [
+       52.9508,
+       -1.1384
+      ],
+      [
+       52.9517,
+       -1.1373
+      ],
+      [
+       52.95257,
+       -1.1362
+      ],
+      [
+       52.95343,
+       -1.1351
+      ]
+     ]
+    }
+   },
+   {
+    "section": "code",
+    "size": "lg",
+    "href": "/life/code",
+    "hero": {
+     "type": "stat",
+     "caption": "212 commits this month. The keyboard is fine. Probably.",
+     "value": 212,
+     "unit": "",
+     "label": "commits this month"
+    }
+   },
+   {
+    "section": "body",
+    "size": "md",
+    "href": "/life/body",
+    "hero": {
+     "type": "spark",
+     "caption": "Sleep at 7.1 h, up 0.4 over 12 weeks. Bedtime finally won.",
+     "points": [
+      [
+       "2026-W34",
+       6.7
+      ],
+      [
+       "2026-W35",
+       6.7
+      ],
+      [
+       "2026-W36",
+       6.8
+      ],
+      [
+       "2026-W37",
+       6.8
+      ],
+      [
+       "2026-W38",
+       6.8
+      ],
+      [
+       "2026-W39",
+       6.9
+      ],
+      [
+       "2026-W40",
+       6.9
+      ],
+      [
+       "2026-W41",
+       6.9
+      ],
+      [
+       "2026-W42",
+       7.0
+      ],
+      [
+       "2026-W43",
+       7.0
+      ],
+      [
+       "2026-W44",
+       7.0
+      ],
+      [
+       "2026-W45",
+       7.1
+      ]
+     ],
+     "unit": "h",
+     "label": "sleep"
+    }
+   },
+   {
+    "section": "games",
+    "size": "md",
+    "href": "/life/games",
+    "hero": {
+     "type": "image",
+     "caption": "410 hours of Space Farm, all time. No regrets.",
+     "src": "/card_life.png",
+     "alt": "Space Farm"
+    }
+   },
+   {
+    "section": "reading",
+    "size": "md",
+    "href": "/life/reading",
+    "hero": {
+     "type": "bars",
+     "caption": "Sci-fi leads the shelf at 48%.",
+     "items": [
+      {
+       "label": "Sci-fi",
+       "pct": 48
+      },
+      {
+       "label": "Fantasy",
+       "pct": 30
+      },
+      {
+       "label": "Non-fiction",
+       "pct": 22
+      }
+     ]
+    }
+   },
+   {
+    "section": "watching",
+    "size": "md",
+    "href": "/life/watching",
+    "hero": {
+     "type": "posters",
+     "caption": "14 films and series on the wall. Latest: Lanterns of the Quiet Coast.",
+     "items": [
+      {
+       "src": "https://image.tmdb.org/t/p/w342/fx-lanterns.jpg",
+       "alt": "Lanterns of the Quiet Coast"
+      },
+      {
+       "src": "https://image.tmdb.org/t/p/w342/fx-harbour.jpg",
+       "alt": "The Invented Harbour"
+      },
+      {
+       "src": "https://image.tmdb.org/t/p/w342/fx-high.jpg",
+       "alt": "Placeholder High"
+      },
+      {
+       "src": "https://image.tmdb.org/t/p/w342/fx-falls.jpg",
+       "alt": "Fixture Falls"
+      }
+     ]
+    }
+   },
+   {
+    "section": "live",
+    "size": "sm",
+    "href": "/life/live",
+    "hero": {
+     "type": "stat",
+     "caption": "9 live events this year.",
+     "value": 9,
+     "unit": "",
+     "label": "live events this year"
+    }
+   },
+   {
+    "section": "listening",
+    "size": "sm",
+    "href": "/life/listening",
+    "hero": null
+   }
+  ]
+ }
 }

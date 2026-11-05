@@ -1626,3 +1626,298 @@ a.hub-hero__route:hover .hub-hero__route-cta { background: var(--life-ink); colo
 .outings-month__items li { padding: 1px 0; overflow-wrap: anywhere; }
 .outings-kind { margin-left: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--life-ink, var(--ink-section)); }
 .life-notable__big { margin-left: 6px; font-family: var(--f-mono); font-size: 10px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.08em; padding: 1px 5px; border: 1px solid var(--life-ink, var(--ink-section)); color: var(--life-ink, var(--ink-section)); white-space: nowrap; vertical-align: middle; }
+
+/* ─── /life/watching: the poster wall, the year by month, the YouTube channels ─
+   The wall follows the games cover wall: columns from the wall's own width (a container), rows from
+   the column at a 2:3 poster, so every tile's box is fixed before a poster loads. Weight 2 is 2×2. */
+.watch-note { margin: -14px 0 22px; max-width: 70ch; font-family: var(--f-mono); font-size: 12px; line-height: 1.55; color: color-mix(in srgb, var(--ink) 72%, #fff); }
+
+.watch-wall-wrap { container-type: inline-size; margin: 0 0 44px; padding: 10px 4px 14px; }
+.watch-wall {
+  --cols: 7;
+  --gap: 10px;
+  --col: calc((100cqi - (var(--cols) - 1) * var(--gap)) / var(--cols));
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  grid-auto-rows: calc(var(--col) * 1.5);
+  grid-auto-flow: dense;
+  gap: var(--gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@container (max-width: 940px) { .watch-wall { --cols: 5; } }
+@container (max-width: 640px) { .watch-wall { --cols: 3; --gap: 8px; } }
+@container (max-width: 420px) { .watch-wall { --cols: 2; } }
+/* phones: the newest two dozen; the rest of the wall (and its posters) stays off a phone */
+@container (max-width: 460px) { .watch-wall > li:nth-child(n+25) { display: none; } }
+
+/* a year card: where each year's tiles begin */
+.watch-year {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 10px;
+  background: var(--ink);
+  color: var(--ink-yellow);
+  border: 3px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink-red);
+  transform: rotate(-1.5deg);
+}
+.watch-year__y { font-family: var(--f-disp); font-size: clamp(34px, 5.5vw, 64px); line-height: 0.9; }
+.watch-year__n { margin-top: 6px; font-family: var(--f-mono); font-size: 11px; color: var(--paper-4); }
+
+.watch-tile { position: relative; z-index: 1; transform: rotate(var(--tilt, 0deg)); transition: transform 0.15s ease; }
+.watch-tile--w2 { grid-column: span 2; grid-row: span 2; z-index: 2; }
+.watch-tile:hover { z-index: 6; transform: rotate(0deg) scale(1.03); }
+.watch-tile__figure {
+  container-type: size;
+  position: relative;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  border: 3px solid var(--ink);
+  background: var(--paper-4);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+/* typeset tiles under the stamp: the title starts below it */
+.watch-tile--big.watch-tile--type .watch-tile__name { padding-top: max(22%, 38px); }
+.watch-tile--big .watch-tile__figure { box-shadow: 4px 4px 0 var(--ink-magenta), 7px 7px 0 var(--ink); }
+.watch-tile__art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; color: transparent; }
+.watch-tile__name {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  padding: 12% 9% 0;
+  overflow: hidden;
+  font-family: var(--f-disp);
+  font-size: clamp(14px, min(16cqi, 12cqh), 64px);
+  line-height: 0.98;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+.watch-tile--ink0 .watch-tile__figure { background: var(--ink-red) radial-gradient(circle, rgba(23,19,17,0.28) 1px, transparent 1.5px) 0 0 / 6px 6px; color: var(--paper-4); }
+.watch-tile--ink1 .watch-tile__figure { background: var(--ink-yellow); color: var(--ink); }
+.watch-tile--ink2 .watch-tile__figure { background: var(--ink); color: var(--ink-yellow); }
+.watch-tile--ink3 .watch-tile__figure { background: var(--paper-4); color: var(--ink); }
+.watch-tile--ink4 .watch-tile__figure { background: var(--ink-blue) radial-gradient(circle, rgba(255,252,239,0.22) 1px, transparent 1.5px) 0 0 / 6px 6px; color: var(--paper-4); }
+
+/* the label: a strip of paper pasted over the foot of the poster */
+.watch-tile__cap {
+  position: absolute;
+  z-index: 2;
+  left: -3px;
+  right: 10%;
+  bottom: 8px;
+  padding: 5px 8px 6px;
+  background: var(--paper-4);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-left: 0;
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  line-height: 1.3;
+  transform: rotate(-1.2deg);
+}
+.watch-tile__when { display: block; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 9.5px; color: var(--ink-red); }
+.watch-tile__why { display: block; overflow-wrap: anywhere; }
+.watch-tile--w2 .watch-tile__cap { right: 22%; bottom: 14px; padding: 8px 12px 9px; font-size: 14px; }
+.watch-tile--w2 .watch-tile__when { font-size: 11px; }
+.watch-tile--w2 .watch-tile__why { font-family: var(--f-scrib); font-size: 25px; line-height: 1; margin-top: 3px; }
+
+/* "big screen": a ticket stamp */
+.watch-tile__stamp {
+  position: absolute;
+  z-index: 3;
+  top: 9px;
+  right: -6px;
+  padding: 3px 8px 3px 10px;
+  background: var(--ink-magenta);
+  color: var(--paper-4);
+  border: 2px solid var(--ink);
+  font-family: var(--f-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transform: rotate(4deg);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 6px 50%);
+}
+.watch-tile--w2 .watch-tile__stamp { font-size: 12px; top: 14px; }
+
+/* the year by month */
+.watch-strip-wrap { margin: 0 0 44px; }
+.watch-strip {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 3px solid var(--ink);
+  background: var(--paper-4);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.watch-month {
+  display: grid;
+  grid-template-rows: 92px 96px auto auto;
+  min-width: 0;
+  padding: 10px 6px 10px;
+  border-left: 1px dashed color-mix(in srgb, var(--ink) 35%, transparent);
+}
+.watch-month:first-child { border-left: 0; }
+.watch-month--newyear { border-left: 3px solid var(--ink); }
+.watch-month__posters { position: relative; }
+.watch-mini {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 54px;
+  height: 81px;
+  margin-left: -27px;
+  overflow: hidden;
+  border: 2px solid var(--ink);
+  background: var(--paper-2);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.watch-mini img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; color: transparent; }
+.watch-mini b { display: block; padding: 4px; font-family: var(--f-disp); font-weight: 400; font-size: 11px; line-height: 1; text-transform: uppercase; overflow-wrap: anywhere; }
+.watch-mini--n0 { transform: rotate(-7deg) translateX(-12px); z-index: 1; }
+.watch-mini--n1 { transform: rotate(2deg); z-index: 2; top: 4px; }
+.watch-mini--n2 { transform: rotate(9deg) translateX(13px); z-index: 3; top: 8px; }
+.watch-mini:only-child { transform: rotate(-2deg); }
+.watch-mini--ink0 { background: var(--ink-red); color: var(--paper-4); }
+.watch-mini--ink1 { background: var(--ink-yellow); }
+.watch-mini--ink2 { background: var(--ink); color: var(--ink-yellow); }
+.watch-mini--ink4 { background: var(--ink-blue); color: var(--paper-4); }
+.watch-month__bars { display: flex; justify-content: center; align-items: flex-end; gap: 4px; border-bottom: 2px solid var(--ink); }
+.watch-bar { width: min(14px, 30%); height: max(var(--h), 2px); border: 1.5px solid var(--ink); border-bottom: 0; }
+.watch-bar--ep { background: var(--ink-red); }
+.watch-bar--vid { background: var(--ink-blue); }
+.watch-month__label { margin-top: 6px; font-family: var(--f-disp); font-size: 22px; line-height: 1; text-align: center; text-transform: uppercase; }
+.watch-month__label small { display: block; font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.06em; }
+.watch-month__counts { margin: 6px 0 0; font-family: var(--f-mono); font-size: 10.5px; line-height: 1.35; }
+.watch-month__counts div { display: flex; justify-content: space-between; gap: 2px; }
+.watch-month__counts dt { color: color-mix(in srgb, var(--ink) 65%, #fff); }
+.watch-month__counts dd { margin: 0; font-weight: 700; }
+.watch-month--quiet .watch-month__label, .watch-month--quiet .watch-month__counts { opacity: 0.45; }
+.watch-key { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 14px 0 0; font-family: var(--f-mono); font-size: 11px; color: color-mix(in srgb, var(--ink) 72%, #fff); }
+.watch-key__ep::before, .watch-key__vid::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 6px; border: 1.5px solid var(--ink); vertical-align: -1px; }
+.watch-key__ep::before { background: var(--ink-red); }
+.watch-key__vid::before { background: var(--ink-blue); }
+
+@media (max-width: 900px) {
+  .watch-strip { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .watch-month:nth-child(7) { border-left: 0; }
+  .watch-month:nth-child(n+7) { border-top: 2px solid var(--ink); }
+}
+@media (max-width: 520px) {
+  .watch-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); box-shadow: 4px 4px 0 var(--ink); }
+  .watch-month { grid-template-rows: 84px 70px auto auto; padding: 8px 4px; }
+  .watch-month:nth-child(7) { border-left: 1px dashed color-mix(in srgb, var(--ink) 35%, transparent); }
+  .watch-month:nth-child(4n+1) { border-left: 0; }
+  .watch-month:nth-child(n+5) { border-top: 2px solid var(--ink); }
+  .watch-mini { width: 46px; height: 69px; margin-left: -23px; }
+  .watch-month__label { font-size: 19px; }
+}
+
+/* the YouTube channels: a scrapbook of cards, the strongest habit first and biggest */
+.watch-channels {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: 22px;
+  margin: 0 0 44px;
+  padding: 0;
+  list-style: none;
+}
+.watch-ch {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px 14px 12px;
+  background: var(--paper-4);
+  border: 2px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--ink-blue);
+}
+.watch-ch:nth-child(3n+2) { box-shadow: 5px 5px 0 var(--ink-red); }
+.watch-ch:nth-child(3n) { box-shadow: 5px 5px 0 var(--ink-yellow); }
+.watch-ch--lead { grid-column: span 2; padding: 18px 20px 16px; box-shadow: 8px 8px 0 var(--ink-red); }
+@media (max-width: 640px) { .watch-ch--lead { grid-column: auto; } }
+.watch-ch__head { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.watch-ch__avatar {
+  flex: 0 0 auto;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  object-fit: cover;
+  background: var(--paper-2);
+  color: transparent;
+}
+.watch-ch--lead .watch-ch__avatar { width: 84px; height: 84px; box-shadow: 3px 3px 0 var(--ink); }
+.watch-ch__avatar--type {
+  display: grid;
+  place-items: center;
+  font-family: var(--f-disp);
+  font-size: 22px;
+  color: var(--paper-4);
+  background: var(--ink-blue);
+}
+.watch-ch--ink1 .watch-ch__avatar--type { background: var(--ink-red); }
+.watch-ch--ink2 .watch-ch__avatar--type { background: var(--ink); color: var(--ink-yellow); }
+.watch-ch--ink3 .watch-ch__avatar--type { background: var(--ink-yellow); color: var(--ink); }
+.watch-ch--ink4 .watch-ch__avatar--type { background: var(--ink-magenta); }
+.watch-ch--lead .watch-ch__avatar--type { font-size: 34px; }
+.watch-ch__id { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.watch-ch__name { margin: 0; font-family: var(--f-disp); font-weight: 400; font-size: 24px; line-height: 1.02; text-transform: uppercase; overflow-wrap: anywhere; }
+.watch-ch--lead .watch-ch__name { font-size: clamp(30px, 4vw, 48px); }
+.watch-ch__rule {
+  padding: 2px 7px;
+  border: 1.5px solid var(--ink);
+  font-family: var(--f-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--ink-yellow);
+  transform: rotate(-3deg);
+}
+.watch-ch__rule--new { background: var(--ink-green); color: var(--paper-4); }
+.watch-ch__rule--binge { background: var(--ink-magenta); color: var(--paper-4); }
+.watch-ch__why { margin: 0; font-family: var(--f-scrib); font-size: 24px; line-height: 1.05; }
+.watch-ch--lead .watch-ch__why { font-size: 32px; }
+.watch-ch__thumbs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.watch-ch__thumbs img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border: 2px solid var(--ink); background: var(--paper-2); color: transparent; }
+.watch-ch__thumbs img:nth-child(2) { transform: rotate(1.2deg); }
+.watch-ch__thumbs img:nth-child(3) { transform: rotate(-1deg); }
+.watch-ch__stats { display: flex; flex-wrap: wrap; gap: 2px 12px; margin: 0; font-family: var(--f-mono); font-size: 12px; font-weight: 700; }
+.watch-ch__stats span + span::before { content: '· '; font-weight: 400; margin-left: -8px; }
+.watch-ch__rhythm { display: grid; grid-template-columns: repeat(26, minmax(0, 13px)); gap: 2px; margin-top: auto; padding-top: 2px; }
+.watch-ch__rhythm-label { margin: -6px 0 0; font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: color-mix(in srgb, var(--ink) 60%, #fff); }
+.watch-ch__wk { display: block; aspect-ratio: 1; border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent); }
+.watch-ch__wk--1 { background: color-mix(in srgb, var(--ink-red) 35%, var(--paper-4)); }
+.watch-ch__wk--2 { background: color-mix(in srgb, var(--ink-red) 70%, var(--paper-4)); }
+.watch-ch__wk--3 { background: var(--ink-red); border-color: var(--ink); }
+
+/* the hub card: the newest posters, fanned */
+.hub-hero--posters { align-items: center; }
+.hub-hero__posters { position: relative; width: min(100%, 300px); aspect-ratio: 5 / 4; margin: 8px auto 6px; }
+.hub-card--lg .hub-hero__posters { width: min(100%, 380px); }
+.hub-hero__poster {
+  position: absolute;
+  top: 6%;
+  width: 46%;
+  margin: 0;
+  border: 2px solid var(--ink);
+  background: var(--paper-2);
+  box-shadow: 4px 4px 0 var(--ink);
+  transform: rotate(var(--tilt, 0deg));
+}
+.hub-hero__poster img { display: block; width: 100%; height: auto; aspect-ratio: 2 / 3; object-fit: cover; color: transparent; }
+.hub-hero__poster--n0 { left: 0; z-index: 4; transform: rotate(-6deg); }
+.hub-hero__poster--n1 { left: 18%; top: 2%; z-index: 3; transform: rotate(-1deg); }
+.hub-hero__poster--n2 { left: 36%; top: 5%; z-index: 2; transform: rotate(4deg); }
+.hub-hero__poster--n3 { left: 54%; top: 9%; z-index: 1; transform: rotate(8deg); }

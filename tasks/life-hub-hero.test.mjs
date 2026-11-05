@@ -100,9 +100,9 @@ test('hero cards: export order, sizes, zig-zag and headlines', () => {
   const hub = buildHub(fixture, fitnessLife, now);
   const cards = hub.hero;
   assert.deepEqual(cards.map((c) => c.name), fixture.hub.rows.map((/** @type {any} */ r) => r.section));
-  assert.deepEqual(cards.map((c) => c.size), ['lg', 'lg', 'md', 'md', 'md', 'sm', 'sm', 'sm']);
+  assert.deepEqual(cards.map((c) => c.size), ['lg', 'lg', 'md', 'md', 'md', 'md', 'sm', 'sm']);
   assert.deepEqual(cards.map((c) => c.side), ['left', 'right', '', '', '', '', '', '']);
-  assert.deepEqual(cards.map((c) => c.hero?.type ?? null), ['route', 'stat', 'spark', 'image', 'bars', 'stat', null, null]);
+  assert.deepEqual(cards.map((c) => c.hero?.type ?? null), ['route', 'stat', 'spark', 'image', 'bars', 'posters', 'stat', null]);
   // the section's own headline, as the rows had it
   const byName = Object.fromEntries(hub.cards.map((c) => [c.name, c]));
   // (a stat hero that is the headline's own figure stands in for it)
@@ -176,7 +176,9 @@ test('the page: a card per row, sized, each hero drawn, heading and insights kep
   assert.ok(html.indexOf('did-you-know') < html.indexOf('hub-grid'));
   assert.doesNotMatch(html, /class="life-index"/);
   const cards = html.match(/<li class="hub-card [^"]*"/g) || [];
-  assert.deepEqual(cards.map((c) => /hub-card--(lg|md|sm)/.exec(c)?.[1]), ['lg', 'lg', 'md', 'md', 'md', 'sm', 'sm', 'sm']);
+  assert.deepEqual(cards.map((c) => /hub-card--(lg|md|sm)/.exec(c)?.[1]), ['lg', 'lg', 'md', 'md', 'md', 'md', 'sm', 'sm']);
+  // posters: the newest from the Watching wall, fanned, lazy, with alt
+  assert.match(html, /<div class="hub-hero__posters">\s*<figure class="hub-hero__poster hub-hero__poster--n0" style="--tilt: [-0-9.]+deg"><img src="https:\/\/image\.tmdb\.org\/t\/p\/w342\/fx-lanterns\.jpg" alt="Lanterns of the Quiet Coast" loading="lazy"/);
   assert.match(cards[0], /hub-card--left hub-card--route life-ink--fitness/);
   assert.match(cards[1], /hub-card--right hub-card--stat life-ink--code/);
   // image: lazy, fixed size, alt

@@ -1,9 +1,14 @@
 {{!-- One hero on a hub card (C8). Context: a heroView() from tasks/life-hub.mjs — exactly one of
-      image / spark / stat / route / bars is true. Every number here was computed by code. --}}
+      image / spark / stat / route / bars / posters is true. Every number here was computed by code. --}}
 {{#if image}}
 <figure class="hub-hero__frame">
   <img class="hub-hero__img" src="{{src}}" alt="{{alt}}" loading="lazy" decoding="async" width="400" height="600">
 </figure>
+{{/if}}
+{{#if posters}}
+<div class="hub-hero__posters">
+  {{#each items}}<figure class="hub-hero__poster hub-hero__poster--n{{n}}" style="--tilt: {{tilt}}deg"><img src="{{src}}" alt="{{alt}}" loading="lazy" decoding="async" width="342" height="513"></figure>{{/each}}
+</div>
 {{/if}}
 {{#if spark}}{{> chart-line chart}}{{/if}}
 {{#if stat}}
