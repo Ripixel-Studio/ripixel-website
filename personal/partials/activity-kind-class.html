@@ -1,0 +1,75 @@
+{{!-- A class (Hyrox/hybrid PT, bootcamp, crossfit, HIIT, spin): the engine — the heart rate
+     across the session coloured by zone and the minutes in each — then the work, station by
+     station. Context: `act`. --}}
+{{#if engine}}
+<section class="act-sec act-engine" aria-labelledby="act-engine">
+  <h2 class="act-h" id="act-engine">the <span>engine</span>.</h2>
+  <div class="act-card act-engine__card">
+    <div class="act-card__inner">
+      {{#if engine.cells.length}}
+      <div class="act-cells">
+        {{#each engine.cells}}
+        <div class="act-cell{{#if lead}} act-cell--lead{{/if}}"><div class="act-cell__v">{{value}}{{#if unit}}<span>{{unit}}</span>{{/if}}</div><div class="act-cell__l">{{label}}</div></div>
+        {{/each}}
+      </div>
+      {{/if}}
+      {{#with engine.ribbon}}
+      <figure class="chart act-ribbon">
+        <figcaption class="chart__label">{{chart.label}} <span>{{chart.unit}}</span>, over the zone it was in</figcaption>
+        <div class="chart__plot">
+          <ol class="chart__y" aria-hidden="true">{{#each chart.yTicks}}<li style="top:{{pct}}%">{{label}}</li>{{/each}}</ol>
+          <svg class="chart__svg act-ribbon__svg" viewBox="0 0 {{chart.w}} {{chart.h}}" preserveAspectRatio="none" role="img" aria-label="{{chart.summary}}, coloured by heart-rate zone">
+            {{#each bands}}<rect class="act-ribbon__band act-ribbon__band--z{{zone}}" x="{{x}}%" y="0" width="{{w}}%" height="100%"><title>Z{{zone}} {{name}}</title></rect>{{/each}}
+            {{#each chart.yTicks}}<line class="chart__grid" x1="0" x2="100%" y1="{{pct}}%" y2="{{pct}}%" vector-effect="non-scaling-stroke"/>{{/each}}
+            <path class="act-ribbon__line" d="{{chart.d}}" vector-effect="non-scaling-stroke"/>
+          </svg>
+          <ol class="chart__x" aria-hidden="true">{{#each chart.xTicks}}<li style="left:{{pct}}%">{{label}}</li>{{/each}}</ol>
+        </div>
+        <ul class="act-ribbon__key" aria-hidden="true">{{#each zonesSeen}}<li><i class="act-ribbon__band--z{{zone}}"></i>{{label}} {{name}}</li>{{/each}}</ul>
+      </figure>
+      {{/with}}
+    </div>
+  </div>
+  {{#if engine.split}}{{> activity-zone-split engine.split}}{{/if}}
+</section>
+{{/if}}
+
+{{#if stations}}
+<section class="act-sec act-work" aria-labelledby="act-work">
+  <div class="act-h-row">
+    <h2 class="act-h" id="act-work">the <span>work</span>.</h2>
+    {{#if stations.circuits.length}}<p class="act-h-row__meta">{{#each stations.circuits}}{{#unless @first}} · {{/unless}}<b>circuit {{letter}}</b> {{rounds}} rounds: {{names}}{{/each}}</p>{{/if}}
+  </div>
+  <ol class="act-work__tiles">
+    {{#each stations.tiles}}
+    <li class="act-tile{{#if circuit}} act-tile--circuit{{/if}}">
+      {{#if circuit}}<span class="act-tile__circuit">{{circuit}}</span>{{/if}}
+      <span class="act-tile__name">{{name}}</span>
+      <b class="act-tile__head">{{headline}}</b>
+      <span class="act-tile__sub">{{#if load}}@ {{load}} · {{/if}}{{#if time}}{{time}} · {{/if}}{{sets}} set{{#unless (eq sets 1)}}s{{/unless}}</span>
+      {{#if chips.length}}<span class="act-tile__chips">{{#each chips}}<i>{{this}}</i>{{/each}}</span>{{/if}}
+    </li>
+    {{/each}}
+  </ol>
+</section>
+{{/if}}
+
+{{#if hybridRace}}
+<section class="act-card act-hybrid" aria-label="Race breakdown">
+  <div class="act-card__inner">
+    <div class="act-card__head">
+      <span class="act-card__title">· race breakdown ·</span>
+      <span class="act-card__right">{{hybridRace.total}} total</span>
+    </div>
+    <div class="act-hybrid__segs">
+      {{#each hybridRace.segments}}
+      <div class="act-hybrid__seg{{#if isRun}} act-hybrid__seg--run{{/if}}">
+        <span class="act-hybrid__icon">{{icon}}</span>
+        <span class="act-hybrid__label">{{label}}</span>
+        <span class="act-hybrid__dur">{{duration}}</span>
+      </div>
+      {{/each}}
+    </div>
+  </div>
+</section>
+{{/if}}

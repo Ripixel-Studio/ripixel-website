@@ -1,0 +1,38 @@
+{{!-- A lifting session: every set drawn as a bar within its exercise (by weight, else reps,
+     distance or time), the heaviest marked, each against the last time; then what it hit.
+     Context: `act`. --}}
+{{#if strength.lifts.length}}
+<section class="act-sec act-lifts" aria-labelledby="act-lifts">
+  <h2 class="act-h" id="act-lifts">the <span>lifts</span>.</h2>
+  <div class="act-lifts__list">
+    {{#each strength.lifts}}
+    <article class="act-lift act-lift--{{mode}}{{#if few}} act-lift--few{{/if}}{{#if isPR}} act-lift--pr{{/if}}">
+      <header class="act-lift__head">
+        <h3 class="act-lift__name">{{name}}{{#if isPR}} <span class="stamp act-stamp act-stamp--pr">★ PR</span>{{/if}}</h3>
+        <p class="act-lift__meta"><b>{{topSet}}</b> best set · {{sets}} set{{#unless (eq sets 1)}}s{{/unless}} · {{volume}}</p>
+        {{#if vsLast}}<a class="act-lift__vs act-lift__vs--{{vsLast.tone}}" href="{{vsLast.url}}">{{vsLast.text}} <small>vs {{vsLast.date}}</small></a>{{else}}<span class="act-lift__vs act-lift__vs--new">first time on record</span>{{/if}}
+      </header>
+      <ol class="act-lift__bars" aria-label="{{name}}: each set">
+        {{#each bars}}
+        <li class="act-lift__set{{#if heaviest}} act-lift__set--top{{/if}}">
+          <span class="act-lift__top">{{top}}</span>
+          <span class="act-lift__col" style="--h: {{pct}}" aria-hidden="true"></span>
+          {{#if bottom}}<span class="act-lift__bottom">{{bottom}}</span>{{/if}}
+        </li>
+        {{/each}}
+      </ol>
+    </article>
+    {{/each}}
+  </div>
+</section>
+{{/if}}
+
+{{#if strength.muscles.length}}
+<section class="act-sec act-muscles" aria-labelledby="act-muscles">
+  <h2 class="act-h" id="act-muscles">what it <span>hit</span>.</h2>
+  <ul class="act-muscles__list">
+    {{#each strength.muscles}}<li class="act-muscle act-muscle--{{tone}}">{{text}}</li>{{/each}}
+  </ul>
+  {{#if strength.hasSecondary}}<p class="act-note act-note--quiet">solid: worked hardest · outlined: along for the ride</p>{{/if}}
+</section>
+{{/if}}

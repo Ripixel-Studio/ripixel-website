@@ -1,0 +1,19 @@
+{{!-- The heart: the page's one heart-rate chart, with the zones beside it. Context: `heart`. --}}
+<section class="act-sec act-heart" aria-labelledby="act-heart">
+  <h2 class="act-h" id="act-heart">the <span>heart</span>.</h2>
+  <div class="act-card act-heart__card">
+    <div class="act-card__inner">
+      {{#if cells.length}}
+      <div class="act-cells">
+        {{#each cells}}
+        <div class="act-cell{{#if lead}} act-cell--lead{{/if}}{{#if warn}} act-cell--warn{{/if}}"><div class="act-cell__v">{{value}}{{#if unit}}<span>{{unit}}</span>{{/if}}</div><div class="act-cell__l">{{label}}</div></div>
+        {{/each}}
+      </div>
+      {{/if}}
+      <div class="act-heart__body{{#if zones}}{{#if chart}} act-heart__body--two{{/if}}{{/if}}">
+        {{#if chart}}<div class="act-heart__chart">{{> chart-line chart}}</div>{{/if}}
+        {{#if zones}}<div class="act-heart__zones"><div class="act-heart__cap">minutes per zone{{#if right}} · {{right}}{{/if}}</div>{{> activity-hr-zones zones}}</div>{{/if}}
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,8 +1,15 @@
-{{!-- His own words, as a pull quote straight under the hero. Context: `act`. --}}
+{{!-- His own words, as a pull quote straight under the hero, then the AI note (only the
+     current ones, written in his voice; older summaries are hidden). Context: `act`. --}}
 {{#if description}}
 <section class="act-words" aria-label="In his words">
   <div class="act-words__label">in his words</div>
   <blockquote class="act-words__body">{{description}}</blockquote>
   <div class="act-words__by">— {{owner}}</div>
+</section>
+{{/if}}
+{{#if aiSummaryHtml}}
+<section class="act-ai" aria-label="AI note">
+  <div class="act-ai__label">AI note</div>
+  <div class="act-ai__body">{{{aiSummaryHtml}}}</div>
 </section>
 {{/if}}

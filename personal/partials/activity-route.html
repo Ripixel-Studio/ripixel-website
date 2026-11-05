@@ -1,0 +1,15 @@
+{{!-- The route: the tiled map over the published points (static SVG underneath for no-JS).
+     Without a map the kind partial prints the one-line empty state instead. Context: `act`. --}}
+<section class="act-card act-map act-map--{{routeMap.state}}" aria-label="Route">
+  <div class="act-card__inner">
+    <div class="route-map route-map--activity" data-route-map role="region" aria-label="Route map. Zoom with the plus and minus buttons, or focus the map and use the arrow keys to pan.">
+      <svg class="route-map__fallback act-map__svg" viewBox="0 0 {{route.w}} {{route.h}}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Route drawn from the GPS track">
+        <path d="{{route.d}}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+        <circle cx="{{route.start.x}}" cy="{{route.start.y}}" r="5" class="act-map__start" />
+        <circle cx="{{route.end.x}}" cy="{{route.end.y}}" r="5" class="act-map__end" />
+      </svg>
+      <script type="application/json" data-route-map-data>{{{routeMap.json}}}</script>
+    </div>
+    {{> route-map-assets}}
+  </div>
+</section>

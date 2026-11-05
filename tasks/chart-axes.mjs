@@ -121,7 +121,18 @@ function xTicksFor(x, n) {
     const long = total >= 3600;
     return [0, 50, 100].map((pct) => ({ label: clockLabel((total * pct) / 100, long), pct }));
   }
+  if (x.kind === 'distance') {
+    const total = Number.isFinite(x.meters) && x.meters > 0 ? x.meters : 0;
+    if (!total) return [];
+    return [0, 50, 100].map((pct) => ({ label: kmLabel((total * pct) / 100), pct }));
+  }
   return [];
+}
+
+/** Metres → `0 km`, `2.5 km`, `21.1 km` (one decimal, a whole number without it). @param {number} m */
+function kmLabel(m) {
+  const km = Math.round(m / 100) / 10;
+  return `${Number.isInteger(km) ? km : km.toFixed(1)} km`;
 }
 
 /** The x extent in words for the summary: `26 weeks`, `55:00`, `7 days`. */
@@ -134,6 +145,10 @@ function xSpan(x, n) {
       const total = Number.isFinite(x.seconds) && x.seconds > 0 ? x.seconds : 0;
       return total ? `over ${clockLabel(total, total >= 3600)}` : `${n} samples`;
     }
+    case 'distance': {
+      const total = Number.isFinite(x.meters) && x.meters > 0 ? x.meters : 0;
+      return total ? `over ${kmLabel(total)}` : `${n} samples`;
+    }
     default: return `${n} points`;
   }
 }
@@ -142,6 +157,7 @@ function xSpan(x, n) {
  * @typedef {{ kind: 'weeks', weeks: string[] }
  *   | { kind: 'months', months: string[] }
  *   | { kind: 'clock', seconds: number }
+ *   | { kind: 'distance', meters: number }
  *   | { kind: 'days', labels: string[] }} XSpec
  * @typedef {{ label: string, pct: number }} Tick
  * @typedef {{ d: string, area: string, w: number, h: number, label: string, unit: string,

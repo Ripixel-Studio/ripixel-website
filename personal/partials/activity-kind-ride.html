@@ -1,0 +1,18 @@
+{{!-- A ride or a walk: the route, the ground covered, the lifetime total. Speed, cadence and
+     power sit in the grid below. Context: `act`. --}}
+{{#if route}}
+<section class="act-sec act-sec--route" aria-labelledby="act-route">
+  <h2 class="act-h" id="act-route">the <span>route</span>.</h2>
+  {{> activity-route}}
+</section>
+{{else}}{{#if routeMap}}<p class="act-noroute">{{routeMap.label}}</p>{{/if}}{{/if}}
+{{#if ride.elevation}}
+<section class="act-sec act-elev" aria-labelledby="act-elev">
+  <div class="act-h-row">
+    <h2 class="act-h" id="act-elev">up and <span>down</span>.</h2>
+    <p class="act-h-row__meta"><b>↑ {{ride.elevation.gain}} m</b> · ↓ {{ride.elevation.loss}} m · high {{ride.elevation.high}} m</p>
+  </div>
+  <div class="act-card act-elev__card"><div class="act-card__inner">{{> chart-line ride.elevation.chart}}</div></div>
+</section>
+{{/if}}
+{{#if lifetime}}{{> activity-lifetime lifetime}}{{/if}}

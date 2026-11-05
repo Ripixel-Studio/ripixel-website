@@ -27,6 +27,11 @@ import { activityTheme, hybridRaceLabel } from './fitness-theme.mjs';
 import { calorieFigure } from './fitness-calories.mjs';
 import { orientationOf } from './fitness-photo-dims.mjs';
 import { routeMapState, cleanPoints, activityMapData, scriptJson, ROUTE_EMPTY_LABELS } from './route-map.mjs';
+import {
+  activityKind, shortLocation, isCurrentAiSummary, DEFAULT_MAX_HR, inferMaxHr, buildActivityHistory, effortRibbon, zoneSplit,
+  runSplits, elevationProfile, bestEffortBadges, lifetimeProgress, liftCards, prList, prExercises, classStations,
+  practiceStats, focusWords, steadyHeart, finePrint, kindAnchors,
+} from './fitness-activity-kinds.mjs';
 
 export const ACTIVITY_BASE_PATH = '/life/activity';
 /** Where the fitness Atom feed is written (kept as a literal: tasks/fitness-feed-items.mjs imports this module). */
@@ -216,16 +221,6 @@ export function typeIcon(activityType) {
   return ACTIVITY_ICONS[String(activityType ?? '')] ?? '★';
 }
 
-/** `exercise-item` partial type from the contract's activity type / category. */
-export function exerciseItemType(activityType, category) {
-  if (category === 'strength') return 'strength';
-  const t = String(activityType ?? '');
-  if (/RUN$/.test(t)) return 'run';
-  if (/RIDE$|HANDCYCLE|VELOMOBILE/.test(t)) return 'cycle';
-  if (/WALK|HIKE|SNOWSHOE/.test(t)) return 'walk';
-  return 'class';
-}
-
 // ---------------------------------------------------------------------------
 // Text helpers
 
@@ -343,18 +338,6 @@ const CARDIO_PRIORITY = [
   'fastest_ride_5k', 'highest_elevation_gain',
 ];
 
-/** `Bench Press (Barbell)_1rm` → { label, prType: '1RM', exercise } ; `5k` → { label: '5k', prType: '' }. */
-export function parseRecordType(recordType) {
-  const rt = String(recordType ?? '');
-  for (const suffix of STRENGTH_SUFFIXES) {
-    if (rt.endsWith(suffix)) {
-      const exercise = rt.slice(0, -suffix.length);
-      return { label: titleCase(exercise), exercise, prType: suffix.slice(1).toUpperCase().replace(/_/g, ' '), isStrength: true };
-    }
-  }
-  return { label: rt.replace(/_/g, ' '), exercise: rt, prType: '', isStrength: false };
-}
-
 /** @param {{ recordType: string }[]} records */
 export function topPR(records) {
   return [...records].sort((a, b) => {
@@ -393,142 +376,7 @@ export function prDelta(value, previous, unit) {
 }
 
 // ---------------------------------------------------------------------------
-// Strength set list (SetListModule.tsx, copied)
-
-/** @param {number} kg */
-function setWeight(kg) {
-  return kg % 1 === 0 ? String(kg) : kg.toFixed(1);
-}
-
-/** @param {number} secs */
-function setDuration(secs) {
-  if (secs >= 3600) {
-    const h = Math.floor(secs / 3600);
-    const m = Math.floor((secs % 3600) / 60);
-    return m > 0 ? `${h}h${m}m` : `${h}h`;
-  }
-  if (secs >= 60) {
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return s > 0 ? `${m}m${s}s` : `${m}m`;
-  }
-  return `${secs}s`;
-}
-
-/** `3×8 × 80kg`, `45s`, `1.2km × 20kg`… */
-export function setChip(s) {
-  const hasDuration = s.durationSeconds > 0;
-  const hasDistance = s.distanceMeters > 0;
-  const hasWeight = s.weightKg > 0;
-  let base;
-  if (hasDuration) {
-    const dur = setDuration(s.durationSeconds);
-    base = hasWeight ? `${dur} × ${setWeight(s.weightKg)}kg` : dur;
-  } else if (hasDistance) {
-    const dist = s.distanceMeters >= 1000 ? `${(s.distanceMeters / 1000).toFixed(1)}km` : `${Math.round(s.distanceMeters)}m`;
-    base = hasWeight ? `${dist} × ${setWeight(s.weightKg)}kg` : dist;
-  } else {
-    const weight = hasWeight ? ` × ${setWeight(s.weightKg)}kg` : '';
-    base = s.reps > 0 ? `${s.reps}${weight}` : `—${weight}`;
-  }
-  return s.count > 1 ? `${s.count}×${base}` : base;
-}
-
-/**
- * Group sets by exercise (first-seen order), collapse consecutive identical
- * sets, compute per-exercise volume and the footer totals.
- * @param {any[]} sets   every session's `strengthSets` flattened
- * @param {Set<string>} [prNames]  exercise names with a PR this activity
- */
-export function groupStrengthSets(sets, prNames = new Set()) {
-  const list = Array.isArray(sets) ? sets : [];
-  if (!list.length) return null;
-  /** @type {string[]} */
-  const order = [];
-  /** @type {Record<string, any[]>} */
-  const runs = {};
-  for (const set of list) {
-    const name = String(set?.exerciseName ?? '');
-    if (!runs[name]) {
-      order.push(name);
-      runs[name] = [];
-    }
-    runs[name].push(set);
-  }
-  const exercises = order.map((name) => {
-    const raw = runs[name];
-    /** @type {any[]} */
-    const combined = [];
-    for (const set of raw) {
-      const entry = {
-        reps: num(set.reps),
-        weightKg: num(set.weightKg),
-        durationSeconds: num(set.durationSeconds),
-        distanceMeters: num(set.distanceMeters),
-      };
-      const last = combined[combined.length - 1];
-      if (
-        last &&
-        last.reps === entry.reps &&
-        last.weightKg === entry.weightKg &&
-        last.durationSeconds === entry.durationSeconds &&
-        last.distanceMeters === entry.distanceMeters
-      ) {
-        last.count += 1;
-      } else {
-        combined.push({ ...entry, count: 1 });
-      }
-    }
-    const volume = raw.reduce((sum, s) => sum + num(s.reps) * num(s.weightKg), 0);
-    const reps = raw.reduce((sum, s) => sum + num(s.reps), 0);
-    const duration = raw.reduce((sum, s) => sum + num(s.durationSeconds), 0);
-    const chips = combined.map(setChip);
-    const summary = [
-      `${raw.length} set${raw.length === 1 ? '' : 's'}`,
-      reps > 0 ? `${reps} reps` : '',
-      volume > 0 ? `${fmtNumber(Math.round(volume))} kg` : duration > 0 ? setDuration(duration) : '',
-    ].filter(Boolean).join(' · ');
-    return {
-      name: name || 'Exercise',
-      isPR: !!(name && prNames.has(name)),
-      chips,
-      setCount: raw.length,
-      reps,
-      volume: Math.round(volume),
-      volumeLabel: volume > 0 ? `${fmtNumber(Math.round(volume))} kg` : duration > 0 ? setDuration(duration) : '',
-      summary,
-    };
-  });
-  const totalSets = list.length;
-  const totalReps = list.reduce((sum, s) => sum + num(s.reps), 0);
-  const totalVolume = Math.round(list.reduce((sum, s) => sum + num(s.reps) * num(s.weightKg), 0));
-  const totalDuration = list.reduce((sum, s) => sum + num(s.durationSeconds), 0);
-  return {
-    exercises,
-    totalSets,
-    totalReps,
-    totalVolume,
-    totalVolumeLabel: fmtNumber(totalVolume),
-    totalDurationLabel: totalReps === 0 && totalDuration > 0 ? setDuration(totalDuration) : '',
-    right: `${exercises.length} exercise${exercises.length === 1 ? '' : 's'} · ${totalSets} set${totalSets === 1 ? '' : 's'}`,
-  };
-}
-
-// ---------------------------------------------------------------------------
 // Module gating + order (contract §4)
-
-const WEATHER_ICONS = [
-  [0, 'clear'], [1, 'mostly clear'], [2, 'part cloud'], [3, 'cloud'], [45, 'fog'], [48, 'fog'], [51, 'showers'], [53, 'showers'], [55, 'rain'],
-  [56, 'rain'], [57, 'rain'], [61, 'rain'], [63, 'rain'], [65, 'rain'], [66, 'rain'], [67, 'rain'], [71, 'snow'], [73, 'snow'],
-  [75, 'snow'], [77, 'snow'], [80, 'showers'], [81, 'rain'], [82, 'storm'], [85, 'snow'], [86, 'snow'], [95, 'storm'], [96, 'storm'], [99, 'storm'],
-];
-
-/** WMO weather code → short text label. */
-export function weatherIcon(code) {
-  const c = num(code);
-  const hit = WEATHER_ICONS.find(([k]) => k === c);
-  return hit ? hit[1] : 'weather';
-}
 
 /** @param {number} v @param {string} [unit] @param {string} [label] */
 function cell(value, unit, label, extra = {}) {
@@ -546,39 +394,6 @@ export function buildModule(key, ctx) {
   const chart = (values, label, unit, decimals = 0) =>
     lineChart(values, { label, unit, decimals, h: 120, x: { kind: 'clock', seconds } });
   switch (key) {
-    case 'heart-rate': {
-      const d = en.heartRate;
-      if (!has('HEART_RATE_SUMMARY') || !d || num(d.avgBpm) <= 0) return null;
-      const cells = [cell(d.minBpm, 'bpm', 'min'), cell(d.avgBpm, 'bpm', 'avg', { lead: true }), cell(d.maxBpm, 'bpm', 'max')];
-      if (num(d.driftBpm) !== 0) cells.push(cell(`${d.driftBpm > 0 ? '+' : ''}${d.driftBpm}`, 'bpm', 'drift', { warn: !!d.driftWarning }));
-      return { key, title: 'Heart rate', cells, chart: chart(series.heartRate, 'Heart rate', 'bpm') };
-    }
-    case 'zones': {
-      const d = en.heartRateZones;
-      const zones = Array.isArray(d?.zones) ? d.zones : [];
-      if (!has('HEART_RATE_ZONES') || !zones.some((z) => num(z.minutes) > 0)) return null;
-      return { key, title: 'HR zones', right: d.totalMinutes ? `${d.totalMinutes} min` : '', zones: hrZoneBars(zones) };
-    }
-    case 'pace': {
-      const d = en.pace;
-      if (!has('PACE_SUMMARY') || !d || num(d.avgPaceSecondsPerKm) <= 0) return null;
-      const cells = [cell(fmtPace(d.avgPaceSecondsPerKm), '/km', 'avg pace', { lead: true })];
-      if (num(d.bestSplitSecondsPerKm) > 0) cells.push(cell(fmtPace(d.bestSplitSecondsPerKm), '/km', 'best split'));
-      const splits = Array.isArray(d.splits) ? d.splits.filter((s) => num(s.seconds) > 0) : [];
-      const slowest = splits.reduce((m, s) => Math.max(m, num(s.seconds)), 0);
-      const kmHr = new Map((Array.isArray(ctx.kmSplits) ? ctx.kmSplits : []).map((k) => [num(k.km), k]));
-      const bars = splits.map((s) => {
-        const hr = kmHr.get(num(s.km));
-        return { label: `${s.km} km`, value: fmtPace(s.seconds), pct: slowest ? Math.round((num(s.seconds) / slowest) * 100) : 0, hr: hr && num(hr.avgHr) > 0 ? `${Math.round(hr.avgHr)}` : '', hrMax: hr && num(hr.maxHr) > 0 ? `${Math.round(hr.maxHr)}` : '' };
-      });
-      const paceSeries = Array.isArray(series.speedMs) ? series.speedMs.map((v) => (num(v) > 0 ? 1000 / v : null)) : null;
-      return {
-        key, title: 'Pace', cells,
-        chart: paceSeries ? lineChart(paceSeries, { label: 'Pace', unit: '/km', h: 120, x: { kind: 'clock', seconds }, invert: true, fmt: fmtPace, mults: SECOND_MULTS }) : null,
-        bars: bars.length ? { rows: bars, hasHr: bars.some((b) => b.hr) } : null,
-        note: num(d.paceDropPercent) > 0 ? `${Math.round(d.paceDropPercent)}% pace drop in the final quarter` : '',
-      };
-    }
     case 'speed': {
       const d = en.speed;
       if (!has('SPEED_SUMMARY') || !d || num(d.avgSpeedKmh) <= 0) return null;
@@ -599,13 +414,6 @@ export function buildModule(key, ctx) {
         chart: chart(series.cadenceRpm, 'Cadence', unit),
       };
     }
-    case 'elevation': {
-      const d = en.elevation;
-      if (!has('ELEVATION_SUMMARY') || !d || (num(d.totalGainM) === 0 && num(d.totalLossM) === 0)) return null;
-      const cells = [cell(`↑ ${Math.round(num(d.totalGainM))}`, 'm', 'gain', { lead: true }), cell(`↓ ${Math.round(num(d.totalLossM))}`, 'm', 'loss')];
-      if (num(d.maxAltitudeM) > 0) cells.push(cell(Math.round(d.maxAltitudeM), 'm', 'max altitude'));
-      return { key, title: 'Elevation', cells, chart: chart(series.altitudeM, 'Altitude', 'm') };
-    }
     case 'power': {
       const d = en.power;
       if (!has('POWER_SUMMARY') || !d || num(d.avgWatts) <= 0) return null;
@@ -615,28 +423,6 @@ export function buildModule(key, ctx) {
       if (num(d.kilojoules) > 0) cells.push(cell(Math.round(d.kilojoules), 'kJ', 'work'));
       if (num(d.intensityFactor) > 0) cells.push(cell(fmtNumber(d.intensityFactor, 2), '', 'intensity factor'));
       return { key, title: 'Power', cells, chart: chart(series.powerW, 'Power', 'W') };
-    }
-    case 'effort': {
-      const d = en.effort;
-      if (!has('EFFORT_SCORE') || !d) return null;
-      const factors = Array.isArray(d.factors) ? d.factors.filter((f) => f && f.label) : [];
-      return {
-        key, title: 'Effort', right: d.band || '',
-        cells: [cell(Math.round(num(d.score)), '/100', 'score', { lead: true }), cell(d.band || '—', '', 'band')],
-        note: factors.length ? factors.map((f) => `${f.label} ×${fmtNumber(f.ratioVsBaseline, 2)}`).join(' · ') : '',
-      };
-    }
-    case 'calories': {
-      // The platform's figure (Strava's) over FitGlue's estimate (F5.5).
-      const c = ctx.calories ?? calorieFigure(ctx.activity, ctx.entry);
-      if ((!has('CALORIES_BURNED') && c.source !== 'platform') || c.kcal <= 0) return null;
-      const right = c.source === 'platform' ? `from ${sourceLabel(ctx.activity?.source) || 'the source'}` : 'estimated';
-      return { key, title: 'Calories', right, cells: [cell(fmtNumber(c.kcal), 'kcal', 'burned', { lead: true })], note: c.note };
-    }
-    case 'training-load': {
-      const d = en.trainingLoad;
-      if (!has('TRAINING_LOAD') || !d || num(d.trimp) <= 0) return null;
-      return { key, title: 'Training load', right: d.bucket || '', cells: [cell(Math.round(d.trimp), 'trimp', 'load', { lead: true }), cell(d.bucket || '—', '', 'bucket')], note: d.hint || '' };
     }
     case 'running-dynamics': {
       const d = en.runningDynamics;
@@ -661,42 +447,6 @@ export function buildModule(key, ctx) {
         },
       };
     }
-    case 'best-efforts': {
-      const d = en.bestEfforts;
-      const efforts = Array.isArray(d?.efforts) ? d.efforts : [];
-      if (!has('BEST_EFFORTS') || !efforts.length || ctx.category !== 'cardio-distance') return null;
-      return { key, title: 'Best efforts', cells: efforts.map((e) => cell(fmtClock(e.timeSeconds) || '—', '', e.display || e.distanceKey)) };
-    }
-    case 'muscle-heatmap': {
-      const d = en.muscleHeatmap;
-      const primary = Array.isArray(d?.primary) ? d.primary : [];
-      const secondary = Array.isArray(d?.secondary) ? d.secondary : [];
-      if (!(has('MUSCLE_HEATMAP') || has('MUSCLE_HEATMAP_IMAGE')) || !d || !(primary.length || secondary.length || d.imageUrl)) return null;
-      return {
-        key, title: 'Muscles',
-        image: d.imageUrl ? { src: d.imageUrl, alt: 'Muscle heatmap' } : null,
-        chips: [...primary.map((m) => ({ text: titleCase(m), tone: 'primary' })), ...secondary.map((m) => ({ text: titleCase(m), tone: 'secondary' }))],
-        chipsLegend: primary.length && secondary.length ? 'solid = primary · outlined = secondary' : '',
-      };
-    }
-    case 'recovery': {
-      const d = en.recovery;
-      if (!has('RECOVERY_ADVISOR') || !d) return null;
-      const cells = [cell(Math.round(num(d.sessionLoad)), '', 'session load', { lead: true }), cell(fmtNumber(d.acuteChronicRatio, 2), '', 'acute:chronic'), cell(Math.round(num(d.hoursToRecover)), 'h', 'to recover')];
-      if (num(d.sevenDayLoad) > 0) cells.push(cell(Math.round(d.sevenDayLoad), '', '7-day load'));
-      if (num(d.twentyEightDayAvgLoad) > 0) cells.push(cell(Math.round(d.twentyEightDayAvgLoad), '', '28-day avg'));
-      return { key, title: 'Recovery', cells, note: d.alert ? d.alertText || 'Recovery alert' : '', noteWarn: !!d.alert };
-    }
-    case 'streak': {
-      const d = en.streak;
-      if (!has('STREAK_TRACKER') || !d || num(d.currentDays) <= 0) return null;
-      const cal = Array.isArray(d.calendar) ? d.calendar.slice(-28) : [];
-      return {
-        key, title: 'Streak',
-        cells: [cell(d.currentDays, 'days', 'current', { lead: true }), cell(num(d.longestDays), 'days', 'longest')],
-        dots: cal.map((c) => ({ date: c.date, state: String(c.state ?? '').replace('STREAK_DAY_STATE_', '').toLowerCase() || 'off' })),
-      };
-    }
     case 'goals': {
       const d = en.goalTracker;
       const goals = Array.isArray(d?.goals) ? d.goals : [];
@@ -709,14 +459,6 @@ export function buildModule(key, ctx) {
           status: g.onPace ? 'on pace ✓' : 'behind ✗', onPace: !!g.onPace,
           days: `${num(g.daysRemaining)} day${num(g.daysRemaining) === 1 ? '' : 's'} left`,
         })),
-      };
-    }
-    case 'weather': {
-      const d = en.weather;
-      if (!has('WEATHER') || ctx.category !== 'cardio-distance' || !d || typeof d.tempC !== 'number') return null;
-      return {
-        key, title: 'Weather', right: weatherIcon(d.weatherCode),
-        cells: [cell(`${Math.round(d.tempC)}°`, 'C', 'temp', { lead: true }), cell(d.weatherDescription || '—', '', 'conditions'), cell(Math.round(num(d.windSpeedKph)), 'km/h', 'wind'), cell(d.windDirection || '—', '', 'direction')],
       };
     }
     case 'temperature': {
@@ -749,19 +491,6 @@ export function buildModule(key, ctx) {
         key, title: 'Soundtrack', right: 'music',
         list: tracks.slice(0, 8).map((t) => ({ primary: t.title, secondary: t.artist, tertiary: fmtClock(t.durationSeconds) })),
         note: more > 0 ? `+${more} more` : '',
-      };
-    }
-    case 'pr-callout': {
-      const d = en.personalRecords;
-      const records = Array.isArray(ctx.records) ? ctx.records : Array.isArray(d?.records) ? d.records : [];
-      if (!has('PERSONAL_RECORDS') || !records.length) return null;
-      return {
-        key, title: 'Personal records', right: `${records.length} new`,
-        list: records.map((r) => {
-          const parsed = parseRecordType(r.recordType);
-          const v = prValue(r.newValue, r.unit);
-          return { primary: r.displayMessage || `${parsed.label} ${parsed.prType}`.trim(), secondary: `${v.val}${v.unit ? ` ${v.unit}` : ''}`, tertiary: prDelta(r.newValue, r.previousValue, r.unit) };
-        }),
       };
     }
     default:
@@ -826,18 +555,25 @@ export function hrZoneBars(zones) {
   };
 }
 
-const GRID_ORDER = /** @type {Record<string, string[]>} */ ({
-  'cardio-distance': ['heart-rate', 'zones', 'pace', 'speed', 'cadence', 'elevation', 'power', 'effort', 'calories', 'training-load', 'running-dynamics', 'intervals', 'best-efforts'],
-  'cardio-time': ['heart-rate', 'zones', 'cadence', 'effort', 'calories', 'training-load'],
-  strength: ['muscle-heatmap', 'set-list', 'heart-rate', 'zones', 'effort', 'calories', 'training-load'],
-  sport: ['heart-rate', 'zones', 'effort', 'calories'],
-  untraditional: ['heart-rate', 'calories'],
+/**
+ * The small grid cards each kind keeps under its own sections (gating per module in
+ * buildModule). Heart rate, zones, splits, elevation, efforts, muscles, records and the
+ * fine print are drawn by the kind sections themselves (tasks/fitness-activity-kinds.mjs).
+ */
+const MODULES_BY_KIND = /** @type {Record<import('./fitness-activity-kinds.mjs').Kind, string[]>} */ ({
+  run: ['cadence', 'power', 'running-dynamics', 'intervals', 'goals', 'temperature', 'hdrop', 'spotify'],
+  ride: ['speed', 'cadence', 'power', 'goals', 'temperature', 'hdrop', 'spotify'],
+  walk: ['goals', 'spotify'],
+  strength: ['hdrop', 'spotify'],
+  class: ['intervals', 'hdrop', 'spotify'],
+  mind: ['spotify'],
+  race: ['hdrop', 'spotify'],
+  other: ['speed', 'cadence', 'power', 'hdrop', 'spotify'],
 });
-const TAIL_ORDER = ['recovery', 'streak', 'goals', 'weather', 'temperature', 'hdrop', 'spotify'];
 
-/** Module keys for a category, in the contract's order (gating applied later). */
-export function moduleOrderFor(category) {
-  return [...(GRID_ORDER[category] ?? GRID_ORDER.untraditional), 'pr-callout', ...TAIL_ORDER];
+/** Grid module keys for a kind, in order (gating applied later). @param {string} kind */
+export function modulesFor(kind) {
+  return MODULES_BY_KIND[/** @type {keyof typeof MODULES_BY_KIND} */ (kind)] ?? MODULES_BY_KIND.other;
 }
 
 // ---------------------------------------------------------------------------
@@ -928,14 +664,19 @@ export function heroLayout(dims) {
 }
 
 /**
- * Build the template context for one activity file.
+ * Build the template context for one activity file. The page is laid out by its kind
+ * (tasks/fitness-activity-kinds.mjs activityKind): `act.is.<kind>` picks the kind's
+ * sections in personal/templates/activity.html.
  * @param {any} file     an element of `fitnessActivities` (activity file + indexEntry)
  * @param {any} index    `fitnessIndex`
- * @param {{ siteUrl?: string, ogCard?: string, share?: any, hyrox?: import('./fitness-hyrox.mjs').HyroxHistory|null, photoDims?: Record<string, { w: number, h: number }> }} [opts]
+ * @param {{ siteUrl?: string, ogCard?: string, share?: any, hyrox?: import('./fitness-hyrox.mjs').HyroxHistory|null,
+ *   photoDims?: Record<string, { w: number, h: number }>, activityHistory?: import('./fitness-activity-kinds.mjs').ActivityHistory|null, maxHr?: number }} [opts]
  *   `ogCard` is the rendered OG card URL from tasks/fitness-og-images.mjs; when set it is the og:image,
  *   else first photo → section card. `hyrox` is buildHyroxHistory(fitnessActivities), for PBs
  *   per division, race weekends and the PB chase. `photoDims` (fitnessPhotoDims) lays the hero out by the
  *   picture's shape. `share` is the page's Share-button entry (fitnessShareCards.activity[slug], F5.4).
+ *   `activityHistory` is buildActivityHistory(fitnessActivities) (best efforts, last time per exercise, the
+ *   practice so far) and `maxHr` inferMaxHr(fitnessActivities) (the effort ribbon's zone edges).
  */
 export function buildActivityView(file, index, opts = {}) {
   const activity = file?.activity ?? {};
@@ -944,6 +685,7 @@ export function buildActivityView(file, index, opts = {}) {
   const routePoints = Array.isArray(file?.routePoints) ? file.routePoints : [];
   const slug = String(file?.slug ?? entry.showcaseId ?? activity.showcaseId ?? '');
   const category = file?.category || deriveCategory(activity);
+  const kind = activityKind(file);
   const activityType = String(activity.activityType ?? entry.activityType ?? '');
   const applied = Array.isArray(activity.appliedEnrichments) ? activity.appliedEnrichments : [];
   const appliedSet = new Set(applied);
@@ -954,16 +696,20 @@ export function buildActivityView(file, index, opts = {}) {
   const showPhotos = !!index?.profile?.showPhotoGallery;
   const photos = showPhotos && Array.isArray(activity.photoUrls) ? activity.photoUrls.filter((u) => /^https:\/\//.test(String(u))) : [];
   const siteUrl = (opts.siteUrl || '').replace(/\/+$/, '');
+  const startTime = activity.startTime ?? entry.startTime ?? '';
+  const history = opts.activityHistory ?? null;
 
-  // Totals from the sessions (falls back to the entry for metadata-only activities).
+  // Totals from the sessions (falls back to the entry for metadata-only activities, and to
+  // the sets for a run logged in Hevy as one running set).
+  const allSets = sessions.flatMap((s) => (Array.isArray(s?.strengthSets) ? s.strengthSets : []));
   const sessionDuration = sessions.reduce((s, x) => s + num(x?.totalElapsedTime), 0);
   const sessionDistance = sessions.reduce((s, x) => s + num(x?.totalDistance), 0);
   const durationS = sessionDuration || num(entry.durationSeconds);
-  const distanceM = sessionDistance || num(entry.distanceMeters);
-  const allSets = sessions.flatMap((s) => (Array.isArray(s?.strengthSets) ? s.strengthSets : []));
+  const distanceM = sessionDistance || num(entry.distanceMeters) || (kind === 'run' ? allSets.reduce((s, x) => s + num(x?.distanceMeters), 0) : 0);
   const sets = allSets.length || num(entry.totalSets);
   const volumeKg = allSets.length ? allSets.reduce((s, x) => s + num(x.reps) * num(x.weightKg), 0) : num(entry.totalWeightKg);
   const reps = allSets.length ? allSets.reduce((s, x) => s + num(x.reps), 0) : num(entry.totalReps);
+  const topKg = allSets.reduce((m, x) => (num(x.reps) > 0 ? Math.max(m, num(x.weightKg)) : m), 0);
   const avgBpm = num(en.heartRate?.avgBpm) || num(entry.avgHeartRate) || num(sessions[0]?.avgHeartRate);
   const maxBpm = num(en.heartRate?.maxBpm) || num(sessions[0]?.maxHeartRate);
   const calorieInfo = calorieFigure(activity, entry);
@@ -971,18 +717,20 @@ export function buildActivityView(file, index, opts = {}) {
   // Hyrox race (F5.2): the export's `race` plus PBs per division across the whole history.
   // FitGlue's division-less hybrid_race_* records are superseded by the per-division ones
   // computed here, so they are dropped from this page.
-  const history = opts.hyrox ?? null;
+  const hyrox = opts.hyrox ?? null;
   const description = descriptionPreamble(activity.description);
-  const race = buildRaceView(file, history, { words: description });
+  const race = buildRaceView(file, hyrox, { words: description });
   const allRecords = has('PERSONAL_RECORDS') && Array.isArray(en.personalRecords?.records) ? en.personalRecords.records : [];
-  const records = race ? allRecords.filter((r) => !String(r?.recordType ?? '').startsWith('hybrid_race_')) : allRecords;
+  // A calm session has no records worth a stamp (Hevy files its minutes as one).
+  const records = kind === 'mind' ? [] : race ? allRecords.filter((r) => !String(r?.recordType ?? '').startsWith('hybrid_race_')) : allRecords;
   const prCount = records.length + (race ? race.prCount : 0);
   const icon = typeIcon(activityType);
   const title = String(activity.title ?? entry.title ?? 'Activity');
-  const locationName = String(en.location?.locationName ?? entry.locationName ?? '');
+  const locationName = shortLocation(en.location?.locationName ?? entry.locationName ?? '');
 
-  // Pre-grid pieces
-  const aiSummaryHtml = has('AI_COMPANION') ? sanitizeAiHtml(en.aiSummary?.html) : '';
+  // His words, then the AI note — only the current (Claude, his voice) ones; the older
+  // Gemini summaries stay hidden (see isCurrentAiSummary).
+  const aiSummaryHtml = has('AI_COMPANION') && isCurrentAiSummary(en.aiSummary, startTime) ? sanitizeAiHtml(en.aiSummary?.html) : '';
   const hybrid = has('HYBRID_RACE_TAGGER') && Array.isArray(activity.activityData?.hybridRaceSummary?.segments)
     ? activity.activityData.hybridRaceSummary.segments
     : [];
@@ -992,31 +740,22 @@ export function buildActivityView(file, index, opts = {}) {
         segments: hybrid.map((s) => ({ icon: s.icon || (s.isRun ? 'RUN' : 'GYM'), label: s.label || '', duration: fmtClock(s.durationSeconds) || '—', isRun: !!s.isRun })),
       }
     : null;
-  const ms = has('DISTANCE_MILESTONES') && en.distanceMilestone && num(en.distanceMilestone.lifetimeDistanceKm) > 0 ? en.distanceMilestone : null;
-  const milestone = ms
-    ? {
-        lifetimeKm: fmtNumber(ms.lifetimeDistanceKm, 1),
-        typeLabel: ms.activityTypeLabel || typeLabel(activityType).toLowerCase(),
-        nextKm: num(ms.nextMilestoneKm) > ms.lifetimeDistanceKm ? fmtNumber(ms.nextMilestoneKm) : '',
-        toGoKm: num(ms.nextMilestoneKm) > ms.lifetimeDistanceKm ? fmtNumber(ms.nextMilestoneKm - ms.lifetimeDistanceKm, 1) : '',
-        crossedKm: num(ms.milestoneKm) > 0 ? fmtNumber(ms.milestoneKm) : '',
-      }
-    : null;
+  const lifetime = (kind === 'run' || kind === 'ride' || kind === 'walk') && has('DISTANCE_MILESTONES') ? lifetimeProgress(en.distanceMilestone) : null;
   const tags = Array.isArray(activity.tags) ? activity.tags.filter((t) => typeof t === 'string' && t) : [];
   // Route card: the tiled map over the published points (static SVG underneath for no-JS),
   // or a one-line empty state. A hidden route is never drawn, whatever points came with it.
-  const routeState = routeMapState({ routePoints, routeHidden: file?.routeHidden ?? entry.routeHidden, category });
+  const routeState = routeMapState({ routePoints, routeHidden: file?.routeHidden ?? entry.routeHidden, category: kind === 'run' || kind === 'ride' || kind === 'walk' ? 'cardio-distance' : category });
   const route = routeState === 'map' ? routePath(cleanPoints(routePoints)) : null;
-  const routeMap = !routeState
+  const routeMap = !routeState || !['run', 'ride', 'walk'].includes(kind)
     ? null
     : routeState === 'map' && route
       ? { state: 'map', json: scriptJson(activityMapData(routePoints)) }
       : { state: routeState === 'map' ? 'indoor' : routeState, label: ROUTE_EMPTY_LABELS[routeState === 'map' ? 'indoor' : routeState] };
 
-  // Page bands
-  const pk = has('PARKRUN') && activityType === 'ACTIVITY_TYPE_RUN' && en.parkrun?.eventName ? en.parkrun : null;
+  // Bands
+  const pk = has('PARKRUN') && kind === 'run' && en.parkrun?.eventName ? en.parkrun : null;
   const parkrun = pk
-    ? { eventName: pk.eventName, finishTime: pk.finishTime || '—', position: num(pk.position) > 0 ? `#${pk.position}` : '—', ageGrade: pk.ageGrade || '—', totalParkruns: num(pk.totalParkruns) > 0 ? String(pk.totalParkruns) : '', isTimePb: !!pk.isTimePb, isAgeGradePb: !!pk.isAgeGradePb }
+    ? { eventName: pk.eventName, finishTime: pk.finishTime || '', position: num(pk.position) > 0 ? `#${pk.position}` : '', ageGrade: pk.ageGrade || '', totalParkruns: num(pk.totalParkruns) > 0 ? String(pk.totalParkruns) : '', isTimePb: !!pk.isTimePb, isAgeGradePb: !!pk.isAgeGradePb }
     : null;
   let prBand = null;
   if (race?.isTotalPB) {
@@ -1027,80 +766,91 @@ export function buildActivityView(file, index, opts = {}) {
       value: race.total,
       unit: '',
       delta: race.totalDelta,
-      message: '',
     };
   } else if (records.length && !race) {
     const top = topPR(records);
-    const parsed = parseRecordType(top.recordType);
     const v = prValue(top.newValue, top.unit);
     const extra = records.length - 1;
+    const [named] = prList([top]);
     prBand = {
-      label: parsed.label.toUpperCase(),
-      sub: [parsed.prType, 'NEW PERSONAL RECORD', extra > 0 ? `+${extra} MORE RECORD${extra === 1 ? '' : 'S'} BELOW` : ''].filter(Boolean).join(' · '),
+      label: named.primary.toUpperCase(),
+      sub: ['NEW PERSONAL RECORD', extra > 0 ? `+${extra} MORE RECORD${extra === 1 ? '' : 'S'} BELOW` : ''].filter(Boolean).join(' · '),
       value: v.val,
       unit: v.unit,
       delta: prDelta(top.newValue, top.previousValue, top.unit),
-      message: top.displayMessage || '',
     };
   }
 
-  // Hero chart: first of HR / power / speed in `series` (same preference as entry.sparkline.metric).
-  let heroChart = null;
-  for (const [key, label, unit, decimals, map] of [
-    ['heartRate', 'heart rate', 'bpm', 0, (v) => v],
-    ['powerW', 'power', 'W', 0, (v) => v],
-    ['speedMs', 'speed', 'km/h', 1, (v) => (typeof v === 'number' ? v * 3.6 : null)],
-  ]) {
-    if (Array.isArray(series[key])) {
-      heroChart = lineChart(series[key].map(map), { label, unit, decimals, h: 140, x: { kind: 'clock', seconds: durationS } });
-      if (heroChart) break;
-    }
-  }
-
-  // HR zones from the entry's hrZoneMinutes (index 0 = below Z1, not drawn),
-  // names/percentages from the enrichment when it is present. Gate per §4.
+  // The heart card: the one heart-rate chart on the page, with the zones beside it. A class
+  // draws its heart as the effort ribbon and a calm session as its steady line instead.
   const zoneMinutes = Array.isArray(entry.hrZoneMinutes) && entry.hrZoneMinutes.length === 6 ? entry.hrZoneMinutes : null;
   const zoneSource = Array.isArray(en.heartRateZones?.zones) && en.heartRateZones.zones.length === 6 ? en.heartRateZones.zones : zoneMinutes;
   const hrZones = has('HEART_RATE_ZONES') && zoneSource ? hrZoneBars(zoneSource) : null;
+  const hrChart = Array.isArray(series.heartRate) ? lineChart(series.heartRate, { label: 'Heart rate', unit: 'bpm', h: 140, x: { kind: 'clock', seconds: durationS } }) : null;
+  const d = en.heartRate;
+  const hrCells = has('HEART_RATE_SUMMARY') && d && num(d.avgBpm) > 0
+    ? [cell(d.minBpm, 'bpm', 'min'), cell(d.avgBpm, 'bpm', 'avg', { lead: true }), cell(d.maxBpm, 'bpm', 'max'), ...(num(d.driftBpm) !== 0 ? [cell(`${d.driftBpm > 0 ? '+' : ''}${d.driftBpm}`, 'bpm', 'drift', { warn: !!d.driftWarning })] : [])]
+    : [];
+  const heart = kind !== 'class' && kind !== 'mind' && (hrCells.length || hrChart || hrZones)
+    ? { cells: hrCells, chart: hrChart, zones: hrZones, right: hrZones ? `${hrZones.total} min` : '' }
+    : null;
 
-  // Grid modules in §4 order; the set list is its own partial but slots in order.
-  const prNames = new Set(records.map((r) => parseRecordType(r.recordType).exercise));
-  const setList = category === 'strength' || allSets.length ? groupStrengthSets(allSets, prNames) : null;
+  // Kind sections
+  const prNames = prExercises(records);
+  const efforts = Array.isArray(entry.bestEfforts) && entry.bestEfforts.length ? entry.bestEfforts : en.bestEfforts?.efforts;
+  const run = kind === 'run'
+    ? {
+        splits: runSplits(series, en.pace, file?.kmSplits),
+        elevation: elevationProfile(series, en.elevation),
+        efforts: has('BEST_EFFORTS') || (Array.isArray(entry.bestEfforts) && entry.bestEfforts.length) ? bestEffortBadges(efforts, allRecords, history, startTime) : [],
+      }
+    : null;
+  const ride = kind === 'ride' || kind === 'walk' ? { elevation: elevationProfile(series, en.elevation) } : null;
+  const muscles = en.muscleHeatmap && (has('MUSCLE_HEATMAP') || has('MUSCLE_HEATMAP_IMAGE'))
+    ? [...(en.muscleHeatmap.primary ?? []).map((/** @type {string} */ m) => ({ text: titleCase(m), tone: 'primary' })), ...(en.muscleHeatmap.secondary ?? []).map((/** @type {string} */ m) => ({ text: titleCase(m), tone: 'secondary' }))]
+    : [];
+  const strength = kind === 'strength'
+    ? { lifts: liftCards(allSets, { history, date: startTime, prNames }), muscles, hasSecondary: muscles.some((m) => m.tone === 'secondary') }
+    : null;
+  const hotMinutes = zoneMinutes ? num(zoneMinutes[4]) + num(zoneMinutes[5]) : 0;
+  const ribbon = kind === 'class' ? effortRibbon(series, opts.maxHr ?? DEFAULT_MAX_HR, durationS) : null;
+  const split = kind === 'class' ? zoneSplit(zoneMinutes) : null;
+  const engine = kind === 'class' && (ribbon || split)
+    ? {
+        ribbon,
+        split,
+        cells: [
+          ...(avgBpm > 0 ? [cell(Math.round(avgBpm), 'bpm', 'avg')] : []),
+          ...(maxBpm > 0 ? [cell(Math.round(maxBpm), 'bpm', 'peak', { lead: true })] : []),
+          ...(has('EFFORT_SCORE') && num(en.effort?.score) > 0 ? [cell(Math.round(en.effort.score), '/100', `effort · ${String(en.effort.band || '').toLowerCase()}`)] : []),
+        ],
+      }
+    : null;
+  const stations = kind === 'class' ? classStations(allSets) : null;
+  const practice = kind === 'mind' ? practiceStats(history, file) : null;
+  const mind = kind === 'mind'
+    ? { practice, focus: focusWords(title), steady: steadyHeart(series, en.heartRate, durationS) }
+    : null;
+  // Records get their own list on lifting and class pages; a run shows its PBs as effort
+  // badges, a race as its splits.
+  const prs = kind === 'strength' || kind === 'class' ? prList(records) : [];
+
+  // Small grid cards, then the fine print.
   const ctx = { durationS, en, series, has, category, activityType, entry, activity, kmSplits: file?.kmSplits, records, calories: calorieInfo };
-  const modules = [];
-  for (const key of moduleOrderFor(category)) {
-    if (key === 'zones') {
-      if (hrZones) modules.push({ key, title: 'HR zones', right: `${hrZones.total} min`, zones: hrZones });
-      continue;
-    }
-    if (key === 'set-list') {
-      // A race's sets are its splits, which the race breakdown already shows.
-      if (setList && !race) modules.push({ key, title: 'Workout', right: setList.right, wide: true, setList });
-      continue;
-    }
-    const m = buildModule(key, ctx);
-    if (m) modules.push(m);
-  }
+  const modules = modulesFor(kind).map((key) => buildModule(key, ctx)).filter(Boolean);
+  const fine = finePrint({ calories: calorieInfo, en, has, kind, entry });
   const footerChips = [];
   if (has('AUTO_INCREMENT')) footerChips.push('Series activity');
   if (has('SOURCE_LINK')) footerChips.push(`→ Linked to ${sourceLabel(activity.source ?? entry.source) || 'source'}`);
 
-  const extraStats = [];
-  if (category !== 'cardio-time' && calories > 0) extraStats.push({ value: fmtNumber(calories), unit: 'kcal', label: 'calories' });
-  if (num(entry.elevationGainM) > 0) extraStats.push({ value: Math.round(entry.elevationGainM), unit: 'm', label: 'elevation gain' });
-  if (category !== 'cardio-time' && maxBpm > 0) extraStats.push({ value: maxBpm, unit: 'bpm', label: 'max hr' });
-  if (category === 'strength' && reps > 0 && !race) extraStats.push({ value: fmtNumber(reps), unit: '', label: 'reps' });
-  if (category === 'strength' && avgBpm > 0 && !race) extraStats.push({ value: avgBpm, unit: 'bpm', label: 'avg hr' });
-  if (typeof entry.tempC === 'number') extraStats.push({ value: `${Math.round(entry.tempC)}°`, unit: 'C', label: entry.weatherDescription ? String(entry.weatherDescription).toLowerCase() : 'temperature' });
-
   // Race-day context, the event weekend it belongs to, and the PB progression.
-  const eventGroup = race ? history?.eventBySlug.get(slug) : undefined;
+  const eventGroup = race ? hyrox?.eventBySlug.get(slug) : undefined;
   const eventLink = eventGroup
     ? {
         url: eventUrl(eventGroup.slug),
         name: eventGroup.name,
         count: eventGroup.slugs.length,
-        others: eventGroup.slugs.filter((x) => x !== slug).map((x) => history?.races.get(x)).filter(Boolean).map((r) => ({ url: r.url, title: r.title, total: r.total, division: r.divisionLabel, isPB: r.isPB })),
+        others: eventGroup.slugs.filter((x) => x !== slug).map((x) => hyrox?.races.get(x)).filter(Boolean).map((r) => ({ url: r.url, title: r.title, total: r.total, division: r.divisionLabel, isPB: r.isPB })),
       }
     : null;
   const weather = en.weather && typeof en.weather.tempC === 'number'
@@ -1108,21 +858,23 @@ export function buildActivityView(file, index, opts = {}) {
     : typeof entry.tempC === 'number' ? `${Math.round(entry.tempC)}°C${entry.weatherDescription ? ` · ${String(entry.weatherDescription).toLowerCase()}` : ''}` : '';
   const raceDay = race
     ? [
-        { icon: '', label: 'venue', value: locationName || race.event },
-        { icon: '', label: 'race day', value: fmtDateShort(activity.startTime ?? entry.startTime) },
-        { icon: '', label: 'division', value: race.divisionLabel },
-        weather ? { icon: '', label: 'weather', value: weather } : null,
-        race.partner ? { icon: '', label: 'partner', value: race.partner } : null,
+        { label: 'venue', value: locationName || race.event },
+        { label: 'race day', value: fmtDateShort(startTime) },
+        { label: 'division', value: race.divisionLabel },
+        weather ? { label: 'weather', value: weather } : null,
+        race.partner ? { label: 'partner', value: race.partner } : null,
       ].filter((x) => x && x.value)
     : [];
   // This race against the PB it was chasing, its own division only, history up to it (F5.5).
   const divisionKey = String(file?.race?.division?.key ?? '');
-  const chase = race && history && divisionKey && !race.isSimulation ? pbChase(history, divisionKey, [slug]) : null;
+  const chase = race && hyrox && divisionKey && !race.isSimulation ? pbChase(hyrox, divisionKey, [slug]) : null;
   const gallery = photos.map((src, i) => ({ src, id: `photo-${i + 1}`, n: i + 1, prev: `#photo-${i === 0 ? photos.length : i}`, next: `#photo-${i + 2 > photos.length ? 1 : i + 2}`, total: photos.length }));
 
-  const ogDescription = truncate(description || stripTags(aiSummaryHtml) || `${typeLabel(activityType).toLowerCase()} · ${fmtDateShort(activity.startTime ?? entry.startTime)}`, 200);
+  const ogDescription = truncate(description || stripTags(aiSummaryHtml) || `${typeLabel(activityType).toLowerCase()} · ${fmtDateShort(startTime)}`, 200);
   const ogImage = (opts.ogCard && /^https?:\/\//.test(opts.ogCard) ? opts.ogCard : '') || photos[0] || '';
   const canonical = siteUrl ? `${siteUrl}${activityUrl(slug)}` : '';
+  const pace = num(en.pace?.avgPaceSecondsPerKm);
+  const speedKmh = num(en.speed?.avgSpeedKmh);
 
   return {
     page: 'life',
@@ -1134,7 +886,7 @@ export function buildActivityView(file, index, opts = {}) {
     ogType: 'article',
     ogImage,
     canonical,
-    publishedTime: activity.startTime ?? entry.startTime ?? '',
+    publishedTime: startTime,
     atomFeed: FITNESS_FEED_PATH,
     act: {
       slug,
@@ -1142,22 +894,26 @@ export function buildActivityView(file, index, opts = {}) {
       canonical,
       title,
       icon,
+      kind,
+      is: { [kind]: true },
       typeLabel: hybridRaceLabel(title, { hasRace: !!race, event: race?.event }) || typeLabel(activityType),
       ...activityTheme(activityType),
       category,
       source: sourceLabel(activity.source ?? entry.source),
-      dateStamp: fmtDateStamp(activity.startTime ?? entry.startTime),
-      dateIso: activity.startTime ?? entry.startTime ?? '',
+      dateStamp: fmtDateStamp(startTime),
+      dateIso: startTime,
       prCount,
       bgPhotoUrl: photos[0] || '',
       ...heroLayout(opts.photoDims?.[photos[0] || '']),
       owner: String(activity.ownerDisplayName ?? index?.profile?.displayName ?? 'James').toUpperCase(),
       locationName: locationName.toUpperCase(),
       links: buildLinks(file?.links),
-      anchors: race ? raceAnchors(race, avgBpm) : anchorStats({ category, distanceM, durationS, avgBpm, maxBpm, calories, pace: num(en.pace?.avgPaceSecondsPerKm), speedKmh: num(en.speed?.avgSpeedKmh), sets, volumeKg, prCount, icon }),
-      extraStats,
+      // `anchors` feed the share cards, the Atom feed and the race weekend (unchanged); the
+      // page leads with `headline`, the kind's own numbers, never padded with a dash.
+      anchors: race ? raceAnchors(race, avgBpm) : anchorStats({ category, distanceM, durationS, avgBpm, maxBpm, calories, pace, speedKmh, sets, volumeKg, prCount, icon }),
+      headline: race ? raceAnchors(race, avgBpm) : kindAnchors(kind, { durationS, distanceM, avgBpm, maxBpm, calories, pace, speedKmh, sets, reps, volumeKg, topKg, hotMinutes, elevationM: num(entry.elevationGainM), practice }),
       parkrun,
-      milestone,
+      lifetime,
       prBand,
       hybridRace,
       race,
@@ -1171,9 +927,17 @@ export function buildActivityView(file, index, opts = {}) {
       photos,
       route,
       routeMap,
-      heroChart,
+      heart,
       hrZones,
+      run,
+      ride,
+      strength,
+      engine,
+      stations,
+      mind,
+      prs,
       modules,
+      finePrint: fine,
       footerChips,
       ogImage,
       ogDescription,
@@ -1203,6 +967,8 @@ export function fitnessActivityViewsTask() {
         return { fitnessActivityPages: [] };
       }
       const hyrox = buildHyroxHistory(activities);
+      const activityHistory = buildActivityHistory(activities);
+      const maxHr = inferMaxHr(activities);
       const pages = [];
       for (const file of activities) {
         const slug = file?.slug ?? file?.entry?.showcaseId;
@@ -1212,9 +978,10 @@ export function fitnessActivityViewsTask() {
         }
         const ogCard = g.fitnessOgImages?.activity?.[String(slug)];
         const share = g.fitnessShareCards?.activity?.[String(slug)];
-        pages.push(buildActivityView(file, g.fitnessIndex, { siteUrl: g.siteUrl, ogCard, share, hyrox, photoDims: g.fitnessPhotoDims }));
+        pages.push(buildActivityView(file, g.fitnessIndex, { siteUrl: g.siteUrl, ogCard, share, hyrox, photoDims: g.fitnessPhotoDims, activityHistory, maxHr }));
       }
-      ctx.logger.info(`Activity views: ${pages.length} of ${activities.length}`);
+      const kinds = pages.reduce((/** @type {Record<string, number>} */ m, p) => ({ ...m, [p.act.kind]: (m[p.act.kind] ?? 0) + 1 }), {});
+      ctx.logger.info(`Activity views: ${pages.length} of ${activities.length} (${Object.entries(kinds).map(([k, n]) => `${k} ${n}`).join(', ')}; max HR ${maxHr})`);
       return { fitnessActivityPages: pages };
     },
   };

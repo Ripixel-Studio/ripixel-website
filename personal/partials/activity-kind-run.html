@@ -1,0 +1,60 @@
+{{!-- A run: the route big and early, then each km against the run's own average, the
+     ground it covered, its best efforts against every earlier run, and the lifetime total.
+     Context: `act`. --}}
+{{#if route}}
+<section class="act-sec act-sec--route" aria-labelledby="act-route">
+  <h2 class="act-h" id="act-route">the <span>route</span>.</h2>
+  {{> activity-route}}
+</section>
+{{else}}{{#if routeMap}}<p class="act-noroute">{{routeMap.label}}</p>{{/if}}{{/if}}
+
+{{#if run.splits}}
+<section class="act-sec act-splits" aria-labelledby="act-splits">
+  <div class="act-h-row">
+    <h2 class="act-h" id="act-splits">km by <span>km</span>.</h2>
+    <p class="act-h-row__meta">against the average, <b>{{run.splits.avg}} /km</b> · faster to the left</p>
+  </div>
+  <ol class="act-splits__rows">
+    {{#each run.splits.rows}}
+    <li class="act-split{{#if faster}} act-split--fast{{else}} act-split--slow{{/if}}{{#if fastest}} act-split--best{{/if}}">
+      <span class="act-split__km">{{#if partial}}last {{label}}{{else}}km {{label}}{{/if}}</span>
+      <span class="act-split__track" aria-hidden="true"><span class="act-split__bar" style="--w: {{pct}}"></span></span>
+      <span class="act-split__pace">{{pace}}{{#if fastest}} <b class="act-split__star">fastest</b>{{/if}}</span>
+      <span class="act-split__delta">{{delta}}</span>
+      {{#if ../run.splits.hasHr}}<span class="act-split__hr">{{#if hr}}{{hr}}<small>bpm</small>{{/if}}</span>{{/if}}
+    </li>
+    {{/each}}
+  </ol>
+</section>
+{{/if}}
+
+{{#if run.elevation}}
+<section class="act-sec act-elev" aria-labelledby="act-elev">
+  <div class="act-h-row">
+    <h2 class="act-h" id="act-elev">up and <span>down</span>.</h2>
+    <p class="act-h-row__meta"><b>↑ {{run.elevation.gain}} m</b> · ↓ {{run.elevation.loss}} m · high {{run.elevation.high}} m</p>
+  </div>
+  <div class="act-card act-elev__card"><div class="act-card__inner">{{> chart-line run.elevation.chart}}</div></div>
+</section>
+{{/if}}
+
+{{#if run.efforts.length}}
+<section class="act-sec act-efforts" aria-labelledby="act-efforts">
+  <div class="act-h-row">
+    <h2 class="act-h" id="act-efforts">best <span>efforts</span>.</h2>
+    <p class="act-h-row__meta">the fastest stretch of each distance, against every run before it</p>
+  </div>
+  <ol class="act-efforts__list">
+    {{#each run.efforts}}
+    <li class="act-effort{{#if top}} act-effort--top{{/if}}">
+      <span class="act-effort__d">{{label}}</span>
+      <b class="act-effort__t">{{time}}</b>
+      {{#if badge}}<span class="stamp act-stamp act-effort__badge">{{badge}}</span>{{/if}}
+      {{#if was}}<span class="act-effort__was">{{#if top}}was {{was}}{{else}}best {{was}}{{/if}}</span>{{/if}}
+    </li>
+    {{/each}}
+  </ol>
+</section>
+{{/if}}
+
+{{#if lifetime}}{{> activity-lifetime lifetime}}{{/if}}
