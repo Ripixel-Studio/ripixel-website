@@ -2376,6 +2376,7 @@ a.hub-hero__route:hover .hub-hero__route-cta { background: var(--life-ink); colo
   }
   .hub-card--lg.hub-card--image:has(> .hub-session) .hub-hero__frame { width: min(100% - 14px, 300px); }
   .hub-hero--spark .chart { --chart-h: 150px; }
+}
 
 /* ── Watching: service stamps ─────────────────────────────────────────────
    Where a film or show was watched, as a set of riso text stamps (never a logo file): one shape, the
