@@ -1,4 +1,4 @@
-{{!-- Page-level bands: parkrun, milestone crossed, personal-records callout. Context: `act`. --}}
+{{!-- Page-level bands: parkrun, lifetime milestone crossed, personal-record callout. Context: `act`. --}}
 {{#if parkrun}}
 <section class="act-band act-band--parkrun" aria-label="parkrun result">
   <div class="act-band__kicker">
@@ -7,20 +7,20 @@
     {{#if parkrun.isAgeGradePb}}<span class="stamp act-stamp act-stamp--pb">AG PB</span>{{/if}}
   </div>
   <div class="act-band__cells">
-    <div class="act-band__cell"><div class="act-band__n">{{parkrun.finishTime}}</div><div class="act-band__l">finish time</div></div>
-    <div class="act-band__cell"><div class="act-band__n">{{parkrun.position}}</div><div class="act-band__l">position</div></div>
-    <div class="act-band__cell"><div class="act-band__n">{{parkrun.ageGrade}}</div><div class="act-band__l">age grade</div></div>
+    {{#if parkrun.finishTime}}<div class="act-band__cell"><div class="act-band__n">{{parkrun.finishTime}}</div><div class="act-band__l">finish time</div></div>{{/if}}
+    {{#if parkrun.position}}<div class="act-band__cell"><div class="act-band__n">{{parkrun.position}}</div><div class="act-band__l">position</div></div>{{/if}}
+    {{#if parkrun.ageGrade}}<div class="act-band__cell"><div class="act-band__n">{{parkrun.ageGrade}}</div><div class="act-band__l">age grade</div></div>{{/if}}
     {{#if parkrun.totalParkruns}}<div class="act-band__cell"><div class="act-band__n">{{parkrun.totalParkruns}}</div><div class="act-band__l">total parkruns</div></div>{{/if}}
   </div>
 </section>
 {{/if}}
 
-{{#if milestone.crossedKm}}
+{{#if lifetime.crossed}}
 <section class="act-band act-band--milestone" aria-label="Distance milestone">
   <span class="act-band__icon">★</span>
   <div>
-    <div class="act-band__title">{{milestone.crossedKm}} km lifetime</div>
-    <div class="act-band__sub">total {{milestone.lifetimeKm}} km {{milestone.typeLabel}} · crossed on this one</div>
+    <div class="act-band__title">{{lifetime.crossed}} km lifetime</div>
+    <div class="act-band__sub">total {{lifetime.km}} km {{lifetime.typeLabel}} · crossed on this one</div>
   </div>
 </section>
 {{/if}}

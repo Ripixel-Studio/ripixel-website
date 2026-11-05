@@ -1,9 +1,7 @@
 /* =========================================
    FITNESS ACTIVITY PAGES — /life/activity/<slug>
    Zine voice: mono labels, ink borders, paper wash.
-   Everything is scoped under body.page-activity so the
-   legacy stat-card / exercise-item partials get a look
-   here without touching the rest of the site.
+   Everything is scoped under body.page-activity.
    Bundled automatically: every .css in styles/main/ is
    concatenated by bundleCssTask (skier.personal.tasks.mjs).
    ========================================= */
@@ -103,21 +101,6 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
 .act-anchor__unit { font-size: 16px; margin-left: 4px; color: var(--ink-section); letter-spacing: .05em; }
 .act-anchors .stat-strip__label { text-transform: uppercase; letter-spacing: .14em; font-size: 10px; }
 
-/* Secondary numbers — stat-grid / stat-card partials get their zine look here */
-.page-activity .stat-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 18px;
-}
-.page-activity .stat-card {
-  background: var(--paper-4); border: 2px solid var(--ink); padding: 10px 14px;
-  display: flex; flex-direction: column; gap: 2px;
-}
-.page-activity .stat-card .stat-value { font-family: var(--f-disp); font-size: 30px; line-height: 1; color: var(--ink); }
-.page-activity .stat-card .stat-value small { font-family: var(--f-mono); font-size: 11px; margin-left: 4px; color: var(--ink-section); }
-.page-activity .stat-card .stat-label {
-  display: block; background: none; color: var(--ink); opacity: .72; padding: 0;
-  font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
-}
-.page-activity .stat-card .stat-subtext { font-family: var(--f-mono); font-size: 10px; opacity: .55; }
 
 /* ─── Generic card ──────────────────────── */
 .act-card {
@@ -197,14 +180,6 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
 .act-ai__body ul { list-style: square; }
 .act-ai__body ol { list-style: decimal; }
 
-.act-milestone {
-  display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; margin-bottom: 18px;
-  font-family: var(--f-mono); font-size: 12px; padding: 10px 14px; background: var(--paper-4); border: 1.5px dashed var(--ink);
-}
-.act-milestone__label { letter-spacing: .14em; text-transform: uppercase; font-size: 10px; opacity: .7; }
-.act-milestone__value { font-family: var(--f-disp); font-size: 28px; line-height: 1; }
-.act-milestone__next { opacity: .75; }
-.act-milestone__hit { color: var(--ink-section); font-weight: 700; }
 
 .act-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
 
@@ -218,7 +193,7 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
 .act-map__end { fill: var(--ink-section); }
 
 /* ─── Module grid ──────────────────────── */
-.act-layout { display: grid; grid-template-columns: 1fr 260px; gap: 22px; align-items: start; margin-top: 4px; }
+.act-aside__back { display: inline-block; margin-top: 4px; font-family: var(--f-mono); font-size: 12px; color: var(--ink-section); border-bottom: 1px solid var(--ink-section); }
 .act-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .act-grid .act-card { margin-bottom: 0; }
 .act-module--wide { grid-column: 1 / -1; }
@@ -250,11 +225,9 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
 .act-zones__legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-family: var(--f-mono); font-size: 10px; opacity: .6; }
 
 /* Horizontal bar rows (pace splits, goals) */
-.act-bars-list { display: grid; gap: 4px; margin-top: 6px; }
 .act-bar { display: grid; grid-template-columns: 48px 1fr 52px; align-items: center; gap: 8px; font-family: var(--f-mono); font-size: 11px; }
 .act-bar__svg { display: block; width: 100%; height: 12px; }
 .act-bar__fill { fill: var(--ink-section); opacity: .85; }
-.act-bar__value { text-align: right; font-weight: 700; }
 
 .act-goals { display: grid; gap: 10px; }
 .act-goal__head, .act-goal__foot { display: flex; justify-content: space-between; font-family: var(--f-mono); font-size: 11px; }
@@ -263,26 +236,10 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
 .act-goal__off { color: var(--ink-red); font-weight: 700; }
 
 /* Streak dots */
-.act-dots { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; margin-top: 4px; }
-.act-dot { display: inline-block; width: 12px; height: 12px; border: 1.5px solid var(--ink); }
-.act-dot--active { background: var(--ink-section); }
-.act-dot--rest { background: var(--paper-3); }
-.act-dot--off { background: #fff; opacity: .5; }
-.act-dots__legend { display: flex; align-items: center; gap: 6px; font-family: var(--f-mono); font-size: 10px; opacity: .65; margin-top: 8px; }
-.act-dots__legend .act-dot { width: 10px; height: 10px; }
 
 /* Images (muscle heatmap) */
-.act-module__image img { width: 100%; max-height: 260px; object-fit: contain; margin: 4px 0 8px; }
 
 /* Chips */
-.act-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.act-chip {
-  display: inline-block; font-family: var(--f-mono); font-size: 11px; padding: 2px 8px;
-  border: 1.5px solid var(--ink); background: #fff; color: var(--ink);
-}
-.act-chip--primary { background: var(--ink-section); color: var(--paper); border-color: var(--ink-section); }
-.act-chip--secondary { border-style: dashed; }
-.act-chip--set { background: var(--paper-4); }
 
 /* Table (intervals) */
 .act-table { width: 100%; border-collapse: collapse; font-family: var(--f-mono); font-size: 12px; }
@@ -299,28 +256,11 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
 .act-list__tertiary { color: var(--ink-section); font-size: 11px; }
 
 /* Set list */
-.act-sets { display: grid; gap: 10px; }
-.act-ex { border-bottom: 1.5px dashed rgba(23,19,17,.3); padding-bottom: 10px; }
-.act-ex:last-of-type { border-bottom: none; }
-.page-activity .exercise-item { display: flex; gap: 12px; align-items: flex-start; }
-.page-activity .exercise-icon { font-size: 20px; line-height: 1.2; }
-.page-activity .exercise-details h4 { font-family: var(--f-disp); font-size: 22px; line-height: 1; color: var(--ink); margin: 0 0 2px; }
-.page-activity .exercise-date { font-family: var(--f-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; opacity: .65; }
-.act-ex--pr .exercise-details h4 { color: var(--ink-section); }
-.act-ex__sets { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 0 32px; }
-.act-ex__vol { margin-left: auto; font-family: var(--f-mono); font-size: 12px; font-weight: 700; }
-.act-sets__foot { display: flex; flex-wrap: wrap; gap: 18px; border-top: 2px solid var(--ink); padding-top: 10px; margin-top: 4px; }
-.act-sets__stat { font-family: var(--f-disp); font-size: 28px; line-height: 1; }
-.act-sets__stat small { font-family: var(--f-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; opacity: .65; margin-left: 4px; }
-.act-sets__stat--ink { color: var(--ink-section); }
 
-.act-footer-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
 
-.act-aside__back { display: inline-block; margin-top: 4px; font-family: var(--f-mono); font-size: 12px; color: var(--ink-section); border-bottom: 1px solid var(--ink-section); }
 
 /* ─── Responsive ───────────────────────── */
 @media (max-width: 880px) {
-  .act-layout { grid-template-columns: 1fr; }
   .act-anchors { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 720px) {
@@ -328,7 +268,6 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
   .act-hero__body { padding: 16px 18px 18px; }
   .act-anchors .stat-strip__num { font-size: 40px; }
   .act-band__n { font-size: 34px; }
-  .act-dots { grid-template-columns: repeat(7, 1fr); }
 }
 
 /* ─── Hyrox: stamps, race day, event link ─── */
@@ -405,8 +344,6 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
 .act-race__callout--loss { color: var(--ink-red); }
 
 /* Pace splits: HR per km */
-.act-bar__hr { font-family: var(--f-mono); font-size: 11px; white-space: nowrap; min-width: 64px; text-align: right; }
-.act-bar__hr small { opacity: .6; }
 
 /* ─── PB progression ─── */
 /* PB chase (F5.5): one time axis, faster to the left; this race against the PB it

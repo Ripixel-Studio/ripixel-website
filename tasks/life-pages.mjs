@@ -25,8 +25,8 @@ import { FEED_PATH, FEED_TITLE, FEED_SUBTITLE } from './fitness-feed-items.mjs';
 import { eventOutPath } from './fitness-event-views.mjs';
 
 /**
- * Handlebars helpers the activity and event partials use (`{{#if (eq type "strength")}}` in
- * exercise-item, `{{#unless (eq total 1)}}` in activity-gallery).
+ * Handlebars helpers the activity and event partials use (`{{#unless (eq sets 1)}}` in
+ * activity-kind-strength and -class, `{{#unless (eq total 1)}}` in activity-gallery).
  */
 export const templateHelpers = {
   eq: (/** @type {unknown} */ a, /** @type {unknown} */ b) => a === b,

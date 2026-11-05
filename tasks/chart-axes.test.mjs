@@ -98,6 +98,12 @@ describe('lineChart', () => {
     assert.equal(b.xTicks[b.xTicks.length - 1].label, '1:30');
   });
 
+  test('distance: km at the start, middle and end', () => {
+    const a = lineChart([20, 30, 25], { label: 'Altitude', unit: 'm', x: { kind: 'distance', meters: 5060 } });
+    assert.deepEqual(a?.xTicks.map((t) => t.label), ['0 km', '2.5 km', '5.1 km']);
+    assert.match(a?.summary ?? '', /over 5\.1 km/);
+  });
+
   test('days: every label', () => {
     const labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
     const m = lineChart([1, 2, 3, 4, 5, 6, 7], { label: 'Steps', unit: 'steps', x: { kind: 'days', labels } });

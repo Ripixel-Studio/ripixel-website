@@ -1,0 +1,9 @@
+{{!-- Lifetime distance for the type, towards the next milestone. Context: lifetimeProgress(). --}}
+<section class="act-lifetime" aria-label="Lifetime distance">
+  <div class="act-lifetime__head">
+    <span class="act-lifetime__l">lifetime {{typeLabel}}</span>
+    <b class="act-lifetime__km">{{km}}<small>km</small></b>
+    {{#if next}}<span class="act-lifetime__next">{{toGo}} km to {{next}}</span>{{/if}}
+  </div>
+  {{#if next}}<div class="act-lifetime__bar" aria-hidden="true"><span style="width: {{pct}}%"></span></div>{{/if}}
+</section>

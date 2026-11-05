@@ -1,0 +1,41 @@
+{{!-- Pilates, yoga, mobility: calm. The practice (this session's place in the year, the
+     weeks in a row), what it focused on, and a steady heart. No sets, volume or records.
+     Context: `act`. --}}
+{{#with mind}}
+{{#if practice}}
+<section class="act-sec act-practice" aria-labelledby="act-practice">
+  <h2 class="act-h act-h--calm" id="act-practice">the <span>practice</span>.</h2>
+  <p class="act-practice__line">
+    The <b>{{practice.nthYearLabel}}</b> {{practice.practice}} session of {{practice.year}},
+    <b>{{practice.month}}</b> so far in {{practice.monthName}}{{#if practice.streak}}, and <b>{{practice.weekStreak}} weeks</b> in a row{{/if}}.
+  </p>
+  <figure class="act-weeks">
+    <ol class="act-weeks__strip" aria-label="Weeks with a {{practice.practice}} session, the last 26 weeks">
+      {{#each practice.weeks}}<li class="act-week{{#if count}} act-week--on{{/if}}{{#if many}} act-week--many{{/if}}{{#if current}} act-week--now{{/if}}" title="{{title}}: {{count}}"><span class="act-sr">{{title}}: {{count}}</span></li>{{/each}}
+    </ol>
+    <figcaption class="act-weeks__cap"><span>26 weeks ago</span><span>{{practice.weeksActive}} of the last 26 weeks</span><span>this week</span></figcaption>
+  </figure>
+</section>
+{{/if}}
+
+{{#if focus.length}}
+<section class="act-sec act-focus" aria-labelledby="act-focus">
+  <h2 class="act-h act-h--calm" id="act-focus">the <span>focus</span>.</h2>
+  <ul class="act-focus__list">
+    {{#each focus}}<li class="act-focus__item"><b>{{word}}</b><span>{{gloss}}</span></li>{{/each}}
+  </ul>
+</section>
+{{/if}}
+
+{{#if steady}}
+<section class="act-sec act-steady" aria-labelledby="act-steady">
+  <h2 class="act-h act-h--calm" id="act-steady"><span>steady</span>.</h2>
+  <div class="act-steady__row">
+    <div class="act-steady__n"><b>{{steady.avg}}</b><small>bpm</small><span>average</span></div>
+    {{#if steady.band}}<div class="act-steady__n act-steady__n--quiet"><b>{{steady.band}}</b><small>bpm</small><span>half the session</span></div>{{/if}}
+    {{#if steady.range}}<div class="act-steady__n act-steady__n--quiet"><b>{{steady.range}}</b><small>bpm</small><span>low to high</span></div>{{/if}}
+  </div>
+  {{#if steady.chart}}<div class="act-steady__chart">{{> chart-line steady.chart}}</div>{{/if}}
+</section>
+{{/if}}
+{{/with}}

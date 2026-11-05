@@ -2,7 +2,7 @@
 <html lang="en">
 {{> head}}
 
-<body class="page-life page-activity {{act.typeClass}}" data-page="life">
+<body class="page-life page-activity {{act.typeClass}} act-kind--{{act.kind}}" data-page="life">
   <div class="paper-wash" aria-hidden="true"></div>
   <div class="paper-dot" aria-hidden="true"></div>
 
@@ -27,55 +27,64 @@
 
     {{> activity-hero}}
 
-    {{> activity-words}}
-
-    <!-- Headline numbers: the four anchor cells by category, then whatever else the data has -->
-    <div class="stat-strip act-anchors">
-      {{#each anchors}}
+    {{!-- The kind's own headline numbers: only what this activity has, never a dash. --}}
+    {{#if headline.length}}
+    <div class="stat-strip act-anchors" style="--n: {{headline.length}}">
+      {{#each headline}}
       <div class="stat-strip__item">
         <div class="stat-strip__num">{{value}}{{#if unit}}<span class="act-anchor__unit">{{unit}}</span>{{/if}}</div>
         <div class="stat-strip__label">{{label}}</div>
       </div>
       {{/each}}
     </div>
-
-    {{> activity-raceday}}
-
-    {{#if extraStats.length}}
-    {{#> stat-grid modifier="act-extra"}}
-      {{#each extraStats}}{{> stat-card}}{{/each}}
-    {{/stat-grid}}
     {{/if}}
 
-    {{#if heroChart}}
-    <section class="act-card act-spark" aria-label="Session chart">
-      <div class="act-card__inner">
-        {{> chart-line heroChart}}
-      </div>
-    </section>
-    {{/if}}
+    {{#if is.race}}{{> activity-kind-race}}{{/if}}
 
     {{> activity-bands}}
 
-    {{> activity-pregrid}}
+    {{> activity-words}}
 
-    <div class="act-layout">
-      <main>
-        {{#if modules.length}}
-        <div class="act-grid">
-          {{#each modules}}{{> activity-module}}{{/each}}
-        </div>
-        {{/if}}
-        {{#if footerChips.length}}
-        <div class="act-footer-chips">
-          {{#each footerChips}}<span class="tag-chip">{{this}}</span>{{/each}}
-        </div>
-        {{/if}}
-      </main>
-      <aside class="act-aside">
-        <a class="act-aside__back" href="/life/fitness">← all activity</a>
-      </aside>
+    {{#if is.run}}{{> activity-kind-run}}{{/if}}
+    {{#if is.ride}}{{> activity-kind-ride}}{{/if}}
+    {{#if is.walk}}{{> activity-kind-ride}}{{/if}}
+    {{#if is.strength}}{{> activity-kind-strength}}{{/if}}
+    {{#if is.class}}{{> activity-kind-class}}{{/if}}
+    {{#if is.mind}}{{> activity-kind-mind}}{{/if}}
+
+    {{#if prs.length}}
+    <section class="act-sec act-prs" aria-labelledby="act-prs">
+      <h2 class="act-h" id="act-prs">new <span>records</span>.</h2>
+      <ol class="act-prs__list">
+        {{#each prs}}
+        <li class="act-prs__item"><span class="act-prs__what">{{primary}}</span><b class="act-prs__val">{{secondary}}</b>{{#if tertiary}}<span class="act-prs__delta">{{tertiary}}</span>{{/if}}</li>
+        {{/each}}
+      </ol>
+    </section>
+    {{/if}}
+
+    {{#if tags.length}}
+    <div class="act-tags">
+      {{#each tags}}<span class="tag-chip">#{{this}}</span>{{/each}}
     </div>
+    {{/if}}
+
+    {{> activity-gallery gallery}}
+
+    {{#if heart}}{{> activity-heart heart}}{{/if}}
+
+    {{#if modules.length}}
+    <div class="act-grid">
+      {{#each modules}}{{> activity-module}}{{/each}}
+    </div>
+    {{/if}}
+
+    {{#if finePrint.length}}{{> activity-fineprint}}{{/if}}
+
+    <footer class="act-foot">
+      {{#each footerChips}}<span class="tag-chip">{{this}}</span>{{/each}}
+      <a class="act-foot__back" href="/life/fitness">← all activity</a>
+    </footer>
     {{/with}}
 
   </div>

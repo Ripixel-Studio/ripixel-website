@@ -1,0 +1,10 @@
+{{!-- The fine print: calories, effort, load, recovery, streak, weather — what the activity
+     has, small. Context: `act`. --}}
+<section class="act-fine" aria-label="The fine print">
+  <h2 class="act-fine__h">the fine print</h2>
+  <dl class="act-fine__cells">
+    {{#each finePrint}}
+    <div class="act-fine__cell"><dt>{{label}}</dt><dd><b>{{value}}</b>{{#if unit}}<small>{{unit}}</small>{{/if}}{{#if note}}<span>{{note}}</span>{{/if}}</dd></div>
+    {{/each}}
+  </dl>
+</section>

@@ -28,18 +28,15 @@ export function foodComparison(kcal) {
 /**
  * @param {any} activity  the export's `activity`
  * @param {any} [entry]   its index entry
- * @returns {{ kcal: number, source: 'platform'|'estimate'|'', note: string }}
+ * The food comparison is the page's own (foodComparison), never FitGlue's stored
+ * `comparisonText`, which ends in an emoji.
+ * @returns {{ kcal: number, source: 'platform'|'estimate'|'' }}
  */
 export function calorieFigure(activity, entry = {}) {
   const sessions = Array.isArray(activity?.activityData?.sessions) ? activity.activityData.sessions : [];
   const platform = sessions.reduce((s, x) => s + num(x?.totalCalories), 0);
   const stored = activity?.enrichments?.calories;
-  if (platform > 0) {
-    const kcal = Math.round(platform);
-    // Keep the food comparison only where fun mode had one, recomputed for this figure.
-    const note = stored?.comparisonText ? foodComparison(kcal) : '';
-    return { kcal, source: 'platform', note };
-  }
+  if (platform > 0) return { kcal: Math.round(platform), source: 'platform' };
   const kcal = Math.round(num(stored?.kcal) || num(entry?.caloriesKcal));
-  return { kcal, source: kcal > 0 ? 'estimate' : '', note: kcal > 0 ? String(stored?.comparisonText ?? '') : '' };
+  return { kcal, source: kcal > 0 ? 'estimate' : '' };
 }

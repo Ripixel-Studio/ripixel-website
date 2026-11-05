@@ -17,29 +17,7 @@
     </div>
     {{/if}}
 
-    {{#if zones}}{{> activity-hr-zones zones}}{{/if}}
-
     {{#if chart}}{{> chart-line chart}}{{/if}}
-
-    {{#if bars}}
-    <div class="act-bars-list" role="list">
-      {{#each bars.rows}}
-      <div class="act-bar" role="listitem">
-        <span class="act-bar__label">{{label}}</span>
-        <svg class="act-bar__svg" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="1" width="{{pct}}" height="8" class="act-bar__fill" /></svg>
-        <span class="act-bar__value">{{value}}</span>
-        {{#if ../bars.hasHr}}<span class="act-bar__hr">{{#if hr}}♡ {{hr}}<small>/{{hrMax}}</small>{{/if}}</span>{{/if}}
-      </div>
-      {{/each}}
-    </div>
-    {{/if}}
-
-    {{#if dots.length}}
-    <div class="act-dots" aria-label="Last 28 days">
-      {{#each dots}}<span class="act-dot act-dot--{{state}}" title="{{date}}"></span>{{/each}}
-    </div>
-    <div class="act-dots__legend"><span class="act-dot act-dot--active"></span> active <span class="act-dot act-dot--rest"></span> rest <span class="act-dot act-dot--off"></span> off</div>
-    {{/if}}
 
     {{#if goals.length}}
     <div class="act-goals">
@@ -51,17 +29,6 @@
       </div>
       {{/each}}
     </div>
-    {{/if}}
-
-    {{#if image}}
-    <div class="act-module__image"><img src="{{image.src}}" alt="{{image.alt}}" loading="lazy" decoding="async" /></div>
-    {{/if}}
-
-    {{#if chips.length}}
-    <div class="act-chips">
-      {{#each chips}}<span class="act-chip act-chip--{{tone}}">{{text}}</span>{{/each}}
-    </div>
-    {{#if chipsLegend}}<div class="act-note act-note--quiet">{{chipsLegend}}</div>{{/if}}
     {{/if}}
 
     {{#if table}}
@@ -86,8 +53,6 @@
       {{/each}}
     </ol>
     {{/if}}
-
-    {{#if setList}}{{> activity-set-list setList}}{{/if}}
 
     {{#if note}}<div class="act-note{{#if noteWarn}} act-note--warn{{/if}}">{{note}}</div>{{/if}}
   </div>

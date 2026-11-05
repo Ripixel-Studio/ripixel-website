@@ -28,28 +28,31 @@ import {
   stripTags,
   routePath,
   hrZoneBars,
-  groupStrengthSets,
-  setChip,
-  parseRecordType,
   topPR,
   prValue,
   prDelta,
   anchorStats,
-  moduleOrderFor,
+  modulesFor,
   buildModule,
   buildActivityView,
   deriveCategory,
   fitnessActivityViewsTask,
 } from './fitness-activity-views.mjs';
 import { loadFitnessData } from './fitness-fetch.mjs';
+import { buildActivityHistory } from './fitness-activity-kinds.mjs';
 import { lifePageTasks } from './life-pages.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const FIXTURES = path.join(REPO, 'fixtures', 'fitness');
+/** One activity per page kind the shared fixtures lack (pilates, a Hyrox PT class). Kept out of
+ * fixtures/fitness so the feed, calendar and roundup suites keep their own fixed set. */
+const KIND_FIXTURES = path.join(REPO, 'fixtures', 'fitness-kinds');
+const KIND_SLUGS = ['glutes-core-pilates-2026-10-19', 'half-hyrox-pt-2026-10-21'];
 
 /** @param {string} slug */
 async function fixture(slug) {
-  return JSON.parse(await fs.readFile(path.join(FIXTURES, 'activity', `${slug}.json`), 'utf8'));
+  const dir = KIND_SLUGS.includes(slug) ? KIND_FIXTURES : path.join(FIXTURES, 'activity');
+  return JSON.parse(await fs.readFile(path.join(dir, `${slug}.json`), 'utf8'));
 }
 async function fixtureIndex() {
   return JSON.parse(await fs.readFile(path.join(FIXTURES, 'index.json'), 'utf8'));
@@ -159,42 +162,8 @@ describe('inline SVG maths', () => {
   });
 });
 
-describe('strength set list', () => {
-  const sets = [
-    { exerciseName: 'Bench Press (Barbell)', reps: 8, weightKg: 80 },
-    { exerciseName: 'Bench Press (Barbell)', reps: 8, weightKg: 80 },
-    { exerciseName: 'Bench Press (Barbell)', reps: 8, weightKg: 80 },
-    { exerciseName: 'Bench Press (Barbell)', reps: 1, weightKg: 100 },
-    { exerciseName: 'Plank', durationSeconds: 45 },
-    { exerciseName: 'Plank', durationSeconds: 45 },
-    { exerciseName: 'Sled Push', distanceMeters: 1200, weightKg: 60 },
-  ];
-  test('groups, collapses identical consecutive sets, computes volume', () => {
-    const g = groupStrengthSets(sets, new Set(['Bench Press (Barbell)']));
-    assert.ok(g);
-    assert.equal(g.exercises.length, 3);
-    assert.deepEqual(g.exercises[0].chips, ['3×8 × 80kg', '1 × 100kg']);
-    assert.equal(g.exercises[0].isPR, true);
-    assert.equal(g.exercises[0].volume, 2020);
-    assert.equal(g.exercises[0].summary, '4 sets · 25 reps · 2,020 kg');
-    assert.deepEqual(g.exercises[1].chips, ['2×45s']);
-    assert.equal(g.exercises[1].volumeLabel, '1m30s');
-    assert.deepEqual(g.exercises[2].chips, ['1.2km × 60kg']);
-    assert.equal(g.totalSets, 7);
-    assert.equal(g.totalReps, 25);
-    assert.equal(g.totalVolume, 2020);
-    assert.equal(g.right, '3 exercises · 7 sets');
-    assert.equal(groupStrengthSets([]), null);
-  });
-  test('chips', () => {
-    assert.equal(setChip({ reps: 10, weightKg: 0, durationSeconds: 0, distanceMeters: 0, count: 1 }), '10');
-    assert.equal(setChip({ reps: 0, weightKg: 0, durationSeconds: 3660, distanceMeters: 0, count: 1 }), '1h1m');
-    assert.equal(setChip({ reps: 5, weightKg: 62.5, durationSeconds: 0, distanceMeters: 0, count: 2 }), '2×5 × 62.5kg');
-  });
-});
-
 describe('no vestigial showcase stats', () => {
-  const slugs = ['colwick-parkrun-2026-10-17', 'evening-ride-to-the-reservoir-2026-10-15', 'push-day-2026-10-13'];
+  const slugs = ['colwick-parkrun-2026-10-17', 'evening-ride-to-the-reservoir-2026-10-15', 'push-day-2026-10-13', 'glutes-core-pilates-2026-10-19', 'half-hyrox-pt-2026-10-21'];
   /** @param {any} o @param {string} p @param {string[]} hits */
   function walk(o, p, hits) {
     if (Array.isArray(o)) o.forEach((x, i) => walk(x, `${p}[${i}]`, hits));
@@ -209,15 +178,13 @@ describe('no vestigial showcase stats', () => {
       const hits = [];
       walk(v.act, 'act', hits);
       assert.deepEqual(hits, []);
-      assert.ok(!v.act.extraStats.some((s) => s.subtext === 'pushed to'));
+      assert.ok(v.act.headline.every((a) => a.value && a.value !== '—'), 'no dash placeholders in the headline');
     });
   }
 });
 
 describe('PRs', () => {
   test('record types', () => {
-    assert.deepEqual(parseRecordType('Bench Press (Barbell)_1rm'), { label: 'Bench Press (Barbell)', exercise: 'Bench Press (Barbell)', prType: '1RM', isStrength: true });
-    assert.equal(parseRecordType('5k').prType, '');
     assert.equal(topPR([{ recordType: 'x_set_volume' }, { recordType: 'x_1rm' }]).recordType, 'x_1rm');
     assert.equal(topPR([{ recordType: 'fastest_5k' }, { recordType: 'fastest_10k' }]).recordType, 'fastest_10k');
     assert.deepEqual(prValue(1192, 'seconds'), { val: '19:52', unit: '' });
@@ -249,20 +216,20 @@ describe('hero anchors by category', () => {
   });
 });
 
-describe('module gating (§4)', () => {
-  const has = (/** @type {string} */ k) => k === 'HEART_RATE_SUMMARY' || k === 'WEATHER';
+describe('grid modules', () => {
+  const has = (/** @type {string} */ k) => k === 'SPEED_SUMMARY' || k === 'CADENCE_SUMMARY';
   test('a module needs its enricher applied and non-empty data', () => {
-    const ctx = { en: { heartRate: { avgBpm: 150, minBpm: 90, maxBpm: 180, driftBpm: 0 }, calories: { kcal: 300 } }, series: {}, has, category: 'cardio-distance', activityType: 'ACTIVITY_TYPE_RUN' };
-    assert.equal(buildModule('heart-rate', ctx)?.cells.length, 3);
-    assert.equal(buildModule('calories', ctx), null, 'CALORIES_BURNED not applied');
-    assert.equal(buildModule('heart-rate', { ...ctx, en: { heartRate: { avgBpm: 0 } } }), null, 'avgBpm 0');
-    assert.equal(buildModule('weather', { ...ctx, en: { weather: { tempC: 9 } }, category: 'strength' }), null, 'weather is cardio-distance only');
-    assert.equal(buildModule('weather', { ...ctx, en: { weather: { tempC: 9, weatherCode: 2 } } })?.right, 'part cloud');
+    const ctx = { en: { speed: { avgSpeedKmh: 26.6, maxSpeedKmh: 41 }, cadence: { avgRpm: 0 } }, series: {}, has, category: 'cardio-distance', activityType: 'ACTIVITY_TYPE_RIDE' };
+    assert.equal(buildModule('speed', ctx)?.cells[0].value, '26.6');
+    assert.equal(buildModule('cadence', ctx), null, 'avgRpm 0');
+    assert.equal(buildModule('power', ctx), null, 'POWER_SUMMARY not applied');
+    assert.equal(buildModule('heart-rate', ctx), null, 'heart rate is the heart card now, not a module');
   });
-  test('order per category', () => {
-    assert.deepEqual(moduleOrderFor('strength').slice(0, 3), ['muscle-heatmap', 'set-list', 'heart-rate']);
-    assert.deepEqual(moduleOrderFor('untraditional').slice(0, 2), ['heart-rate', 'calories']);
-    assert.ok(moduleOrderFor('sport').includes('spotify'));
+  test('modules per kind', () => {
+    assert.deepEqual(modulesFor('run').slice(0, 3), ['cadence', 'power', 'running-dynamics']);
+    assert.deepEqual(modulesFor('mind'), ['spotify']);
+    assert.ok(!modulesFor('strength').includes('set-list'));
+    assert.deepEqual(modulesFor('nonsense'), modulesFor('other'));
   });
   test('category derivation when the export did not carry one', () => {
     assert.equal(deriveCategory({ activityType: 'ACTIVITY_TYPE_YOGA' }), 'cardio-time');
@@ -273,10 +240,12 @@ describe('module gating (§4)', () => {
 });
 
 describe('view model from the fixtures', () => {
-  test('parkrun run: bands, zones, map, photos (gallery on), modules in order', async () => {
+  test('parkrun run: the run page — route, splits, elevation, efforts, bands, one heart chart', async () => {
     const index = await fixtureIndex();
     const v = buildActivityView(await fixture('colwick-parkrun-2026-10-17'), index, { siteUrl: 'https://james.ripixel.co.uk/' });
     const a = v.act;
+    assert.equal(a.kind, 'run');
+    assert.deepEqual(a.is, { run: true });
     assert.equal(a.url, '/life/activity/colwick-parkrun-2026-10-17');
     assert.equal(a.canonical, 'https://james.ripixel.co.uk/life/activity/colwick-parkrun-2026-10-17');
     assert.equal(a.typeLabel, 'RUN');
@@ -289,27 +258,25 @@ describe('view model from the fixtures', () => {
     assert.equal(a.prBand?.label, '5K');
     assert.equal(a.prBand?.delta, '−14s');
     assert.equal(a.description, 'Went out hard on the first lap and somehow held it. New 5K best.');
-    assert.match(a.aiSummaryHtml, /^<p>A <b>5K personal best<\/b>/);
-    assert.ok(a.hrZones && a.hrZones.total === 20);
+    assert.equal(a.aiSummaryHtml, '', 'a Gemini summary is hidden');
+    assert.deepEqual(a.headline.map((x) => `${x.value}${x.unit}|${x.label}`), ['5.01km|distance', '19:52|time', '3:58/km|avg pace', '171bpm|avg hr']);
     assert.ok(a.route && a.route.d.startsWith('M'));
     assert.equal(a.routeMap?.state, 'map');
     assert.equal(JSON.parse(a.routeMap.json).kind, 'route');
+    assert.ok(a.run?.splits && a.run.splits.rows.length >= 2);
+    assert.ok(a.run.splits.rows.some((r) => r.fastest));
+    assert.ok(a.run?.efforts.length);
+    assert.equal(a.run.efforts.find((e) => e.label === '5K')?.badge, 'PB', 'FitGlue says PB');
+    assert.ok(a.heart?.chart, 'the heart card carries the one HR chart');
+    assert.equal(a.heart.chart.unit, 'bpm');
+    assert.match(a.heart.chart.xTicks.at(-1).label, /^\d+:\d{2}$/);
+    assert.ok(a.heart.zones && a.heart.zones.total === 20);
+    assert.equal(a.heroChart, undefined, 'no second HR chart at the top');
     assert.equal(a.photos.length, 1);
-    assert.equal(a.heroSpark, undefined);
-    assert.equal(a.heroChart?.label, 'heart rate');
-    assert.equal(a.heroChart?.unit, 'bpm');
-    assert.ok(a.heroChart.yTicks.length >= 2);
-    const hr = a.modules.find((m) => m.key === 'heart-rate');
-    assert.equal(hr.chart.unit, 'bpm');
-    assert.match(hr.chart.xTicks.at(-1).label, /^\d+:\d{2}$/);
-    assert.equal(hr.chart.xTicks.at(-1).label, a.heroChart.xTicks.at(-1).label, 'x axis ends at the session length');
-    assert.equal(hr.sparkline, undefined);
-    const pace = a.modules.find((m) => m.key === 'pace').chart;
-    assert.equal(pace.unit, '/km');
-    assert.ok(pace.yTicks.every((t) => /^\d+:\d{2}$/.test(t.label)), 'pace ticks are m:ss');
-    assert.match(pace.end.label, /^\d+:\d{2}$/);
-    assert.ok(+pace.yTicks[0].label.split(':')[0] <= +pace.yTicks.at(-1).label.split(':')[0], 'fastest pace on top');
-    assert.deepEqual(a.modules.map((m) => m.key), ['heart-rate', 'zones', 'pace', 'cadence', 'elevation', 'effort', 'calories', 'training-load', 'best-efforts', 'pr-callout', 'streak', 'weather']);
+    assert.deepEqual(a.modules.map((m) => m.key), ['cadence']);
+    assert.deepEqual(a.finePrint.map((c) => c.label), ['calories', 'effort', 'training load', 'active streak', 'weather']);
+    assert.ok(a.finePrint.every((c) => !/\p{Extended_Pictographic}/u.test(`${c.value}${c.note}`)));
+    assert.deepEqual(a.prs, [], 'a run shows its PBs as effort badges');
     assert.deepEqual(a.footerChips, ['→ Linked to Strava']);
     assert.equal(a.ogImage, a.photos[0]);
     assert.equal(v.description, a.description);
@@ -320,6 +287,11 @@ describe('view model from the fixtures', () => {
     assert.equal(v.canonical, a.canonical);
     assert.equal(v.publishedTime, '2026-10-17T08:00:00Z');
     assert.equal(v.atomFeed, '/life/feed.xml');
+  });
+  test('a current (Claude) AI summary is shown', async () => {
+    const file = await fixture('colwick-parkrun-2026-10-17');
+    file.activity.enrichments.aiSummary = { ...file.activity.enrichments.aiSummary, model: 'claude-haiku-4-5' };
+    assert.match(buildActivityView(file, await fixtureIndex()).act.aiSummaryHtml, /^<p>A <b>5K personal best<\/b>/);
   });
   test('a rendered OG card (S2.5) beats the photo for og:image; a non-URL is ignored', async () => {
     const index = await fixtureIndex();
@@ -336,31 +308,64 @@ describe('view model from the fixtures', () => {
     assert.equal(v.act.bgPhotoUrl, '');
     assert.equal(v.act.ogImage, '');
   });
-  test('ride: speed not pace, milestone, recovery/temperature tail', async () => {
+  test('ride: speed not pace, lifetime progress, speed/cadence/power cards', async () => {
     const v = buildActivityView(await fixture('evening-ride-to-the-reservoir-2026-10-15'), await fixtureIndex());
     const a = v.act;
-    assert.equal(a.anchors[2].label, 'avg speed');
-    assert.equal(a.milestone?.toGoKm, '187.7');
-    assert.equal(a.milestone?.crossedKm, '');
+    assert.equal(a.kind, 'ride');
+    assert.equal(a.headline[2].label, 'avg speed');
+    assert.equal(a.lifetime?.toGo, '187.7');
+    assert.equal(a.lifetime?.crossed, '');
     assert.equal(a.prBand, null);
-    assert.deepEqual(a.modules.map((m) => m.key), ['heart-rate', 'zones', 'speed', 'cadence', 'elevation', 'power', 'effort', 'calories', 'training-load', 'recovery', 'weather', 'temperature']);
+    assert.deepEqual(a.modules.map((m) => m.key), ['speed', 'cadence', 'power', 'temperature']);
+    assert.ok(a.ride?.elevation);
     assert.equal(a.description, 'Out along the Trent, up the one proper hill, home in the dark.');
   });
-  test('strength: set list with PR stamp, muscle heatmap, no map', async () => {
+  test('strength: every set a bar, PR marked, muscles, records in plain words, no map', async () => {
     const v = buildActivityView(await fixture('push-day-2026-10-13'), await fixtureIndex());
     const a = v.act;
-    assert.equal(a.category, 'strength');
-    assert.deepEqual(a.anchors.map((x) => x.label), ['sets', 'volume moved', 'duration', 'personal records']);
+    assert.equal(a.kind, 'strength');
+    assert.deepEqual(a.headline.map((x) => x.label), ['volume moved', 'heaviest set', 'sets', 'reps']);
     assert.equal(a.route, null);
     assert.equal(a.routeMap, null);
-    const keys = a.modules.map((m) => m.key);
-    assert.deepEqual(keys.slice(0, 3), ['muscle-heatmap', 'set-list', 'heart-rate']);
-    const setList = a.modules.find((m) => m.key === 'set-list')?.setList;
-    assert.ok(setList);
-    assert.equal(setList.exercises[0].name, 'Bench Press (Barbell)');
-    assert.equal(setList.exercises[0].isPR, true);
-    assert.equal(a.prBand?.label, 'BENCH PRESS (BARBELL)');
-    assert.equal(a.prBand?.sub, '1RM · NEW PERSONAL RECORD · +1 MORE RECORD BELOW');
+    const bench = a.strength?.lifts[0];
+    assert.equal(bench?.name, 'Bench Press (Barbell)');
+    assert.equal(bench?.isPR, true);
+    assert.equal(bench?.bars.filter((b) => b.heaviest).length, 1);
+    assert.ok(a.strength?.muscles.length);
+    assert.equal(a.prBand?.label, 'BENCH PRESS (BARBELL) · 1RM');
+    assert.equal(a.prBand?.sub, 'NEW PERSONAL RECORD · +1 MORE RECORD BELOW');
+    assert.ok(a.prs.length >= 2);
+    assert.ok(a.prs.every((r) => !/\p{Extended_Pictographic}/u.test(r.primary)));
+  });
+  test('class: the engine (zone ribbon, minutes per zone) and the work, no lifting stats', async () => {
+    const v = buildActivityView(await fixture('half-hyrox-pt-2026-10-21'), await fixtureIndex(), { maxHr: 186 });
+    const a = v.act;
+    assert.equal(a.kind, 'class');
+    assert.deepEqual(a.headline.map((x) => x.label), ['minutes', 'in zones 4–5', 'peak hr', 'calories']);
+    assert.ok(a.engine?.ribbon?.bands.some((b) => b.zone === 5));
+    assert.ok(a.engine?.split?.some((z) => z.key === 'z4'));
+    assert.equal(a.heart, null, 'the ribbon is the heart chart');
+    assert.deepEqual(a.stations?.tiles.map((t) => t.name), ['Treadmill', 'Ski Erg', 'Sled Push', 'Sled Pull', 'Burpee Broad Jumps', 'Wall Ball', 'Farmers Carry']);
+    assert.deepEqual(a.stations?.circuits, [{ letter: 'A', rounds: 3, names: 'Wall Ball + Farmers Carry' }]);
+    assert.equal(a.strength, null);
+    assert.equal(a.locationName, 'FERNWOOD CP, NEWARK');
+    assert.equal(a.aiSummaryHtml, '', 'before the switch to Claude: hidden');
+  });
+  test('pilates: calm — the practice and the focus, no sets, volume or records', async () => {
+    const files = [await fixture('glutes-core-pilates-2026-10-19')];
+    const v = buildActivityView(files[0], await fixtureIndex(), { activityHistory: buildActivityHistory(files) });
+    const a = v.act;
+    assert.equal(a.kind, 'mind');
+    assert.deepEqual(a.headline.map((x) => x.label), ['minutes', 'pilates of 2026', 'avg hr']);
+    assert.equal(a.mind?.practice?.nthYearLabel, '1st');
+    assert.deepEqual(a.mind?.focus.map((f) => f.word), ['Glutes', 'Core']);
+    assert.ok(a.mind?.steady?.avg);
+    assert.equal(a.prCount, 0);
+    assert.equal(a.prBand, null);
+    assert.deepEqual(a.prs, []);
+    assert.equal(a.heart, null);
+    assert.deepEqual(a.finePrint.map((c) => c.label), ['calories']);
+    assert.equal(a.finePrint[0].note, '≈ 1.0 slice of pizza');
   });
   test('metadata-only activity (enrichments null, activityData null) still renders a page', () => {
     const v = buildActivityView(
@@ -368,9 +373,9 @@ describe('view model from the fixtures', () => {
       { profile: { showPhotoGallery: true } },
     );
     assert.deepEqual(v.act.modules, []);
-    assert.equal(v.act.anchors[0].value, '8.00');
-    assert.equal(v.act.anchors[2].value, '5:00');
-    assert.equal(v.act.heroChart, null);
+    assert.equal(v.act.headline[0].value, '8.00');
+    assert.equal(v.act.headline[2].value, '5:00');
+    assert.equal(v.act.heart, null);
     assert.equal(v.act.hrZones, null);
   });
 });
@@ -388,7 +393,7 @@ describe('task', () => {
       globals: { fitnessIndex: data.index, fitnessActivities: [...data.activities, { slug: '../escape', activity: {}, entry: {} }], siteUrl: 'https://james.ripixel.co.uk' },
       logger: logger(warnings),
     });
-    assert.deepEqual(out.fitnessActivityPages.map((/** @type {any} */ p) => p.act.slug), ['colwick-parkrun-2026-10-17', 'evening-ride-to-the-reservoir-2026-10-15', 'push-day-2026-10-13']);
+    assert.deepEqual(out.fitnessActivityPages.map((/** @type {any} */ p) => `${p.act.slug}:${p.act.kind}`), ['colwick-parkrun-2026-10-17:run', 'evening-ride-to-the-reservoir-2026-10-15:ride', 'push-day-2026-10-13:strength']);
     assert.equal(warnings.length, 1);
     assert.match(warnings[0], /unusable activity slug/);
   });
@@ -397,8 +402,9 @@ describe('task', () => {
     const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'activity-pages-'));
     try {
       const data = await loadFitnessData({ env: {}, source: 'fixtures', fixturesDir: FIXTURES });
+      const kinds = await Promise.all(KIND_SLUGS.map(fixture));
       const globals = {
-        fitnessIndex: data.index, fitnessActivities: data.activities, fitnessRoundups: [], year: 2026, cacheHash: 'x', siteUrl: 'https://james.ripixel.co.uk',
+        fitnessIndex: data.index, fitnessActivities: [...data.activities, ...kinds], fitnessRoundups: [], year: 2026, cacheHash: 'x', siteUrl: 'https://james.ripixel.co.uk',
         fitnessOgImages: { activity: { 'colwick-parkrun-2026-10-17': 'https://james.ripixel.co.uk/life/og/activity/colwick-parkrun-2026-10-17.png' }, roundup: {} },
         fitnessShareCards: { activity: { 'colwick-parkrun-2026-10-17': { title: 'Colwick parkrun #87', shapes: [
           { shape: 'story', label: 'Story', w: 1080, h: 1920, variants: [{ id: 'photo-1', label: 'Photo 1', url: '/life/share/activity/c/story-photo-1.jpg', file: 'c-story.jpg' }, { id: 'ink', label: 'Colour', url: '/life/share/activity/c/story-ink.png', file: 'c-story-ink.png' }] },
@@ -415,7 +421,8 @@ describe('task', () => {
       assert.match(html, /<link rel="alternate" type="application\/atom\+xml" href="\/life\/feed\.xml"/);
       assert.doesNotMatch(html, /activity-head/);
       assert.match(html, /class="act-zones__bar"/);
-      assert.match(html, /class="chart__line"/);
+      assert.equal((html.match(/aria-label="Heart rate in bpm/g) || []).length, 1, 'the HR chart once, in the heart card');
+      assert.match(html, /class="act-split act-split--/);
       assert.match(html, /class="act-zones__yaxis"/);
       assert.match(html, /class="route-map__fallback act-map__svg"/);
       assert.match(html, /<div class="route-map route-map--activity" data-route-map role="region" aria-label="Route map\./);
@@ -443,13 +450,24 @@ describe('task', () => {
       const ride = await fs.readFile(path.join(tmp, 'life', 'activity', 'evening-ride-to-the-reservoir-2026-10-15', 'index.html'), 'utf8');
       assert.match(ride, /<meta property="og:image" content="https:\/\/james\.ripixel\.co\.uk\/card_[a-z]+\.png"/, 'no card, no photo → the section card');
       assert.doesNotMatch(ride, /data-share/, 'no share entry → no button');
-      for (const slug of ['colwick-parkrun-2026-10-17', 'evening-ride-to-the-reservoir-2026-10-15', 'push-day-2026-10-13']) {
+      const slugs = ['colwick-parkrun-2026-10-17', 'evening-ride-to-the-reservoir-2026-10-15', 'push-day-2026-10-13', 'glutes-core-pilates-2026-10-19', 'half-hyrox-pt-2026-10-21'];
+      for (const slug of slugs) {
         const page = await fs.readFile(path.join(tmp, 'life', 'activity', slug, 'index.html'), 'utf8');
         assert.doesNotMatch(page, /DESTINATION|BOOSTER|booster sequence|AI banner/, slug + ': no showcase stats or banner');
+        assert.doesNotMatch(page, /<div class="stat-strip__num">—/, slug + ': no dash placeholder stats');
+        assert.ok((page.match(/aria-label="Heart rate in bpm/g) || []).length <= 1, slug + ': the HR chart is drawn once');
+        assert.doesNotMatch(page, /\u{1F355}|\u{1F3C6}/u, slug + ': none of FitGlue\'s emoji (calorie comparison, PR messages)');
       }
       const strength = await fs.readFile(path.join(tmp, 'life', 'activity', 'push-day-2026-10-13', 'index.html'), 'utf8');
-      assert.match(strength, /class="exercise-item exercise-strength"/, 'exercise-item needs the eq helper');
-      assert.match(strength, /4×8 × 80kg/);
+      assert.match(strength, /class="act-lift act-lift--load/);
+      assert.match(strength, /act-lift__set act-lift__set--top/);
+      const pilates = await fs.readFile(path.join(tmp, 'life', 'activity', 'glutes-core-pilates-2026-10-19', 'index.html'), 'utf8');
+      assert.match(pilates, /act-kind--mind/);
+      assert.match(pilates, /the <span>practice<\/span>/);
+      assert.doesNotMatch(pilates, /volume moved|personal records|act-lift/);
+      const cls = await fs.readFile(path.join(tmp, 'life', 'activity', 'half-hyrox-pt-2026-10-21', 'index.html'), 'utf8');
+      assert.match(cls, /class="chart__svg act-ribbon__svg"/);
+      assert.match(cls, /class="act-tile/);
     } finally {
       await fs.rm(tmp, { recursive: true, force: true });
     }
@@ -469,24 +487,26 @@ describe('calories, the type chip and the type ink (F5.5)', async () => {
   const { hybridRaceLabel } = await import('./fitness-theme.mjs');
   test("the platform's calories over FitGlue's estimate", () => {
     const solo = { activityData: { sessions: [{ totalCalories: 1346 }] }, enrichments: { calories: { kcal: 523, comparisonText: '≈ 1.8 slice of pizza 🍕' } } };
-    assert.deepEqual(calorieFigure(solo), { kcal: 1346, source: 'platform', note: '≈ 4.7 slice of pizza' });
-    const hevy = { activityData: { sessions: [{}] }, enrichments: { calories: { kcal: 310 } } };
-    assert.deepEqual(calorieFigure(hevy), { kcal: 310, source: 'estimate', note: '' });
-    assert.deepEqual(calorieFigure({}, { caloriesKcal: 200 }), { kcal: 200, source: 'estimate', note: '' });
-    assert.deepEqual(calorieFigure({}), { kcal: 0, source: '', note: '' });
+    assert.deepEqual(calorieFigure(solo), { kcal: 1346, source: 'platform' });
+    const hevy = { activityData: { sessions: [{}] }, enrichments: { calories: { kcal: 310, comparisonText: '≈ 1.1 slice of pizza \u{1F355}' } } };
+    assert.deepEqual(calorieFigure(hevy), { kcal: 310, source: 'estimate' }, 'FitGlue\'s text (with its emoji) never comes through');
+    assert.deepEqual(calorieFigure({}, { caloriesKcal: 200 }), { kcal: 200, source: 'estimate' });
+    assert.deepEqual(calorieFigure({}), { kcal: 0, source: '' });
+    assert.equal(foodComparison(1346), '≈ 4.7 slice of pizza');
     assert.equal(foodComparison(40), '');
-  });
-  test('the calories module says where the figure came from', () => {
-    const has = (/** @type {string} */ k) => k === 'CALORIES_BURNED';
-    const activity = { source: 'SOURCE_STRAVA', activityData: { sessions: [{ totalCalories: 1132 }] }, enrichments: { calories: { kcal: 440 } } };
-    const m = buildModule('calories', { en: activity.enrichments, series: {}, has, category: 'strength', activityType: 'ACTIVITY_TYPE_CROSSFIT', activity, entry: {} });
-    assert.equal(m?.cells[0].value, '1,132');
-    assert.equal(m?.right, 'from Strava');
   });
   test('Hyrox races are labelled Hyrox, not CROSSFIT', () => {
     assert.equal(hybridRaceLabel("Hyrox Birmingham - Open Men's Solo"), 'HYROX');
     assert.equal(hybridRaceLabel('Morning WOD'), '');
     assert.equal(hybridRaceLabel('Race', { hasRace: true }), 'HYROX', 'a race breakdown is a Hyrox race');
+  });
+  test('a run filed as a workout (one running set in Hevy) is stamped and inked as a run', () => {
+    const sets = [{ exerciseName: 'Running', reps: 0, weightKg: 0, durationSeconds: 18751, distanceMeters: 42726 }];
+    const v = buildActivityView({ slug: 'm', activity: { title: 'Leeds Marathon', activityType: 'ACTIVITY_TYPE_WEIGHT_TRAINING', startTime: '2026-05-10T08:00:00Z', activityData: { sessions: [{ strengthSets: sets }] } }, entry: {} }, {});
+    assert.equal(v.act.kind, 'run');
+    assert.equal(v.act.typeLabel, 'RUN');
+    assert.equal(v.act.typeClass, 'fit-type--run');
+    assert.equal(v.act.headline[0].value, '42.7');
   });
   test('an activity page takes its type ink', () => {
     const v = buildActivityView({ slug: 'r', activity: { title: 'Run', activityType: 'ACTIVITY_TYPE_RUN', startTime: '2026-01-01T09:00:00Z' }, entry: {} }, {});

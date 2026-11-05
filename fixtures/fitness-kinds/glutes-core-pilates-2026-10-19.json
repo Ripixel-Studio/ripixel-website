@@ -1,0 +1,315 @@
+{
+  "schemaVersion": 1,
+  "slug": "glutes-core-pilates-2026-10-19",
+  "exportedAt": "2026-10-19T00:06:40Z",
+  "category": "strength",
+  "links": {
+    "hevy": "https://hevy.com/workout/0f3c9e2a-0000-4000-8000-000000000019"
+  },
+  "activity": {
+    "showcaseId": "glutes-core-pilates-2026-10-19",
+    "title": "Glutes & Core Pilates",
+    "description": "Legs like jelly after the bridges. Lovely way to start the week.",
+    "activityType": "ACTIVITY_TYPE_PILATES",
+    "source": "SOURCE_HEVY",
+    "startTime": "2026-10-19T08:00:00Z",
+    "activityData": {
+      "sessions": [
+        {
+          "startTime": "2026-10-19T08:00:00Z",
+          "totalElapsedTime": 3000,
+          "totalDistance": 0,
+          "laps": [],
+          "strengthSets": [
+            {
+              "exerciseName": "Pilates",
+              "reps": 0,
+              "weightKg": 0,
+              "startTime": null,
+              "durationSeconds": 3000,
+              "notes": "",
+              "supersetId": "",
+              "primaryMuscleGroup": "MUSCLE_GROUP_UNSPECIFIED",
+              "secondaryMuscleGroups": [],
+              "distanceMeters": 0,
+              "setType": "normal"
+            }
+          ],
+          "avgHeartRate": 80,
+          "maxHeartRate": 89,
+          "minHeartRate": 73
+        }
+      ]
+    },
+    "appliedEnrichments": [
+      "ENRICHER_PROVIDER_FITBIT_HEART_RATE",
+      "ENRICHER_PROVIDER_HEART_RATE_SUMMARY",
+      "ENRICHER_PROVIDER_HEART_RATE_ZONES",
+      "ENRICHER_PROVIDER_EFFORT_SCORE",
+      "ENRICHER_PROVIDER_CALORIES_BURNED",
+      "ENRICHER_PROVIDER_TRAINING_LOAD",
+      "ENRICHER_PROVIDER_PERSONAL_RECORDS",
+      "ENRICHER_PROVIDER_AI_COMPANION",
+      "ENRICHER_PROVIDER_LOCATION_NAMING",
+      "ENRICHER_PROVIDER_WORKOUT_SUMMARY",
+      "ENRICHER_PROVIDER_SOURCE_LINK"
+    ],
+    "tags": [],
+    "createdAt": "2026-10-19T08:00:00Z",
+    "expiresAt": null,
+    "ownerDisplayName": "James",
+    "ownerProfilePictureUrl": "https://storage.googleapis.com/fitglue-server-prod-showcase-assets/showcase_pictures/kQ2v9bX1ZtNcR4mL8pW6yHdE3aF7/profile.jpg",
+    "ownerProfileSlug": "james",
+    "photoUrls": [],
+    "enrichments": {
+      "calories": {
+        "kcal": 290,
+        "comparisonText": "≈ 1.0 slice of pizza 🍕"
+      },
+      "effort": {
+        "score": 24,
+        "band": "Easy",
+        "factors": []
+      },
+      "trainingLoad": {
+        "trimp": 6,
+        "bucket": "Recovery",
+        "hint": ""
+      },
+      "aiSummary": {
+        "html": "AI Summary:\nA focused session with steady effort throughout.",
+        "model": "",
+        "generatedAt": null
+      },
+      "location": {
+        "locationName": "Fernwood CP, Newark and Sherwood, Nottinghamshire, East Midlands, England, United Kingdom"
+      },
+      "personalRecords": {
+        "records": [
+          {
+            "recordType": "pilates_duration",
+            "newValue": 3000,
+            "unit": "seconds",
+            "previousValue": 2700,
+            "displayMessage": "🏆 Pilates Longest: 50:00"
+          }
+        ]
+      },
+      "heartRate": {
+        "minBpm": 73,
+        "avgBpm": 80,
+        "maxBpm": 89,
+        "driftBpm": 0,
+        "driftWarning": false
+      },
+      "heartRateZones": {
+        "zones": [
+          {
+            "zoneIndex": 0,
+            "name": "Zone 0 (Rest)",
+            "minutes": 50,
+            "percentage": 1.0
+          },
+          {
+            "zoneIndex": 1,
+            "name": "Zone 1 (Recovery)",
+            "minutes": 0,
+            "percentage": 0.0
+          },
+          {
+            "zoneIndex": 2,
+            "name": "Zone 2 (Endurance)",
+            "minutes": 0,
+            "percentage": 0.0
+          },
+          {
+            "zoneIndex": 3,
+            "name": "Zone 3 (Tempo)",
+            "minutes": 0,
+            "percentage": 0.0
+          },
+          {
+            "zoneIndex": 4,
+            "name": "Zone 4 (Threshold)",
+            "minutes": 0,
+            "percentage": 0.0
+          },
+          {
+            "zoneIndex": 5,
+            "name": "Zone 5 (VO2 Max)",
+            "minutes": 0,
+            "percentage": 0.0
+          }
+        ],
+        "totalMinutes": 50
+      }
+    }
+  },
+  "entry": {
+    "showcaseId": "glutes-core-pilates-2026-10-19",
+    "title": "Glutes & Core Pilates",
+    "activityType": "ACTIVITY_TYPE_PILATES",
+    "source": "SOURCE_HEVY",
+    "startTime": "2026-10-19T08:00:00Z",
+    "routeThumbnailUrl": "",
+    "distanceMeters": 0,
+    "durationSeconds": 3000,
+    "totalSets": 1,
+    "totalReps": 0,
+    "totalWeightKg": 0,
+    "boosterCount": 11,
+    "destinationCount": 2,
+    "sparkline": {
+      "metric": "heart_rate",
+      "values": [
+        74.0,
+        76.6,
+        78.8,
+        80.6,
+        81.6,
+        81.8,
+        81.3,
+        80.1,
+        78.5,
+        76.7,
+        75.0,
+        73.8,
+        73.2,
+        73.3,
+        74.3,
+        75.9,
+        78.2,
+        80.7,
+        83.3,
+        85.6,
+        87.4,
+        88.5,
+        88.8,
+        88.4
+      ]
+    },
+    "avgHeartRate": 80,
+    "caloriesKcal": 290,
+    "hrZoneMinutes": [
+      50,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "photoUrls": [],
+    "createdAt": "2026-10-19T08:00:00Z",
+    "locationName": "Fernwood CP, Newark and Sherwood, Nottinghamshire, East Midlands, England, United Kingdom",
+    "bestEfforts": [],
+    "primaryMuscles": []
+  },
+  "series": {
+    "n": 50,
+    "elapsedS": [
+      0,
+      61,
+      122,
+      184,
+      245,
+      306,
+      367,
+      429,
+      490,
+      551,
+      612,
+      673,
+      735,
+      796,
+      857,
+      918,
+      980,
+      1041,
+      1102,
+      1163,
+      1224,
+      1286,
+      1347,
+      1408,
+      1469,
+      1531,
+      1592,
+      1653,
+      1714,
+      1776,
+      1837,
+      1898,
+      1959,
+      2020,
+      2082,
+      2143,
+      2204,
+      2265,
+      2327,
+      2388,
+      2449,
+      2510,
+      2571,
+      2633,
+      2694,
+      2755,
+      2816,
+      2878,
+      2939,
+      3000
+    ],
+    "heartRate": [
+      74.0,
+      75.3,
+      76.6,
+      77.8,
+      78.8,
+      79.8,
+      80.6,
+      81.2,
+      81.6,
+      81.8,
+      81.8,
+      81.6,
+      81.3,
+      80.8,
+      80.1,
+      79.3,
+      78.5,
+      77.6,
+      76.7,
+      75.8,
+      75.0,
+      74.3,
+      73.8,
+      73.4,
+      73.2,
+      73.1,
+      73.3,
+      73.7,
+      74.3,
+      75.0,
+      75.9,
+      77.0,
+      78.2,
+      79.4,
+      80.7,
+      82.0,
+      83.3,
+      84.5,
+      85.6,
+      86.6,
+      87.4,
+      88.1,
+      88.5,
+      88.8,
+      88.8,
+      88.7,
+      88.4,
+      87.9,
+      87.2,
+      86.5
+    ]
+  },
+  "routePoints": []
+}
