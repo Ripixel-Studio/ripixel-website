@@ -687,6 +687,8 @@ export function buildActivityView(file, index, opts = {}) {
   const category = file?.category || deriveCategory(activity);
   const kind = activityKind(file);
   const activityType = String(activity.activityType ?? entry.activityType ?? '');
+  // A run Hevy filed as a workout (one running set) is stamped and inked as the run it was.
+  const shownType = kind === 'run' && !/RUN$/.test(activityType) ? 'ACTIVITY_TYPE_RUN' : activityType;
   const applied = Array.isArray(activity.appliedEnrichments) ? activity.appliedEnrichments : [];
   const appliedSet = new Set(applied);
   const has = (/** @type {string} */ k) => appliedSet.has(P + k);
@@ -896,8 +898,8 @@ export function buildActivityView(file, index, opts = {}) {
       icon,
       kind,
       is: { [kind]: true },
-      typeLabel: hybridRaceLabel(title, { hasRace: !!race, event: race?.event }) || typeLabel(activityType),
-      ...activityTheme(activityType),
+      typeLabel: hybridRaceLabel(title, { hasRace: !!race, event: race?.event }) || typeLabel(shownType),
+      ...activityTheme(shownType),
       category,
       source: sourceLabel(activity.source ?? entry.source),
       dateStamp: fmtDateStamp(startTime),

@@ -150,6 +150,7 @@ describe('heart-rate zones', () => {
     assert.deepEqual(s.map((z) => z.key), ['z0', 'z1', 'z2', 'z3', 'z4', 'z5']);
     assert.equal(s.reduce((a, z) => a + z.minutes, 0), 62);
     assert.equal(s.find((z) => z.key === 'z4')?.pct, 58);
+    assert.equal(s.find((z) => z.key === 'z4')?.short, 'Z4');
     assert.deepEqual(zoneSplit([0, 0, 5, 0, 0, 5]).map((z) => z.key), ['z2', 'z5']);
     assert.equal(zoneSplit(null), null);
     assert.equal(zoneSplit([0, 0, 0, 0, 0, 0]), null);

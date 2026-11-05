@@ -1,9 +1,10 @@
-{{!-- Minutes per heart-rate zone as one 100 % bar (the life-split look), every zone named in
-     the key underneath so narrow ones never collide. Context: zoneSplit() items. --}}
+{{!-- Minutes per heart-rate zone as one 100 % bar (the life-split look): the bar carries the
+     share and Z-number, the key underneath names every zone with its minutes, so narrow
+     parts never collide or spill. Context: zoneSplit() items. --}}
 <figure class="life-split life-split--zones">
   <figcaption class="life-split__label">Minutes in each heart-rate zone</figcaption>
   <ol class="life-split__bar">
-    {{#each this}}<li class="life-split__part life-split__part--{{key}}" style="flex-basis:{{pct}}%">{{#if narrow}}<span class="act-sr">{{label}}: {{pct}}%</span>{{else}}<b class="life-split__pct">{{pct}}<small>%</small></b> <span class="life-split__name">{{label}}</span>{{/if}}</li>{{/each}}
+    {{#each this}}<li class="life-split__part life-split__part--{{key}}" style="flex-basis:{{pct}}%">{{#if narrow}}<span class="act-sr">{{label}}: {{pct}}%</span>{{else}}<b class="life-split__pct">{{pct}}<small>%</small></b> <span class="life-split__name">{{short}}</span><span class="act-sr"> {{label}}</span>{{/if}}</li>{{/each}}
   </ol>
   <ul class="act-zkey" aria-hidden="true">{{#each this}}<li><i class="act-ribbon__band--{{key}}"></i><b>{{minutes}}</b> min {{label}}</li>{{/each}}</ul>
 </figure>

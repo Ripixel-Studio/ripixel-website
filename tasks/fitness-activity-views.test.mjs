@@ -500,6 +500,14 @@ describe('calories, the type chip and the type ink (F5.5)', async () => {
     assert.equal(hybridRaceLabel('Morning WOD'), '');
     assert.equal(hybridRaceLabel('Race', { hasRace: true }), 'HYROX', 'a race breakdown is a Hyrox race');
   });
+  test('a run filed as a workout (one running set in Hevy) is stamped and inked as a run', () => {
+    const sets = [{ exerciseName: 'Running', reps: 0, weightKg: 0, durationSeconds: 18751, distanceMeters: 42726 }];
+    const v = buildActivityView({ slug: 'm', activity: { title: 'Leeds Marathon', activityType: 'ACTIVITY_TYPE_WEIGHT_TRAINING', startTime: '2026-05-10T08:00:00Z', activityData: { sessions: [{ strengthSets: sets }] } }, entry: {} }, {});
+    assert.equal(v.act.kind, 'run');
+    assert.equal(v.act.typeLabel, 'RUN');
+    assert.equal(v.act.typeClass, 'fit-type--run');
+    assert.equal(v.act.headline[0].value, '42.7');
+  });
   test('an activity page takes its type ink', () => {
     const v = buildActivityView({ slug: 'r', activity: { title: 'Run', activityType: 'ACTIVITY_TYPE_RUN', startTime: '2026-01-01T09:00:00Z' }, entry: {} }, {});
     assert.equal(v.act.typeClass, 'fit-type--run');

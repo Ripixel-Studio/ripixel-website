@@ -187,7 +187,7 @@ a.act-lift__vs:hover { background: var(--ink); color: var(--paper); border-color
 .act-zkey { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 18px; font-family: var(--f-mono); font-size: 11px; }
 .act-zkey i { display: inline-block; width: 12px; height: 12px; border: 1.5px solid var(--ink); vertical-align: -2px; margin-right: 5px; }
 .act-zkey b { font-family: var(--f-disp); font-weight: 400; font-size: 18px; }
-.act-engine .life-split--zones .life-split__part { color: var(--ink); }
+.act-engine .life-split--zones .life-split__part { color: var(--ink); overflow: hidden; }
 .act-engine .life-split--zones .life-split__part--z0 { background: var(--paper-2); }
 .act-engine .life-split--zones .life-split__part--z1 { background: color-mix(in srgb, var(--ink-blue) 22%, #fff); }
 .act-engine .life-split--zones .life-split__part--z2 { background: color-mix(in srgb, var(--ink-green) 30%, #fff); }

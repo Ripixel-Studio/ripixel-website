@@ -233,7 +233,7 @@ export function zoneSplit(zoneMinutes) {
   const total = zoneMinutes.reduce((s, m) => s + num(m), 0);
   if (!total) return null;
   return zoneMinutes
-    .map((m, i) => ({ key: `z${i}`, label: `Z${i} ${ZONE_NAMES[i]}`, minutes: num(m), pct: Math.round((num(m) / total) * 100) }))
+    .map((m, i) => ({ key: `z${i}`, short: `Z${i}`, label: `Z${i} ${ZONE_NAMES[i]}`, minutes: num(m), pct: Math.round((num(m) / total) * 100) }))
     .filter((z) => z.minutes > 0)
     .map((z) => ({ ...z, narrow: z.pct < 12 }));
 }
