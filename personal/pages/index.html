@@ -104,7 +104,7 @@
     </div>
 
     <div class="section-cards">
-      <a class="section-card section-card--projects" href="/projects">
+      <a class="section-card section-card--projects card-link" href="/projects">
         <div class="section-card__inner">
           <div class="section-card__top">
             <span class="section-card__num">◆ PROJECTS</span>
@@ -117,9 +117,10 @@
             {{#if latestProjectDate}}<span class="section-card__latest-date">{{latestProjectDate}}</span>{{/if}}
           </div>
         </div>
+        {{> card-arrow}}
       </a>
 
-      <a class="section-card section-card--thoughts" href="/thoughts">
+      <a class="section-card section-card--thoughts card-link" href="/thoughts">
         <div class="section-card__inner">
           <div class="section-card__top">
             <span class="section-card__num">◇ THOUGHTS</span>
@@ -132,9 +133,10 @@
             <span class="section-card__latest-date">{{latestThoughtDate}}</span>
           </div>
         </div>
+        {{> card-arrow}}
       </a>
 
-      <a class="section-card section-card--work" href="/work">
+      <a class="section-card section-card--work card-link" href="/work">
         <div class="section-card__inner">
           <div class="section-card__top">
             <span class="section-card__num">◉ WORK</span>
@@ -147,9 +149,10 @@
             <span class="section-card__latest-date">{{latestRoleDate}}</span>
           </div>
         </div>
+        {{> card-arrow}}
       </a>
 
-      <a class="section-card section-card--fitness" href="/life">
+      <a class="section-card section-card--fitness card-link" href="/life">
         <div class="section-card__inner">
           <div class="section-card__top">
             <span class="section-card__num">△ LIFE</span>
@@ -166,6 +169,7 @@
             {{/if}}
           </div>
         </div>
+        {{> card-arrow}}
       </a>
     </div>
 
@@ -174,13 +178,13 @@
 
     <div class="press-grid">
       <!-- Featured project: FitGlue -->
-      <article class="press-featured">
+      <a class="press-featured card-link" href="/projects" aria-labelledby="press-featured-title">
         <div class="press-featured__inner">
           <div class="press-featured__badge">
             <span class="press-featured__tag">◆ FEATURED PROJECT</span>
             <span class="press-featured__meta">{{#if fitglueStartedYear}}built {{fitglueStartedYear}} · {{/if}}still shipping</span>
           </div>
-          <div class="press-featured__title">
+          <div class="press-featured__title" id="press-featured-title">
             FIT<span>GLUE</span>.
           </div>
           <div class="press-featured__sub">
@@ -193,33 +197,33 @@
           </div>
           <div class="press-featured__footer">
             <span>tech / go · typescript · react · gcp</span>
-            <a href="/projects">read more →</a>
           </div>
         </div>
-      </article>
+        {{> card-arrow}}
+      </a>
 
       <!-- Latest thought -->
-      <article class="press-card press-card--thought">
+      <a class="press-card press-card--thought card-link" href="/{{latestThoughtSlug}}" aria-labelledby="press-thought-title">
         <div class="press-card__inner">
           <span class="press-card__tag">◇ LATEST THOUGHT</span>
           <div class="press-card__meta">{{latestThoughtDateLong}} · {{latestThoughtReadTime}} min</div>
-          <div class="press-card__title">{{latestThought}}.</div>
+          <div class="press-card__title" id="press-thought-title">{{latestThought}}.</div>
           <div class="press-card__body">{{latestThoughtExcerpt}}</div>
-          <div class="press-card__link"><a href="/{{latestThoughtSlug}}">read it →</a></div>
         </div>
-      </article>
+        {{> card-arrow}}
+      </a>
 
       <!-- Current role -->
-      <article class="press-card press-card--role">
+      <a class="press-card press-card--role card-link" href="/work" aria-labelledby="press-role-title">
         <div class="press-card__inner">
           <span class="press-card__tag">◉ CURRENT ROLE</span>
           <div class="press-card__meta">{{latestRoleDate}}</div>
-          <div class="press-card__title">{{latestRole}}<span style="color:var(--ink-blue)">.</span></div>
+          <div class="press-card__title" id="press-role-title">{{latestRole}}<span style="color:var(--ink-blue)">.</span></div>
           <div class="press-card__role">{{latestRoleTitle}}</div>
           <div class="press-card__body">{{latestRoleBlurb}}</div>
-          <div class="press-card__link"><a href="/work">the work record →</a></div>
         </div>
-      </article>
+        {{> card-arrow}}
+      </a>
     </div>
 
     <!-- Find me -->

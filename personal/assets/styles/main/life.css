@@ -818,6 +818,8 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
   box-shadow: 5px 5px 0 var(--ink);
 }
 .code-card--live { box-shadow: 5px 5px 0 var(--life-ink); }
+.code-card.card-link { --card-ink: var(--life-ink); --card-lift: 8px 8px 0 var(--life-ink); }
+.code-card.card-link .code-card__body { padding-bottom: 36px; }
 .code-card__strip { display: flex; height: 14px; border-bottom: 2px solid var(--ink); }
 .code-card__strip span + span { border-left: 1.5px solid #fff; }
 .code-card__strip--none { background: repeating-linear-gradient(45deg, var(--paper-2) 0 4px, #fff 4px 8px); }
@@ -832,7 +834,6 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
   overflow-wrap: anywhere;
 }
 .code-card__name a { border-bottom: 3px solid var(--life-ink); }
-.code-card__name a:hover { background: var(--paper-3); }
 .code-card__stamp {
   flex: none;
   margin-top: 2px;
@@ -1360,9 +1361,11 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
   background: #fff;
   border: 2px solid var(--ink);
   box-shadow: 7px 7px 0 var(--life-ink);
-  transition: transform 160ms ease, box-shadow 160ms ease;
+  --card-ink: var(--life-ink);
+  --card-lift: 10px 10px 0 var(--life-ink);
 }
-.hub-card:hover { transform: translate(-2px, -2px); box-shadow: 10px 10px 0 var(--life-ink); }
+.hub-card.card-link { padding-bottom: 36px; } /* room for the arrow tab */
+.hub-card .hub-hero { isolation: isolate; } /* its fanned posters stay under the card's link */
 
 .hub-card--lg { grid-column: span 4; grid-row: span 2; padding: 22px 26px 20px; }
 .hub-card--lg.hub-card--right { grid-column: 3 / span 4; }
@@ -1392,7 +1395,6 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
   margin-left: -5px;
   border-bottom: 4px solid var(--life-ink);
 }
-.hub-card__name a:hover { background: var(--life-ink); color: var(--paper); }
 .hub-card__name a::after { content: '.'; }
 
 .hub-card__stat {
@@ -1444,16 +1446,6 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
 .hub-card__note a { text-decoration: underline; text-decoration-color: var(--life-ink); text-decoration-thickness: 2px; text-underline-offset: 3px; }
 .hub-card__note a:hover { background: var(--paper-3); }
 
-.hub-card__more {
-  margin-left: auto;
-  font-family: var(--f-mono);
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 2px solid var(--life-ink);
-}
-.hub-card__more:hover { background: var(--life-ink); color: #fff; }
 
 /* image: a polaroid taped in at an angle */
 .hub-hero__frame {
@@ -1567,15 +1559,12 @@ a.hub-hero__route:hover .hub-hero__route-cta { background: var(--life-ink); colo
   .hub-grid { grid-template-columns: minmax(0, 1fr); gap: 26px; }
   .hub-card--lg, .hub-card--lg.hub-card--right, .hub-card--md, .hub-card--sm { grid-column: auto; }
   .hub-card { box-shadow: 5px 5px 0 var(--life-ink); padding: 16px 16px 14px; }
+  .hub-card.card-link { padding-bottom: 36px; }
   .hub-card--lg .hub-card__name { font-size: 42px; }
   .hub-card--lg .hub-card__caption { font-size: 24px; }
   .hub-hero__frame { margin-inline: 2px; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .hub-card { transition: none; }
-  .hub-card:hover { transform: none; box-shadow: 7px 7px 0 var(--life-ink); }
-}
 
 /* ─── /life/live: the month-by-month list under each year ─ */
 .outings-count { font-family: var(--f-mono); font-size: 13px; letter-spacing: 0; -webkit-text-stroke: 0; color: color-mix(in srgb, var(--ink) 72%, #fff); margin-left: 8px; }
@@ -1981,7 +1970,7 @@ a.hub-hero__route:hover .hub-hero__route-cta { background: var(--life-ink); colo
   transform: rotate(var(--tilt, 0deg));
   transition: transform 0.18s ease;
 }
-.stub:hover { z-index: 2; transform: rotate(0deg) translateY(-4px); }
+.stub:hover { z-index: 2; transform: rotate(0deg) scale(1.03); } /* decorative: straightens to be read, no lift */
 .stub__ticket {
   --notch: 10px;
   --tear: 40px;
@@ -2182,6 +2171,7 @@ a.hub-hero__route:hover .hub-hero__route-cta { background: var(--life-ink); colo
 }
 @media (prefers-reduced-motion: reduce) {
   .stub, .stub__img { transition: none; }
+  .stub:hover { transform: rotate(var(--tilt, 0deg)); }
 }
 
 /* ─── The hub's mini pages: each card's hero is its section page's own picture, smaller ───
@@ -2210,7 +2200,6 @@ a.hub-hero__route:hover .hub-hero__route-cta { background: var(--life-ink); colo
 
 .hub-hero--grid { justify-content: center; }
 .hub-hero__grid { display: block; width: 100%; height: auto; margin: 10px 0 4px; }
-.hub-card .hub-hero__grid .code-grid__cell:hover { stroke: var(--ink); stroke-width: 1.5; }
 
 .hub-hero__rank {
   display: flex;

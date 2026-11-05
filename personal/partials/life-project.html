@@ -1,13 +1,13 @@
 {{!-- One project card on /life/code. Context: an active[] row from life-hub.mjs codeView; `card` is
       tasks/code-view.mjs projectCards (strip, bar, span), `timeline` the shared axis.
       A public repo links to GitHub; a private one is its name only. --}}
-<li class="code-card{{#if card.live}} code-card--live{{/if}}">
+<li class="code-card{{#if card.live}} code-card--live{{/if}}{{#if url}} card-link{{/if}}">
   {{#if card.strip.length}}
   <div class="code-card__strip" aria-hidden="true">{{#each card.strip}}<span class="code-slot-{{slot}}" style="width: {{pct}}%" title="{{label}}"></span>{{/each}}</div>
   {{else}}<div class="code-card__strip code-card__strip--none" aria-hidden="true"></div>{{/if}}
   <div class="code-card__body">
     <div class="code-card__head">
-      <h3 class="code-card__name">{{#if url}}<a href="{{url}}">{{name}}</a>{{else}}{{name}}{{/if}}</h3>
+      <h3 class="code-card__name">{{#if url}}<a class="card-link__target" href="{{url}}">{{name}}</a>{{else}}{{name}}{{/if}}</h3>
       {{#if card.live}}<span class="code-card__stamp">active</span>{{/if}}
     </div>
     {{#if description}}<p class="life-project__desc">{{description}}</p>{{/if}}
@@ -25,4 +25,5 @@
     <ul class="code-card__langs">{{#each card.strip}}<li><i class="code-slot-{{slot}}" aria-hidden="true"></i>{{label}}</li>{{/each}}</ul>
     {{/if}}
   </div>
+  {{#if url}}{{> card-arrow}}{{/if}}
 </li>

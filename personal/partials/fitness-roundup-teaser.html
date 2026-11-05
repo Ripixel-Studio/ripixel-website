@@ -1,9 +1,9 @@
 <!-- Context: fitnessLife.roundup — the newest roundup of any period type -->
-<section class="fit-roundup" aria-labelledby="fit-roundup-title">
+<section class="fit-roundup card-link card-link--wide" aria-labelledby="fit-roundup-title">
   <div class="fit-roundup__inner">
     <div class="fit-roundup__period">
       <span class="fit-roundup__kind">{{kindLabel}}</span>
-      <h2 class="fit-roundup__title" id="fit-roundup-title">{{periodLabel}}</h2>
+      <h2 class="fit-roundup__title" id="fit-roundup-title"><a class="card-link__target" href="{{href}}">{{periodLabel}}</a></h2>
       {{#if range}}<span class="fit-roundup__range">{{range}}</span>{{/if}}
     </div>
     <dl class="fit-roundup__stats">
@@ -26,8 +26,8 @@
     <blockquote class="fit-roundup__summary">{{summary}}</blockquote>
     {{/if}}
     <div class="fit-roundup__links">
-      <a class="fit-roundup__link" href="{{href}}">read the full roundup →</a>
-      <a class="fit-roundup__all" href="{{roundupsHref}}">all roundups →</a>
+      <a class="fit-roundup__all card-link__aside" href="{{roundupsHref}}">every roundup</a>
     </div>
   </div>
+  {{> card-arrow}}
 </section>

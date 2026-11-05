@@ -1,8 +1,8 @@
 <!-- Context: fitnessLife.week — the latest weekly roundup (or last-7-days fallback) -->
-<section class="fit-week" aria-labelledby="fit-week-title">
+<section class="fit-week{{#if href}} card-link card-link--wide{{/if}}" aria-labelledby="fit-week-title">
   <div class="fit-week__head">
     <span class="fit-week__kicker"{{#if kickerStart}} data-week-start="{{kickerStart}}" data-week-end="{{kickerEnd}}"{{/if}}>{{kicker}}</span>
-    <h2 class="fit-week__title" id="fit-week-title">{{title}}<span>.</span></h2>
+    <h2 class="fit-week__title" id="fit-week-title">{{#if href}}<a class="card-link__target" href="{{href}}" aria-label="{{title}}: the roundup">{{title}}<span>.</span></a>{{else}}{{title}}<span>.</span>{{/if}}</h2>
     <span class="fit-week__range">{{range}}</span>
   </div>
   <div class="fit-week__body">
@@ -35,7 +35,5 @@
       {{/each}}
     </dl>
   </div>
-  {{#if href}}
-  <a class="fit-week__link" href="{{href}}">read the week's roundup →</a>
-  {{/if}}
+  {{#if href}}{{> card-arrow}}{{/if}}
 </section>

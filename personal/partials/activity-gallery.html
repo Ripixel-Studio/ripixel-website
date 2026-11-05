@@ -3,8 +3,9 @@
 {{#if this.length}}
 <section class="act-photos" aria-label="Photos">
   {{#each this}}
-  <a class="photo-block act-photo" href="#{{id}}" aria-label="Open photo {{n}} of {{total}}">
+  <a class="photo-block act-photo card-link" href="#{{id}}" aria-label="Open photo {{n}} of {{total}}">
     <img src="{{src}}" alt="Activity photo {{n}}" loading="lazy" decoding="async" />
+    {{> card-arrow}}
   </a>
   {{/each}}
 </section>

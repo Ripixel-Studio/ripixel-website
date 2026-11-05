@@ -44,10 +44,11 @@
       {{!-- Hyrox PBs, one division (F5.5): total first, then stations + Roxzone and the runs. --}}
       <div class="fit-hx">
         {{#if total}}{{#with total}}
-        <a class="fit-pr fit-hx__total" href="{{url}}" title="{{title}}">
+        <a class="fit-pr fit-hx__total card-link" href="{{url}}" title="{{title}}">
           <span class="fit-pr__name">{{name}}</span>
           <span class="fit-pr__value">{{display}}</span>
-          <span class="fit-pr__date">{{where}} · {{date}} →</span>
+          <span class="fit-pr__date">{{where}} · {{date}}</span>
+          {{> card-arrow}}
         </a>
         {{/with}}{{/if}}
         <div class="fit-hx__lists">

@@ -23,9 +23,10 @@
       {{!-- One tile per race: its highlight photo, cropped to the tile (faces kept high), labelled. --}}
       <div class="ev-collage" style="--cols: {{collageCols}}">
         {{#each collage}}
-        <a class="ev-collage__tile" href="{{url}}">
+        <a class="ev-collage__tile card-link" href="{{url}}">
           <img src="{{src}}" alt="{{division}}, {{date}}" loading="eager" decoding="async" />
           <span class="ev-collage__label"><b>{{total}}</b> {{division}}{{#if isPB}} · ★ PB{{/if}}<small>{{date}}</small></span>
+          {{> card-arrow}}
         </a>
         {{/each}}
       </div>
@@ -51,7 +52,7 @@
 
     <div class="ev-races">
       {{#each cards}}
-      <a class="ev-race" href="{{url}}">
+      <a class="ev-race card-link" href="{{url}}">
         {{!-- With the header collage the photo is already up top: the card is the race's numbers and words. --}}
         {{#unless ../collage.length}}{{#if photo}}<div class="ev-race__art"><img class="act-hero__fill" src="{{photo}}" alt="" aria-hidden="true" loading="lazy" /><img class="act-hero__img" src="{{photo}}" alt="" loading="lazy" decoding="async" /></div>{{/if}}{{/unless}}
         <div class="ev-race__body">
@@ -64,8 +65,8 @@
             {{#if partner}}<span>with {{partner}}</span>{{/if}}
           </div>
           {{#if words}}<blockquote class="ev-race__words">{{words}}</blockquote>{{/if}}
-          <div class="ev-race__more">the full breakdown →</div>
         </div>
+        {{> card-arrow}}
       </a>
       {{/each}}
     </div>

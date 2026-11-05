@@ -286,7 +286,8 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
   display: grid; gap: 2px; margin-bottom: 18px; padding: 12px 16px; background: var(--ink); color: var(--paper);
   border: 2px solid var(--ink); box-shadow: 5px 5px 0 var(--ink-section); text-decoration: none;
 }
-.act-eventlink:hover { background: var(--ink-section); }
+.act-eventlink { --card-ink: var(--ink-section); --card-lift: 7px 7px 0 var(--ink-section); padding-right: 44px; }
+.act-eventlink .card-link__arrow { border-color: var(--paper); }
 .act-eventlink__kicker { font-family: var(--f-mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-yellow); }
 .act-eventlink__name { font-family: var(--f-disp); font-size: 30px; line-height: 1; }
 .act-eventlink__others { font-family: var(--f-mono); font-size: 11px; opacity: .8; }
@@ -451,6 +452,7 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
   background: var(--ink); border-bottom: 3px solid var(--ink);
 }
 .ev-collage__tile { position: relative; display: block; overflow: hidden; color: var(--ink); text-decoration: none; }
+.ev-collage__tile { --card-ink: var(--paper); --card-ink-fg: var(--ink); --card-lift: 5px 5px 0 var(--type, var(--ink-section)); } /* the tab reads on a dark photo */
 .ev-collage__tile img {
   display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 24%;
   filter: saturate(.92) contrast(1.04); transition: transform .3s ease;
@@ -475,15 +477,14 @@ body.page-activity[class*='fit-type--'] .act-stamp--type { background: var(--typ
 .ev-race {
   display: flex; flex-direction: column; background: #fff; border: 2px solid var(--ink); color: var(--ink);
   text-decoration: none; box-shadow: 5px 5px 0 color-mix(in srgb, var(--ink-section) 40%, transparent);
+  --card-ink: var(--ink-section); --card-lift: 7px 7px 0 var(--ink-section);
 }
-.ev-race:hover { box-shadow: 5px 5px 0 var(--ink-section); }
 .ev-race__art { position: relative; aspect-ratio: 4 / 3; overflow: hidden; border-bottom: 2px solid var(--ink); isolation: isolate; }
-.ev-race__body { padding: 12px 16px 14px; display: grid; gap: 6px; }
+.ev-race__body { padding: 12px 40px 36px 16px; display: grid; gap: 6px; }
 .ev-race__kicker { font-family: var(--f-mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-section); }
 .ev-race__total { font-family: var(--f-disp); font-size: 48px; line-height: .95; }
 .ev-race__meta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-family: var(--f-mono); font-size: 11px; }
 .ev-race__words { font-family: var(--f-scrib); font-size: 22px; line-height: 1.1; margin: 4px 0 0; white-space: pre-line; }
-.ev-race__more { font-family: var(--f-mono); font-size: 11px; color: var(--ink-section); margin-top: 4px; }
 
 .ev-compare__wrap { overflow-x: auto; }
 .ev-compare__table { width: 100%; border-collapse: collapse; font-family: var(--f-mono); font-size: 12px; min-width: 420px; }

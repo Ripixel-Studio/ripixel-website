@@ -719,9 +719,11 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
   margin-top: 6px;
 }
 
+.section-card { --card-lift: 8px 8px 0 var(--card-ink); }
 .section-card__latest {
   margin-top: 8px;
   padding-top: 8px;
+  padding-right: 30px; /* clear of the arrow tab */
   border-top: 1px dashed rgba(23,19,17,0.33);
   font-family: var(--f-mono);
   font-size: 11px;
@@ -764,10 +766,12 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
 
 /* Featured article card (big) */
 .press-featured {
+  --card-ink: var(--ink-magenta);
+  display: block;
   position: relative;
   background: #fff;
   border: 2px solid var(--ink);
-  padding: 18px 22px;
+  padding: 18px 22px 36px;
   overflow: hidden;
 }
 
@@ -846,10 +850,11 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
 
 /* Press small cards (thought + role) */
 .press-card {
+  display: block;
   position: relative;
   background: #fff;
   border: 2px solid var(--ink);
-  padding: 14px 16px;
+  padding: 14px 16px 36px;
   overflow: hidden;
 }
 
@@ -914,15 +919,6 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
   margin-top: 6px;
   color: var(--ink);
 }
-
-.press-card__link {
-  margin-top: 8px;
-  font-family: var(--f-mono);
-  font-size: 11px;
-}
-
-.press-card--thought .press-card__link { color: var(--ink-green); }
-.press-card--role    .press-card__link { color: var(--ink-blue); }
 
 /* Find me / contact panel */
 .find-me {
@@ -1238,6 +1234,7 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
 }
 
 .proj-card {
+  --card-ink: var(--ink-section);
   position: relative;
   background: #fff;
   border: 2px solid var(--ink);
@@ -1257,9 +1254,8 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
   opacity: 0.20;
   mix-blend-mode: multiply;
   pointer-events: none;
+  z-index: -1; /* under the text and under the title's stretched link */
 }
-
-.proj-card__inner { position: relative; }
 
 .proj-card__top {
   display: flex;
@@ -1295,6 +1291,7 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
 .proj-card__footer {
   margin-top: 10px;
   padding-top: 8px;
+  padding-right: 30px; /* clear of the arrow tab */
   border-top: 1px dashed rgba(23,19,17,0.33);
   display: flex;
   justify-content: space-between;
@@ -1305,7 +1302,8 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
 }
 
 .proj-card__tech { color: var(--ink-section); max-width: 70%; }
-.proj-card__year { opacity: 0.7; }
+.proj-card__year a { opacity: 0.7; text-decoration: underline; text-underline-offset: 3px; }
+.proj-card__year a:hover { opacity: 1; }
 
 /* ─── 11. Thoughts Page ─────────────────── */
 
@@ -1406,17 +1404,22 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
 
 /* Post row */
 .post-row {
+  --card-ink: var(--ink-section);
   position: relative;
   border-bottom: 1px dashed rgba(23,19,17,0.47);
-  padding: 16px 0;
+  /* the row bleeds 14px past the column so its text stays aligned and, lifted, has a margin */
+  margin-inline: -14px;
+  padding: 16px 44px 16px 14px; /* right: clear of the arrow tab */
 }
+/* a plain row: lifted, it becomes a pasted-in card */
+.post-row:not(.post-row--featured):is(:hover, :focus-within) { background: var(--paper-4); outline: 2px solid var(--ink); }
 
 .post-row--featured {
   background: #fff;
   border: 2px solid var(--ink);
   border-bottom: 2px solid var(--ink);
-  padding: 18px 22px;
-  margin-bottom: 14px;
+  padding: 18px 44px 18px 22px;
+  margin: 0 0 14px;
   overflow: hidden;
 }
 
@@ -1429,9 +1432,9 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
   opacity: 0.18;
   mix-blend-mode: multiply;
   pointer-events: none;
+  z-index: -1;
 }
 
-.post-row__inner { position: relative; }
 
 .post-row__meta-row {
   display: flex;
@@ -1471,11 +1474,6 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
   letter-spacing: 0.15em;
 }
 
-.post-row__read-link {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  color: var(--ink-section);
-}
 
 .post-row__title {
   font-family: var(--f-disp);
@@ -2280,9 +2278,10 @@ body.page-life     .masthead__nav .nav-fitness  { opacity: 1; }
 }
 
 .thought-prevnext__item {
+  --card-ink: var(--ink-section);
   background: #fff;
   border: 2px solid var(--ink);
-  padding: 14px 18px;
+  padding: 14px 18px 34px;
   display: block;
 }
 
@@ -2605,31 +2604,93 @@ body.page-life     .tab-bar__item--fitness  { opacity: 1; }
 
 .life-section-header span { color: var(--ink-section); }
 
-/* ─── 20. Card hover tilt (direction set by interactions.js) ─── */
-.section-card,
-.proj-card,
-.post-row,
-.role-card {
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+/* ─── 20. Cards: what goes somewhere, and how it says so ───
+   One convention for the whole zine (tasks/card-link.mjs checks it on the built pages):
+
+   .card-link   The whole card is one link. Either the card IS the <a>, or it holds exactly one
+                a.card-link__target (usually the title) whose ::before stretches over the card;
+                any other link inside is a .card-link__aside, raised above that overlay.
+                It carries {{> card-arrow}}: the arrow tab in the bottom-right corner, in the
+                card's ink. The tab is the one signal that a card goes somewhere, and it is there
+                without hover (phones). Hover / keyboard focus: a small tilt, a lift, the arrow nudges.
+   .card-tilt   A card that tilts on hover only because it looks nice. Never a link, never the
+                arrow, the pointer or the lift.
+
+   A component may set: --card-ink (tab + lift shadow), --card-ink-fg (the arrow on the tab),
+   --card-lift (the hovered shadow), --card-tilt-mag (the angle; .card-link--wide for long rows).
+   Tilt and lift use the rotate / translate properties, so they add to a card's own resting
+   transform (a pasted-in tilt) instead of replacing it. */
+.card-link,
+.card-tilt {
+  --card-tilt-mag: 1deg;
+  --card-tilt-dir: 1;
+  transition: rotate 160ms ease, translate 160ms ease, box-shadow 160ms ease;
+}
+.card-link:nth-child(even),
+.card-tilt:nth-child(even),
+:nth-child(even) > .card-link:only-child,
+:nth-child(even) > .card-tilt:only-child { --card-tilt-dir: -1; }
+.card-link--wide,
+.role-card.card-tilt { --card-tilt-mag: 0.4deg; } /* long rows: a degree swings their ends too far */
+
+/* isolated, so a card's own halftone / paper layer can sit at z-index -1, under its text and its link */
+.card-link { position: relative; isolation: isolate; cursor: pointer; }
+
+.card-tilt:hover { rotate: calc(var(--card-tilt-dir) * var(--card-tilt-mag)); }
+
+/* :is() is forgiving, so a browser without :has() still gets the hover */
+.card-link:is(:hover, :focus-visible, :has(.card-link__target:focus-visible)) {
+  z-index: 2;
+  rotate: calc(var(--card-tilt-dir) * var(--card-tilt-mag));
+  translate: -2px -2px;
+  box-shadow: var(--card-lift, 6px 6px 0 var(--card-ink, var(--ink)));
 }
 
-.section-card:hover {
-  transform: rotate(var(--hover-rotate, 1.5deg)) translateY(-2px);
-  box-shadow: 8px 8px 0 var(--ink) !important;
+/* the stretched link: the title's overlay is the card's click target */
+.card-link__target::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
 }
+.card-link__aside { position: relative; z-index: 3; }
 
-.proj-card:hover {
-  transform: rotate(var(--hover-rotate, 1.5deg)) translateY(-2px);
-  box-shadow: 6px 6px 0 var(--ink);
-  cursor: pointer;
+/* keyboard focus rings the whole card, not the title */
+.card-link:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; }
+.card-link__target:focus-visible { outline: none; }
+.card-link__target:focus-visible::before { outline: 3px solid var(--ink); outline-offset: 4px; }
+
+/* the arrow tab: a corner of the card printed in its ink, arrow knocked out of it */
+.card-link__arrow {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 30px;
+  height: 30px;
+  background: var(--card-ink, var(--ink));
+  border-top: 2px solid var(--ink);
+  border-left: 2px solid var(--ink);
+  pointer-events: none;
 }
-
-.post-row:hover {
-  transform: rotate(var(--hover-rotate, 0.8deg)) translateY(-1px);
-  cursor: pointer;
+.card-link__arrow::before {
+  content: '';
+  position: absolute;
+  inset: 8px 7px 8px 6px;
+  background: var(--card-ink-fg, #fff);
+  clip-path: polygon(0 36%, 50% 36%, 50% 4%, 100% 50%, 50% 96%, 50% 64%, 0 64%);
+  transition: translate 160ms ease;
 }
+.card-link:is(:hover, :focus-visible, :has(.card-link__target:focus-visible)) .card-link__arrow::before { translate: 3px 0; }
+/* "previous": the same tab, the arrow turned round */
+.card-link--back .card-link__arrow::before { scale: -1 1; }
+.card-link--back:is(:hover, :focus-visible) .card-link__arrow::before { translate: -3px 0; }
 
-.role-card:hover {
-  transform: rotate(var(--hover-rotate, 0.8deg)) translateY(-1px);
-  cursor: pointer;
+@media (prefers-reduced-motion: reduce) {
+  .card-link,
+  .card-tilt,
+  .card-link__arrow::before { transition: none; }
+  .card-link:is(:hover, :focus-visible, :has(.card-link__target:focus-visible)),
+  .card-tilt:hover { rotate: none; translate: none; }
+  .card-link:is(:hover, :focus-visible, :has(.card-link__target:focus-visible)) .card-link__arrow::before { translate: none; }
 }

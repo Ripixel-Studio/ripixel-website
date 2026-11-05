@@ -531,7 +531,7 @@ test('old export: projects without status are active, and the page renders', asy
     assert.ok(full.indexOf('sample-tool') > 0);
     assert.doesNotMatch(full, /retired/i);
     assert.doesNotMatch(full, /old-orbit|paper-lantern/);
-    assert.match(full, /<a href="https:\/\/github.com\/Ripixel-Studio\/sample-tool"/);
+    assert.match(full, /<a class="card-link__target" href="https:\/\/github.com\/Ripixel-Studio\/sample-tool"/);
     assert.doesNotMatch(full, /href="[^"]*quiet-ledger/);
     assert.equal((full.match(/class="life-project__desc"/g) || []).length, 4);
     assert.doesNotMatch(full, /life-project__desc">\s*</);

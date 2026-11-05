@@ -366,17 +366,6 @@
         </a>
       </div>
     </nav>
-    <script>
-      (function(){
-        var sel = '.section-card,.proj-card,.post-row,.role-card';
-        document.querySelectorAll(sel).forEach(function(el){
-          el.addEventListener('mouseenter', function(){
-            var deg = (Math.random() * 1.5 + 0.4) * (Math.random() > 0.5 ? 1 : -1);
-            el.style.setProperty('--hover-rotate', deg.toFixed(2) + 'deg');
-          });
-        });
-      })();
-    </script>
 
   <div class="paper-grain" aria-hidden="true"></div>
 </body>

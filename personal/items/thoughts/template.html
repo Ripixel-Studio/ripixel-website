@@ -94,14 +94,16 @@
     <!-- Prev / next -->
     {{#if prevThought}}
     <div class="thought-prevnext">
-      <a class="thought-prevnext__item" href="/{{prevThought.relativePath}}">
+      <a class="thought-prevnext__item card-link card-link--back" href="/{{prevThought.relativePath}}">
         <div class="thought-prevnext__dir">← previous thought · {{prevThought.dateDisplay}}</div>
         <div class="thought-prevnext__title">{{prevThought.title}}</div>
+        {{> card-arrow}}
       </a>
       {{#if nextThought}}
-      <a class="thought-prevnext__item thought-prevnext__item--next" href="/{{nextThought.relativePath}}">
+      <a class="thought-prevnext__item thought-prevnext__item--next card-link" href="/{{nextThought.relativePath}}">
         <div class="thought-prevnext__dir">next thought · {{nextThought.dateDisplay}} →</div>
         <div class="thought-prevnext__title">{{nextThought.title}}</div>
+        {{> card-arrow}}
       </a>
       {{/if}}
     </div>
@@ -109,9 +111,10 @@
     <div class="thought-prevnext">
       <div></div>
       {{#if nextThought}}
-      <a class="thought-prevnext__item thought-prevnext__item--next" href="/{{nextThought.relativePath}}">
+      <a class="thought-prevnext__item thought-prevnext__item--next card-link" href="/{{nextThought.relativePath}}">
         <div class="thought-prevnext__dir">next thought · {{nextThought.dateDisplay}} →</div>
         <div class="thought-prevnext__title">{{nextThought.title}}</div>
+        {{> card-arrow}}
       </a>
       {{/if}}
     </div>
