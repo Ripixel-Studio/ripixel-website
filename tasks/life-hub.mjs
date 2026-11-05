@@ -21,6 +21,7 @@
 
 import { lineChart, stackedShare, clockBars, columnBars } from './chart-axes.mjs';
 import { cleanPoints } from './route-map.mjs';
+import { commitGrid, projectCards } from './code-view.mjs';
 
 export const SECTION_ORDER = ['fitness', 'body', 'games', 'code', 'watching', 'listening', 'reading', 'live'];
 /** @param {string} name */
@@ -557,6 +558,7 @@ function codeView(sec) {
       const from = year(p.fromYear) || started.slice(0, 4);
       return {
         retired: p.status === 'retired',
+        raw: p,
         view: {
           name: String(p.name),
           description: typeof p.description === 'string' ? p.description.trim() : '',
@@ -572,11 +574,17 @@ function codeView(sec) {
     });
   const months = (Array.isArray(sec.commitsByMonth) ? sec.commitsByMonth : []).filter((m) => m && typeof m === 'object');
   const byYear = sec.languagesByYear && typeof sec.languagesByYear === 'object' ? sec.languagesByYear : {};
+  const languages = stackedShare(byYear);
+  const endDay = /^\d{4}-\d{2}-\d{2}$/.test(String(sec.updated || '')) ? String(sec.updated) : new Date().toISOString().slice(0, 10);
+  const live = projects.filter((p) => !p.retired);
+  const drawn = projectCards(live.map((p) => p.raw), (languages?.series || []).map((/** @type {any} */ s) => s.key), endDay);
   return {
     languagesNow: Array.isArray(sec.languagesNow) ? sec.languagesNow : [],
     commits: lineChart(months.map((m) => num(m.n) ?? 0), { label: 'Commits', unit: 'a month', x: { kind: 'months', months: months.map((m) => String(m.month || '')) } }),
-    languages: stackedShare(byYear),
-    active: projects.filter((p) => !p.retired).map((p) => p.view),
+    languages,
+    grid: commitGrid(sec.commitsByDay, endDay),
+    timeline: { axis: drawn.axis, nowPct: drawn.nowPct },
+    active: live.map((p, i) => ({ ...p.view, card: drawn.cards[i] })),
   };
 }
 

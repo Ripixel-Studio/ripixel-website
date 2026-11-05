@@ -38,7 +38,71 @@
       {{/each}}
     </div>
 
+    {{#if workView.timeline}}
+    <!-- Career timeline: a band per company on one year axis (work-view.mjs buildCharts) -->
+    {{#with workView.timeline}}
+    <section class="wt" aria-labelledby="wt-h">
+      <h2 class="tech-roster__heading" id="wt-h">the <span>timeline</span>.</h2>
+      <p class="tech-roster__hint">one band per company, oldest at the top · hatched = contract · the red line is today</p>
+      <div class="wt-chart">
+        <div class="wt-row wt-row--axis" aria-hidden="true">
+          <span></span>
+          <span class="wt-axis">{{#each axis.ticks}}<span class="wt-axis__tick{{#if odd}} wt-axis__tick--odd{{/if}}" style="left: {{left}}%"><b class="wt-axis__long">{{label}}</b><b class="wt-axis__short">{{short}}</b></span>{{/each}}</span>
+        </div>
+        {{#each rows}}
+        <div class="wt-row{{#if current}} wt-row--now{{/if}}" style="--c: var(--ink-{{ink}})">
+          <div class="wt-label">
+            <span class="wt-label__company">{{company}}</span>
+            <span class="wt-label__meta">{{when}}{{#if contract}} · contract{{/if}}</span>
+            <span class="wt-label__titles">{{titles}}</span>
+          </div>
+          <div class="wt-track">
+            {{#each ../axis.ticks}}<i class="wt-grid" style="left: {{left}}%"></i>{{/each}}
+            <b class="wt-today" style="left: {{../nowPct}}%"></b>
+            {{#each roles}}<span class="wt-band{{#if contract}} wt-band--contract{{/if}}{{#if current}} wt-band--now{{/if}}" style="left: {{left}}%; width: {{width}}%" title="{{label}}">{{#if current}}<em>now</em>{{/if}}</span>{{/each}}
+          </div>
+        </div>
+        {{/each}}
+      </div>
+    </section>
+    {{/with}}
+    {{/if}}
+
+    {{#if workView.techChart}}
+    <!-- The stack over time: when each technology was used, from the roles' tech lists -->
+    {{#with workView.techChart}}
+    <section class="wt wt--tech" aria-labelledby="wtech-h">
+      <h2 class="tech-roster__heading" id="wtech-h">the stack, <span>over time</span>.</h2>
+      <p class="tech-roster__hint">every technology from the roles below, coloured by where I used it · ★ = using it now · ☆ = not lately</p>
+      <p class="wt-legend">{{#each legend}}<span style="--c: var(--ink-{{ink}})"><i class="{{#if contract}}wt-band--contract{{/if}}"></i>{{company}}</span>{{/each}}</p>
+      <div class="wt-chart">
+        <div class="wt-row wt-row--axis" aria-hidden="true">
+          <span></span>
+          <span class="wt-axis">{{#each axis.ticks}}<span class="wt-axis__tick{{#if odd}} wt-axis__tick--odd{{/if}}" style="left: {{left}}%"><b class="wt-axis__long">{{label}}</b><b class="wt-axis__short">{{short}}</b></span>{{/each}}</span>
+        </div>
+        {{#each groups}}
+        <div class="wt-group">{{label}}</div>
+        {{#each rows}}
+        <div class="wt-row wt-row--tech{{#if current}} wt-row--now{{/if}}">
+          <div class="wt-label wt-label--tech">
+            <span class="wt-label__tech" title="{{name}}">{{name}}</span>
+            <span class="wt-label__star" title="{{#if current}}using now{{else}}not lately{{/if}}">{{#if current}}★{{else}}☆{{/if}}</span>
+            <span class="wt-label__yrs">{{years}}</span>
+          </div>
+          <div class="wt-track wt-track--thin">
+            {{#each ../../axis.ticks}}<i class="wt-grid" style="left: {{left}}%"></i>{{/each}}
+            {{#each spans}}<span class="wt-band{{#if contract}} wt-band--contract{{/if}}" style="left: {{left}}%; width: {{width}}%; --c: var(--ink-{{ink}})" title="{{label}}"></span>{{/each}}
+          </div>
+        </div>
+        {{/each}}
+        {{/each}}
+      </div>
+    </section>
+    {{/with}}
+    {{/if}}
+
     <!-- Roles, newest first -->
+    <h2 class="tech-roster__heading work-detail__heading">the <span>detail</span>.</h2>
     <ol class="work-roles">
       {{#each workView.roles}}
       <li class="work-roles__item">
@@ -113,21 +177,6 @@
       </div>
     </section>
     {{/if}}
-
-    <!-- Tech roster -->
-    <div class="work-lower">
-      {{#if workView.roster.length}}
-      <div>
-        <div class="tech-roster__heading">the full tech <span>roster</span>.</div>
-        <div class="tech-roster__hint">★ = using it now · ☆ = not lately</div>
-        <div class="tech-grid">
-          {{#each workView.roster}}
-          <div class="tech-item"><span>{{name}}</span><span class="tech-item__status" title="{{#if current}}using now{{else}}not lately{{/if}}">{{mark}}</span></div>
-          {{/each}}
-        </div>
-      </div>
-      {{/if}}
-    </div>
 
     {{else}}
     <div class="life-empty">The work record isn't available right now. Check back soon.</div>

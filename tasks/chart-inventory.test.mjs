@@ -13,7 +13,8 @@ const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const LIFE = path.join(REPO, 'public', 'personal', 'life');
 
 const WRAPPERS = ['chart', 'chart--stack', 'act-zones-wrap', 'fit-strip', 'roundup-effort-wrap'];
-const EXEMPT = /act-map__svg|heatmap|route|reg-?mark/;
+// Maps, and the /life/code commit calendar (its month and weekday labels are inside the svg).
+const EXEMPT = /act-map__svg|heatmap|route|reg-?mark|code-grid__svg/;
 const AXIS = /class="(?:chart__y|[\w-]*__yaxis)[\s"]/;
 
 async function htmlFiles(dir) {

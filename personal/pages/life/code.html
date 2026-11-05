@@ -16,16 +16,37 @@
       <line x1="9" y1="0" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/>
     </svg>
 
-    {{!-- Code (C7, R2e.6): commits a month, languages by year, active projects (lifeSections.code). --}}
+    {{!-- Code (C7, R2e.6): the year in commits (daily grid), commits a month, languages by year,
+          and a card per active project (lifeSections.code; tasks/code-view.mjs draws the grid and cards). --}}
     {{#with section}}
     {{> life-section-head snapTop="PUSHED" snapAccent="TO MAIN"}}
     {{#if empty}}
     {{> life-empty}}
     {{else}}
+    <p class="code-note"><span class="code-note__tag">NB</span>This is my own code: side projects, this site, the odd experiment. The day job's commits live on the day job's GitHub, so none of them are counted here.</p>
     {{#if languagesNow.length}}
     <p class="life-langs-now"><span class="life-period__label">Writing now</span>
       {{#each languagesNow}}<span class="life-chip">{{this}}</span>{{/each}}
     </p>
+    {{/if}}
+    {{#if grid}}
+    <h2 class="fit-header">the year in <span>commits</span>.</h2>
+    {{#with grid}}
+    <figure class="code-grid">
+      <div class="code-grid__scroll">
+        <svg class="code-grid__svg" viewBox="0 0 {{width}} {{height}}" width="{{width}}" height="{{height}}" role="img" aria-label="Commits per day over the last 12 months: {{stats.0.value}} in all">
+          {{#each months}}<text class="code-grid__month" x="{{x}}" y="{{y}}">{{label}}</text>{{/each}}
+          {{#each dayLabels}}<text class="code-grid__dow" x="{{x}}" y="{{y}}" text-anchor="end">{{label}}</text>{{/each}}
+          {{#each cells}}<rect class="code-grid__cell code-lv-{{level}}" x="{{x}}" y="{{y}}" width="11" height="11" rx="2"><title>{{title}}</title></rect>{{/each}}
+        </svg>
+      </div>
+      <figcaption class="code-grid__foot">
+        <span>One square a day, newest on the right.</span>
+        <span class="code-grid__legend" aria-hidden="true">less{{#each legend}}<i class="code-lv-{{level}}"></i>{{/each}}more</span>
+      </figcaption>
+    </figure>
+    {{> life-stats stats}}
+    {{/with}}
     {{/if}}
     {{#if commits}}
     <div class="life-charts life-charts--wide">
@@ -39,8 +60,13 @@
     {{/if}}
     {{#if active.length}}
     <h2 class="fit-header">the <span>projects</span>.</h2>
-    <ol class="life-projects">
-      {{#each active}}{{> life-project}}{{/each}}
+    <p class="code-key">
+      <span><i class="code-key__strip" aria-hidden="true"></i>what it's written in</span>
+      <span><i class="code-key__bar" aria-hidden="true"></i>commits, against the busiest</span>
+      <span><i class="code-key__span" aria-hidden="true"></i>first to last commit, {{timeline.axis.from}} to now</span>
+    </p>
+    <ol class="code-cards">
+      {{#each active}}{{> life-project timeline=../timeline}}{{/each}}
     </ol>
     {{/if}}
     {{/if}}

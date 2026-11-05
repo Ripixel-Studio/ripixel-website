@@ -282,7 +282,7 @@ test('old-shape export', async () => {
 test('code commits chart has axes', () => {
   const c = buildSection('code', fixture.sections.code, now);
   assert.equal(c.commits.label, 'Commits');
-  assert.deepEqual(c.commits.xTicks.map((t) => t.label), ['Sep ’26', 'Oct ’26']);
+  assert.deepEqual(c.commits.xTicks.map((t) => t.label), ['Jun ’25', 'Mar ’26', 'Nov ’26']);
 });
 
 test('lifeInsights filters', () => {
@@ -464,15 +464,20 @@ test('champion of the month carries its icon', () => {
 
 test('code view splits', () => {
   const c = buildSection('code', fixture.sections.code, now);
-  assert.deepEqual(c.active.map((p) => p.name), ['sample-tool', 'quiet-ledger']);
+  assert.deepEqual(c.active.map((p) => p.name), ['sample-tool', 'quiet-ledger', 'tide-tables', 'pixel-kiln', 'spare-parts', 'night-bus']);
   assert.ok(!('retired' in c));
   assert.ok(!c.active.some((p) => ['paper-lantern', 'old-orbit'].includes(p.name)), 'status: retired rows are filtered out');
   const [tool, ledger] = c.active;
-  assert.deepEqual(tool, {
+  const { card, ...plain } = tool;
+  assert.deepEqual(plain, {
     name: 'sample-tool', description: 'A small invented command-line helper that tidies folders of sample files.',
     years: '2025–now', lastCommit: 'Oct 2026', commits: '1,212', commitsUnit: 'commits', languages: ['Python', 'Shell'],
     url: 'https://github.com/Ripixel-Studio/sample-tool', started: '2025-08-02',
   });
+  assert.equal(card.name, 'sample-tool');
+  assert.equal(card.bar, 100);
+  assert.ok(c.grid && c.grid.cells.length > 360, 'the daily grid is drawn from commitsByDay');
+  assert.equal(c.timeline.axis.to, 2026);
   // the private one: no link, and no placeholder description
   assert.equal(ledger.url, '');
   assert.equal(ledger.description, '');
@@ -512,6 +517,7 @@ test('old export: projects without status are active, and the page renders', asy
     { name: 'example-site', started: '2024-03-14', languages: ['JavaScript', 'CSS'], url: 'https://github.com/ripixel/example-site' },
     { name: 'sample-tool', started: '2025-08-02', languages: ['Python'], url: null },
   ];
+  delete sec.commitsByDay;
   const c = buildSection('code', sec, now);
   assert.deepEqual(c.active.map((p) => p.name), ['example-site', 'sample-tool']);
   assert.equal(c.active[0].years, '2024–now');
@@ -546,8 +552,19 @@ test('old export: projects without status are active, and the page renders', asy
     assert.doesNotMatch(full, /old-orbit|paper-lantern/);
     assert.match(full, /<a href="https:\/\/github.com\/Ripixel-Studio\/sample-tool"/);
     assert.doesNotMatch(full, /href="[^"]*quiet-ledger/);
-    assert.equal((full.match(/class="life-project__desc"/g) || []).length, 1);
+    assert.equal((full.match(/class="life-project__desc"/g) || []).length, 4);
     assert.doesNotMatch(full, /life-project__desc">\s*</);
+    // the year in commits, the note about work code, and a card per project
+    assert.match(full, /class="code-note"/);
+    assert.match(full, /day job's commits live on the day job's GitHub/);
+    assert.ok((full.match(/class="code-grid__cell /g) || []).length > 360);
+    assert.match(full, /<title>3 commits, Mon 3 Nov 2025<\/title>/);
+    assert.equal((full.match(/<li class="code-card/g) || []).length, 6);
+    assert.match(full, /class="code-slot-3" style="width: 78%" title="Python 78%"/);
+    assert.match(full, /class="code-card__span" style="left: 76.4%; width: 20.8%"/);
+    // an old export without daily counts draws no grid but keeps the note
+    assert.doesNotMatch(old, /code-grid__cell/);
+    assert.match(old, /class="code-note"/);
   } finally {
     await fs.rm(tmp, { recursive: true, force: true });
   }
