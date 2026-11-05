@@ -105,10 +105,12 @@ test('hero cards: export order, sizes, zig-zag and headlines', () => {
   assert.deepEqual(cards.map((c) => c.hero?.type ?? null), ['route', 'stat', 'spark', 'image', 'bars', 'stat', null, null]);
   // the section's own headline, as the rows had it
   const byName = Object.fromEntries(hub.cards.map((c) => [c.name, c]));
-  for (const c of cards) if (byName[c.name]) assert.deepEqual(c.headline, byName[c.name].headline, c.name);
+  // (a stat hero that is the headline's own figure stands in for it)
+  for (const c of cards) if (byName[c.name] && c.name !== 'live') assert.deepEqual(c.headline, byName[c.name].headline, c.name);
   assert.equal(cards[0].headline?.value, '614');
   assert.equal(cards.find((c) => c.name === 'live')?.title, 'Live');
-  assert.equal(cards.find((c) => c.name === 'live')?.headline?.value, '3');
+  assert.equal(cards.find((c) => c.name === 'live')?.headline, null);
+  assert.equal(cards.find((c) => c.name === 'live')?.hero?.value, byName.live.headline.value, 'the hero agrees with its section');
   // outings has its own page like the rest (the export's href is /life/live)
   assert.equal(cards.find((c) => c.name === 'live')?.href, '/life/live');
   assert.equal(cards[0].href, '/life/fitness');
@@ -195,7 +197,7 @@ test('the page: a card per row, sized, each hero drawn, heading and insights kep
   // sm rows show no hero, only the caption
   const outings = /<li class="hub-card hub-card--sm hub-card--stat life-ink--live">[\s\S]*?<\/li>/.exec(html)?.[0] || '';
   assert.doesNotMatch(outings, /hub-hero/);
-  assert.match(outings, /9 live events this year\./);
+  assert.match(outings, /3 live events this year\./);
   assert.match(outings, /href="\/life\/live"/);
   assert.doesNotMatch(html, /id="life-outings-title"/);
 });
@@ -231,6 +233,22 @@ test('a stat hero equal to the headline hides the small headline; a different on
   assert.equal(mk(same).headline, null, 'duplicate figure hidden');
   assert.equal(mk(same).hero.value, base.headline.value);
   assert.deepEqual(mk(same + 1).headline, base.headline, 'different figure keeps the headline');
+});
+
+test('a stat hero naming the headline\'s measure with another figure is dropped, caption and all', () => {
+  // The hub is picked once a day; the export is republished during it. A hero that says
+  // "3 live events this year" beside a headline of 7 must never reach the page.
+  const base = buildHub(fixture, fitnessLife, now).cards.find((c) => c.name === 'code');
+  const same = Number(String(base.headline.value).replace(/,/g, ''));
+  const row = (/** @type {number} */ value) => ({ section: 'code', size: 'lg', hero: { type: 'stat', value, unit: base.headline.unit, label: base.headline.label, caption: `${value} ${base.headline.label}, and counting.` } });
+  const stale = heroCards({ ...fixture, hub: { rows: [row(same - 4)] } }, [base], now)[0];
+  assert.equal(stale.hero, null);
+  assert.equal(stale.caption, '');
+  assert.equal(stale.size, 'sm');
+  assert.deepEqual(stale.headline, base.headline, 'the section\'s own figure stands');
+  const fresh = heroCards({ ...fixture, hub: { rows: [row(same)] } }, [base], now)[0];
+  assert.equal(fresh.hero?.value, base.headline.value);
+  assert.equal(fresh.headline, null);
 });
 
 test('a hidden duplicate headline is not "empty"; a section with no data is', () => {

@@ -1,16 +1,20 @@
 {{!-- Inline SVG effort strip. Context: the `effortStrip` view model from tasks/fitness-roundup-views.mjs
-     (kind 'bars' for a week, 'grid' for a month/year; every rect is precomputed). --}}
+     (kind 'bars' for a week, 'calendar' for a month, 'grid' for a year; every rect is precomputed).
+     Drawn at its own size at most: a few weeks must never blow up to fill a column. --}}
 <div class="roundup-effort-wrap roundup-effort-wrap--{{kind}}">
 <div class="roundup-effort__yaxis" aria-hidden="true">
   <span class="roundup-effort__ycap">{{yAxis.caption}}</span>
   <ol>{{#each yAxis.ticks}}<li style="top:{{pct}}%">{{label}}</li>{{/each}}</ol>
 </div>
-<svg class="roundup-effort roundup-effort--{{kind}}" viewBox="{{vx}} 0 {{vw}} {{height}}" preserveAspectRatio="xMinYMin meet" role="img" aria-label="Effort per day, from rest to very hard">
+<svg class="roundup-effort roundup-effort--{{kind}}" viewBox="{{vx}} 0 {{vw}} {{height}}" preserveAspectRatio="xMinYMin meet" style="max-width:{{width}}px" role="img" aria-label="Effort per day, from rest to very hard">
   {{#each labels}}
   <text class="roundup-effort__text" x="{{x}}" y="{{y}}"{{#if anchor}} text-anchor="{{anchor}}"{{/if}}>{{text}}</text>
   {{/each}}
   {{#each cells}}
   <rect class="roundup-effort__cell roundup-effort__cell--l{{level}}" x="{{x}}" y="{{y}}" width="{{w}}" height="{{h}}"><title>{{title}}</title></rect>
+  {{#if num}}
+  <text class="roundup-effort__num{{#if on}} roundup-effort__num--on{{/if}}" x="{{nx}}" y="{{ny}}" text-anchor="end" aria-hidden="true">{{num}}</text>
+  {{/if}}
   {{#if label}}
   <text class="roundup-effort__text roundup-effort__text--dow" x="{{lx}}" y="{{ly}}" text-anchor="middle">{{label}}</text>
   <text class="roundup-effort__text roundup-effort__text--day" x="{{lx}}" y="{{sy}}" text-anchor="middle">{{sub}}</text>

@@ -152,6 +152,10 @@
 .roundup-grid--2      { grid-template-columns: 1fr 1fr; }
 .roundup-grid--3      { grid-template-columns: repeat(3, 1fr); }
 .roundup-grid--effort { grid-template-columns: 1.3fr 1fr; }
+/* a month's calendar keeps its own size; the zones panel takes the rest */
+.roundup-grid--effort-calendar { grid-template-columns: max-content 1fr; }
+/* places beside a short weather card that sits at the top, not stretched to the list's height */
+.roundup-grid--out    { grid-template-columns: 1.6fr 1fr; align-items: start; }
 .roundup-grid--routes { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
 .roundup-grid--tiles  { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
 
@@ -185,6 +189,11 @@ a.zine-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(
 }
 
 .roundup-effort__text--day { fill: var(--ink-section); font-weight: 700; }
+
+/* the calendar's dates, inside each square */
+.roundup-effort__num { font-family: var(--f-mono); font-size: 9px; fill: var(--ink); pointer-events: none; }
+.roundup-effort__num--on { fill: var(--paper); }
+.roundup-effort--calendar .roundup-effort__text { font-size: 10px; letter-spacing: 0; }
 
 .roundup-legend {
   display: flex;
@@ -257,6 +266,8 @@ a.zine-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(
   grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
   gap: 12px;
 }
+
+.roundup-cells--pair { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 12px; }
 
 .roundup-cells--efforts { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 
@@ -545,13 +556,14 @@ a.zine-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(
 /* ─── Responsive ───────────────────────── */
 @media (max-width: 880px) {
   .roundup-grid--3, .roundup-grid--effort { grid-template-columns: 1fr 1fr; }
+  .roundup-grid--effort-calendar { grid-template-columns: max-content 1fr; }
   .roundup-hero { grid-template-columns: 1fr; }
   .roundup-hero__aside { align-items: flex-start; }
   .roundup-totals .stat-strip__num { font-size: 40px; }
 }
 
 @media (max-width: 600px) {
-  .roundup-grid--2, .roundup-grid--3, .roundup-grid--effort { grid-template-columns: 1fr; }
+  .roundup-grid--2, .roundup-grid--3, .roundup-grid--effort, .roundup-grid--effort-calendar, .roundup-grid--out { grid-template-columns: 1fr; }
   .roundup-bars__row { grid-template-columns: 90px 1fr auto; }
   .roundup-section__head { flex-direction: column; align-items: flex-start; gap: 2px; }
   .roundup-section__note { text-align: left; }

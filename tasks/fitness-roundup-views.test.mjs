@@ -170,12 +170,20 @@ test('buildEffortStrip: a week is seven labelled bars, a month a Mon-first grid,
   assert.ok(week.cells[5].h > week.cells[0].h, 'a harder day is a taller bar');
   assert.match(week.cells[5].title, /17 OCT 2026: very hard · 1 session/);
 
-  const month = buildEffortStrip('month', calendarDays('2026-10-01T00:00:00Z', '2026-11-01T00:00:00Z', []));
-  assert.equal(month.kind, 'grid');
+  // A month is a small wall calendar: weekday columns, a row per week, the date in each square.
+  const month = buildEffortStrip('month', calendarDays('2026-10-01T00:00:00Z', '2026-11-01T00:00:00Z', [{ date: '2026-10-18', effortLevel: 4, activityCount: 1 }]));
+  assert.equal(month.kind, 'calendar');
   assert.equal(month.cells.length, 31);
-  assert.equal(month.cells[0].y, month.cells[0].y, 'Thu 1 Oct sits in row 3');
-  assert.equal(month.cells[0].y > month.cells[4].y, true, '1 Oct (Thu) is lower than 5 Oct (Mon)');
-  assert.equal(month.cells[4].x > month.cells[0].x, true, '5 Oct starts the next column');
+  assert.equal(month.cells[0].x, month.cells[7].x, '1 Oct and 8 Oct share a column (Thursday)');
+  assert.ok(month.cells[4].x < month.cells[0].x, '5 Oct (Mon) is left of 1 Oct (Thu)');
+  assert.ok(month.cells[4].y > month.cells[0].y, '5 Oct starts the next row');
+  assert.deepEqual(month.cells.slice(0, 3).map((c) => c.num), ['1', '2', '3']);
+  assert.equal(month.cells[17].on, true, 'a very hard day prints its date in paper');
+  assert.equal(month.cells[0].on, false);
+  assert.deepEqual(month.labels.map((l) => l.text), ['M', 'T', 'W', 'T', 'F', 'S', 'S']);
+  assert.deepEqual(month.yAxis.ticks.map((t) => t.label), ['W40', 'W41', 'W42', 'W43', 'W44']);
+  assert.ok(month.width <= 280 && month.height <= 260, `compact: ${month.width}x${month.height}`);
+  assert.ok(month.cells[0].w >= 28, 'still big enough to read the date');
 
   const year = buildEffortStrip('year', calendarDays('2026-01-01T00:00:00Z', '2027-01-01T00:00:00Z', []));
   assert.equal(year.cells.length, 365);

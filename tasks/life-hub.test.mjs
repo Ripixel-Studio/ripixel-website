@@ -61,7 +61,7 @@ test('latest notable is newest', () => {
   assert.equal(v2.notable[0].title, 'Newer');
 });
 
-test('gigs join listening, cinema films are watching rows with a big-screen flag', () => {
+test('live events stay on the live page, cinema films are watching rows with a big-screen flag', () => {
   const gig = fixture.sections.live.notable[0];
   const hub = buildHub({ ...fixture, sections: { ...fixture.sections, live: { ...fixture.sections.live, notable: [gig] } } }, fitnessLife, now);
   assert.equal(hub.live.length, 1);
@@ -69,10 +69,11 @@ test('gigs join listening, cinema films are watching rows with a big-screen flag
   const w = buildSection('watching', { staleDays: 0, headline: { value: 1, unit: '', label: 'x' }, notable: [film],
     totals: { year: { films: 3, cinema: 1, episodes: 0, videos: 0, hours: 5 }, month: {} } }, now, [gig]);
   assert.equal(w.notable[0].bigScreen, true);
-  assert.equal(w.hasSaw, false);
+  assert.equal('hasSaw' in w, false);
   assert.equal(w.stats[0].items.find((r) => r.label === 'At the cinema')?.value, '1');
   const l = buildSection('listening', fixture.sections.listening, now, [gig]);
-  assert.deepEqual(l.saw.map((s) => s.title), ['Sample Band Live']);
+  assert.equal('saw' in l || 'hasSaw' in l, false);
+  assert.ok(!JSON.stringify(l).includes('Sample Band Live'));
   assert.equal(sawLabel('2026-10'), 'saw in Oct 2026');
   assert.equal(sawLabel('nope'), '');
 });
