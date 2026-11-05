@@ -850,7 +850,7 @@ function liveNotables(lifeIndex) {
  * The hub: one card per section in order, then the outings list.
  * @param {any} lifeIndex @param {any} fitnessLife @param {Date} now
  */
-export function buildHub(lifeIndex, fitnessLife, now = new Date()) {
+export function buildHub(lifeIndex, fitnessLife, now = new Date(), fitnessIndex = null) {
   const sections = lifeIndex?.sections && typeof lifeIndex.sections === 'object' ? lifeIndex.sections : {};
   const outs = liveNotables(lifeIndex);
   const cards = SECTION_ORDER.map((name) => {
@@ -870,7 +870,7 @@ export function buildHub(lifeIndex, fitnessLife, now = new Date()) {
   return {
     cards,
     live: sortedNotables(outs).map((n) => ({ ...n, sawLabel: sawLabel(n.month) })),
-    hero: heroCards(lifeIndex, cards, now),
+    hero: heroCards(lifeIndex, cards, now, { fitnessLife, fitnessIndex }),
   };
 }
 
@@ -1055,7 +1055,7 @@ const captionOf = (c) => {
  * [] with no usable `hub` (an older export), and the page falls back to the rows.
  * @param {any} lifeIndex @param {any[]} cards the hub's section cards @param {Date} now
  */
-export function heroCards(lifeIndex, cards, now = new Date()) {
+export function heroCards(lifeIndex, cards, now = new Date(), extra = {}) {
   const rows = Array.isArray(lifeIndex?.hub?.rows) ? lifeIndex.hub.rows : [];
   const sections = lifeIndex?.sections && typeof lifeIndex.sections === 'object' ? lifeIndex.sections : {};
   const byName = new Map((cards || []).map((c) => [c.name, c]));
@@ -1068,7 +1068,9 @@ export function heroCards(lifeIndex, cards, now = new Date()) {
     seen.add(name);
     const card = byName.get(name) || /** @type {any} */ (buildSection(name, sections[name], now));
     const title = String(card.title || '') === name ? name[0].toUpperCase() + name.slice(1) : String(card.title);
-    let hero = heroView(r.hero, title);
+    let hero = /** @type {any} */ (heroView(r.hero, title));
+    if (hero?.type === 'image' && name === 'fitness') hero = { ...hero, session: photoSession(hero.src, extra) };
+    if (hero?.type === 'rank' && name === 'games') hero = { ...hero, ...rankCovers(sections.games) };
     let headline = card.empty ? null : card.headline || null;
     // The hub is picked once a day and the export republished during it. A stat hero naming the
     // headline's own measure with another figure is a day stale: drop it, caption and all, and
@@ -1092,7 +1094,89 @@ export function heroCards(lifeIndex, cards, now = new Date()) {
       hero,
     });
   }
-  return out;
+  return hubLayout(out);
+}
+
+/**
+ * The session behind the fitness photo, from the site's own fitness data: its stats (as on the
+ * activity cards) and its heart-rate trace. Sits beside the polaroid so a portrait photo does
+ * not leave the wide card empty. Null when the photo is not one of the newest sessions'.
+ * @param {string} src @param {{ fitnessLife?: any, fitnessIndex?: any }} extra
+ */
+export function photoSession(src, extra) {
+  const card = (Array.isArray(extra?.fitnessLife?.activities) ? extra.fitnessLife.activities : [])
+    .find((/** @type {any} */ c) => c && c.isPhoto && c.photo === src);
+  if (!card) return null;
+  const entry = (Array.isArray(extra?.fitnessIndex?.activities) ? extra.fitnessIndex.activities : [])
+    .find((/** @type {any} */ e) => e && e.slug === card.slug);
+  const sp = entry?.sparkline;
+  const secs = num(entry?.durationSeconds);
+  const chart = sp?.metric === 'heart_rate' && Array.isArray(sp.values) && secs
+    ? lineChart(sp.values.map(num), { label: 'heart rate', unit: 'bpm', w: 320, h: 90, x: { kind: 'clock', seconds: secs } })
+    : null;
+  const stats = (Array.isArray(card.stats) ? card.stats : []).slice(0, 3)
+    .map((/** @type {any} */ s) => ({ value: String(s.value), unit: String(s.unit || ''), label: String(s.label || '') }));
+  if (!stats.length && !chart) return null;
+  return { date: String(card.date || ''), typeLabel: String(card.typeLabel || ''), stats, chart };
+}
+
+/**
+ * The top of the games cover wall beside the rank (the same pick as the covers hero: games still
+ * played, Steam and Riot art only), four in a row under the rank panel; none with fewer than four.
+ * @param {any} sec the games section
+ */
+function rankCovers(sec) {
+  const wall = (Array.isArray(sec?.wall) ? sec.wall : [])
+    .filter((/** @type {any} */ w) => w && typeof w.name === 'string' && w.name.trim() && !w.idle && safeArt(w.art))
+    .slice(0, 4)
+    .map((/** @type {any} */ w) => ({ src: safeArt(w.art), alt: w.name.trim() }));
+  return wall.length === 4 ? { rankCovers: wall } : {};
+}
+
+/** Grid columns at the wide layout. */
+const HUB_COLS = 6;
+
+/**
+ * Lay the cards out so no card is left beside a hole. Cards go biggest first (the export sends
+ * them that way; a rejected hero dropped to sm in place is moved down). Then the wide grid's
+ * dense flow is simulated: lg cards are 4×2 at their side, md 2×2, sm 2×1. The slim cards that
+ * end the grid share its last row (`wide`: 6, 3 or 2 columns, so two of them are not left with
+ * a third of the row empty). At the two-column layout an odd md card and an odd sm card span
+ * both columns (`solo`), so a slim card is never the partner of a tall one.
+ * @param {any[]} cards
+ */
+export function hubLayout(cards) {
+  const order = { lg: 0, md: 1, sm: 2 };
+  const sorted = [...cards].sort((a, b) => (order[/** @type {'lg'} */ (a.size)] ?? 1) - (order[/** @type {'lg'} */ (b.size)] ?? 1));
+  /** @type {boolean[][]} */
+  const grid = [];
+  const free = (/** @type {number} */ r, /** @type {number} */ c, /** @type {number} */ w, /** @type {number} */ h) => {
+    for (let y = r; y < r + h; y++) for (let x = c; x < c + w; x++) if (grid[y]?.[x]) return false;
+    return true;
+  };
+  const take = (/** @type {number} */ r, /** @type {number} */ c, /** @type {number} */ w, /** @type {number} */ h) => {
+    for (let y = r; y < r + h; y++) { grid[y] ||= Array(HUB_COLS).fill(false); for (let x = c; x < c + w; x++) grid[y][x] = true; }
+  };
+  const placed = sorted.map((card) => {
+    const [w, h] = card.size === 'lg' ? [4, 2] : card.size === 'md' ? [2, 2] : [2, 1];
+    const cols = card.size === 'lg' && card.side === 'right' ? [2] : Array.from({ length: HUB_COLS - w + 1 }, (_, i) => i);
+    for (let r = 0; ; r++) {
+      const c = cols.find((x) => free(r, x, w, h));
+      if (c != null) { take(r, c, w, h); return { card, r, h }; }
+    }
+  });
+  const last = Math.max(-1, ...placed.map((p) => p.r + p.h - 1));
+  const tail = placed.filter((p) => p.r + p.h - 1 === last);
+  const wide = tail.length && tail.length <= 3 && tail.every((p) => p.card.size === 'sm' && p.r === last) && grid[last].includes(false)
+    ? HUB_COLS / tail.length : 0;
+  const count = (/** @type {string} */ size) => sorted.filter((c) => c.size === size).length;
+  const lastOf = (/** @type {string} */ size) => sorted.filter((c) => c.size === size).at(-1);
+  const solo = new Set(['md', 'sm'].filter((s) => count(s) % 2).map(lastOf));
+  return sorted.map((card) => ({
+    ...card,
+    wide: wide && tail.some((p) => p.card === card) ? wide : 0,
+    solo: solo.has(card),
+  }));
 }
 
 /** @param {any} f */
@@ -1164,7 +1248,7 @@ export function lifeHubTask(config = {}) {
       const lifeSections = Object.fromEntries(
         SECTION_ORDER.filter((n) => n !== 'fitness').map((n) => [n, buildSection(n, idx?.sections?.[n], now, outs)]),
       );
-      const lifeHub = buildHub(idx, g.fitnessLife, now);
+      const lifeHub = buildHub(idx, g.fitnessLife, now, g.fitnessIndex);
       ctx.logger.info(`Life hub: ${lifeHub.cards.filter((c) => !c.empty).length}/${lifeHub.cards.length} sections have data`);
       return { lifeHub, ...homeLifeGlobals(lifeHub), lifeSections, lifeFacts: lifeFacts(idx?.facts),
         lifeInsights: lifeInsights(idx),

@@ -7,7 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { generatePagesTask } from 'skier';
-import { buildHub, buildSection, heroCards, heroView, isoWeekMonday, routeSketch, lifeInsights } from './life-hub.mjs';
+import { buildHub, buildSection, heroCards, heroView, hubLayout, isoWeekMonday, photoSession, routeSketch, lifeInsights } from './life-hub.mjs';
 import { runSkierTasks } from './skier-test-runner.mjs';
 import { templateHelpers } from './life-pages.mjs';
 
@@ -184,11 +184,12 @@ test('a row without a usable hero drops to a slim row', () => {
     { section: '<b>', size: 'lg', hero: null },
   ] } };
   const cards = heroCards(idx, buildHub(fixture, fitnessLife, now).cards, now);
-  assert.deepEqual(cards.map((c) => [c.name, c.size, c.side]), [['games', 'sm', ''], ['code', 'md', ''], ['reading', 'sm', '']]);
+  // biggest first: the slim rows move below the md card (hubLayout)
+  assert.deepEqual(cards.map((c) => [c.name, c.size, c.side]), [['code', 'md', ''], ['games', 'sm', ''], ['reading', 'sm', '']]);
   assert.equal(cards[2].href, '/life/reading');
   assert.equal(cards[2].caption, '');
-  assert.equal(cards[0].caption, '', 'a rejected hero leaves no orphan caption');
-  assert.equal(cards[1].caption, 'z');
+  assert.equal(cards[1].caption, '', 'a rejected hero leaves no orphan caption');
+  assert.equal(cards[0].caption, 'z');
 });
 
 test('a caption is plain text, and an over-long one is dropped', () => {
@@ -278,7 +279,7 @@ test('the page draws covers, an image and a stat, and an sm row shows only its c
   assert.match(html, /<div class="hub-hero__posters hub-hero__posters--covers">\s*<figure class="hub-hero__poster hub-hero__poster--n0" style="--tilt: [-0-9.]+deg"><img src="https:\/\/shared\.akamai\.steamstatic\.com\/[^"]+" alt="Game A" loading="lazy" decoding="async" width="600" height="900">/);
   assert.match(html, /<img class="hub-hero__img" src="\/card_life.png" alt="Space Farm" loading="lazy" decoding="async" width="400" height="600">/);
   assert.match(html, /<b class="hub-hero__value">212<\/b> <span class="hub-hero__what">commits this month<\/span>/);
-  const outings = /<li class="hub-card hub-card--sm hub-card--stat life-ink--live">[\s\S]*?<\/li>/.exec(html)?.[0] || '';
+  const outings = /<li class="hub-card hub-card--sm hub-card--stat hub-card--wide6 hub-card--solo life-ink--live">[\s\S]*?<\/li>/.exec(html)?.[0] || '';
   assert.doesNotMatch(outings, /hub-hero/);
   assert.match(outings, /3 live events this year\./);
   assert.match(outings, /href="\/life\/live"/);
@@ -342,4 +343,60 @@ test('a hidden duplicate headline is not "empty"; a section with no data is', ()
   assert.equal(dup.empty, false, 'template must render nothing, not "No code data yet."');
   const none = heroCards({ ...fixture, hub: { rows: [{ section: 'code', size: 'sm', hero: null }] } }, [{ ...base, empty: true }], now)[0];
   assert.equal(none.empty, true);
+});
+
+/** Cards of the given sizes, lg alternating sides as heroCards does. @param {string[]} sizes */
+const sized = (sizes) => { let lg = 0; return sizes.map((size, i) => ({ name: `s${i}`, size, side: size === 'lg' ? (lg++ % 2 ? 'right' : 'left') : '' })); };
+
+test('hub layout: biggest first, the slim cards share the last row, odd cards span two columns', () => {
+  // today's shape: 3 lg + 3 md fill their rows; two sm share the last row half and half
+  const a = hubLayout(sized(['lg', 'lg', 'lg', 'md', 'md', 'md', 'sm', 'sm']));
+  assert.deepEqual(a.map((c) => c.wide), [0, 0, 0, 0, 0, 0, 3, 3]);
+  assert.deepEqual(a.map((c) => c.solo), [false, false, false, false, false, true, false, false]);
+  // one sm alone: the whole row; three: a third each (no widening needed, but no gap either)
+  assert.deepEqual(hubLayout(sized(['lg', 'md', 'sm'])).map((c) => c.wide), [0, 0, 6]);
+  assert.deepEqual(hubLayout(sized(['lg', 'md', 'sm', 'sm', 'sm'])).map((c) => c.wide), [0, 0, 0, 0, 0]);
+  // an extra lg leaves a 2×2 hole beside it: the sm cards pack into it, nothing is widened
+  const hole = hubLayout(sized(['lg', 'lg', 'lg', 'md', 'md', 'sm', 'sm']));
+  assert.deepEqual(hole.map((c) => c.wide), [0, 0, 0, 0, 0, 0, 0]);
+  // an sm dropped in place (a rejected hero) moves below the md cards; odd sm spans at two columns
+  const moved = hubLayout(sized(['lg', 'sm', 'md', 'md', 'sm', 'sm']));
+  assert.deepEqual(moved.map((c) => c.size), ['lg', 'md', 'md', 'sm', 'sm', 'sm']);
+  assert.deepEqual(moved.map((c) => c.solo), [false, false, false, false, false, true]);
+  assert.deepEqual(hubLayout([]), []);
+});
+
+test('the fitness photo brings its session: stats and the heart-rate trace', () => {
+  const src = 'https://storage.googleapis.com/x/p.jpg';
+  const fitnessLifeX = { activities: [{ slug: 'pt-1', isPhoto: true, photo: src, date: 'Wed 4 Nov', typeLabel: 'Hyrox', stats: [{ value: '10', unit: '', label: 'sets' }, { value: '1h 5m', unit: '', label: 'time' }] }] };
+  const fitnessIndex = { activities: [{ slug: 'pt-1', durationSeconds: 3888, sparkline: { metric: 'heart_rate', values: [100, 140, 160, 150] } }] };
+  const s = /** @type {any} */ (photoSession(src, { fitnessLife: fitnessLifeX, fitnessIndex }));
+  assert.equal(s.typeLabel, 'Hyrox');
+  assert.deepEqual(s.stats.map((/** @type {any} */ x) => x.label), ['sets', 'time']);
+  assert.equal(s.chart.label, 'heart rate');
+  assert.equal(s.chart.xTicks.at(-1).label, '1:04');
+  // no trace without a heart-rate sparkline; nothing for a photo that is not a newest session's
+  assert.equal(/** @type {any} */ (photoSession(src, { fitnessLife: fitnessLifeX, fitnessIndex: { activities: [{ slug: 'pt-1', sparkline: { metric: 'pace', values: [1, 2] } }] } })).chart, null);
+  assert.equal(photoSession('https://storage.googleapis.com/x/other.jpg', { fitnessLife: fitnessLifeX, fitnessIndex }), null);
+  assert.equal(photoSession(src, {}), null);
+});
+
+test('the rank hero carries the top four covers from the games wall', () => {
+  const games = fixture.sections.games;
+  const rows = [{ section: 'games', size: 'md', hero: { type: 'rank', tier: 'GOLD', division: 'II', lp: 40, icon: 'https://ddragon.leagueoflegends.com/cdn/16.1.1/img/champion/Jhin.png', champion: 'Jhin' } }];
+  const card = heroCards({ ...fixture, hub: { rows } }, [], now)[0];
+  const wall = (games.wall || []).filter((/** @type {any} */ w) => !w.idle && /^https:/.test(String(w.art || '')));
+  if (wall.length >= 4) assert.equal(/** @type {any} */ (card.hero).rankCovers.length, 4);
+  const none = heroCards({ ...fixture, sections: { ...fixture.sections, games: { ...games, wall: wall.slice(0, 3) } }, hub: { rows } }, [], now)[0];
+  assert.equal(/** @type {any} */ (none.hero).rankCovers, undefined);
+});
+
+test('hub CSS: a md hero is a size container and its picture is sized from it, not in pixels', async () => {
+  const css = await fs.readFile(path.join(REPO, 'personal/assets/styles/main/life.css'), 'utf8');
+  assert.match(css, /\.hub-card--md \.hub-hero--posters,[\s\S]*?container: hubfill \/ size;/);
+  assert.match(css, /\.hub-card--md \.hub-hero__posters \{ --fan-w: min\([^}]*cq/);
+  assert.match(css, /\.hub-card--md \.hub-hero--image \.hub-hero__frame \{[^}]*cqh/);
+  assert.match(css, /\.hub-hero--spark \.chart__plot,[\s\S]*?grid-template-rows: minmax\(var\(--chart-h\), 1fr\) auto;/);
+  assert.match(css, /\.hub-card--sm\.hub-card--wide3 \{ grid-column: span 3; \}/);
+  assert.doesNotMatch(css, /\.hub-hero__posters \{[^}]*width: min\(100%, 300px\)/, 'the old fixed-size fan is gone');
 });

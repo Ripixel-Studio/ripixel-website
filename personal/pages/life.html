@@ -31,7 +31,7 @@
          from the export, a slim row when there is no hero. The caption is James's line, as text. -->
     <ol class="hub-grid">
       {{#each lifeHub.hero}}
-      <li class="hub-card hub-card--{{size}}{{#if side}} hub-card--{{side}}{{/if}}{{#if hero}} hub-card--{{hero.type}}{{/if}} life-ink--{{name}}">
+      <li class="hub-card hub-card--{{size}}{{#if side}} hub-card--{{side}}{{/if}}{{#if hero}} hub-card--{{hero.type}}{{/if}}{{#if wide}} hub-card--wide{{wide}}{{/if}}{{#if solo}} hub-card--solo{{/if}} life-ink--{{name}}">
         <header class="hub-card__head">
           <h2 class="hub-card__name">{{#if href}}<a href="{{href}}">{{title}}</a>{{else}}{{title}}{{/if}}</h2>
           {{#if headline}}
@@ -42,6 +42,13 @@
         </header>
         {{#if hero}}{{#unless (eq size "sm")}}<div class="hub-hero hub-hero--{{hero.type}}">{{> life-hub-hero hero}}</div>{{/unless}}{{/if}}
         {{#if caption}}<p class="hub-card__caption">{{caption}}</p>{{/if}}
+        {{#if hero.session}}{{#with hero.session}}
+        <div class="hub-session">
+          <p class="hub-session__when">{{typeLabel}}{{#if date}} · {{date}}{{/if}}</p>
+          {{#if stats.length}}<ul class="hub-session__stats">{{#each stats}}<li><b>{{value}}{{#if unit}}<small>{{unit}}</small>{{/if}}</b> <span>{{label}}</span></li>{{/each}}</ul>{{/if}}
+          {{#if chart}}{{> chart-line chart}}{{/if}}
+        </div>
+        {{/with}}{{/if}}
         <footer class="hub-card__foot">
           {{#if staleLabel}}<p class="life-stale">{{staleLabel}}</p>{{/if}}
           {{#if (eq name "fitness")}}{{#if @root.fitnessLife.roundup}}
