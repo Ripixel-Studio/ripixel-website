@@ -127,8 +127,9 @@ const r1 = (/** @type {number} */ n) => Math.round(n * 10) / 10;
 const YM = /^(\d{4})-(\d{2})$/;
 
 /**
- * The shared axis: Jan of the first role's year to Dec of the export's year; `pos(ym)` is the
- * percentage for the start of a month, `endPos(ym|null)` for the end of one (null: today).
+ * The shared axis, running back in time from the left (James, 2026-11-05: this year leftmost):
+ * Dec of the export's year at 0% to Jan of the first role's year at 100%. `pct(m)` is a month
+ * index's distance from the start, `at(m)` its mirrored position on the page.
  * @param {any[]} rows roles with a valid `from` @param {string} today YYYY-MM-DD
  */
 function makeAxis(rows, today) {
@@ -139,14 +140,16 @@ function makeAxis(rows, today) {
   const daysIn = new Date(Date.UTC(+today.slice(0, 4), +today.slice(5, 7), 0)).getUTCDate();
   const nowIdx = idx(today.slice(0, 7)) + Math.min(1, +today.slice(8, 10) / daysIn);
   const pct = (/** @type {number} */ m) => r1(Math.max(0, Math.min(100, (100 * m) / months)));
-  const ticks = [];
-  for (let y = from; y <= to; y++) ticks.push({ label: String(y), short: `’${String(y).slice(2)}`, left: pct((y - from) * 12), odd: (y - from) % 2 === 1 });
+  const at = (/** @type {number} */ m) => r1(100 - pct(m));
+  const ticks = [];   // newest first: each label at its year's left edge (the year's end, mirrored)
+  for (let y = to; y >= from; y--) ticks.push({ label: String(y), short: `’${String(y).slice(2)}`, left: at((y - from + 1) * 12), odd: (y - from) % 2 === 1 });
   return {
     axis: { from, to, ticks },
-    nowPct: pct(nowIdx),
+    nowPct: at(nowIdx),
     /** @param {string} ym */ startIdx: (ym) => idx(ym),
     /** @param {string|null} ym */ endIdx: (ym) => (ym && YM.test(ym) ? Math.min(idx(ym) + 1, nowIdx) : nowIdx),
     pct,
+    at,
   };
 }
 
@@ -167,10 +170,10 @@ function buildCharts(roles, raw, roster, today) {
   const seg = (/** @type {any} */ r, /** @type {any} */ v) => {
     const a = ax.startIdx(r.from);
     const b = ax.endIdx(r.to);
-    const left = ax.pct(a);
+    const left = ax.at(b);               // mirrored: a role's end is its left edge
     return {
       company: v.company, title: v.title, ink: v.ink, contract: v.contract, current: v.current,
-      left, width: Math.max(0.6, r1(ax.pct(b) - left)), a, b,
+      left, width: Math.max(0.6, r1(ax.pct(b) - ax.pct(a))), a, b,
       label: `${v.title}, ${ymLabel(r.from)} to ${r.to ? ymLabel(r.to) : 'now'}`,
     };
   };
@@ -185,7 +188,7 @@ function buildCharts(roles, raw, roster, today) {
     row.current = row.current || v.current;
     row.contract = row.contract && v.contract;
   }
-  const rows = [...byCompany.values()].map((row) => {
+  const rows = [...byCompany.values()].reverse().map((row) => {   // newest company on top
     const first = String(oldestFirst.find(({ v }) => v.company === row.company)?.r.from).slice(0, 4);
     const ends = dated.filter(({ v }) => v.company === row.company).map(({ r }) => r.to);
     const last = ends.includes(null) ? 'now' : String(ends.sort().at(-1)).slice(0, 4);
@@ -227,7 +230,7 @@ function buildCharts(roles, raw, roster, today) {
   const groups = order.filter((g) => grouped.has(g)).map((label) => ({
     label,
     rows: /** @type {any[]} */ (grouped.get(label))
-      .sort((a, b) => a.first.localeCompare(b.first) || a.name.localeCompare(b.name))
+      .sort((a, b) => b.first.localeCompare(a.first) || a.name.localeCompare(b.name))   // newest first
       .map(({ first: _f, ...row }) => row),
   }));
   return {
