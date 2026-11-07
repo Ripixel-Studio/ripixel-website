@@ -53,3 +53,11 @@ test('hub notes: the last book finished, the most loved artist', async () => {
     totals: { year: { tracks: 1 } }, lovedArtists: [{ name: 'Small', loves: 3 }, { name: 'Big', loves: 30 }] });
   assert.deepEqual(hubNote('listening', l), { label: 'Most loved', value: 'Big, 30 songs liked', href: '' });
 });
+
+test('hub covers hero: shelf art is accepted and drawn square, foreign art is not', async () => {
+  const { heroView } = await import('./life-hub.mjs');
+  const U = 'https://m.media-amazon.com/images/I/a.jpg';
+  const v = heroView({ type: 'covers', caption: 'x', items: [{ src: U, alt: 'A' }, { src: U, alt: 'B' }, { src: U, alt: 'C' }] });
+  assert.equal(v.square, true);
+  assert.equal(heroView({ type: 'covers', caption: 'x', items: [{ src: 'https://evil.example/a.jpg', alt: 'A' }, { src: U, alt: 'B' }, { src: U, alt: 'C' }] }), null);
+});

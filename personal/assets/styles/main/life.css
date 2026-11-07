@@ -2179,6 +2179,12 @@ a.hub-hero__route:hover .hub-hero__route-cta { background: var(--life-ink); colo
    the rank is the games page's League block. Every picture has a fixed box, so nothing re-flows. */
 .hub-hero--covers { align-items: center; }
 .hub-hero__posters--covers .hub-hero__poster img { background: var(--ink); }
+/* books and albums: square art, a little wider so the fan still fills the card */
+.hub-hero__posters--square .hub-hero__poster { width: 52%; }
+.hub-hero__posters--square .hub-hero__poster img { aspect-ratio: 1; }
+.hub-hero__posters--square .hub-hero__poster--n1 { left: 16%; }
+.hub-hero__posters--square .hub-hero__poster--n2 { left: 32%; }
+.hub-hero__posters--square .hub-hero__poster--n3 { left: 48%; top: 12%; }
 
 .hub-hero__stubs {
   display: grid;

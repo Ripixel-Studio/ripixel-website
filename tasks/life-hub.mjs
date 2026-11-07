@@ -21,7 +21,7 @@
 import { lineChart, stackedShare, clockBars, columnBars } from './chart-axes.mjs';
 import { cleanPoints } from './route-map.mjs';
 import { commitGrid, projectCards } from './code-view.mjs';
-import { readingView, listeningView } from './life-shelves.mjs';
+import { readingView, listeningView, shelfArt } from './life-shelves.mjs';
 
 export const SECTION_ORDER = ['fitness', 'body', 'games', 'code', 'watching', 'listening', 'reading', 'live'];
 /** @param {string} name */
@@ -1019,11 +1019,14 @@ export function heroView(h, title = '') {
       return { type: 'posters', posters: true, items: safe.map((it, i) => ({ ...it, n: i, tilt: tiltOf(it.alt) })) };
     }
     case 'covers': {
-      // the top of the games cover wall, fanned like the posters (Steam and Riot art only)
+      // the top of the games cover wall (Steam and Riot art), or the newest books on the shelf and the
+      // top of the CD crate (Audible and YouTube Music art, life-shelves.mjs), fanned like the posters
       const items = Array.isArray(h.items) ? h.items : [];
-      const safe = items.map((it) => ({ src: safeArt(it?.src), alt: String(it?.alt || '').trim() }));
+      const safe = items.map((it) => ({ src: safeArt(it?.src) || shelfArt(it?.src), alt: String(it?.alt || '').trim() }));
       if (safe.length < 3 || safe.length > 4 || safe.some((it) => !it.src || !it.alt)) return null;
-      return { type: 'covers', covers: true, items: safe.map((it, i) => ({ ...it, n: i, tilt: tiltOf(it.alt) })) };
+      // book and album art is square: drawn square, never cropped to a game cover's 2:3
+      const square = safe.every((it) => !safeArt(it.src));
+      return { type: 'covers', covers: true, square, items: safe.map((it, i) => ({ ...it, n: i, tilt: tiltOf(it.alt) })) };
     }
     case 'stubs': {
       // the newest ticket stubs from /life/live, drawn with the page's own stub
