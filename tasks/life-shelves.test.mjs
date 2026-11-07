@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readingView, listeningView, shelfArt } from './life-shelves.mjs';
+import { readingView, listeningView, shelfArt, fitSpine } from './life-shelves.mjs';
 
 const COVER = 'https://m.media-amazon.com/images/I/51HIZdnqASL._SL500_.jpg';
 
@@ -60,4 +60,51 @@ test('hub covers hero: shelf art is accepted and drawn square, foreign art is no
   const v = heroView({ type: 'covers', caption: 'x', items: [{ src: U, alt: 'A' }, { src: U, alt: 'B' }, { src: U, alt: 'C' }] });
   assert.equal(v.square, true);
   assert.equal(heroView({ type: 'covers', caption: 'x', items: [{ src: 'https://evil.example/a.jpg', alt: 'A' }, { src: U, alt: 'B' }, { src: U, alt: 'C' }] }), null);
+});
+
+test('fitSpine: the whole title at the biggest size that fits, a wider spine when nothing does', () => {
+  const short = fitSpine('Dune', 30, 90);
+  assert.equal(short.font, 17);
+  assert.equal(short.width, 30);
+  const long = fitSpine('Isaac Steele and the Best Idea in the Universe', 28, 85);
+  assert.ok(long.font < 17 && long.width === 28);
+  const huge = fitSpine('Galaxy Outlaws: The Complete Black Ocean Mobius Missions, 1-16.5 and a great deal more besides', 22, 80);
+  assert.ok(huge.width > 22);
+});
+
+test('readingView: parts kept apart on a spine, format and re-listens carried, bookmarks and heard again', () => {
+  const v = readingView({
+    shelf: [{ key: 'a', title: 'Fourth Wing (Part 2 of 2) (Dramatized Adaptation)', hours: 9, finished: '2026-04', again: true }],
+    onTheGo: [{ title: 'Carl', progress: 0.85, again: true, heard: '2026-11' }],
+    bookmarks: [{ title: 'Flybot', progress: 0.05, heard: '2025-06' }],
+    heardAgain: [{ title: 'Carl', progress: 0.85, state: 'now' }, { title: 'Games', progress: 1, state: 'twice', heard: '2025-09' },
+      { title: 'Bad', state: 'nonsense' }],
+    bookStats: { finished: 1, again: 2, againHours: 30 },
+  });
+  const spine = v.shelf[1];
+  assert.equal(spine.spineTitle, 'Fourth Wing pt 2');
+  assert.equal(spine.format, 'audio');
+  assert.equal(spine.again, true);
+  assert.equal(v.onTheGo[0].again, true);
+  assert.equal(v.onTheGo[0].percent, 85);
+  assert.equal(v.bookmarks[0].heard, 'Jun 2025');
+  assert.deepEqual(v.heardAgain.map((b) => b.label), ['on it again now, 85% in', 'heard twice, again in Sep 2025']);
+  assert.ok(v.numbers.some((n) => n.label === 'heard again' && n.value === '2'));
+});
+
+test('listeningView: tapes, years with the real rank, stayers', () => {
+  const art = 'https://yt3.ggpht.com/abc=w226-h226-l90-rj';
+  const v = listeningView({
+    music: { loves: 3 }, playlistCount: 1,
+    playlists: [{ title: 'Running', tracks: 50, hours: 3.2, artists: ['A', 'B', 'C', 'D'], arts: [art, art, art, art], loved: 5, heard: 8 }],
+    recapYears: [{ year: 2024, tracks: 96, songs: [{ rank: 2, title: 'Two', by: 'X', art }], topArtist: { name: 'X', tracks: 4 } }],
+    stayers: [{ title: 'S', by: 'Y', years: [2023, 2024] }],
+  });
+  assert.equal(v.tapes[0].artists, 'A, B, C');
+  assert.equal(v.tapes[0].arts.length, 4);
+  assert.equal(v.tapes[0].heard, '16% played lately');
+  assert.equal(v.years[0].lead.rank, 2);
+  assert.equal(v.years[0].topArtist, 'X: 4 songs in the top 96');
+  assert.equal(v.stayers[0].years, '2023 · 2024');
+  assert.ok(v.numbers.some((n) => n.label === 'playlists made'));
 });

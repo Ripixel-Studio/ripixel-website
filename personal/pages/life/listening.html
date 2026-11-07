@@ -17,8 +17,9 @@
     </svg>
 
     {{!-- Listening (lifeSections.listening, tasks/life-shelves.mjs): the big numbers, the chart (top artists by
-          plays), the loves poster (artists set by how many of their songs I liked), the crate (albums as CD jewel
-          cases), the mixtape (latest likes on a cassette J-card), on repeat, then audiobook hours a month. --}}
+          plays), the loves poster (artists set by how many of their songs I liked), year by year (the recaps),
+          the stayers, my playlists as tapes, the mixtape (latest likes), on repeat, the crate (albums as CD jewel
+          cases), then audiobook hours a month. --}}
     {{#with section}}
     {{> life-section-head snapTop="TURN IT" snapAccent="UP"}}
     {{#if empty}}
@@ -32,6 +33,43 @@
     <div class="loves-poster" role="list">
       {{#each poster}}<span class="loves-poster__a loves-poster__a--s{{size}} loves-poster__a--ink{{ink}}" role="listitem" title="{{loves}} liked">{{name}}<sup>{{loves}}</sup></span> {{/each}}
     </div>
+    {{/if}}
+
+    {{#if years.length}}
+    <h2 class="fit-header">year by <span>year</span>.</h2>
+    <p class="watch-note">YouTube Music's own top songs of each year, number one first.</p>
+    <ol class="music-years">
+      {{#each years}}
+      <li class="music-year music-year--ink{{ink}}">
+        <span class="music-year__y">{{year}}</span>
+        <figure class="music-year__one">
+          {{#if lead.art}}<img src="{{lead.art}}" alt="" loading="lazy" decoding="async" width="226" height="226">{{/if}}
+          <span class="music-year__no">No.&nbsp;{{lead.rank}}</span>
+        </figure>
+        <span class="music-year__t">{{lead.title}}</span>
+        <span class="music-year__by">{{lead.by}}</span>
+        <ol class="music-year__rest">
+          {{#each rest}}<li><span class="music-year__rank">{{rank}}</span>{{#if art}}<img src="{{art}}" alt="" loading="lazy" decoding="async" width="40" height="40">{{/if}}<span class="music-year__rt">{{title}}<em>{{by}}</em></span></li>{{/each}}
+        </ol>
+        {{#if topArtist}}<span class="music-year__top">{{topArtist}}</span>{{/if}}
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+
+    {{#if stayers.length}}
+    <h2 class="fit-header">the <span>stayers</span>.</h2>
+    <p class="watch-note">Songs that made more than one year's top songs.</p>
+    <ol class="music-stayers">
+      {{#each stayers}}
+      <li class="music-stayers__t">
+        {{#if art}}<img src="{{art}}" alt="" loading="lazy" decoding="async" width="96" height="96">{{/if}}
+        <span class="music-stayers__title">{{title}}</span>
+        <span class="music-stayers__by">{{by}}</span>
+        <span class="music-stayers__years">{{years}}</span>
+      </li>
+      {{/each}}
+    </ol>
     {{/if}}
 
     {{#if chart.length}}
@@ -50,20 +88,20 @@
     </ol>
     {{/if}}
 
-    {{#if crate.length}}
-    <h2 class="fit-header">the <span>crate</span>.</h2>
-    <p class="watch-note">Albums I saved, and the ones I keep going back to, most played first.</p>
-    <ol class="cd-crate">
-      {{#each crate}}
-      <li class="cd cd--ink{{ink}}" style="--tilt: {{tilt}}deg">
-        <figure class="cd__case">
-          {{#if art}}<img class="cd__art" src="{{art}}" alt="{{title}}" loading="lazy" decoding="async" width="226" height="226">{{else}}<span class="cd__type">{{title}}</span>{{/if}}
-          <span class="cd__hinge" aria-hidden="true"></span>
-          <span class="cd__gloss" aria-hidden="true"></span>
-          {{#if plays}}<span class="cd__sticker">{{plays}}</span>{{/if}}
-        </figure>
-        <span class="cd__title">{{title}}</span>
-        <span class="cd__by">{{by}}{{#if year}} · {{year}}{{/if}}</span>
+    {{#if tapes.length}}
+    <h2 class="fit-header">tapes I <span>made</span>.</h2>
+    <p class="watch-note">My own playlists, biggest first: who is on them, and how many of their songs I have liked.</p>
+    <ol class="pl-rack">
+      {{#each tapes}}
+      <li class="pl-tape pl-tape--ink{{ink}}" style="--tilt: {{tilt}}deg">
+        <div class="pl-tape__case">
+          <div class="pl-tape__jcard{{#if (eq arts.length 4)}} pl-tape__jcard--four{{/if}}" aria-hidden="true">{{#each arts}}<img src="{{src}}" alt="" loading="lazy" decoding="async" width="120" height="120">{{/each}}</div>
+          <span class="pl-tape__spine">{{title}}</span>
+        </div>
+        <span class="pl-tape__title">{{title}}</span>
+        <span class="pl-tape__meta">{{tracks}}{{#if hours}} · {{hours}}{{/if}}{{#if loved}} · <b>&#9829; {{loved}}</b>{{/if}}</span>
+        {{#if artists}}<span class="pl-tape__artists">{{artists}}</span>{{/if}}
+        {{#if heard}}<span class="pl-tape__heard">{{heard}}</span>{{/if}}
       </li>
       {{/each}}
     </ol>
@@ -100,6 +138,25 @@
         <span class="music-repeat__n">{{n}}</span>
         <span class="music-repeat__title">{{title}}{{#if loved}} <span class="music-repeat__heart" title="liked">&#9829;</span>{{/if}}</span>
         <span class="music-repeat__by">{{by}}{{#if days}} · {{days}}{{/if}}</span>
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+
+    {{#if crate.length}}
+    <h2 class="fit-header">the <span>crate</span>.</h2>
+    <p class="watch-note">Albums I keep going back to, most played first, and the few I saved.</p>
+    <ol class="cd-crate">
+      {{#each crate}}
+      <li class="cd cd--ink{{ink}}" style="--tilt: {{tilt}}deg">
+        <figure class="cd__case">
+          {{#if art}}<img class="cd__art" src="{{art}}" alt="{{title}}" loading="lazy" decoding="async" width="226" height="226">{{else}}<span class="cd__type">{{title}}</span>{{/if}}
+          <span class="cd__hinge" aria-hidden="true"></span>
+          <span class="cd__gloss" aria-hidden="true"></span>
+          {{#if plays}}<span class="cd__sticker">{{plays}}</span>{{/if}}
+        </figure>
+        <span class="cd__title">{{title}}</span>
+        <span class="cd__by">{{by}}{{#if year}} · {{year}}{{/if}}</span>
       </li>
       {{/each}}
     </ol>

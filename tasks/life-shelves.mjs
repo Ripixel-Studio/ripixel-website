@@ -32,28 +32,84 @@ const hoursLabel = (/** @type {unknown} */ h) => {
 /** "Spiral Wars 4" / "Culture" (no number) / "". @param {any} b */
 const seriesLabel = (b) => (str(b.series) ? `${str(b.series)}${str(b.seq) ? ` ${str(b.seq)}` : ''}` : '');
 /** "The Final Empire (Mistborn, Book 1)" keeps its words but loses the brackets on a spine. @param {string} t */
-const spineTitle = (t) => t.replace(/\s*\((?:Part \d+ of \d+|Dramati[sz]ed Adaptation|Unabridged)\)\s*/gi, ' ').replace(/\s*\[[^\]]*\]\s*/g, ' ').replace(/\s+/g, ' ').trim();
+const spineTitle = (t) => t.replace(/\s*\(Part (\d+) of \d+\)/gi, ' pt $1').replace(/\s*\((?:Dramati[sz]ed Adaptation|Unabridged)\)\s*/gi, ' ').replace(/\s*\[[^\]]*\]\s*/g, ' ').replace(/\s+/g, ' ').trim();
 
 /** @param {unknown} a @param {number} max */
 const arts = (a, max) => (Array.isArray(a) ? a : []).map(shelfArt).filter(Boolean).slice(0, max).map((src, n) => ({ src, n }));
 
 // ─── reading ───
 
+/** "audio" (an audiobook: square art) or "print" (a book: book-shaped). @param {any} b */
+const formatOf = (b) => (b && b.format === 'print' ? 'print' : 'audio');
+
+// The spine's type has to carry the whole title: Anton is condensed, about this wide a
+// character for its size, and the spine gives it SPINE_TEXT of its height (the rest is the
+// author and the format mark). Checked against the rendered page (scrollHeight per spine).
+const CHAR_EM = 0.47;
+const SPINE_SHELF = 198;            // the shelf's inner height on a desktop, px (--shelf-h less the plank)
+const SPINE_FOOT = 58;              // padding, the author, the format mark
+const FONT_MAX = 17;
+const FONT_MIN = 9;
+
+/** Lines a greedy word wrap needs, or Infinity when a word will not fit a line. @param {string} t @param {number} cap */
+function wrapLines(t, cap) {
+  let lines = 1;
+  let used = 0;
+  for (const w of t.split(' ')) {
+    if (w.length > cap) return Infinity;
+    if (!used) used = w.length;
+    else if (used + 1 + w.length <= cap) used += 1 + w.length;
+    else { lines += 1; used = w.length; }
+  }
+  return lines;
+}
+
+/**
+ * The biggest type that sets the whole title on the spine, wrapping into columns across its
+ * width; a title too long for that at the smallest size widens the spine instead.
+ * @param {string} t @param {number} width @param {number} height percent of the shelf
+ */
+export function fitSpine(t, width, height) {
+  const len = (SPINE_SHELF * height) / 100 - SPINE_FOOT;
+  for (let f = FONT_MAX; f >= FONT_MIN; f -= 0.5) {
+    const cols = Math.max(1, Math.floor((width - 8) / (f * 1.05)));
+    if (wrapLines(t, Math.floor(len / (f * CHAR_EM))) <= cols) return { font: f, width };
+  }
+  const need = wrapLines(t, Math.floor(len / (FONT_MIN * CHAR_EM)));
+  return { font: FONT_MIN, width: Math.ceil(need * FONT_MIN * 1.05 + 9) };
+}
+
 /** @param {any} b @param {number} i */
 function spine(b, i) {
   const title = str(b.title);
   const hours = num(b.hours) ?? 10;
   const h = hash(title);
+  const set = spineTitle(title);
+  // a thick book is a fat spine: 3 h is a pamphlet, 40 h a doorstop
+  const height = 80 + (h % 21);       // percent of the shelf's height (unitless: the CSS multiplies)
+  const fit = fitSpine(set, Math.round(Math.min(58, Math.max(22, 16 + hours * 1.15))), height);
+  const format = formatOf(b);
   return {
-    key: str(b.key), title, spineTitle: spineTitle(title), by: str(b.by), cover: shelfArt(b.cover),
+    key: str(b.key), title, spineTitle: set, by: str(b.by), cover: shelfArt(b.cover),
     series: seriesLabel(b), monthLabel: monthOf(b.finished), hours: hoursLabel(b.hours), genre: str(b.genre),
-    // a thick book is a fat spine: 3 h is a pamphlet, 40 h a doorstop
-    width: Math.round(Math.min(58, Math.max(22, 16 + hours * 1.15))),
-    height: 80 + (h % 21),            // percent of the shelf's height (unitless: the CSS multiplies)
+    width: fit.width, font: fit.font, height, format, audio: format === 'audio', again: b.again === true,
     lean: i % 9 === 4 ? (h % 2 ? 4 : -4) : 0,
     ink: h % 5, pos: 20 + (h % 60),   // which strip of the cover the spine shows
   };
 }
+
+/** A book's face (cover) for the sections that show covers. @param {any} b */
+function face(b) {
+  const format = formatOf(b);
+  return { title: str(b.title), by: str(b.by), cover: shelfArt(b.cover), series: seriesLabel(b), format,
+    percent: Math.max(1, Math.round((num(b.progress) ?? 0) * 100)), hours: hoursLabel(b.hours), heard: monthOf(b.heard) };
+}
+
+const AGAIN = /** @type {Record<string, (b: any) => string>} */ ({
+  now: (b) => `on it again now, ${b.percent}% in`,
+  paused: (b) => `second listen paused ${b.percent}% in${b.heard ? `, ${b.heard}` : ''}`,
+  twice: (b) => `heard twice${b.heard ? `, again in ${b.heard}` : ''}`,
+});
 
 /** @param {any} sec */
 export function readingView(sec) {
@@ -100,6 +156,7 @@ export function readingView(sec) {
     sec.narrator && str(sec.narrator.name) ? { kicker: 'the voice in my head', big: String(num(sec.narrator.books) ?? ''), line: `books read to me by ${str(sec.narrator.name)}, more than anyone else.`, ink: 3 } : null,
     topGenre && finished ? { kicker: 'the habit', big: `${Math.round(((num(topGenre.books) ?? 0) / finished) * 100)}%`, line: `of everything I have finished is ${str(topGenre.name).toLowerCase()}.`, ink: 4 } : null,
     num(st.unstarted) ? { kicker: 'the pile', big: String(num(st.unstarted)), line: `bought and not started: ${hoursLabel(st.pileHours)} of listening, or ${Math.round((num(st.pileHours) ?? 0) / 24)} days without sleeping.`, ink: 0 } : null,
+    num(st.again) && list(sec.heardAgain)[0] ? { kicker: 'the comfort listen', big: `${group(/** @type {number} */ (num(st.again)))}`, line: `books I have gone back to for another listen. Most recently: ${str(list(sec.heardAgain)[0].title)}.`, ink: 2 } : null,
     busiest ? { kicker: 'the big month', big: hoursLabel(busiest.hours), line: `in ${monthOf(busiest.month)}, my most listened month on record.`, ink: 1 } : null,
   ].filter(Boolean);
 
@@ -108,12 +165,15 @@ export function readingView(sec) {
       { value: group(finished), label: 'books finished', sub: st.since ? `since ${st.since}` : '' },
       { value: `≈${group(hours)}`, label: 'hours listened', sub: `about ${group(hours / 24)} days, end to end` },
       { value: group(num(st.authors) ?? 0), label: 'authors', sub: '' },
+      ...(num(st.again) ? [{ value: group(/** @type {number} */ (num(st.again))), label: 'heard again', sub: `${hoursLabel(st.againHours)} of going back for more` }] : []),
       { value: group(num(st.owned) ?? 0), label: 'in the library', sub: num(st.unstarted) ? `${group(/** @type {number} */ (num(st.unstarted)))} still waiting` : '' },
     ],
-    midway: list(sec.midway).filter((b) => str(b.title)).map((b) => ({
-      title: str(b.title), by: str(b.by), cover: shelfArt(b.cover), series: seriesLabel(b),
-      percent: Math.max(1, Math.round((num(b.progress) ?? 0) * 100)), hours: hoursLabel(b.hours),
-    })),
+    onTheGo: list(sec.onTheGo).filter((b) => str(b.title)).map((b) => ({ ...face(b), again: b.again === true })),
+    bookmarks: list(sec.bookmarks).filter((b) => str(b.title)).map(face),
+    heardAgain: list(sec.heardAgain).filter((b) => str(b.title) && AGAIN[b.state]).map((b) => {
+      const f = face(b);
+      return { ...f, state: String(b.state), label: AGAIN[b.state](f) };
+    }),
     shelf,
     authors: list(sec.topAuthors).filter((a) => str(a.name)).slice(0, 8).map((a, i) => ({
       name: str(a.name), books: plural(num(a.books) ?? 0, 'book', 'books'), hours: hoursLabel(a.hours), rank: i + 1,
@@ -142,10 +202,12 @@ export function listeningView(sec) {
   const months = list(sec.earMonths);
   const maxBook = Math.max(1, ...months.map((x) => num(x.bookHours) ?? 0));
   const crate = list(sec.crate).filter((c) => str(c.title));
+  const tapes = list(sec.playlists).filter((p) => str(p.title));
+  const years = list(sec.recapYears).filter((y) => num(y.year) && list(y.songs).length);
   return {
     numbers: [
       { value: group(num(m.loves) ?? 0), label: 'songs liked', sub: num(m.lovedArtists) ? `by ${group(/** @type {number} */ (num(m.lovedArtists)))} artists` : '' },
-      { value: group(num(m.albums) ?? 0), label: 'albums saved', sub: '' },
+      ...(num(sec.playlistCount) ? [{ value: group(/** @type {number} */ (num(sec.playlistCount))), label: 'playlists made', sub: `${group(tapes.reduce((n, p) => n + (num(p.tracks) ?? 0), 0))} songs on them` }] : []),
       { value: group(num(m.following) ?? 0), label: 'artists followed', sub: '' },
       { value: group(num(m.plays) ?? 0), label: 'plays logged', sub: m.since ? `since ${monthOf(m.since)}` : '' },
       { value: group(num(m.artists) ?? 0), label: 'artists heard', sub: num(m.lovedHeard) ? `${Math.round(((num(m.lovedHeard) ?? 0) / Math.max(1, num(m.plays) ?? 1)) * 100)}% of plays were songs I had liked` : '' },
@@ -164,10 +226,38 @@ export function listeningView(sec) {
       n: String(i + 1).padStart(2, '0'), title: str(t.title), by: str(t.by), art: shelfArt(t.art), loved: t.loved === true,
       days: repeatDays >= 2 ? plural(num(t.days) ?? 0, 'day', 'days') : '',
     })),
-    crate: crate.map((c) => ({
+    crate: crate.slice(0, 12).map((c) => ({
       title: str(c.title), by: str(c.by), year: num(c.year) ?? '', art: shelfArt(c.art), saved: c.saved === true,
       plays: (num(c.plays) ?? 0) > 0 ? plural(/** @type {number} */ (num(c.plays)), 'play', 'plays') : '',
       tilt: ((hash(str(c.title)) % 5) - 2) * 0.7, ink: hash(str(c.title)) % 5,
+    })),
+    tapes: tapes.map((p) => {
+      const h = hash(str(p.title));
+      const tracks = num(p.tracks) ?? 0;
+      const heard = num(p.heard) ?? 0;
+      return {
+        title: str(p.title), tracks: plural(tracks, 'song', 'songs'), hours: hoursLabel(p.hours),
+        artists: (Array.isArray(p.artists) ? p.artists : []).map(str).filter(Boolean).slice(0, 3).join(', '),
+        arts: arts(p.arts, 4), loved: num(p.loved) ?? 0,
+        heard: heard && tracks ? `${Math.round((heard / tracks) * 100)}% played lately` : '',
+        ink: h % 5, tilt: ((h % 7) - 3) * 0.6,
+      };
+    }),
+    years: years.map((y) => {
+      const songs = list(y.songs).filter((t) => str(t.title));
+      const lead = songs[0];
+      const ta = y.topArtist && typeof y.topArtist === 'object' && str(y.topArtist.name) ? y.topArtist : null;
+      return {
+        year: String(y.year), ink: (num(y.year) ?? 0) % 5,
+        lead: { rank: num(lead.rank) ?? 1, title: str(lead.title), by: str(lead.by), art: shelfArt(lead.art) },
+        rest: songs.slice(1, 5).map((t) => ({ rank: num(t.rank) ?? '', title: str(t.title), by: str(t.by), art: shelfArt(t.art) })),
+        topArtist: ta ? `${str(ta.name)}: ${plural(num(ta.tracks) ?? 0, 'song', 'songs')} in the top ${group(num(y.tracks) ?? 100)}` : '',
+        loved: num(y.loved) ?? 0, artists: group(num(y.artists) ?? 0),
+      };
+    }),
+    stayers: list(sec.stayers).filter((t) => str(t.title)).slice(0, 8).map((t) => ({
+      title: str(t.title), by: str(t.by), art: shelfArt(t.art),
+      years: (Array.isArray(t.years) ? t.years : []).filter((v) => num(v)).join(' · '),
     })),
     mixtape: list(sec.latestLoves).filter((t) => str(t.title)).slice(0, 12).map((t, i) => ({
       n: i + 1, side: i < 6 ? 'A' : 'B', title: str(t.title), by: str(t.by), art: shelfArt(t.art),

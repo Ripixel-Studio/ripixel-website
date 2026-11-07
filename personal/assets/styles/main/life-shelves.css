@@ -147,16 +147,18 @@
 .book-spine--ink3 { --inkc: var(--ink-green); }
 .book-spine--ink4 { --inkc: var(--ink-red); }
 .book-spine__title {
+  /* the whole title, wrapped into columns across the spine at the size life-shelves.mjs fitted */
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  max-height: calc(100% - 34px);
+  max-height: calc(100% - 46px);
   overflow: hidden;
   font-family: var(--f-disp);
-  font-size: clamp(11px, calc(var(--w) * 0.42), 17px);
-  line-height: 1;
-  letter-spacing: 0.02em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: calc(var(--fs, 14) * 1px);
+  line-height: 1.02;
+  letter-spacing: 0.01em;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: normal;
   text-shadow: 1px 1px 0 rgba(0,0,0,0.55);
 }
 .book-spine__by {
@@ -191,11 +193,14 @@
   writing-mode: horizontal-tb;
 }
 .book-spine__card img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; margin: 0 0 8px; border: 2px solid var(--ink); }
+.book-spine__card img.book-spine__cover--print { aspect-ratio: 2 / 3; }
+.book-spine__card-again { color: var(--ink-section); font-weight: 700; }
 .book-spine__card strong { display: block; font-family: var(--f-disp); font-weight: 400; font-size: 17px; line-height: 1.05; margin: 0 0 3px; }
 .book-spine__card span { display: block; }
 .book-spine:hover .book-spine__card, .book-spine:focus-visible .book-spine__card { display: block; }
 @media (max-width: 640px) {
   .bookcase { --shelf-h: 170px; padding: 12px 6px 0; }
+  .book-spine__title { font-size: calc(var(--fs, 14) * 0.8px); max-height: calc(100% - 26px); }
   .bookend { flex-basis: 40px; }
   .bookend__y { font-size: 26px; }
   .book-spine { flex-basis: calc(var(--w) * 0.8); width: calc(var(--w) * 0.8); }
@@ -218,7 +223,7 @@
   position: absolute;
   bottom: 0;
   width: 112px;
-  aspect-ratio: 1;
+  height: 112px;          /* an audiobook's art is square; the img's own height attribute must not win */
   object-fit: cover;
   border: 3px solid var(--ink);
   box-shadow: 3px 3px 0 var(--ink);
@@ -541,3 +546,211 @@
 .music-repeat__title { font-family: var(--f-disp); font-size: 19px; line-height: 1.05; }
 .music-repeat__heart { color: var(--ink-magenta); }
 .music-repeat__by { font-family: var(--f-mono); font-size: 11px; }
+
+
+/* ─── reading: shapes. An audiobook's art is square, a book is book-shaped: every cover on
+   the page takes its shape from its format (book-face--audio / --print), never its image ─── */
+.book-face--audio { aspect-ratio: 1; }
+.book-face--print { aspect-ratio: 2 / 3; }
+.book-face--small { width: 120px; }
+.book-face--tiny { width: 74px; margin: 0; box-shadow: 3px 3px 0 var(--ink); border-width: 2px; }
+.book-face--tiny .book-face__mark { width: 10px; right: 8px; border-width: 1.5px; }
+.book-face__again {
+  position: absolute;
+  left: -8px;
+  bottom: 12px;
+  padding: 3px 7px 2px;
+  background: var(--ink-yellow);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  font-family: var(--f-mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transform: rotate(-4deg);
+}
+
+/* ─── reading: the shelf's formats and re-listens ─── */
+.book-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: -4px 0 14px; font-family: var(--f-mono); font-size: 11px; }
+.book-legend__k { display: inline-flex; align-items: center; gap: 6px; }
+.book-legend__k svg { color: var(--ink-section); }
+.book-legend__k b { padding: 1px 4px; background: var(--ink-yellow); border: 1.5px solid var(--ink); font-size: 10px; }
+.book-spine__fmt { flex: 0 0 auto; width: 12px; height: 12px; color: var(--paper-4); opacity: 0.9; filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.5)); }
+/* a book on paper: the page block shows along its top edge, no headphones */
+.book-spine--print { border-top-width: 5px; border-top-color: var(--paper-4); box-shadow: inset 0 3px 0 rgba(0,0,0,0.2); }
+/* heard again: a tab of card stuck out of the top, like a second bookmark */
+.book-spine__again {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  z-index: 2;
+  padding: 1px 3px 4px;
+  transform: translateX(-50%);
+  background: var(--ink-yellow);
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+  border-bottom: 0;
+  font-family: var(--f-mono);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+@media (max-width: 640px) { .book-spine__fmt { width: 9px; height: 9px; } }
+
+/* ─── reading: heard again ─── */
+.book-again {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 26px 18px;
+  margin: 0 0 44px;
+  padding: 0;
+  list-style: none;
+}
+.book-again__item { display: flex; flex-direction: column; gap: 3px; }
+.book-again__item .book-face { transform: rotate(-1deg); box-shadow: 5px 5px 0 var(--ink-section), 9px 9px 0 var(--ink); }
+.book-again__item--now .book-face { box-shadow: 5px 5px 0 var(--ink-yellow), 9px 9px 0 var(--ink); }
+.book-again__stamp {
+  position: absolute;
+  right: -10px;
+  top: -10px;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--ink-yellow);
+  color: var(--ink);
+  border: 2.5px solid var(--ink);
+  font-family: var(--f-disp);
+  font-size: 17px;
+  transform: rotate(12deg);
+}
+.book-again__state { font-family: var(--f-scrib); font-size: 18px; line-height: 1.05; color: var(--ink-section); }
+
+/* ─── reading: a bookmark still in (quiet: small covers, a ribbon each) ─── */
+.book-marks { display: flex; flex-wrap: wrap; gap: 16px 14px; margin: 0 0 44px; padding: 0; list-style: none; }
+.book-marks__item { display: flex; flex-direction: column; gap: 6px; width: 74px; }
+.book-marks__item .book-face { filter: saturate(0.6); }
+.book-marks__pct { font-family: var(--f-mono); font-size: 9px; line-height: 1.2; color: color-mix(in srgb, var(--ink) 70%, transparent); }
+
+/* ─── listening: year by year (the recaps) ─── */
+.music-years {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 26px 22px;
+  margin: 0 0 44px;
+  padding: 0;
+  list-style: none;
+}
+.music-year {
+  --inkc: var(--ink-orange);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px 16px 14px;
+  background: var(--paper-4);
+  border: 3px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--inkc);
+}
+.music-year--ink0 { --inkc: var(--ink-orange); }
+.music-year--ink1 { --inkc: var(--ink-blue); }
+.music-year--ink2 { --inkc: var(--ink-purple); }
+.music-year--ink3 { --inkc: var(--ink-green); }
+.music-year--ink4 { --inkc: var(--ink-red); }
+.music-year__y { position: absolute; top: -20px; right: 12px; padding: 0 8px; background: var(--ink); color: var(--paper-4); font-family: var(--f-disp); font-size: 30px; line-height: 1.15; transform: rotate(2deg); }
+.music-year__one { position: relative; margin: 0 0 10px; aspect-ratio: 1; border: 3px solid var(--ink); background: var(--inkc); }
+.music-year__one img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.music-year__no { position: absolute; left: -8px; bottom: 14px; padding: 4px 10px 2px; background: var(--ink-yellow); border: 2.5px solid var(--ink); font-family: var(--f-disp); font-size: 22px; transform: rotate(-5deg); }
+.music-year__t { font-family: var(--f-disp); font-size: 24px; line-height: 1.02; }
+.music-year__by { font-family: var(--f-mono); font-size: 11px; color: var(--inkc); font-weight: 700; margin: 0 0 8px; }
+.music-year__rest { display: flex; flex-direction: column; gap: 5px; margin: 0 0 10px; padding: 8px 0 0; list-style: none; border-top: 2px dashed color-mix(in srgb, var(--ink) 30%, transparent); }
+.music-year__rest li { display: grid; grid-template-columns: 20px 30px 1fr; gap: 8px; align-items: center; }
+.music-year__rest img { width: 30px; height: 30px; object-fit: cover; border: 1.5px solid var(--ink); }
+.music-year__rank { font-family: var(--f-disp); font-size: 18px; color: var(--inkc); text-align: right; }
+.music-year__rt { min-width: 0; font-family: var(--f-scrib); font-size: 18px; line-height: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.music-year__rt em { display: block; font-family: var(--f-mono); font-style: normal; font-size: 9px; color: color-mix(in srgb, var(--ink) 70%, transparent); overflow: hidden; text-overflow: ellipsis; }
+.music-year__top { margin-top: auto; padding: 6px 8px; background: var(--paper-2); border: 2px solid var(--ink); font-family: var(--f-mono); font-size: 11px; line-height: 1.3; }
+
+/* ─── listening: the stayers ─── */
+.music-stayers { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px 18px; margin: 0 0 44px; padding: 0; list-style: none; }
+.music-stayers__t { display: grid; grid-template-columns: 64px 1fr; grid-template-rows: auto auto auto; column-gap: 12px; align-items: start; }
+.music-stayers__t img { grid-row: 1 / 4; width: 64px; height: 64px; object-fit: cover; border: 2.5px solid var(--ink); box-shadow: 3px 3px 0 var(--ink-section); }
+.music-stayers__title { font-family: var(--f-disp); font-size: 19px; line-height: 1.02; }
+.music-stayers__by { font-family: var(--f-mono); font-size: 10px; color: color-mix(in srgb, var(--ink) 70%, transparent); }
+.music-stayers__years { justify-self: start; margin-top: 4px; padding: 1px 6px; background: var(--ink); color: var(--ink-yellow); font-family: var(--f-mono); font-size: 10px; font-weight: 700; }
+
+/* ─── listening: my playlists as cassette cases (J-card art, a written spine) ─── */
+.pl-rack {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 30px 22px;
+  margin: 0 0 44px;
+  padding: 0;
+  list-style: none;
+}
+.pl-tape { --inkc: var(--ink-orange); display: flex; flex-direction: column; gap: 2px; transform: rotate(var(--tilt, 0deg)); transition: transform 0.15s ease; }
+.pl-tape:hover { transform: rotate(0deg) translateY(-4px); }
+.pl-tape--ink0 { --inkc: var(--ink-orange); }
+.pl-tape--ink1 { --inkc: var(--ink-blue); }
+.pl-tape--ink2 { --inkc: var(--ink-purple); }
+.pl-tape--ink3 { --inkc: var(--ink-green); }
+.pl-tape--ink4 { --inkc: var(--ink-red); }
+.pl-tape__case {
+  position: relative;
+  margin: 0 0 10px;
+  flex: 0 0 auto;              /* overflow: hidden would let it shrink to nothing in the column */
+  aspect-ratio: 1.12;          /* a cassette case, a little wider than tall */
+  border: 3px solid var(--ink);
+  background: var(--inkc);
+  box-shadow: 5px 5px 0 var(--ink);
+  overflow: hidden;
+}
+.pl-tape__case::after {            /* the case's plastic */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(125deg, rgba(255,255,255,0.32), transparent 35%, transparent 70%, rgba(255,255,255,0.12));
+  pointer-events: none;
+}
+/* the J-card: one picture, or four in a square, beside the written spine */
+.pl-tape__jcard {
+  position: absolute;
+  inset: 0 26px 0 0;
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  border-right: 3px solid var(--ink);
+}
+.pl-tape__jcard--four { grid-template: repeat(2, minmax(0, 1fr)) / repeat(2, minmax(0, 1fr)); }
+.pl-tape__jcard img { display: block; width: 100%; height: 100%; min-width: 0; min-height: 0; object-fit: cover; }
+.pl-tape__jcard:not(.pl-tape__jcard--four) img:not(:first-child) { display: none; }
+.pl-tape__spine {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 26px;
+  writing-mode: vertical-rl;
+  padding: 8px 0;
+  overflow: hidden;
+  background: var(--paper-4);
+  font-family: var(--f-scrib);
+  font-size: 17px;
+  line-height: 23px;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--ink);
+}
+.pl-tape__title { font-family: var(--f-disp); font-size: 21px; line-height: 1.02; }
+.pl-tape__meta { font-family: var(--f-mono); font-size: 11px; }
+.pl-tape__meta b { color: var(--ink-magenta); }
+.pl-tape__artists { font-family: var(--f-scrib); font-size: 18px; line-height: 1.05; color: var(--inkc); }
+.pl-tape__heard { font-family: var(--f-mono); font-size: 10px; color: color-mix(in srgb, var(--ink) 65%, transparent); }
+@media (max-width: 640px) {
+  .pl-rack { grid-template-columns: repeat(2, 1fr); gap: 22px 14px; }
+  .pl-tape__title { font-size: 18px; }
+  .music-year__t { font-size: 21px; }
+}
+@media (prefers-reduced-motion: reduce) { .pl-tape, .pl-tape:hover { transition: none; } }
