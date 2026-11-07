@@ -44,8 +44,11 @@ const longDay = (d) => `${DAYS[weekday(d)]} ${d.getUTCDate()} ${MONTHS[d.getUTCM
  * @param {any} commitsByDay [{day, n}]
  * @param {string} endDay YYYY-MM-DD: the last day drawn (the export's `updated`)
  * @param {number} [weeks] columns drawn (the hub's mini grid draws fewer)
+ * @param {{noun?: [string, string], cuts?: number[]}} [opts] another daily count drawn the same way
+ *   (body's steps): its noun, and fixed level cuts in place of the quartiles
  */
-export function commitGrid(commitsByDay, endDay, weeks = WEEKS) {
+export function commitGrid(commitsByDay, endDay, weeks = WEEKS, opts = {}) {
+  const [one, many] = opts.noun || ['commit', 'commits'];
   if (!Array.isArray(commitsByDay) || !commitsByDay.length || !DAY.test(String(endDay))) return null;
   if (!Number.isInteger(weeks) || weeks < 1 || weeks > WEEKS) return null;
   const end = utc(endDay);
@@ -63,7 +66,7 @@ export function commitGrid(commitsByDay, endDay, weeks = WEEKS) {
   // four levels: quartiles of the days that had any commits
   const busy = [...counts.values()].sort((a, b) => a - b);
   const q = (/** @type {number} */ f) => busy[Math.min(busy.length - 1, Math.ceil(f * busy.length) - 1)];
-  const cuts = [q(0.25), q(0.5), q(0.75)];
+  const cuts = Array.isArray(opts.cuts) && opts.cuts.length === 3 ? opts.cuts : [q(0.25), q(0.5), q(0.75)];
   const level = (/** @type {number} */ n) => (n <= 0 ? 0 : n <= cuts[0] ? 1 : n <= cuts[1] ? 2 : n <= cuts[2] ? 3 : 4);
 
   const cells = [];
@@ -94,7 +97,7 @@ export function commitGrid(commitsByDay, endDay, weeks = WEEKS) {
     cells.push({
       day: key, n, col, row, level: level(n),
       x: LEFT + col * STEP, y: TOP + row * STEP,
-      title: `${n ? `${group(n)} ${n === 1 ? 'commit' : 'commits'}` : 'No commits'}, ${longDay(d)}`,
+      title: `${n ? `${group(n)} ${n === 1 ? one : many}` : `No ${many}`}, ${longDay(d)}`,
     });
   }
   const t = /** @type {{n: number, d: Date}} */ (top);

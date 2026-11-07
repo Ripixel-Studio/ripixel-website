@@ -25,38 +25,83 @@
     {{> life-empty}}
     {{else}}
 
-    {{#if measures.stats.length}}
-    <section class="life-block life-block--measures" aria-labelledby="body-measures">
-      <h2 class="fit-header" id="body-measures">what I <span>measure</span>.</h2>
-      {{> life-stats measures.stats}}
-      {{#if measures.charts.length}}
-      <div class="life-charts">{{#each measures.charts}}{{> chart-line}}{{/each}}</div>
-      {{/if}}
-      {{#if measurements}}
-      <div class="life-measurements">
-        <h3 class="life-period__label">Tape and scale, since the first reading</h3>
-        <ul class="life-measurements__list">
-          {{#each measurements.rows}}
-          <li class="life-measurements__row">
-            <span class="life-measurements__name">{{label}}</span>
-            <span class="life-measurements__now">{{value}}{{#if unit}}<small>{{unit}}</small>{{/if}}</span>
-            {{#if change}}<span class="life-measurements__change">{{change}}{{#if unit}} {{unit}}{{/if}}</span>{{/if}}
-            {{#if since}}<span class="life-measurements__since">since {{since}}</span>{{/if}}
-          </li>
+    {{#if recomp}}{{#with recomp}}
+    <section class="life-block body-recomp" aria-labelledby="body-recomp">
+      <h2 class="fit-header" id="body-recomp">the <span>recomp</span>.</h2>
+      {{#if story}}<p class="body-recomp__story"><b>{{story.lead}}</b> {{story.mid}}{{#if story.tail}} <b>{{story.tail}}</b>{{/if}}, {{from}} to {{to}}.</p>{{/if}}
+      <div class="body-recomp__grid">
+        <figure class="body-pair" aria-label="Fat mass and lean mass, {{then.when}} and {{now.when}}">
+          {{#each pair}}
+          <div class="body-pair__col">
+            <div class="body-pair__bar" style="height:{{h}}%">
+              <span class="body-pair__fat" style="flex-basis:{{fatShare}}%"><b>{{fat}}</b><small>kg fat</small></span>
+              <span class="body-pair__lean"><b>{{lean}}</b><small>kg lean</small></span>
+            </div>
+            <p class="body-pair__when">{{when}}</p>
+            <p class="body-pair__sub">{{weight}} kg · {{fatPct}}% fat</p>
+          </div>
           {{/each}}
-        </ul>
-        {{#if measurements.charts.length}}
-        <div class="life-charts">{{#each measurements.charts}}{{> chart-line}}{{/each}}</div>
+        </figure>
+        {{#if monthly.length}}
+        <figure class="body-months">
+          <figcaption class="body-months__label">Month by month: <i class="body-key body-key--lean"></i> lean <i class="body-key body-key--fat"></i> fat</figcaption>
+          <ol class="body-months__cols">
+            {{#each monthly}}<li class="body-months__col" title="{{title}}"><span class="body-months__bar" style="height:{{h}}%"><span class="body-months__fat" style="flex-basis:{{fatShare}}%"></span><span class="body-months__lean"></span></span><span class="body-months__tick">{{label}}{{#if year}}<small>{{year}}</small>{{/if}}</span></li>{{/each}}
+          </ol>
+          {{#if weightChange}}<p class="body-months__note">{{#if weightFlat}}The scale barely moved ({{weightChange}} kg either way): it was never going to show this.{{else}}Weight {{weightDir}} {{weightChange}} kg over the same stretch.{{/if}}</p>{{/if}}
+        </figure>
         {{/if}}
       </div>
-      {{/if}}
     </section>
-    {{/if}}
+    {{/with}}{{/if}}
+
+    {{#if engine}}{{#with engine}}
+    <section class="life-block body-engine" aria-labelledby="body-engine">
+      <h2 class="fit-header" id="body-engine">the <span>engine</span>.</h2>
+      <div class="body-engine__grid">
+        {{#if heart}}{{#with heart}}
+        <div class="body-heart">
+          <svg class="body-heart__icon" viewBox="0 0 32 29" aria-hidden="true" style="animation-duration:{{period}}s"><path d="M16 28 3.2 15.4A8 8 0 0 1 16 4.6a8 8 0 0 1 12.8 10.8Z"/></svg>
+          <p class="body-heart__rate"><span class="body-heart__then">{{was}}</span><span class="body-heart__arrow" aria-hidden="true">→</span><b>{{now}}</b><small>bpm resting</small></p>
+          {{#if beats}}<p class="body-heart__beats"><b>≈{{beats}}</b> fewer heartbeats a day than {{from}}</p>{{/if}}
+        </div>
+        {{/with}}{{/if}}
+        {{#if gauge}}{{#with gauge}}
+        <div class="body-vo2">
+          <p class="body-vo2__head">VO₂ max <small>ml/kg/min</small></p>
+          <p class="body-vo2__now"><b>{{now}}</b>{{#if up}}<span class="body-vo2__up">+{{up}} since {{from}}</span>{{/if}}</p>
+          <div class="body-vo2__scale" role="img" aria-label="VO2 max {{was}} in {{from}}, {{now}} at the last reading">
+            <span class="body-vo2__fill" style="left:{{firstAt}}%;width:calc({{nowAt}}% - {{firstAt}}%)"></span>
+            <span class="body-vo2__mark body-vo2__mark--then" style="left:{{firstAt}}%"><i>{{was}}</i></span>
+            <span class="body-vo2__mark body-vo2__mark--now" style="left:{{nowAt}}%"></span>
+            {{#each ticks}}<span class="body-vo2__tick" style="left:{{at}}%">{{v}}</span>{{/each}}
+          </div>
+          <p class="body-vo2__last">last read {{last}}</p>
+        </div>
+        {{/with}}{{/if}}
+        {{#if ../notes.length}}
+        <ul class="body-notes">{{#each ../notes}}<li class="body-note">{{this}}</li>{{/each}}</ul>
+        {{/if}}
+      </div>
+    </section>
+    {{/with}}{{/if}}
 
     {{#if sleep}}
     <section class="life-block life-block--sleep" aria-labelledby="body-sleep">
       <h2 class="fit-header" id="body-sleep">how I <span>sleep</span>.</h2>
       {{#if sleep.stats.length}}{{> life-stats sleep.stats}}{{/if}}
+      {{#if sleep.nights}}{{#with sleep.nights}}
+      <figure class="body-nights">
+        <figcaption class="body-nights__label">The last {{count}} nights, one column each: <i class="body-key body-key--deep"></i> deep <i class="body-key body-key--rem"></i> REM <i class="body-key body-key--light"></i> light <i class="body-key body-key--wake"></i> awake</figcaption>
+        <div class="body-nights__plot">
+          {{#each guides}}<span class="body-nights__guide" style="bottom:{{at}}%"><i>{{label}}</i></span>{{/each}}
+          <span class="body-nights__avg" style="bottom:{{avgAt}}%"><i>avg {{avg}}</i></span>
+          <ol class="body-nights__cols">
+            {{#each cols}}<li class="body-nights__col{{#if weekend}} body-nights__col--weekend{{/if}}" title="{{title}}"><span class="body-nights__bar" style="height:{{h}}%">{{#each parts}}<span class="body-nights__part body-nights__part--{{key}}" style="flex-basis:{{h}}%"></span>{{/each}}</span><span class="body-nights__dow">{{dow}}</span></li>{{/each}}
+          </ol>
+        </div>
+      </figure>
+      {{/with}}{{/if}}
       {{#if sleep.stages}}{{> life-split items=sleep.stages label="An average night, last 30 nights" kind="sleep"}}{{/if}}
       {{#if sleep.charts.length}}
       <div class="life-charts life-charts--wide">{{#each sleep.charts}}{{> chart-line}}{{/each}}</div>
@@ -81,9 +126,64 @@
     {{#if movement}}
     <section class="life-block life-block--movement" aria-labelledby="body-movement">
       <h2 class="fit-header" id="body-movement">keep <span>moving</span>.</h2>
+      {{#if movement.steps}}{{#with movement.steps}}
+      <div class="body-steps">
+        <p class="body-steps__total"><b>{{total}}</b>{{#if totalUnit}} {{totalUnit}}{{/if}} steps since {{since}}</p>
+        <ul class="body-steps__facts">
+          <li><b>≈{{km}} km</b> on foot, give or take a stride</li>
+          <li><b>≈{{marathons}}</b> marathons' worth</li>
+          {{#if tenK}}<li><b>{{tenK}}</b> days over 10k{{#if tenKShare}} ({{tenKShare}}%){{/if}}</li>{{/if}}
+          {{#if best}}<li><b>{{best}}</b> on the biggest day</li>{{/if}}
+        </ul>
+      </div>
+      {{#if grid}}{{#with grid}}
+      <figure class="code-grid body-steps__grid">
+        <div class="code-grid__scroll">
+          <svg class="code-grid__svg" viewBox="0 0 {{width}} {{height}}" width="{{width}}" height="{{height}}" role="img" aria-label="Steps per day over the last 12 months">
+            {{#each months}}<text class="code-grid__month" x="{{x}}" y="{{y}}">{{label}}</text>{{/each}}
+            {{#each dayLabels}}<text class="code-grid__dow" x="{{x}}" y="{{y}}" text-anchor="end">{{label}}</text>{{/each}}
+            {{#each cells}}<rect class="code-grid__cell steps-lv-{{level}}" x="{{x}}" y="{{y}}" width="11" height="11" rx="2"><title>{{title}}</title></rect>{{/each}}
+          </svg>
+        </div>
+        <figcaption class="code-grid__foot">
+          <span>One square a day, newest on the right.</span>
+          <span class="code-grid__legend body-steps__legend" aria-hidden="true">{{#each ../legend}}<i class="steps-lv-{{level}}"></i>{{label}} {{/each}}</span>
+        </figcaption>
+      </figure>
+      {{/with}}{{/if}}
+      {{/with}}{{/if}}
       {{#if movement.stats.length}}{{> life-stats movement.stats}}{{/if}}
       {{#if movement.charts.length}}
       <div class="life-charts">{{#each movement.charts}}{{> chart-line}}{{/each}}</div>
+      {{/if}}
+    </section>
+    {{/if}}
+
+    {{#if measures.stats.length}}
+    <section class="life-block life-block--measures" aria-labelledby="body-measures">
+      <h2 class="fit-header" id="body-measures">every <span>dial</span>.</h2>
+      <p class="life-block__note">The latest reading of everything the watch and the scale keep, then the last six months a week at a time.</p>
+      {{> life-stats measures.stats}}
+      {{#if measures.charts.length}}
+      <div class="life-charts">{{#each measures.charts}}{{> chart-line}}{{/each}}</div>
+      {{/if}}
+      {{#if measurements}}
+      <div class="life-measurements">
+        <h3 class="life-period__label">Tape and scale, since the first reading</h3>
+        <ul class="life-measurements__list">
+          {{#each measurements.rows}}
+          <li class="life-measurements__row">
+            <span class="life-measurements__name">{{label}}</span>
+            <span class="life-measurements__now">{{value}}{{#if unit}}<small>{{unit}}</small>{{/if}}</span>
+            {{#if change}}<span class="life-measurements__change">{{change}}{{#if unit}} {{unit}}{{/if}}</span>{{/if}}
+            {{#if since}}<span class="life-measurements__since">since {{since}}</span>{{/if}}
+          </li>
+          {{/each}}
+        </ul>
+        {{#if measurements.charts.length}}
+        <div class="life-charts">{{#each measurements.charts}}{{> chart-line}}{{/each}}</div>
+        {{/if}}
+      </div>
       {{/if}}
     </section>
     {{/if}}

@@ -1,0 +1,186 @@
+/* /life/body: the recomp, the engine, the last 30 nights, the step year (tasks/body-view.mjs). */
+
+.body-key { display: inline-block; width: 10px; height: 10px; border: 1px solid var(--ink); vertical-align: -1px; margin: 0 2px 0 8px; }
+.body-key--lean, .body-months__lean, .body-pair__lean { background: var(--ink-red); }
+.body-key--fat, .body-months__fat, .body-pair__fat { background: color-mix(in srgb, var(--ink-yellow) 70%, #fff); }
+.body-key--deep { background: var(--ink-blue); }
+.body-key--rem { background: color-mix(in srgb, var(--ink-blue) 55%, #fff); }
+.body-key--light { background: color-mix(in srgb, var(--ink-blue) 22%, #fff); }
+.body-key--wake { background: var(--paper-2); }
+
+/* ── the recomp ── */
+.body-recomp__story {
+  font-family: var(--f-scrib);
+  font-size: clamp(26px, 3.4vw, 38px);
+  line-height: 1.15;
+  margin: -6px 0 22px;
+  max-width: 34ch;
+}
+.body-recomp__story b { color: var(--ink-red); font-weight: 700; }
+.body-recomp__grid { display: grid; grid-template-columns: minmax(260px, 1fr) 2fr; gap: 28px; align-items: end; }
+
+.body-pair {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  height: 340px;
+  padding: 16px 16px 12px;
+  background: #fff;
+  border: 2px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink-red);
+}
+.body-pair__col { display: flex; flex-direction: column; justify-content: flex-end; min-height: 0; }
+.body-pair__bar {
+  display: flex; flex-direction: column;
+  border: 2px solid var(--ink);
+  min-height: 0;
+}
+.body-pair__fat, .body-pair__lean {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-family: var(--f-disp); line-height: 1; text-align: center; overflow: hidden;
+}
+.body-pair__fat { flex: 0 0 auto; border-bottom: 2px solid var(--ink); color: var(--ink); }
+.body-pair__lean { flex: 1 1 auto; color: var(--paper-4); }
+.body-pair__fat b, .body-pair__lean b { font-size: 30px; font-weight: 400; }
+.body-pair__fat small, .body-pair__lean small { font-family: var(--f-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 3px; }
+.body-pair__when { font-family: var(--f-disp); font-size: 22px; margin: 8px 0 0; line-height: 1; }
+.body-pair__sub { font-family: var(--f-mono); font-size: 11px; margin: 4px 0 0; opacity: 0.75; }
+
+.body-months {
+  margin: 0;
+  padding: 14px 16px 12px;
+  background: #fff;
+  border: 2px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.body-months__label, .body-nights__label { font-family: var(--f-mono); font-size: 11px; font-weight: 700; margin: 0 0 10px; }
+.body-months__cols {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; align-items: flex-end; gap: 6px;
+  height: 230px;
+  border-bottom: 2px solid var(--ink);
+}
+.body-months__col { flex: 1 1 0; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; position: relative; min-width: 0; }
+.body-months__bar { display: flex; flex-direction: column; border: 1.5px solid var(--ink); border-bottom: 0; }
+.body-months__fat { flex: 0 0 auto; border-bottom: 1.5px solid var(--ink); }
+.body-months__lean { flex: 1 1 auto; }
+.body-months__col:hover .body-months__bar { outline: 2px solid var(--ink); }
+.body-months__tick {
+  position: absolute; top: 100%; left: 0; right: 0;
+  font-family: var(--f-mono); font-size: 9px; text-align: center; padding-top: 4px; line-height: 1.2;
+}
+.body-months__tick small { display: block; opacity: 0.6; font-size: 8.5px; }
+.body-months__note { font-family: var(--f-mono); font-size: 11px; margin: 38px 0 0; opacity: 0.8; }
+
+/* ── the engine ── */
+.body-engine__grid { display: grid; grid-template-columns: 1fr 1fr 0.9fr; gap: 22px; align-items: stretch; }
+.body-heart, .body-vo2 {
+  position: relative;
+  padding: 18px 20px 16px;
+  background: #fff;
+  border: 2px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink-red);
+}
+.body-heart__icon {
+  position: absolute; top: 16px; right: 18px;
+  width: 54px; height: 50px;
+  fill: var(--ink-red); stroke: var(--ink); stroke-width: 1.5;
+  animation: body-beat 1s ease-in-out infinite;
+  transform-origin: 50% 60%;
+}
+@keyframes body-beat {
+  0%, 40%, 100% { transform: scale(1); }
+  12% { transform: scale(1.14); }
+  24% { transform: scale(1.04); }
+}
+@media (prefers-reduced-motion: reduce) { .body-heart__icon { animation: none; } }
+.body-heart__rate { margin: 0; font-family: var(--f-disp); line-height: 1; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.body-heart__then { font-size: 40px; opacity: 0.35; text-decoration: line-through; text-decoration-thickness: 3px; }
+.body-heart__arrow { font-size: 30px; }
+.body-heart__rate b { font-size: 84px; font-weight: 400; color: var(--ink-red); }
+.body-heart__rate small { font-family: var(--f-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+.body-heart__beats { font-family: var(--f-scrib); font-size: 26px; line-height: 1.15; margin: 10px 0 0; }
+.body-heart__beats b { font-weight: 700; color: var(--ink-red); }
+
+.body-vo2 { box-shadow: 6px 6px 0 var(--ink-blue); }
+.body-vo2__head { font-family: var(--f-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 0; }
+.body-vo2__head small { font-weight: 400; text-transform: none; opacity: 0.7; }
+.body-vo2__now { margin: 2px 0 26px; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.body-vo2__now b { font-family: var(--f-disp); font-size: 84px; font-weight: 400; line-height: 1; color: var(--ink-blue); }
+.body-vo2__up { font-family: var(--f-scrib); font-size: 26px; }
+.body-vo2__scale {
+  position: relative; height: 16px; margin: 0 8px 30px;
+  background: repeating-linear-gradient(90deg, var(--paper-2) 0 6px, #fff 6px 8px);
+  border: 2px solid var(--ink);
+}
+.body-vo2__fill { position: absolute; top: 0; bottom: 0; background: var(--ink-blue); }
+.body-vo2__mark { position: absolute; top: -8px; bottom: -8px; width: 0; border-left: 3px solid var(--ink); }
+.body-vo2__mark--then { border-left-style: dotted; }
+.body-vo2__mark--then i { position: absolute; bottom: 100%; left: -14px; font-family: var(--f-mono); font-size: 10px; font-style: normal; opacity: 0.7; }
+.body-vo2__tick { position: absolute; top: calc(100% + 6px); transform: translateX(-50%); font-family: var(--f-mono); font-size: 9px; opacity: 0.6; }
+.body-vo2__last { font-family: var(--f-mono); font-size: 10px; margin: 0; opacity: 0.6; }
+
+.body-notes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; justify-content: center; }
+.body-note {
+  font-family: var(--f-scrib); font-size: 23px; line-height: 1.15;
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--ink-yellow) 45%, #fff);
+  border: 1.5px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  transform: rotate(-1.2deg);
+}
+.body-note:nth-child(2n) { transform: rotate(1deg); background: color-mix(in srgb, var(--ink-red) 14%, #fff); }
+
+/* ── the last 30 nights ── */
+.body-nights {
+  margin: 0 0 30px;
+  padding: 14px 16px 12px;
+  background: #fff;
+  border: 2px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink-blue);
+}
+.body-nights__plot { position: relative; height: 220px; margin: 0 0 22px 64px; border-bottom: 2px solid var(--ink); }
+.body-nights__guide, .body-nights__avg { position: absolute; left: 0; right: 0; border-top: 1px dashed color-mix(in srgb, var(--ink) 35%, transparent); }
+.body-nights__guide i, .body-nights__avg i { position: absolute; right: 100%; top: -7px; padding-right: 5px; font-family: var(--f-mono); font-size: 9px; font-style: normal; white-space: nowrap; opacity: 0.7; }
+.body-nights__avg { border-top: 2px solid var(--ink-red); z-index: 1; }
+.body-nights__avg i { color: var(--ink-red); opacity: 1; font-weight: 700; top: -6px; }
+.body-nights__cols { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; display: flex; align-items: flex-end; gap: 3px; }
+.body-nights__col { flex: 1 1 0; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; position: relative; min-width: 0; }
+.body-nights__bar { display: flex; flex-direction: column-reverse; border: 1px solid var(--ink); border-bottom: 0; }
+.body-nights__part { flex: 0 0 auto; }
+.body-nights__part--deep { background: var(--ink-blue); }
+.body-nights__part--rem { background: color-mix(in srgb, var(--ink-blue) 55%, #fff); }
+.body-nights__part--light, .body-nights__part--asleep { background: color-mix(in srgb, var(--ink-blue) 22%, #fff); }
+.body-nights__part--wake { background: var(--paper-2); }
+.body-nights__col:hover .body-nights__bar { outline: 2px solid var(--ink); }
+.body-nights__dow { position: absolute; top: 100%; left: 0; right: 0; text-align: center; font-family: var(--f-mono); font-size: 9px; padding-top: 3px; opacity: 0.6; }
+.body-nights__col--weekend .body-nights__dow { opacity: 1; font-weight: 700; }
+
+/* ── the step year ── */
+.body-steps { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 28px; margin: 0 0 16px; }
+.body-steps__total { margin: 0; font-family: var(--f-mono); font-size: 13px; }
+.body-steps__total b { font-family: var(--f-disp); font-size: 72px; font-weight: 400; line-height: 1; color: var(--ink-green); margin-right: 6px; }
+.body-steps__facts { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 20px; font-family: var(--f-mono); font-size: 12px; }
+.body-steps__facts b { font-family: var(--f-disp); font-size: 22px; font-weight: 400; margin-right: 3px; }
+.body-steps__grid { box-shadow: 5px 5px 0 var(--ink-green); }
+.steps-lv-0 { fill: var(--paper-2); background: var(--paper-2); }
+.steps-lv-1 { fill: color-mix(in srgb, var(--ink-green) 18%, #fff); background: color-mix(in srgb, var(--ink-green) 18%, #fff); }
+.steps-lv-2 { fill: color-mix(in srgb, var(--ink-green) 45%, #fff); background: color-mix(in srgb, var(--ink-green) 45%, #fff); }
+.steps-lv-3 { fill: var(--ink-green); background: var(--ink-green); }
+.steps-lv-4 { fill: color-mix(in srgb, var(--ink-green) 55%, var(--ink)); background: color-mix(in srgb, var(--ink-green) 55%, var(--ink)); }
+.body-steps__legend i { margin-left: 8px; }
+
+@media (max-width: 860px) {
+  .body-recomp__grid { grid-template-columns: 1fr; }
+  .body-engine__grid { grid-template-columns: 1fr; }
+  .body-pair { height: 300px; }
+  .body-months__cols { height: 180px; gap: 3px; }
+  .body-months__tick { font-size: 8px; }
+  .body-months__tick small { display: none; }
+  .body-nights__plot { height: 170px; }
+  .body-nights__cols { gap: 1px; }
+  .body-nights__dow { font-size: 7.5px; }
+  .body-heart__rate b, .body-vo2__now b { font-size: 68px; }
+  .body-steps__total b { font-size: 56px; }
+}

@@ -21,6 +21,7 @@
 import { lineChart, stackedShare, clockBars, columnBars } from './chart-axes.mjs';
 import { cleanPoints } from './route-map.mjs';
 import { commitGrid, projectCards } from './code-view.mjs';
+import { recompView, engineView, nightsView, stepsView } from './body-view.mjs';
 import { readingView, listeningView, shelfArt } from './life-shelves.mjs';
 
 export const SECTION_ORDER = ['fitness', 'body', 'games', 'code', 'watching', 'listening', 'reading', 'live'];
@@ -219,7 +220,8 @@ function bodyView(/** @type {any} */ sec) {
       weeklyChart(weekly, 'bodyFatPct', 'Body fat', '%', 1),
       weeklyChart(weekly, 'restingHr', 'Resting heart rate', 'bpm'),
       weeklyChart(weekly, 'hrvMs', 'HRV', 'ms'),
-      weeklyChart(weekly, 'vo2Max', 'VO₂ max', 'ml/kg/min', 1),
+      // VO2 max stopped coming from the tracker in June: a chart of one or two weeks is the gauge's job
+      column(weekly, 'vo2Max').filter((v) => v != null).length >= 6 && weeklyChart(weekly, 'vo2Max', 'VO₂ max', 'ml/kg/min', 1),
       weeklyChart(weekly, 'spo2Pct', 'SpO₂', '%', 1),
       weeklyChart(weekly, 'breathsPerMin', 'Breathing rate', 'breaths/min', 1),
     ].filter(Boolean),
@@ -269,7 +271,13 @@ function bodyView(/** @type {any} */ sec) {
     ].filter(Boolean),
   });
 
-  return { measures, sleep: sleep || null, food: food || null, movement: movement || null, measurements: measurementsView(sec.measurements) };
+  const endDay = /^\d{4}-\d{2}-\d{2}$/.test(String(sec.updated || '')) ? String(sec.updated) : new Date().toISOString().slice(0, 10);
+  if (sleep) sleep.nights = nightsView(s?.nights);
+  if (movement) movement.steps = stepsView(mv?.steps, endDay);
+  return {
+    measures, sleep: sleep || null, food: food || null, movement: movement || null, measurements: measurementsView(sec.measurements),
+    recomp: recompView(sec.journey), engine: engineView(sec.journey, l),
+  };
 }
 
 // ─── games (C6) ───
@@ -1284,6 +1292,12 @@ export function lifeHubTask(config = {}) {
         SECTION_ORDER.filter((n) => n !== 'fitness').map((n) => [n, buildSection(n, idx?.sections?.[n], now, outs)]),
       );
       const lifeHub = buildHub(idx, g.fitnessLife, now, g.fitnessIndex);
+      // body's own insights sit on its page as notes (the hub strip keeps showing every section's)
+      if (lifeSections.body && !lifeSections.body.empty) {
+        lifeSections.body.notes = (Array.isArray(idx?.insights) ? idx.insights : [])
+          .filter((/** @type {any} */ r) => r && r.section === 'body' && typeof r.text === 'string' && r.text.length > 0 && r.text.length <= 160)
+          .map((/** @type {any} */ r) => r.text).slice(0, 3);
+      }
       ctx.logger.info(`Life hub: ${lifeHub.cards.filter((c) => !c.empty).length}/${lifeHub.cards.length} sections have data`);
       return { lifeHub, ...homeLifeGlobals(lifeHub), lifeSections, lifeFacts: lifeFacts(idx?.facts),
         lifeInsights: lifeInsights(idx),
