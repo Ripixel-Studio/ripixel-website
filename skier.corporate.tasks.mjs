@@ -20,6 +20,11 @@ const PAGE_META = {
         pageDescription: 'How Ripixel apps collect, use and protect your data, including Google user data.',
         pagePath: '/privacy',
     },
+    terms: {
+        pageTitle: 'Terms',
+        pageDescription: 'The terms for using Ripixel apps.',
+        pagePath: '/terms',
+    },
 };
 
 // /apps/<name>: one page per app, from corporate/pages/apps/<name>.html.
