@@ -26,14 +26,15 @@
     {{else}}
     {{#if numbers.length}}{{> life-bignums numbers}}{{/if}}
 
-    {{#if midway.length}}
+    {{#if onTheGo.length}}
     <h2 class="fit-header">on the <span>go</span>.</h2>
     <ol class="book-midway">
-      {{#each midway}}
+      {{#each onTheGo}}
       <li class="book-midway__item">
-        <figure class="book-face">
+        <figure class="book-face book-face--{{format}}">
           {{#if cover}}<img class="book-face__art" src="{{cover}}" alt="{{title}}" loading="lazy" decoding="async" width="240" height="240">{{else}}<span class="book-face__type">{{title}}</span>{{/if}}
           <span class="book-face__mark" style="--pct: {{percent}}%" aria-hidden="true"></span>
+          {{#if again}}<span class="book-face__again">second listen</span>{{/if}}
         </figure>
         <span class="book-midway__title">{{title}}</span>
         {{#if by}}<span class="book-midway__by">{{by}}</span>{{/if}}
@@ -45,27 +46,52 @@
 
     {{#if shelf.length}}
     <h2 class="fit-header">the <span>shelf</span>.</h2>
-    <p class="watch-note">Every audiobook I have finished, newest first, a bookend where each year starts. A fatter spine is a longer book. Point at one for the cover.</p>
+    <p class="watch-note">Every book I have finished, newest first, a bookend where each year starts. A fatter spine is a longer book. Point at one for the cover.</p>
+    <p class="book-legend" aria-hidden="true"><span class="book-legend__k book-legend__k--audio"><svg viewBox="0 0 16 16" width="14" height="14"><use href="#fmt-audio"/></svg> audiobook</span><span class="book-legend__k book-legend__k--print"><svg viewBox="0 0 16 16" width="14" height="14"><use href="#fmt-print"/></svg> on paper</span><span class="book-legend__k book-legend__k--again"><b>2&times;</b> heard again</span></p>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <symbol id="fmt-audio" viewBox="0 0 16 16"><path d="M2.5 10V8a5.5 5.5 0 0 1 11 0v2" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="1.5" y="9" width="3.5" height="5.5" rx="1" fill="currentColor"/><rect x="11" y="9" width="3.5" height="5.5" rx="1" fill="currentColor"/></symbol>
+      <symbol id="fmt-print" viewBox="0 0 16 16"><path d="M8 4C6 2.6 3.5 2.3 1.5 2.6v10C3.5 12.3 6 12.6 8 14c2-1.4 4.5-1.7 6.5-1.4v-10C12.5 2.3 10 2.6 8 4zM8 4v10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+    </svg>
     <div class="bookcase">
       <ol class="bookshelf__row">
         {{#each shelf}}
         {{#if bookend}}
         <li class="bookend"><span class="bookend__y">{{year}}</span><span class="bookend__n">{{count}}{{#if hours}}<br>{{hours}}{{/if}}</span></li>
         {{else}}
-        <li class="book-spine book-spine--ink{{ink}}{{#if lean}} book-spine--lean{{/if}}" style="--w: {{width}}px; --h: {{height}}; --lean: {{lean}}deg; --pos: {{pos}}%;{{#if cover}} --cover: url('{{cover}}');{{/if}}" tabindex="0">
+        <li class="book-spine book-spine--{{format}} book-spine--ink{{ink}}{{#if lean}} book-spine--lean{{/if}}{{#if again}} book-spine--again{{/if}}" style="--w: {{width}}px; --h: {{height}}; --fs: {{font}}; --lean: {{lean}}deg; --pos: {{pos}}%;{{#if cover}} --cover: url('{{cover}}');{{/if}}" tabindex="0">
+          {{#if again}}<span class="book-spine__again" aria-hidden="true">2&times;</span>{{/if}}
           <span class="book-spine__title">{{spineTitle}}</span>
           <span class="book-spine__by">{{by}}</span>
+          <svg class="book-spine__fmt" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><use href="#fmt-{{format}}"/></svg>
           <span class="book-spine__card" role="tooltip">
-            {{#if cover}}<img src="{{cover}}" alt="" loading="lazy" decoding="async" width="160" height="160">{{/if}}
+            {{#if cover}}<img class="book-spine__cover book-spine__cover--{{format}}" src="{{cover}}" alt="" loading="lazy" decoding="async" width="160" height="160">{{/if}}
             <strong>{{title}}</strong>
             <span>{{#if by}}{{by}}{{/if}}{{#if series}} · {{series}}{{/if}}</span>
-            <span>finished {{monthLabel}}{{#if hours}} · {{hours}}{{/if}}</span>
+            <span>{{#if audio}}audiobook{{else}}book{{/if}} · finished {{monthLabel}}{{#if hours}} · {{hours}}{{/if}}</span>
+            {{#if again}}<span class="book-spine__card-again">heard more than once</span>{{/if}}
           </span>
         </li>
         {{/if}}
         {{/each}}
       </ol>
     </div>
+    {{/if}}
+
+    {{#if heardAgain.length}}
+    <h2 class="fit-header">heard <span>again</span>.</h2>
+    <p class="watch-note">Books I went back to. Audible keeps no count of listens, so this is worked out: a book heard after a later one in its series was finished, or started again after it was done.</p>
+    <ol class="book-again">
+      {{#each heardAgain}}
+      <li class="book-again__item book-again__item--{{state}}">
+        <figure class="book-face book-face--{{format}} book-face--small">
+          {{#if cover}}<img class="book-face__art" src="{{cover}}" alt="{{title}}" loading="lazy" decoding="async" width="160" height="160">{{else}}<span class="book-face__type">{{title}}</span>{{/if}}
+          <span class="book-again__stamp" aria-hidden="true">2&times;</span>
+        </figure>
+        <span class="book-midway__title">{{title}}</span>
+        <span class="book-again__state">{{label}}</span>
+      </li>
+      {{/each}}
+    </ol>
     {{/if}}
 
     {{#if authors.length}}
@@ -123,6 +149,22 @@
       <li class="life-card life-card--ink{{ink}}"><span class="life-card__kicker">{{kicker}}</span><span class="life-card__big">{{big}}</span><span class="life-card__line">{{line}}</span></li>
       {{/each}}
     </ul>
+    {{/if}}
+
+    {{#if bookmarks.length}}
+    <h2 class="fit-header">a bookmark <span>still in</span>.</h2>
+    <p class="watch-note">Started, not finished, not heard lately. They are not going anywhere.</p>
+    <ol class="book-marks">
+      {{#each bookmarks}}
+      <li class="book-marks__item" title="{{title}}{{#if by}}, {{by}}{{/if}}: {{percent}}% in{{#if heard}}, last heard {{heard}}{{/if}}">
+        <figure class="book-face book-face--{{format}} book-face--tiny">
+          {{#if cover}}<img class="book-face__art" src="{{cover}}" alt="{{title}}" loading="lazy" decoding="async" width="120" height="120">{{else}}<span class="book-face__type">{{title}}</span>{{/if}}
+          <span class="book-face__mark" style="--pct: {{percent}}%" aria-hidden="true"></span>
+        </figure>
+        <span class="book-marks__pct">{{percent}}%{{#if heard}} · {{heard}}{{/if}}</span>
+      </li>
+      {{/each}}
+    </ol>
     {{/if}}
 
     {{#if genres.length}}
