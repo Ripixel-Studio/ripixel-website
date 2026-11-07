@@ -48,11 +48,23 @@
     {{> life-stats stats}}
     {{/with}}
     {{/if}}
-    {{#if commits}}
-    <div class="life-charts life-charts--wide">
-      {{> chart-line commits}}
+    {{#if years}}{{#with years}}
+    <h2 class="fit-header">the <span>boom</span>.</h2>
+    <div class="code-boom">
+      <p class="code-boom__story">{{#if times}}<b>{{now}}</b> commits in {{year}}: <b>{{times}}</b> every year since {{since}} put together.{{else}}<b>{{now}}</b> commits in {{year}}, {{before}} in the years before it.{{/if}}</p>
+      <ol class="code-boom__cols" aria-label="Commits a year, {{since}} to {{year}}">
+        {{#each cols}}<li class="code-boom__col{{#if now}} code-boom__col--now{{/if}}{{#if none}} code-boom__col--none{{/if}}" title="{{year}}: {{n}} commits"><span class="code-boom__n">{{#unless none}}{{n}}{{/unless}}</span><span class="code-boom__bar" style="height:{{h}}%"></span><span class="code-boom__year">{{short}}</span></li>{{/each}}
+      </ol>
     </div>
-    {{/if}}
+    {{/with}}{{/if}}
+    {{#if weekdays}}{{#with weekdays}}
+    <div class="code-week">
+      <p class="code-week__story"><b>{{busiest}}</b> is when it happens; {{quietest}} is the quietest.</p>
+      <ol class="code-week__days" aria-label="Commits by day of the week, the last 12 months">
+        {{#each days}}<li class="code-week__day{{#if top}} code-week__day--top{{/if}}{{#if weekend}} code-week__day--weekend{{/if}}" title="{{n}} commits"><span class="code-week__bar" style="height:{{h}}%"></span><span class="code-week__label">{{label}}</span></li>{{/each}}
+      </ol>
+    </div>
+    {{/with}}{{/if}}
     {{#if languages}}
     <div class="life-charts life-charts--wide">
       {{> chart-stack languages}}

@@ -16,6 +16,13 @@
       <span class="code-card__bar" aria-hidden="true"><span style="width: {{card.bar}}%"></span></span>
       <span class="code-card__v">{{#if card.commits}}{{card.commits}}{{else}}—{{/if}}</span>
     </div>
+    {{#if spark}}
+    <div class="code-card__row">
+      <span class="code-card__k">12 mo</span>
+      <span class="code-card__spark" aria-hidden="true">{{#each spark}}<i style="height:{{h}}%"{{#if n}} title="{{n}}"{{/if}}></i>{{/each}}</span>
+      <span class="code-card__v"></span>
+    </div>
+    {{/if}}
     <div class="code-card__row">
       <span class="code-card__k">active</span>
       <span class="code-card__track" aria-hidden="true">{{#each timeline.axis.ticks}}<i style="left: {{left}}%"></i>{{/each}}<b class="code-card__now" style="left: {{timeline.nowPct}}%"></b><span class="code-card__span" style="left: {{card.span.left}}%; width: {{card.span.width}}%"></span></span>

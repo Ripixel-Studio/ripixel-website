@@ -20,7 +20,7 @@
 
 import { lineChart, stackedShare, clockBars, columnBars } from './chart-axes.mjs';
 import { cleanPoints } from './route-map.mjs';
-import { commitGrid, projectCards } from './code-view.mjs';
+import { commitGrid, projectCards, yearsView, weekdaysView, sparkOf } from './code-view.mjs';
 import { recompView, engineView, nightsView, stepsView } from './body-view.mjs';
 import { readingView, listeningView, shelfArt } from './life-shelves.mjs';
 
@@ -759,6 +759,7 @@ function codeView(sec) {
           commitsUnit: p.commits === 1 ? 'commit' : 'commits',
           languages: (Array.isArray(p.languages) ? p.languages : []).filter((l) => typeof l === 'string' && l),
           url: typeof p.url === 'string' && REPO_URL.test(p.url) ? p.url : '',
+          spark: sparkOf(p.recent),
           started,
         },
       };
@@ -774,6 +775,8 @@ function codeView(sec) {
     commits: lineChart(months.map((m) => num(m.n) ?? 0), { label: 'Commits', unit: 'a month', x: { kind: 'months', months: months.map((m) => String(m.month || '')) } }),
     languages,
     grid: commitGrid(sec.commitsByDay, endDay),
+    years: yearsView(months, endDay),
+    weekdays: weekdaysView(sec.commitsByDay),
     timeline: { axis: drawn.axis, nowPct: drawn.nowPct },
     active: live.map((p, i) => ({ ...p.view, card: drawn.cards[i] })),
   };

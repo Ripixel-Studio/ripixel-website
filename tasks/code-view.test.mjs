@@ -6,7 +6,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { commitGrid, projectCards, languageSlots } from './code-view.mjs';
+import { commitGrid, projectCards, languageSlots, yearsView, weekdaysView, sparkOf } from './code-view.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const fixture = JSON.parse(await fs.readFile(path.join(REPO, 'fixtures/fitness/life/index.json'), 'utf8'));
@@ -132,4 +132,32 @@ test('project cards: an old export without shares splits evenly, without numbers
   assert.equal(v.cards[0].bar, 0);
   assert.equal(v.cards[0].when, 'since Jan 2025');
   assert.equal(v.cards[0].live, false);
+});
+
+test('the boom: every year to now, empty ones kept, this year against all before', () => {
+  const v = /** @type {any} */ (yearsView([{ month: '2016-03', n: 1 }, { month: '2020-01', n: 60 }, { month: '2025-05', n: 140 }, { month: '2026-02', n: 3000 }], '2026-11-07'));
+  assert.equal(v.cols.length, 11);
+  assert.deepEqual(v.cols.filter((/** @type {any} */ c) => c.none).map((/** @type {any} */ c) => c.year), ['2017', '2018', '2019', '2021', '2022', '2023', '2024']);
+  assert.equal(v.cols.at(-1).now, true);
+  assert.equal(v.times, '14.9×');
+  assert.equal(yearsView([{ month: '2026-01', n: 3 }], '2026-11-07'), null);
+});
+
+test('the week: Monday first, the busiest marked', () => {
+  const days = Array.from({ length: 21 }, (_, i) => ({ day: `2026-10-${String(i + 1).padStart(2, '0')}`, n: i % 7 === 6 ? 10 : 1 }));
+  const v = /** @type {any} */ (weekdaysView(days));
+  assert.equal(v.days[0].label, 'Mon');
+  assert.equal(v.busiest, 'Wednesday');      // 2026-10-07, 14, 21 are Wednesdays
+  assert.equal(v.days.filter((/** @type {any} */ d) => d.top).length, 1);
+  assert.equal(weekdaysView(days.slice(0, 5)), null);
+});
+
+test('a project spark: 12 months against its own busiest, a quiet month empty', () => {
+  const s = /** @type {any} */ (sparkOf([0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 20, 40]));
+  assert.equal(s.length, 12);
+  assert.equal(s[11].h, 100);
+  assert.equal(s[9].h, 6);
+  assert.equal(s[0].h, 0);
+  assert.equal(sparkOf([0, 0]), null);
+  assert.equal(sparkOf(Array(12).fill(0)), null);
 });

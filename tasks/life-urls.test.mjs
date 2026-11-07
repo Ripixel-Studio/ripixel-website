@@ -145,7 +145,7 @@ describe('/life URL inventory', () => {
     assert.ok(await exists('life/body.html'));
     const html = await read('life/body.html');
     const heads = [...html.matchAll(/<h2 class="fit-header"[^>]*>([\s\S]*?)<\/h2>/g)].map((m) => m[1].replace(/<[^>]+>/g, ''));
-    for (const want of [/measure/i, /sleep/i, /food/i, /moving/i]) assert.ok(heads.some((h) => want.test(h)), `${want} in ${heads.join(' | ')}`);
+    for (const want of [/dial/i, /sleep/i, /food/i, /moving/i]) assert.ok(heads.some((h) => want.test(h)), `${want} in ${heads.join(' | ')}`);
     assert.match(html, /class="life-split[^"]*"/);
     assert.doesNotMatch(html.slice(html.indexOf('<body')), /\b\d{1,2}:\d{2}\b/, 'no clock time (bedtimes, wake times) on the page');
     const hub = await read('life.html');

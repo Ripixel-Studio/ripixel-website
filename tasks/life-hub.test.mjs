@@ -453,7 +453,7 @@ test('code view splits', () => {
   assert.deepEqual(plain, {
     name: 'sample-tool', description: 'A small invented command-line helper that tidies folders of sample files.',
     years: '2025–now', lastCommit: 'Oct 2026', commits: '1,212', commitsUnit: 'commits', languages: ['Python', 'Shell'],
-    url: 'https://github.com/Ripixel-Studio/sample-tool', started: '2025-08-02',
+    url: 'https://github.com/Ripixel-Studio/sample-tool', spark: null, started: '2025-08-02',
   });
   assert.equal(card.name, 'sample-tool');
   assert.equal(card.bar, 100);
