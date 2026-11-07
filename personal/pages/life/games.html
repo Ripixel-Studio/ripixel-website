@@ -93,37 +93,42 @@
     <h2 class="fit-header">the <span>cover wall</span>.</h2>
     {{> games-wall wall}}
     {{/if}}
+    {{#if recent.length}}
     <div class="life-columns games-rest">
     {{> life-list title="Recently played" items=recent}}
+    </div>
+    {{/if}}
     {{#if rarest.length}}
-    <section class="life-list-block">
-      <h2 class="life-period__label">Rarest achievements</h2>
-      <ol class="games-rare">
-        {{#each rarest}}
-        <li class="games-rare__item">
-          <span class="games-rare__name">{{name}}</span>
-          <span class="games-rare__game">{{game}}</span>
-          <span class="games-rare__pct">{{pct}} % of players</span>
-        </li>
-        {{/each}}
-      </ol>
-    </section>
+    <h2 class="fit-header">the <span>trophy cabinet</span>.</h2>
+    <p class="games-note">The rarest things I've unlocked, by the share of players who have too.</p>
+    <ol class="games-trophies">
+      {{#each rarest}}
+      <li class="games-trophy games-trophy--{{tier}}">
+        <span class="games-trophy__art"{{#if art}} style="background-image:url('{{art}}')"{{/if}}></span>
+        <span class="games-trophy__medal" aria-hidden="true"><svg viewBox="0 0 40 52"><path class="games-trophy__ribbon" d="M8 0h10l6 18H14zM22 0h10l-6 18h-10z"/><circle cx="20" cy="33" r="16"/><text x="20" y="38" text-anchor="middle">{{rank}}</text></svg></span>
+        <span class="games-trophy__odds"><small>1 in</small> <b>{{oneIn}}</b> <small>players</small></span>
+        <span class="games-trophy__name">{{name}}</span>
+        <span class="games-trophy__game">{{game}} · {{pct}}%</span>
+      </li>
+      {{/each}}
+    </ol>
     {{/if}}
     {{#if completion.length}}
-    <section class="life-list-block">
-      <h2 class="life-period__label">Completion{{#if achieved}} <span class="games-done__all">{{achieved}} achievements</span>{{/if}}</h2>
-      <ol class="games-done">
-        {{#each completion}}
-        <li class="games-done__item">
-          <span class="games-done__game">{{game}}</span>
-          <span class="life-progress" role="img" aria-label="{{pct}}% of achievements"><span class="life-progress__fill" style="width: {{pct}}%"></span></span>
-          <span class="games-done__pct">{{pct}}%</span>
-        </li>
-        {{/each}}
-      </ol>
-    </section>
+    <h2 class="fit-header">how <span>finished</span>.</h2>
+    <p class="games-note">The cover fills as the achievements do{{#if achieved}}: {{achieved}} unlocked across the library{{/if}}.</p>
+    <ol class="games-fill">
+      {{#each completion}}
+      <li class="games-fill__item">
+        <span class="games-fill__cover"{{#if art}} style="--art:url('{{art}}')"{{/if}} role="img" aria-label="{{game}}: {{pct}}% of achievements">
+          <span class="games-fill__todo" style="height:{{todo}}%"></span>
+          <b class="games-fill__pct">{{pct}}<small>%</small></b>
+        </span>
+        <span class="games-fill__game">{{game}}</span>
+        {{#if count}}<span class="games-fill__count">{{count}}</span>{{/if}}
+      </li>
+      {{/each}}
+    </ol>
     {{/if}}
-    </div>
     {{/if}}
     {{/with}}
 

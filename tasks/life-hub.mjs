@@ -455,6 +455,9 @@ function gamesView(sec) {
     // the typographic tile's ink (shown when there is no art, or it fails to load): cycled, so neighbours differ
     ink: i % 5,
   }));
+  // achievements name their game; its cover comes from the wall (or recently played) by name
+  const arts = new Map([...list(sec.recent), ...list(sec.wall)].filter((g) => g.name && safeArt(g.art)).map((g) => [String(g.name), safeArt(g.art)]));
+  const artOf = (/** @type {unknown} */ name) => arts.get(String(name)) || '';
   return {
     stats: gamesStats(sec),
     idleNote: num(sec.allTime?.idle) ? `Idle games left running don't count: another ${group(/** @type {number} */ (num(sec.allTime.idle)))}h.` : '',
@@ -465,8 +468,14 @@ function gamesView(sec) {
     league: leagueView(sec.league),
     recent: list(sec.recent).filter((g) => g.name).map((g) => ({ name: String(g.name), hours: num(g.hours) != null ? hours(g.hours) : '', art: safeArt(g.art) })),
     achieved: num(a.unlocked) != null && num(a.total) ? `${group(a.unlocked)} of ${group(a.total)}` : '',
-    rarest: list(a.rarest).filter((r) => r.name && r.game && num(r.pct) != null).map((r) => ({ game: String(r.game), name: String(r.name), pct: one(r.pct) })),
-    completion: list(a.completion).filter((c) => c.game && num(c.pct) != null).map((c) => ({ game: String(c.game), pct: Math.max(0, Math.min(100, Math.round(c.pct))) })),
+    rarest: list(a.rarest).filter((r) => r.name && r.game && num(r.pct) != null && r.pct > 0).map((r, i) => ({
+      game: String(r.game), name: String(r.name), pct: one(r.pct), art: artOf(r.game), rank: i + 1,
+      oneIn: group(100 / r.pct), tier: r.pct < 5 ? 'gold' : r.pct < 10 ? 'silver' : 'bronze',
+    })),
+    completion: list(a.completion).filter((c) => c.game && num(c.pct) != null).map((c) => ({
+      game: String(c.game), pct: Math.max(0, Math.min(100, Math.round(c.pct))), todo: 100 - Math.max(0, Math.min(100, Math.round(c.pct))), art: artOf(c.game),
+      count: num(c.unlocked) != null && num(c.total) ? `${group(c.unlocked)} of ${group(c.total)}` : '',
+    })),
   };
 }
 
