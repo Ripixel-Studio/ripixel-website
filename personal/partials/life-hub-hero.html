@@ -12,7 +12,7 @@
 </div>
 {{/if}}
 {{#if covers}}
-<div class="hub-hero__posters hub-hero__posters--covers">
+<div class="hub-hero__posters hub-hero__posters--covers{{#if square}} hub-hero__posters--square{{/if}}">
   {{#each items}}<figure class="hub-hero__poster hub-hero__poster--n{{n}}" style="--tilt: {{tilt}}deg"><img src="{{src}}" alt="{{alt}}" loading="lazy" decoding="async" width="600" height="900"></figure>{{/each}}
 </div>
 {{/if}}
