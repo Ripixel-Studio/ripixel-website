@@ -636,3 +636,46 @@ footer { padding: 80px 0 40px; }
   .meet-james { flex-wrap: wrap; padding: 14px 16px 14px 20px; }
   .meet-james .mj-label { font-size: 18px; }
 }
+
+/* ============================================
+   DOC PAGES (privacy, /apps/<name>)
+   ============================================ */
+.doc { padding: 140px 0 96px; }
+.doc-wrap { max-width: 860px; }
+.doc-title {
+  font-family: 'Mochiy Pop One', sans-serif; font-weight: 400;
+  font-size: clamp(44px, 7vw, 96px); line-height: .95; letter-spacing: -0.025em;
+  margin: 0 0 24px;
+}
+.doc-title .grad {
+  background: linear-gradient(135deg, var(--orange), var(--pink), var(--purple));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.doc-lede { font-size: 21px; line-height: 1.5; margin: 0 0 32px; max-width: 46em; }
+.doc-toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 40px; }
+.doc-toc a {
+  padding: 6px 14px; border-radius: 999px; background: #fff; color: var(--ink);
+  border: 1.5px solid rgba(27,10,30,.1); text-decoration: none;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+}
+.doc-toc a:hover { border-color: var(--orange); }
+.doc-shot { border-radius: 28px; overflow: hidden; margin: 0 0 32px; box-shadow: 0 12px 30px rgba(27,10,30,.12); }
+.doc-shot img { display: block; width: 100%; height: auto; }
+.doc-sec {
+  background: #fff; border-radius: 28px; padding: 28px 32px; margin: 0 0 18px;
+  border: 1.5px solid rgba(27,10,30,.08); box-shadow: 0 12px 30px rgba(27,10,30,.06);
+  scroll-margin-top: 110px;
+}
+.doc-sec--note { background: var(--paper); }
+.doc-sec h2 { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 28px; margin: 0 0 12px; }
+.doc-sec h3 { font-family: 'Familjen Grotesk', sans-serif; font-weight: 700; font-size: 18px; margin: 20px 0 6px; }
+.doc-sec p, .doc-sec li { font-size: 17px; line-height: 1.6; }
+.doc-sec ul { padding-left: 1.2em; margin: 8px 0; }
+.doc-sec li { margin: 6px 0; }
+.doc-sec a, .doc-lede a, .colophon a { color: inherit; text-decoration: underline; text-decoration-color: var(--orange); text-decoration-thickness: 2px; text-underline-offset: 3px; font-weight: 600; }
+@media (max-width: 640px) {
+  .doc { padding: 110px 0 64px; }
+  .doc-wrap { padding: 0 16px; }
+  .doc-sec { padding: 22px 20px; border-radius: 22px; }
+  .doc-lede { font-size: 18px; }
+}
