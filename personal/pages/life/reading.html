@@ -16,45 +16,120 @@
       <line x1="9" y1="0" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/>
     </svg>
 
-    {{!-- Reading: books finished and in progress (lifeSections.reading). --}}
+    {{!-- Reading (lifeSections.reading, tasks/life-shelves.mjs): the big numbers, the books on the go, the shelf
+          (a plank per year, a spine per finished audiobook cut from its own cover, thicker for a longer book),
+          authors and series as fanned covers, the years in hours, then odd facts on index cards. --}}
     {{#with section}}
     {{> life-section-head snapTop="PAGE" snapAccent="TURNERS"}}
     {{#if empty}}
     {{> life-empty}}
     {{else}}
-    {{#if current.length}}
-    <h2 class="fit-header">reading <span>now</span>.</h2>
-    <ul class="life-current">
-      {{#each current}}
-      <li class="life-current__item">
-        <span class="life-notable__title">{{title}}</span>
-        {{#if by}}<span class="life-notable__by">{{by}}</span>{{/if}}
-        <span class="life-progress" role="img" aria-label="{{percent}}% read"><span class="life-progress__fill" style="width: {{percent}}%"></span></span>
-        <span class="life-notable__when">{{percent}}% read</span>
+    {{#if numbers.length}}{{> life-bignums numbers}}{{/if}}
+
+    {{#if midway.length}}
+    <h2 class="fit-header">on the <span>go</span>.</h2>
+    <ol class="book-midway">
+      {{#each midway}}
+      <li class="book-midway__item">
+        <figure class="book-face">
+          {{#if cover}}<img class="book-face__art" src="{{cover}}" alt="{{title}}" loading="lazy" decoding="async" width="240" height="240">{{else}}<span class="book-face__type">{{title}}</span>{{/if}}
+          <span class="book-face__mark" style="--pct: {{percent}}%" aria-hidden="true"></span>
+        </figure>
+        <span class="book-midway__title">{{title}}</span>
+        {{#if by}}<span class="book-midway__by">{{by}}</span>{{/if}}
+        <span class="book-midway__pct">{{percent}}% in{{#if hours}} · {{hours}} long{{/if}}</span>
       </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+
+    {{#if shelf.length}}
+    <h2 class="fit-header">the <span>shelf</span>.</h2>
+    <p class="watch-note">Every audiobook I have finished, newest first, a bookend where each year starts. A fatter spine is a longer book. Point at one for the cover.</p>
+    <div class="bookcase">
+      <ol class="bookshelf__row">
+        {{#each shelf}}
+        {{#if bookend}}
+        <li class="bookend"><span class="bookend__y">{{year}}</span><span class="bookend__n">{{count}}{{#if hours}}<br>{{hours}}{{/if}}</span></li>
+        {{else}}
+        <li class="book-spine book-spine--ink{{ink}}{{#if lean}} book-spine--lean{{/if}}" style="--w: {{width}}px; --h: {{height}}; --lean: {{lean}}deg; --pos: {{pos}}%;{{#if cover}} --cover: url('{{cover}}');{{/if}}" tabindex="0">
+          <span class="book-spine__title">{{spineTitle}}</span>
+          <span class="book-spine__by">{{by}}</span>
+          <span class="book-spine__card" role="tooltip">
+            {{#if cover}}<img src="{{cover}}" alt="" loading="lazy" decoding="async" width="160" height="160">{{/if}}
+            <strong>{{title}}</strong>
+            <span>{{#if by}}{{by}}{{/if}}{{#if series}} · {{series}}{{/if}}</span>
+            <span>finished {{monthLabel}}{{#if hours}} · {{hours}}{{/if}}</span>
+          </span>
+        </li>
+        {{/if}}
+        {{/each}}
+      </ol>
+    </div>
+    {{/if}}
+
+    {{#if authors.length}}
+    <h2 class="fit-header">who I <span>read</span>.</h2>
+    <ol class="book-authors">
+      {{#each authors}}
+      <li class="book-author">
+        <div class="book-fan" aria-hidden="true">
+          {{#each covers}}<img class="book-fan__c book-fan__c--{{n}}" src="{{src}}" alt="" loading="lazy" decoding="async" width="160" height="160">{{/each}}
+        </div>
+        <span class="book-author__rank">#{{rank}}</span>
+        <span class="book-author__name">{{name}}</span>
+        <span class="book-author__n">{{books}}{{#if hours}} · {{hours}}{{/if}}</span>
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+
+    {{#if series.length}}
+    <h2 class="fit-header">series I <span>stuck with</span>.</h2>
+    <ol class="book-series">
+      {{#each series}}
+      <li class="book-series__item">
+        <div class="book-series__run" aria-hidden="true">{{#each covers}}<img src="{{src}}" alt="" loading="lazy" decoding="async" width="120" height="120" style="--n: {{n}}">{{/each}}</div>
+        <span class="book-series__title">{{title}}</span>
+        <span class="book-series__n">{{books}}{{#if by}} · {{by}}{{/if}}</span>
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+
+    {{#if yearBars.length}}
+    <h2 class="fit-header">year by <span>year</span>.</h2>
+    <div class="book-years">
+      <ol class="book-years__bars">
+        {{#each yearBars}}
+        <li class="book-years__bar" style="--pct: {{pct}}%"><span class="book-years__n">{{books}}</span><span class="book-years__fill"></span><span class="book-years__y">{{year}}</span><span class="book-years__h">{{hours}}</span></li>
+        {{/each}}
+      </ol>
+      {{#if hasMonths}}
+      <p class="watch-note">Hours of listening a month, the last three years (Audible's own count, so it includes books I have not finished yet).</p>
+      <ol class="ear-months" aria-label="Audiobook hours a month">
+        {{#each monthBars}}
+        <li class="ear-months__m{{#if newYear}} ear-months__m--new{{/if}}" style="--pct: {{pct}}%" title="{{title}}"><span class="ear-months__fill"></span>{{#if newYear}}<span class="ear-months__y">{{year}}</span>{{/if}}</li>
+        {{/each}}
+      </ol>
+      {{/if}}
+    </div>
+    {{/if}}
+
+    {{#if facts.length}}
+    <h2 class="fit-header">odd <span>facts</span>.</h2>
+    <ul class="life-cards">
+      {{#each facts}}
+      <li class="life-card life-card--ink{{ink}}"><span class="life-card__kicker">{{kicker}}</span><span class="life-card__big">{{big}}</span><span class="life-card__line">{{line}}</span></li>
       {{/each}}
     </ul>
     {{/if}}
-    {{#each stats}}
-    <section class="life-period">
-      <h2 class="life-period__label">{{label}}</h2>
-      {{> life-stats items}}
-    </section>
-    {{/each}}
-    <h2 class="fit-header"><span>finished</span>.</h2>
-    {{#if notable.length}}
-    {{> life-notable-list items=notable}}
-    {{else}}
-    <p class="life-empty">Nothing has made the list yet.</p>
-    {{/if}}
-    {{#if yearList.length}}
-    <h2 class="fit-header">year by <span>year</span>.</h2>
-    {{#each yearList}}
-    <section class="life-year">
-      <h3 class="life-year__label">{{this}}</h3>
-      {{> life-notable-list items=(lookup ../years this)}}
-    </section>
-    {{/each}}
+
+    {{#if genres.length}}
+    <h2 class="fit-header">what <span>kind</span>.</h2>
+    <ul class="book-genres">
+      {{#each genres}}<li class="book-genres__g" style="--pct: {{pct}}%"><span class="book-genres__name">{{name}}</span><span class="book-genres__n">{{books}}</span></li>{{/each}}
+    </ul>
     {{/if}}
     {{/if}}
     {{/with}}

@@ -1,0 +1,10 @@
+<!-- Context: [{value, label, sub}] — the big numbers band at the top of Reading and Listening: all-time totals set large. -->
+<ul class="life-bignums">
+  {{#each this}}
+  <li class="life-bignums__item life-bignums__item--{{@index}}">
+    <span class="life-bignums__value">{{value}}</span>
+    <span class="life-bignums__label">{{label}}</span>
+    {{#if sub}}<span class="life-bignums__sub">{{sub}}</span>{{/if}}
+  </li>
+  {{/each}}
+</ul>
