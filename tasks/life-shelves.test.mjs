@@ -43,3 +43,13 @@ test('listeningView: lately until a song comes back on a second day, then on rep
   assert.equal(v.poster.find((p) => p.name === 'Small').size, 1);
   assert.deepEqual(v.chart.map((c) => c.pct), [100, 25]);
 });
+
+test('hub notes: the last book finished, the most loved artist', async () => {
+  const { buildSection, hubNote } = await import('./life-hub.mjs');
+  const r = buildSection('reading', { updated: '2026-11-07', staleDays: 0, headline: { value: 1, unit: '', label: 'x' }, notable: [],
+    totals: { year: { books: 1 } }, shelf: [{ title: 'Newest', by: 'Ann', finished: '2026-11', hours: 9 }] });
+  assert.deepEqual(hubNote('reading', r), { label: 'Last finished', value: 'Newest, Ann', href: '' });
+  const l = buildSection('listening', { updated: '2026-11-07', staleDays: 0, headline: { value: 1, unit: '', label: 'x' }, notable: [],
+    totals: { year: { tracks: 1 } }, lovedArtists: [{ name: 'Small', loves: 3 }, { name: 'Big', loves: 30 }] });
+  assert.deepEqual(hubNote('listening', l), { label: 'Most loved', value: 'Big, 30 songs liked', href: '' });
+});

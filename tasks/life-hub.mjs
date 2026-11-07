@@ -842,10 +842,16 @@ export function hubNote(name, v) {
     }
     case 'reading': {
       const c = v.current?.[0];
-      return latest(v.latest) || (c ? { label: 'Reading now', value: c.by ? `${c.title}, ${c.by}` : c.title, href: '' } : null);
+      // the shelf's newest spine (life-shelves.mjs): the last book finished
+      const b = (v.shelf || []).find((/** @type {any} */ x) => x && !x.bookend && x.title);
+      return latest(v.latest) || (b ? { label: 'Last finished', value: b.by ? `${b.title}, ${b.by}` : b.title, href: '' } : null)
+        || (c ? { label: 'Reading now', value: c.by ? `${c.title}, ${c.by}` : c.title, href: '' } : null);
+    }
+    case 'listening': {
+      const top = [...(v.poster || [])].sort((a, b) => b.loves - a.loves)[0];
+      return latest(v.latest) || (top ? { label: 'Most loved', value: `${top.name}, ${top.loves} songs liked`, href: '' } : null);
     }
     case 'watching':
-    case 'listening':
       return latest(v.latest);
     case 'live': {
       const l = v.latest;
