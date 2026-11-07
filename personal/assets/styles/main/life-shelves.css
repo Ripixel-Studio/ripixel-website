@@ -1,0 +1,543 @@
+/* ══════════════════════════════════════════════════════════════════
+   /life/reading and /life/listening: the shelf, the crate, the chart,
+   the loves poster, the mixtape (tasks/life-shelves.mjs).
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ─── the big numbers (both pages) ─── */
+.life-bignums {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0;
+  margin: 8px 0 30px;
+  padding: 0;
+  list-style: none;
+  border: 3px solid var(--ink);
+  background: var(--paper-4);
+  box-shadow: 6px 6px 0 var(--ink-section);
+}
+.life-bignums__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px 18px 14px;
+  border-right: 2px dashed color-mix(in srgb, var(--ink) 25%, transparent);
+}
+.life-bignums__item:last-child { border-right: 0; }
+.life-bignums__item--0 { background: var(--ink-section); color: var(--paper-4); }
+.life-bignums__item--0 .life-bignums__label,
+.life-bignums__item--0 .life-bignums__sub { color: var(--paper-4); }
+.life-bignums__value { font-family: var(--f-disp); font-size: clamp(38px, 5vw, 58px); line-height: 0.95; }
+.life-bignums__label { font-family: var(--f-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-section); }
+.life-bignums__sub { font-family: var(--f-scrib); font-size: 19px; line-height: 1.05; color: color-mix(in srgb, var(--ink) 75%, transparent); }
+@media (max-width: 640px) {
+  .life-bignums { grid-template-columns: 1fr 1fr; }
+  .life-bignums__item { border-right: 0; border-bottom: 2px dashed color-mix(in srgb, var(--ink) 25%, transparent); }
+  .life-bignums__item--0 { grid-column: 1 / -1; }
+}
+
+/* ─── reading: on the go ─── */
+.book-midway {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 22px 18px;
+  margin: 0 0 40px;
+  padding: 0;
+  list-style: none;
+}
+.book-midway__item { display: flex; flex-direction: column; gap: 3px; }
+.book-midway__item:nth-child(odd) .book-face { transform: rotate(-1.5deg); }
+.book-midway__item:nth-child(even) .book-face { transform: rotate(1.2deg); }
+.book-face {
+  position: relative;
+  margin: 0 0 8px;
+  aspect-ratio: 1;
+  border: 3px solid var(--ink);
+  background: var(--paper-2);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.book-face__art { display: block; width: 100%; height: 100%; object-fit: cover; }
+.book-face__type { display: grid; place-items: center; height: 100%; padding: 10px; font-family: var(--f-disp); font-size: 20px; text-align: center; }
+/* the bookmark ribbon hangs from the top edge, as far down as I have got */
+.book-face__mark {
+  position: absolute;
+  top: -3px;
+  right: 14px;
+  width: 16px;
+  height: max(18px, var(--pct));
+  background: var(--ink-section);
+  border: 2px solid var(--ink);
+  border-top: 0;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 8px), 0 100%);
+}
+.book-midway__title { font-family: var(--f-disp); font-size: 19px; line-height: 1.05; }
+.book-midway__by, .book-midway__pct { font-family: var(--f-mono); font-size: 11px; color: color-mix(in srgb, var(--ink) 70%, transparent); }
+.book-midway__pct { color: var(--ink-section); font-weight: 700; }
+
+/* ─── reading: the shelf ─── */
+.bookcase {
+  --shelf-h: 210px;
+  margin: 0 0 46px;
+  padding: 18px 14px 0;
+  background: var(--paper-2);
+  border: 3px solid var(--ink);
+  box-shadow: 7px 7px 0 var(--ink);
+}
+/* a year's bookend: stands on the shelf where that year's books begin */
+.bookend {
+  flex: 0 0 54px;
+  height: calc(var(--shelf-h) - 12px - 22px);
+  margin: 22px 6px 12px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0 8px;
+  background: var(--ink);
+  color: var(--ink-yellow);
+  border: 3px solid var(--ink);
+  border-radius: 26px 26px 0 0;
+  box-shadow: 3px 0 0 var(--ink-section);
+}
+.bookend__y { writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--f-disp); font-size: 34px; line-height: 1; }
+.bookend__n { font-family: var(--f-mono); font-size: 9px; text-align: center; color: var(--paper-4); line-height: 1.3; }
+.bookshelf__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0 3px;
+  margin: 0;
+  padding: 0 4px;
+  list-style: none;
+  /* a plank under every line of spines */
+  background: linear-gradient(to bottom, transparent calc(var(--shelf-h) - 12px), var(--ink) calc(var(--shelf-h) - 12px),
+    var(--ink) calc(var(--shelf-h) - 9px), var(--ink-section) calc(var(--shelf-h) - 9px)) 0 0 / 100% var(--shelf-h);
+}
+.book-spine {
+  --inkc: var(--ink-orange);
+  position: relative;
+  flex: 0 0 var(--w);
+  width: var(--w);
+  height: calc((var(--shelf-h) - 12px) * var(--h) / 100);
+  margin-top: calc((var(--shelf-h) - 12px) * (100 - var(--h)) / 100);
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0 6px;
+  overflow: visible;
+  border: 2px solid var(--ink);
+  border-radius: 2px 2px 0 0;
+  /* a strip of the book's own cover, tinted with an ink so the type reads */
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.28), transparent 22%, transparent 78%, rgba(0,0,0,0.3)),
+    linear-gradient(color-mix(in srgb, var(--inkc) 55%, transparent), color-mix(in srgb, var(--inkc) 55%, transparent)),
+    var(--cover, none) var(--pos) 50% / auto 100%,
+    var(--inkc);
+  color: var(--paper-4);
+  transform-origin: bottom center;
+  transform: rotate(var(--lean, 0deg));
+  transition: transform 0.15s ease;
+  cursor: default;
+}
+.book-spine--lean { margin-left: 6px; margin-right: 6px; }
+.book-spine--ink0 { --inkc: var(--ink-orange); }
+.book-spine--ink1 { --inkc: var(--ink-blue); }
+.book-spine--ink2 { --inkc: var(--ink-purple); }
+.book-spine--ink3 { --inkc: var(--ink-green); }
+.book-spine--ink4 { --inkc: var(--ink-red); }
+.book-spine__title {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  max-height: calc(100% - 34px);
+  overflow: hidden;
+  font-family: var(--f-disp);
+  font-size: clamp(11px, calc(var(--w) * 0.42), 17px);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.55);
+}
+.book-spine__by {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  max-height: 30px;
+  overflow: hidden;
+  font-family: var(--f-mono);
+  font-size: 8px;
+  text-transform: uppercase;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+.book-spine:hover, .book-spine:focus-visible { z-index: 5; transform: translateY(-14px) rotate(0deg); outline: none; }
+.book-spine__card {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  z-index: 6;
+  display: none;
+  width: 190px;
+  padding: 10px;
+  transform: translateX(-50%) rotate(-1.5deg);
+  background: var(--paper-4);
+  color: var(--ink);
+  border: 3px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--inkc);
+  font-family: var(--f-mono);
+  font-size: 11px;
+  line-height: 1.35;
+  text-align: left;
+  writing-mode: horizontal-tb;
+}
+.book-spine__card img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; margin: 0 0 8px; border: 2px solid var(--ink); }
+.book-spine__card strong { display: block; font-family: var(--f-disp); font-weight: 400; font-size: 17px; line-height: 1.05; margin: 0 0 3px; }
+.book-spine__card span { display: block; }
+.book-spine:hover .book-spine__card, .book-spine:focus-visible .book-spine__card { display: block; }
+@media (max-width: 640px) {
+  .bookcase { --shelf-h: 170px; padding: 12px 6px 0; }
+  .bookend { flex-basis: 40px; }
+  .bookend__y { font-size: 26px; }
+  .book-spine { flex-basis: calc(var(--w) * 0.8); width: calc(var(--w) * 0.8); }
+  .book-spine__by { display: none; }
+  .book-spine__card { width: 150px; }
+}
+
+/* ─── reading: authors as fanned covers ─── */
+.book-authors {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 34px 22px;
+  margin: 0 0 44px;
+  padding: 24px 0 0;
+  list-style: none;
+}
+.book-author { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto auto; column-gap: 8px; }
+.book-fan { position: relative; grid-column: 1 / -1; height: 150px; margin: 0 0 12px; }
+.book-fan__c {
+  position: absolute;
+  bottom: 0;
+  width: 112px;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 3px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  transform-origin: bottom left;
+}
+.book-fan__c--0 { left: 0; transform: rotate(-8deg); z-index: 4; }
+.book-fan__c--1 { left: 30px; transform: rotate(-2deg); z-index: 3; }
+.book-fan__c--2 { left: 60px; transform: rotate(4deg); z-index: 2; }
+.book-fan__c--3 { left: 88px; transform: rotate(10deg); z-index: 1; }
+.book-author__rank { grid-row: 2 / 4; font-family: var(--f-disp); font-size: 38px; line-height: 0.9; color: var(--ink-section); text-shadow: 2px 2px 0 var(--ink); }
+.book-author__name { font-family: var(--f-disp); font-size: 22px; line-height: 1; }
+.book-author__n { font-family: var(--f-mono); font-size: 11px; }
+
+/* ─── reading: series as a run of covers ─── */
+.book-series {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px 28px;
+  margin: 0 0 44px;
+  padding: 0;
+  list-style: none;
+}
+.book-series__item { display: flex; flex-direction: column; gap: 2px; }
+.book-series__run { display: flex; height: 96px; margin: 0 0 10px; }
+.book-series__run img {
+  width: 92px;
+  height: 92px;
+  margin-right: -54px;
+  object-fit: cover;
+  border: 3px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink-section);
+  transform: rotate(calc((var(--n) - 2) * 2deg));
+  z-index: calc(10 - var(--n));
+}
+.book-series__title { font-family: var(--f-disp); font-size: 22px; line-height: 1; }
+.book-series__n { font-family: var(--f-mono); font-size: 11px; }
+
+/* ─── reading: year by year, months in the ear ─── */
+.book-years { margin: 0 0 44px; }
+.book-years__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 200px;
+  margin: 0 0 30px;
+  padding: 0 0 2px;
+  list-style: none;
+  border-bottom: 3px solid var(--ink);
+}
+.book-years__bar { position: relative; flex: 1; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; }
+.book-years__fill {
+  display: block;
+  height: var(--pct);
+  min-height: 4px;
+  background: repeating-linear-gradient(135deg, var(--ink-section) 0 8px, color-mix(in srgb, var(--ink-section) 78%, #fff) 8px 11px);
+  border: 2px solid var(--ink);
+  border-bottom: 0;
+  box-shadow: 3px 0 0 var(--ink);
+}
+.book-years__n { font-family: var(--f-disp); font-size: 24px; text-align: center; }
+.book-years__y { position: absolute; top: calc(100% + 6px); left: 0; right: 0; text-align: center; font-family: var(--f-mono); font-size: 11px; font-weight: 700; }
+.book-years__h { position: absolute; top: calc(100% + 20px); left: 0; right: 0; text-align: center; font-family: var(--f-mono); font-size: 10px; opacity: 0.7; }
+.book-years + .watch-note, .book-years .watch-note { margin-top: 44px; }
+
+.ear-months {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 120px;
+  margin: 0 0 50px;
+  padding: 0;
+  list-style: none;
+  border-bottom: 3px solid var(--ink);
+}
+.ear-months__m { position: relative; flex: 1; height: 100%; display: flex; align-items: flex-end; }
+.ear-months__fill { display: block; width: 100%; height: var(--pct); min-height: 2px; background: var(--ink-section); border: 1px solid var(--ink); border-bottom: 0; }
+.ear-months__m--new { border-left: 2px dashed var(--ink); padding-left: 2px; }
+.ear-months__y { position: absolute; top: calc(100% + 5px); left: 2px; font-family: var(--f-mono); font-size: 11px; font-weight: 700; }
+
+/* ─── odd facts: index cards (both pages) ─── */
+.life-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 22px;
+  margin: 0 0 44px;
+  padding: 0;
+  list-style: none;
+}
+.life-card {
+  --c: var(--ink-orange);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px 16px;
+  background:
+    repeating-linear-gradient(to bottom, var(--paper-4) 0 23px, rgba(33, 72, 192, 0.12) 23px 24px);
+  border: 3px solid var(--ink);
+  border-top: 10px solid var(--c);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.life-card:nth-child(3n+1) { transform: rotate(-1.2deg); }
+.life-card:nth-child(3n+2) { transform: rotate(0.8deg); }
+.life-card--ink0 { --c: var(--ink-orange); }
+.life-card--ink1 { --c: var(--ink-blue); }
+.life-card--ink2 { --c: var(--ink-magenta); }
+.life-card--ink3 { --c: var(--ink-green); }
+.life-card--ink4 { --c: var(--ink-purple); }
+.life-card__kicker { font-family: var(--f-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--c); font-weight: 700; }
+.life-card__big { font-family: var(--f-disp); font-size: 54px; line-height: 0.95; }
+.life-card__line { font-family: var(--f-scrib); font-size: 21px; line-height: 1.1; }
+
+/* ─── reading: genres as a stacked strip ─── */
+.book-genres { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 44px; padding: 0; list-style: none; }
+.book-genres__g {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 6px 12px;
+  border: 2px solid var(--ink);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--ink-section) 35%, transparent) var(--pct), var(--paper-4) var(--pct));
+  font-family: var(--f-mono); font-size: 12px;
+}
+.book-genres__name { font-family: var(--f-disp); font-size: 18px; }
+
+/* ─── listening: the chart ─── */
+.music-chart { margin: 0 0 44px; padding: 0; list-style: none; border: 3px solid var(--ink); background: var(--paper-4); box-shadow: 7px 7px 0 var(--ink-section); }
+.music-chart__row {
+  --c: var(--ink-blue);
+  display: grid;
+  grid-template-columns: 54px 56px minmax(120px, 0.9fr) 1.6fr 64px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  border-bottom: 2px dashed color-mix(in srgb, var(--ink) 25%, transparent);
+}
+.music-chart__row:last-child { border-bottom: 0; }
+.music-chart__row--ink1 { --c: var(--ink-magenta); }
+.music-chart__row--ink2 { --c: var(--ink-orange); }
+.music-chart__row--ink3 { --c: var(--ink-green); }
+.music-chart__row--ink4 { --c: var(--ink-red); }
+.music-chart__rank { font-family: var(--f-disp); font-size: 34px; line-height: 1; color: var(--c); text-shadow: 2px 2px 0 var(--ink); }
+/* the artist on a record: their photo as the label, a black disc around it */
+.music-chart__disc {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: repeating-radial-gradient(circle, #111 0 2px, #2a2a2a 2px 3px);
+  border: 2px solid var(--ink);
+}
+.music-chart__disc img { position: absolute; inset: 7px; width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
+.music-chart__disc::after { content: ''; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px; border-radius: 50%; background: var(--paper-4); }
+.music-chart__row--lead .music-chart__disc { animation: spin 6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .music-chart__row--lead .music-chart__disc { animation: none; } }
+.music-chart__name { font-family: var(--f-disp); font-size: 24px; line-height: 1; }
+.music-chart__row--lead .music-chart__name { font-size: 34px; }
+.music-chart__bar { position: relative; height: 22px; }
+.music-chart__fill { position: absolute; inset: 0 auto 0 0; width: var(--pct); background: var(--c); border: 2px solid var(--ink); }
+.music-chart__plays { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-family: var(--f-mono); font-size: 11px; font-weight: 700; color: var(--paper-4); text-shadow: 1px 1px 0 var(--ink); white-space: nowrap; }
+.music-chart__loves { font-family: var(--f-mono); font-size: 13px; color: var(--ink-magenta); font-weight: 700; text-align: right; }
+@media (max-width: 640px) {
+  .music-chart__row { grid-template-columns: 34px 44px 1fr 44px; gap: 8px; padding: 8px; }
+  .music-chart__bar { grid-column: 3 / 5; grid-row: 2; }
+  .music-chart__disc { width: 42px; height: 42px; }
+  .music-chart__disc img { inset: 6px; width: 26px; height: 26px; }
+  .music-chart__name, .music-chart__row--lead .music-chart__name { font-size: 20px; }
+  .music-chart__rank { font-size: 26px; }
+}
+
+/* ─── listening: the loves poster ─── */
+.loves-poster {
+  margin: 0 0 44px;
+  padding: 26px 24px;
+  background: var(--ink);
+  color: var(--paper-4);
+  border: 3px solid var(--ink);
+  box-shadow: 7px 7px 0 var(--ink-magenta);
+  text-align: center;
+  line-height: 0.92;
+  text-wrap: balance;
+}
+.loves-poster__a:hover { color: var(--ink-magenta); }
+.loves-poster__a { display: inline-block; margin: 0 0.18em; font-family: var(--f-disp); text-transform: uppercase; white-space: nowrap; }
+.loves-poster__a sup { font-family: var(--f-mono); font-size: 11px; vertical-align: super; margin-left: 2px; color: var(--ink-magenta); }
+.loves-poster__a--s1 { font-size: 22px; }
+.loves-poster__a--s2 { font-size: 32px; }
+.loves-poster__a--s3 { font-size: 46px; }
+.loves-poster__a--s4 { font-size: 64px; }
+.loves-poster__a--s5 { font-size: 86px; }
+.loves-poster__a--ink0 { color: var(--paper-4); }
+.loves-poster__a--ink1 { color: var(--ink-yellow); }
+.loves-poster__a--ink2 { color: #7FA6FF; }
+.loves-poster__a--ink3 { color: #FF8FC5; }
+.loves-poster__a--ink4 { color: #6FE0A8; }
+@media (max-width: 640px) {
+  .loves-poster { padding: 18px 10px; }
+  .loves-poster__a { white-space: normal; }
+  .loves-poster__a--s5 { font-size: 52px; } .loves-poster__a--s4 { font-size: 42px; } .loves-poster__a--s3 { font-size: 32px; }
+}
+
+/* ─── listening: the crate (CD jewel cases) ─── */
+.cd-crate {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 26px 20px;
+  margin: 0 0 44px;
+  padding: 0;
+  list-style: none;
+}
+.cd { display: flex; flex-direction: column; gap: 2px; transform: rotate(var(--tilt, 0deg)); transition: transform 0.15s ease; }
+.cd:hover { transform: rotate(0deg) translateY(-4px); }
+.cd__case {
+  position: relative;
+  margin: 0 0 8px;
+  aspect-ratio: 1.08;
+  padding: 6px 6px 6px 18px;
+  border: 3px solid var(--ink);
+  border-radius: 3px;
+  background: linear-gradient(135deg, #e9eef2, #b9c2c9);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.cd__art, .cd__type { display: block; width: 100%; height: 100%; object-fit: cover; border: 1px solid rgba(0,0,0,0.4); }
+.cd__type { display: grid; place-items: center; padding: 8px; background: var(--paper-2); font-family: var(--f-disp); font-size: 18px; text-align: center; }
+/* the hinge: the ridged strip down the left of a jewel case */
+.cd__hinge {
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 14px;
+  background: repeating-linear-gradient(to bottom, rgba(255,255,255,0.65) 0 2px, rgba(0,0,0,0.18) 2px 4px), #cfd6dc;
+  border-right: 2px solid rgba(0,0,0,0.35);
+}
+.cd__gloss {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.1) 32%, transparent 33%, transparent 70%, rgba(255,255,255,0.18) 71%, transparent 85%);
+  pointer-events: none;
+}
+.cd__sticker {
+  position: absolute;
+  right: -8px;
+  bottom: 10px;
+  padding: 3px 7px 2px;
+  background: var(--ink-yellow);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  font-weight: 700;
+  transform: rotate(-8deg);
+}
+.cd__title { font-family: var(--f-disp); font-size: 17px; line-height: 1.05; }
+.cd__by { font-family: var(--f-mono); font-size: 11px; color: color-mix(in srgb, var(--ink) 70%, transparent); }
+@media (max-width: 640px) {
+  .cd-crate { grid-template-columns: repeat(2, 1fr); gap: 20px 14px; }
+  .cd-crate > li:nth-child(n+13) { display: none; }   /* a phone gets the top dozen */
+  .book-authors { padding-top: 36px; }
+}
+
+/* ─── listening: the mixtape ─── */
+.mixtape { display: grid; grid-template-columns: minmax(260px, 340px) 1fr; gap: 26px; align-items: start; margin: 0 0 44px; }
+.mixtape__cassette {
+  position: relative;
+  aspect-ratio: 1.6;
+  padding: 14px;
+  background: #2b2725;
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 6px 6px 0 var(--ink-section);
+  transform: rotate(-3deg);
+}
+.mixtape__label {
+  display: block;
+  padding: 8px 10px 34%;
+  background: var(--paper-4);
+  border-top: 10px solid var(--ink-magenta);
+  border-radius: 4px;
+  font-family: var(--f-disp);
+  font-size: 22px;
+  color: var(--ink);
+}
+.mixtape__label em { display: block; font-family: var(--f-scrib); font-style: normal; font-size: 18px; color: var(--ink-blue); }
+.mixtape__window {
+  position: absolute;
+  left: 22%; right: 22%; bottom: 22%;
+  height: 24%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 8%;
+  background: #4a4441;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+}
+.mixtape__reel { width: 28%; aspect-ratio: 1; border-radius: 50%; background: repeating-conic-gradient(var(--paper-4) 0 30deg, #8a817b 30deg 60deg); border: 3px solid var(--ink); animation: spin 5s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .mixtape__reel { animation: none; } }
+.mixtape__card {
+  columns: 2 240px;
+  column-gap: 26px;
+  margin: 0;
+  padding: 16px 18px;
+  list-style: none;
+  background:
+    repeating-linear-gradient(to bottom, var(--paper-4) 0 39px, rgba(211, 46, 132, 0.28) 39px 40px);
+  border: 3px solid var(--ink);
+  border-left: 12px solid var(--ink-magenta);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.mixtape__track { display: grid; grid-template-columns: 34px 30px 1fr; grid-template-rows: auto auto; column-gap: 8px; align-items: center; min-height: 40px; break-inside: avoid; padding: 3px 0; }
+.mixtape__art { grid-row: 1 / 3; width: 34px; height: 34px; object-fit: cover; border: 2px solid var(--ink); }
+.mixtape__n { grid-row: 1 / 3; grid-column: 2; font-family: var(--f-mono); font-size: 11px; font-weight: 700; color: var(--ink-magenta); }
+.mixtape__t { grid-column: 3; font-family: var(--f-scrib); font-size: 20px; line-height: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mixtape__by { grid-column: 3; font-family: var(--f-mono); font-size: 10px; color: color-mix(in srgb, var(--ink) 70%, transparent); }
+@media (max-width: 760px) { .mixtape { grid-template-columns: 1fr; } .mixtape__cassette { max-width: 300px; } }
+
+/* ─── listening: on repeat / lately ─── */
+.music-repeat { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px 20px; margin: 0 0 44px; padding: 0; list-style: none; }
+.music-repeat__t { display: grid; grid-template-columns: 64px 1fr; grid-template-rows: auto auto auto; column-gap: 12px; align-items: start; }
+.music-repeat__art { grid-row: 1 / 4; width: 64px; height: 64px; object-fit: cover; border: 3px solid var(--ink); box-shadow: 3px 3px 0 var(--ink-section); }
+.music-repeat__n { font-family: var(--f-mono); font-size: 11px; font-weight: 700; color: var(--ink-section); }
+.music-repeat__title { font-family: var(--f-disp); font-size: 19px; line-height: 1.05; }
+.music-repeat__heart { color: var(--ink-magenta); }
+.music-repeat__by { font-family: var(--f-mono); font-size: 11px; }

@@ -16,32 +16,103 @@
       <line x1="9" y1="0" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/>
     </svg>
 
-    {{!-- Listening: sustained listening, plus totals (lifeSections.listening). --}}
+    {{!-- Listening (lifeSections.listening, tasks/life-shelves.mjs): the big numbers, the chart (top artists by
+          plays), the loves poster (artists set by how many of their songs I liked), the crate (albums as CD jewel
+          cases), the mixtape (latest likes on a cassette J-card), on repeat, then audiobook hours a month. --}}
     {{#with section}}
     {{> life-section-head snapTop="TURN IT" snapAccent="UP"}}
     {{#if empty}}
     {{> life-empty}}
     {{else}}
-    {{#each stats}}
-    <section class="life-period">
-      <h2 class="life-period__label">{{label}}</h2>
-      {{> life-stats items}}
-    </section>
-    {{/each}}
-    <h2 class="fit-header">on <span>repeat</span>.</h2>
-    {{#if notable.length}}
-    {{> life-notable-list items=notable}}
-    {{else}}
-    <p class="life-empty">Nothing has made the list yet.</p>
+    {{#if numbers.length}}{{> life-bignums numbers}}{{/if}}
+
+    {{#if poster.length}}
+    <h2 class="fit-header">the <span>loves</span>.</h2>
+    <p class="watch-note">Artists by how many of their songs I have liked, all time. The bigger the name, the more hearts.</p>
+    <div class="loves-poster" role="list">
+      {{#each poster}}<span class="loves-poster__a loves-poster__a--s{{size}} loves-poster__a--ink{{ink}}" role="listitem" title="{{loves}} liked">{{name}}<sup>{{loves}}</sup></span> {{/each}}
+    </div>
     {{/if}}
-    {{#if yearList.length}}
-    <h2 class="fit-header">year by <span>year</span>.</h2>
-    {{#each yearList}}
-    <section class="life-year">
-      <h3 class="life-year__label">{{this}}</h3>
-      {{> life-notable-list items=(lookup ../years this)}}
-    </section>
-    {{/each}}
+
+    {{#if chart.length}}
+    <h2 class="fit-header">the <span>chart</span>.</h2>
+    <p class="watch-note">Who I have played most since YouTube Music started keeping count for me. A heart is a song of theirs I liked.</p>
+    <ol class="music-chart">
+      {{#each chart}}
+      <li class="music-chart__row music-chart__row--ink{{ink}}{{#if lead}} music-chart__row--lead{{/if}}">
+        <span class="music-chart__rank">{{rank}}</span>
+        <span class="music-chart__disc" aria-hidden="true">{{#if art}}<img src="{{art}}" alt="" loading="lazy" decoding="async" width="120" height="120">{{/if}}</span>
+        <span class="music-chart__name">{{name}}</span>
+        <span class="music-chart__bar" style="--pct: {{pct}}%"><span class="music-chart__fill"></span><span class="music-chart__plays">{{plays}}</span></span>
+        {{#if loves}}<span class="music-chart__loves" title="{{loves}} liked">&#9829; {{loves}}</span>{{/if}}
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+
+    {{#if crate.length}}
+    <h2 class="fit-header">the <span>crate</span>.</h2>
+    <p class="watch-note">Albums I saved, and the ones I keep going back to, most played first.</p>
+    <ol class="cd-crate">
+      {{#each crate}}
+      <li class="cd cd--ink{{ink}}" style="--tilt: {{tilt}}deg">
+        <figure class="cd__case">
+          {{#if art}}<img class="cd__art" src="{{art}}" alt="{{title}}" loading="lazy" decoding="async" width="226" height="226">{{else}}<span class="cd__type">{{title}}</span>{{/if}}
+          <span class="cd__hinge" aria-hidden="true"></span>
+          <span class="cd__gloss" aria-hidden="true"></span>
+          {{#if plays}}<span class="cd__sticker">{{plays}}</span>{{/if}}
+        </figure>
+        <span class="cd__title">{{title}}</span>
+        <span class="cd__by">{{by}}{{#if year}} · {{year}}{{/if}}</span>
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+
+    {{#if mixtape.length}}
+    <h2 class="fit-header">the <span>mixtape</span>.</h2>
+    <p class="watch-note">The last twelve songs I liked, as a tape.</p>
+    <div class="mixtape">
+      <div class="mixtape__cassette" aria-hidden="true">
+        <span class="mixtape__label">LATEST LOVES <em>side A / B</em></span>
+        <span class="mixtape__window"><span class="mixtape__reel"></span><span class="mixtape__reel"></span></span>
+      </div>
+      <ol class="mixtape__card">
+        {{#each mixtape}}
+        <li class="mixtape__track{{#if (eq n 7)}} mixtape__track--b{{/if}}">
+          {{#if art}}<img class="mixtape__art" src="{{art}}" alt="" loading="lazy" decoding="async" width="56" height="56">{{/if}}
+          <span class="mixtape__n">{{side}}{{n}}</span>
+          <span class="mixtape__t">{{title}}</span>
+          <span class="mixtape__by">{{by}}</span>
+        </li>
+        {{/each}}
+      </ol>
+    </div>
+    {{/if}}
+
+    {{#if repeat.length}}
+    <h2 class="fit-header"><span>{{repeatTitle}}</span>.</h2>
+    <p class="watch-note">{{repeatNote}}</p>
+    <ol class="music-repeat">
+      {{#each repeat}}
+      <li class="music-repeat__t">
+        {{#if art}}<img class="music-repeat__art" src="{{art}}" alt="" loading="lazy" decoding="async" width="96" height="96">{{/if}}
+        <span class="music-repeat__n">{{n}}</span>
+        <span class="music-repeat__title">{{title}}{{#if loved}} <span class="music-repeat__heart" title="liked">&#9829;</span>{{/if}}</span>
+        <span class="music-repeat__by">{{by}}{{#if days}} · {{days}}{{/if}}</span>
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+
+    {{#if monthBars.length}}
+    <h2 class="fit-header">in my <span>ears</span>.</h2>
+    <p class="watch-note">Hours of audiobooks a month, the last three years. The books themselves are on <a href="/life/reading">Reading</a>.</p>
+    <ol class="ear-months" aria-label="Audiobook hours a month">
+      {{#each monthBars}}
+      <li class="ear-months__m{{#if newYear}} ear-months__m--new{{/if}}" style="--pct: {{pct}}%" title="{{title}}"><span class="ear-months__fill"></span>{{#if newYear}}<span class="ear-months__y">{{year}}</span>{{/if}}</li>
+      {{/each}}
+    </ol>
     {{/if}}
     {{/if}}
     {{/with}}

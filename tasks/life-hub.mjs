@@ -21,6 +21,7 @@
 import { lineChart, stackedShare, clockBars, columnBars } from './chart-axes.mjs';
 import { cleanPoints } from './route-map.mjs';
 import { commitGrid, projectCards } from './code-view.mjs';
+import { readingView, listeningView } from './life-shelves.mjs';
 
 export const SECTION_ORDER = ['fitness', 'body', 'games', 'code', 'watching', 'listening', 'reading', 'live'];
 /** @param {string} name */
@@ -792,7 +793,7 @@ export function buildSection(name, sec, now = new Date(), liveNotables = []) {
     }
     case 'listening': {
       const m = mediaView(sec);
-      return { ...view, ...m, latest: latestOf(sec.notable),
+      return { ...view, ...m, latest: latestOf(sec.notable), ...listeningView(sec),
         stats: [['This year', m.totals.year], ['This month', m.totals.month]].map(([label, t]) => /** @type {any} */ (t) && Object.keys(/** @type {any} */ (t)).length ? ({
           label,
           items: [row('Tracks', group(num(t.tracks) ?? 0)), row('Podcast episodes', group(num(t.podcastEpisodes) ?? 0)), row('Audiobook', group(num(t.audiobookHours) ?? 0), 'h')],
@@ -800,7 +801,7 @@ export function buildSection(name, sec, now = new Date(), liveNotables = []) {
     }
     case 'reading': {
       const m = mediaView(sec);
-      return { ...view, ...m, latest: latestOf(sec.notable),
+      return { ...view, ...m, latest: latestOf(sec.notable), ...readingView(sec),
         current: (Array.isArray(sec.current) ? sec.current : []).map((c) => ({ title: String(c?.title || ''), by: c?.by || '', percent: Math.round((num(c?.progress) ?? 0) * 100) })).filter((c) => c.title),
         stats: [['This year', m.totals.year], ['This month', m.totals.month]].map(([label, t]) => /** @type {any} */ (t) && Object.keys(/** @type {any} */ (t)).length ? ({
           label, items: [row('Books', group(num(t.books) ?? 0)), row('Pages', group(num(t.pages) ?? 0))],

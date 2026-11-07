@@ -123,7 +123,7 @@ export function auditHtml(html) {
 }
 
 /** Wall tiles with their own hover (straighten to be read): decorative, so never a link. */
-export const DECORATIVE = ['games-tile', 'watch-tile', 'stub'];
+export const DECORATIVE = ['games-tile', 'watch-tile', 'stub', 'book-spine', 'cd'];
 
 /** Hover rules that may move or lift something that is not a card-link, and why. */
 export const HOVER_ALLOW = {
@@ -136,6 +136,8 @@ export const HOVER_ALLOW = {
   'games-tile': 'decorative wall tile, straightens to be read',
   'watch-tile': 'decorative wall tile, straightens to be read',
   'stub': 'decorative ticket stub, straightens to be read',
+  'book-spine': 'a spine on the reading shelf, pulled out to show its cover card',
+  'cd': 'a CD case in the listening crate, straightens to be read',
   'ev-collage__tile': 'photo zoom inside its own frame (the image scales, the frame does not move)',
 };
 
