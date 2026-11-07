@@ -157,12 +157,12 @@ describe('corrections', () => {
     const idx = await fs.readFile(path.join(o2, 'index.html'), 'utf8');
     const proj = await fs.readFile(path.join(o2, 'projects.html'), 'utf8');
     await fs.rm(o2, { recursive: true, force: true });
-    assert.doesNotMatch(idx, /built \S+ · still|→ present/);
+    assert.doesNotMatch(idx, /built \S+ · retired|→ present/);
     assert.doesNotMatch(idx, /latest →<\/span> FitGlue<\/span>\s*<span class="section-card__latest-date">/);
-    assert.match(idx, /still shipping/);
-    assert.doesNotMatch(proj, /built \S+ · still/);
-    assert.match(proj, /still shipping/);
-    assert.doesNotMatch(idx, /· still shipping/);
+    assert.match(idx, /retired 2026/);
+    assert.doesNotMatch(proj, /built \S+ · retired/);
+    assert.match(proj, /retired 2026/);
+    assert.doesNotMatch(idx, /· retired 2026/);
   });
 
   test('orphans gone', () => {

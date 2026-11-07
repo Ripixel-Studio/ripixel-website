@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ripixel — A small software label</title>
-  <meta name="description" content="Ripixel — A small indie software label. Five things live. One human.">
+  <title>{{#if pageTitle}}{{pageTitle}} · Ripixel{{else}}Ripixel — A small software label{{/if}}</title>
+  <meta name="description" content="{{#if pageDescription}}{{pageDescription}}{{else}}Ripixel — A small indie software label. Five things live. One human.{{/if}}">
 
   <!-- Open Graph -->
-  <meta property="og:title" content="Ripixel — A small software label">
+  <meta property="og:title" content="{{#if pageTitle}}{{pageTitle}} · Ripixel{{else}}Ripixel — A small software label{{/if}}">
   <meta property="og:description" content="A small indie software label. Five things live. One human.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://www.ripixel.co.uk">
+  <meta property="og:url" content="https://www.ripixel.co.uk{{#if pagePath}}{{pagePath}}{{/if}}">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
