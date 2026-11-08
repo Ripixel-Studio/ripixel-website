@@ -199,8 +199,6 @@ export function listeningView(sec) {
   const loved = list(sec.lovedArtists).filter((a) => str(a.name));
   const maxLoves = Math.max(1, ...loved.map((a) => num(a.loves) ?? 0));
   const repeatDays = num(sec.repeatDays) ?? 0;
-  const months = list(sec.earMonths);
-  const maxBook = Math.max(1, ...months.map((x) => num(x.bookHours) ?? 0));
   const crate = list(sec.crate).filter((c) => str(c.title));
   const tapes = list(sec.playlists).filter((p) => str(p.title));
   const years = list(sec.recapYears).filter((y) => num(y.year) && list(y.songs).length);
@@ -262,11 +260,5 @@ export function listeningView(sec) {
     mixtape: list(sec.latestLoves).filter((t) => str(t.title)).slice(0, 12).map((t, i) => ({
       n: i + 1, side: i < 6 ? 'A' : 'B', title: str(t.title), by: str(t.by), art: shelfArt(t.art),
     })),
-    monthBars: months.map((x) => {
-      const mo = String(x.month || '');
-      return { label: MONTHS[+mo.slice(5) - 1]?.[0] || '', newYear: mo.endsWith('-01'), year: mo.slice(0, 4),
-        title: `${monthOf(mo)}: ${hoursLabel(x.bookHours) || '0 h'} of audiobooks`,
-        pct: Math.round(((num(x.bookHours) ?? 0) / maxBook) * 100) };
-    }),
   };
 }

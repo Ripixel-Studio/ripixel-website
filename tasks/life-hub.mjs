@@ -810,7 +810,7 @@ export function buildSection(name, sec, now = new Date(), liveNotables = []) {
       return { ...view, ...m, latest: latestOf(sec.notable), ...listeningView(sec),
         stats: [['This year', m.totals.year], ['This month', m.totals.month]].map(([label, t]) => /** @type {any} */ (t) && Object.keys(/** @type {any} */ (t)).length ? ({
           label,
-          items: [row('Tracks', group(num(t.tracks) ?? 0)), row('Podcast episodes', group(num(t.podcastEpisodes) ?? 0)), row('Audiobook', group(num(t.audiobookHours) ?? 0), 'h')],
+          items: [row('Tracks', group(num(t.tracks) ?? 0)), row('Podcast episodes', group(num(t.podcastEpisodes) ?? 0))],
         }) : null).filter(Boolean) };
     }
     case 'reading': {
