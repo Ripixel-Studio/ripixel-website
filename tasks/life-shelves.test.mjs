@@ -92,19 +92,30 @@ test('readingView: parts kept apart on a spine, format and re-listens carried, b
   assert.ok(v.numbers.some((n) => n.label === 'heard again' && n.value === '2'));
 });
 
-test('listeningView: tapes, years with the real rank, stayers', () => {
+test('listeningView: tapes, years from the plays, stayers, the deck', () => {
   const art = 'https://yt3.ggpht.com/abc=w226-h226-l90-rj';
   const v = listeningView({
-    music: { loves: 3 }, playlistCount: 1,
+    music: { loves: 3, since: '2018-11' }, playlistCount: 1,
     playlists: [{ title: 'Running', tracks: 50, hours: 3.2, artists: ['A', 'B', 'C', 'D'], arts: [art, art, art, art], loved: 5, heard: 8 }],
-    recapYears: [{ year: 2024, tracks: 96, songs: [{ rank: 2, title: 'Two', by: 'X', art }], topArtist: { name: 'X', tracks: 4 } }],
+    musicYears: [{ year: 2024, plays: 300, hours: 20.5, artists: 40, songs: [{ rank: 2, title: 'Two', by: 'X', art, plays: 9 }], topArtist: { name: 'X', plays: 40 } },
+      { year: 2018, plays: 26, hours: 2.9, artists: 5, songs: [{ rank: 1, title: 'One', by: 'X', art, plays: 3 }], topArtist: null }],
+    deck: [{ kind: 'song', title: 'A', by: 'X', art, plays: 6 }, { kind: 'podcast', title: 'P', art: 'https://i.ytimg.com/pl_c/PLab-1/studio_square_thumbnail.jpg?sqp=x-Y&rs=1', plays: 3 },
+      { kind: 'song', title: 'B', plays: 2 }, { kind: 'song', title: 'C', plays: 1 }],
     stayers: [{ title: 'S', by: 'Y', years: [2023, 2024] }],
   });
   assert.equal(v.tapes[0].artists, 'A, B, C');
   assert.equal(v.tapes[0].arts.length, 4);
-  assert.equal(v.tapes[0].heard, '16% played lately');
+  assert.equal(v.tapes[0].heard, '16% of it played');
   assert.equal(v.years[0].lead.rank, 2);
-  assert.equal(v.years[0].topArtist, 'X: 4 songs in the top 96');
+  assert.equal(v.years[0].topArtist, 'X, 40 plays');
+  assert.equal(v.years[0].leadPlays, '9 plays');
+  assert.equal(v.years[0].part, '');
+  assert.equal(v.years[1].part, 'from Nov');
+  assert.equal(v.sinceLabel, 'Nov 2018');
+  assert.equal(v.deck?.n, 4);
+  assert.equal(v.deck?.items[1].podcast, true);
+  assert.equal(v.deck?.items[1].plays, '3 episodes');
+  assert.ok(v.deck?.items[1].art.startsWith('https://i.ytimg.com/pl_c/'));
   assert.equal(v.stayers[0].years, '2023 · 2024');
   assert.ok(v.numbers.some((n) => n.label === 'playlists made'));
 });
