@@ -90,12 +90,14 @@
   background: #0b0d12;
   color: #e8ecf4;
 }
-/* the launcher's backdrop: the lead game's own art, blurred and darkened */
-.monitor__screen::before {
-  content: '';
+/* the launcher's backdrop: each game's own art, blurred and darkened, cycling with it */
+.monitor__bg {
   position: absolute; inset: -30px;
-  background: var(--bg) center 25% / cover no-repeat;
+  background: center 25% / cover no-repeat;
   filter: blur(22px) brightness(0.4) saturate(1.4);
+  opacity: 0;
+  animation: launch-cycle 16s infinite;
+  animation-delay: calc(var(--i) * 4s);
 }
 .monitor__glare { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(125deg, rgba(255,255,255,0.1), transparent 30%); }
 .launcher { position: relative; display: flex; flex-direction: column; height: 100%; padding: 2.4% 3%; gap: 3%; font-family: var(--f-sans); }
@@ -103,7 +105,21 @@
 .launcher__bar b { color: #fff; }
 .launcher__bar i { width: 9px; height: 9px; border-radius: 50%; background: #454b58; }
 .launcher__bar i:first-of-type { margin-left: auto; }
-.launcher__hero { flex: 1; min-height: 0; display: flex; gap: 4%; align-items: stretch; }
+.launcher__hero { position: relative; flex: 1; min-height: 0; }
+.launcher__slide {
+  position: absolute; inset: 0;
+  display: flex; gap: 4%; align-items: stretch;
+  opacity: 0;
+  animation: launch-cycle 16s infinite;
+  animation-delay: calc(var(--i) * 4s);
+}
+.monitor__screen[style*="--n: 1"] .monitor__bg,
+.monitor__screen[style*="--n: 1"] .launcher__slide { opacity: 1; animation: none; }
+@keyframes launch-cycle {
+  0% { opacity: 0; transform: translateX(14px); }
+  3%, 23% { opacity: 1; transform: none; }
+  26%, 100% { opacity: 0; }
+}
 .launcher__cover { height: 100%; width: auto; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); outline: 2px solid rgba(255,255,255,0.2); }
 .launcher__about { display: flex; flex-direction: column; justify-content: center; gap: 6px; min-width: 0; }
 .launcher__name { font-family: var(--f-disp); font-weight: 400; font-size: clamp(20px, 4.4vw, 42px); line-height: 1; color: #fff; }
@@ -113,10 +129,18 @@
 .launcher__progress span { display: block; height: 100%; background: linear-gradient(90deg, #4cc9f0, #7bf1a8); }
 .launcher__play { align-self: flex-start; margin-top: 6px; padding: 6px 18px; border-radius: 3px; background: linear-gradient(180deg, #5fd36a, #2e9e3e); color: #fff; font-family: var(--f-disp); font-size: clamp(12px, 2vw, 17px); letter-spacing: 0.08em; box-shadow: 0 3px 0 #1d6b29; }
 .launcher__row { display: flex; gap: 2%; margin: 0; padding: 0; list-style: none; height: 26%; }
-.launcher__tile { position: relative; height: 100%; aspect-ratio: 2 / 3; border-radius: 3px; overflow: hidden; opacity: 0.7; }
+.launcher__tile { position: relative; height: 100%; aspect-ratio: 2 / 3; border-radius: 3px; overflow: hidden; opacity: 0.55; animation: launch-pick 16s infinite; animation-delay: calc(var(--i) * 4s); }
 .launcher__tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.launcher__tile span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-.launcher__tile--on { opacity: 1; outline: 3px solid #4cc9f0; outline-offset: -3px; }
+/* the selection moves along the row with the game on screen */
+@keyframes launch-pick {
+  0%, 24% { opacity: 1; outline: 3px solid #4cc9f0; outline-offset: -3px; transform: translateY(-4px); }
+  25%, 100% { opacity: 0.55; outline: 0 solid transparent; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .monitor__bg, .launcher__slide, .launcher__tile { animation: none; }
+  .monitor__bg[style*="--i: 0"], .launcher__slide[style*="--i: 0"] { opacity: 1; }
+  .launcher__tile[style*="--i: 0"] { opacity: 1; outline: 3px solid #4cc9f0; outline-offset: -3px; }
+}
 .monitor__chin { display: flex; justify-content: flex-end; height: 18px; padding: 5px 10px; }
 .monitor__chin i { width: 6px; height: 6px; border-radius: 50%; background: #4cc9f0; box-shadow: 0 0 6px #4cc9f0; }
 .monitor__neck { width: 70px; height: 46px; background: linear-gradient(90deg, #1d1d20, #3a3a3f 50%, #1d1d20); border: 3px solid var(--ink); border-top: 0; }
@@ -133,7 +157,7 @@
 .gshelf {
   --s: 1;                                    /* the scale every box is drawn at */
   --lip: 12px;
-  --talk: 46px;
+  --talk: 10px;                              /* room under the lip; a shelf with a note under it takes more */
   margin: 8px 0 44px;
   padding: 18px 14px 4px;
   background: linear-gradient(180deg, #2a211b, #3b2f25 60%, #2a211b);
@@ -158,12 +182,14 @@
       transparent calc(var(--top) * var(--s) + var(--lip) + 3px))
     0 0 / 100% var(--row-h);
 }
+.gshelf__row:has(.gbox__quip) { --talk: 46px; }
 .gshelf__row--box { --top: 178px; }
 .gshelf__row--dvd { --top: 160px; }
 .gshelf__row--jewel { --top: 110px; }
 .gbox {
   --inkc: var(--ink-magenta);
   --w: 150px; --h: 196px; --d: 30px;         /* the front's size and the side's depth, before --s */
+  --rise: 0.532; --lean: 62deg;              /* the side panel's slope (tan 28deg) and the top's matching lean */
   position: relative;
   flex: none;
   display: flex;
@@ -175,8 +201,8 @@
   outline: none;
 }
 .gbox--box { --w: 122px; --h: 160px; --d: 22px; }
-.gbox--dvd { --w: 100px; --h: 142px; --d: 9px; }
-.gbox--jewel { --w: 104px; --h: 92px; --d: 7px; }
+.gbox--dvd { --w: 100px; --h: 142px; --d: 9px; --rise: 0.7; --lean: 55deg; }
+.gbox--jewel { --w: 104px; --h: 92px; --d: 7px; --rise: 0.7; --lean: 55deg; }
 .gbox--ink1 { --inkc: var(--ink-blue); }
 .gbox--ink2 { --inkc: var(--ink-yellow); }
 .gbox--ink3 { --inkc: var(--ink-red); }
@@ -208,6 +234,20 @@
 .gbox__art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; color: transparent; }
 .gbox--jewel .gbox__art { object-position: 50% 30%; }
 .gbox__name { position: absolute; inset: 0; display: flex; align-items: center; padding: 10px; overflow: hidden; font-family: var(--f-disp); font-size: calc(18px * var(--s)); line-height: 1; text-transform: uppercase; overflow-wrap: anywhere; }
+/* the top: the box's depth seen from above, meeting the side panel's slope */
+.gbox__top {
+  position: absolute; z-index: 0;
+  left: 0;
+  bottom: 100%;
+  width: calc(var(--w) * var(--s));
+  height: calc(var(--d) * var(--s) * var(--rise));
+  background: linear-gradient(0deg, rgba(0,0,0,0.12), rgba(255,255,255,0.18)), var(--inkc);
+  border: 3px solid var(--ink);
+  border-bottom: 0;
+  transform: skewX(calc(-1 * var(--lean)));
+  transform-origin: left bottom;
+}
+.gbox--dvd .gbox__top, .gbox--jewel .gbox__top { background: linear-gradient(0deg, #222, #4a4a4a); }
 /* the side panel: the box's depth, in perspective, with the name down it on the big ones */
 .gbox__side {
   flex: none;
@@ -303,10 +343,11 @@
 .gbox:hover .gbox__back, .gbox:focus-visible .gbox__back { display: block; }
 .gbox:first-child .gbox__back { left: 0; transform: rotate(1.2deg); }
 @media (max-width: 640px) {
-  .gshelf { --s: 0.56; --talk: 34px; padding: 14px 6px 2px; }
+  .gshelf { --s: 0.56; padding: 14px 6px 2px; }
+  .gshelf__row:has(.gbox__quip) { --talk: 34px; }
   .gshelf__row { gap: 0 10px; padding: 0; }
   .gbox__quip { font-size: 13px; }
-  .gbox__badge { font-size: 7px; bottom: 8px; padding: 2px 3px; }
+  .gbox__badge { font-size: 6.5px; bottom: 8px; padding: 2px 0; letter-spacing: 0.02em; white-space: nowrap; }
   .gbox__back { width: 170px; }
 }
 @media (prefers-reduced-motion: reduce) { .gbox__body { transition: none; } }

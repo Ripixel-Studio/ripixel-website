@@ -12,7 +12,8 @@
  *   boxesView(wall, completion)  the big-box shelf: the wall's weight is the box (4 a big box, 3 a box, 2 a DVD
  *                                case, 1 a jewel case), achievements give a completion sticker.
  *   shelvesOf(boxes)             a shelf per kind of box, so each is as tall as its boxes.
- *   monitorView(boxes)           the monitor: the most recently played as a launcher's library row.
+ *   monitorView(boxes)           the monitor: the four most recently played as a launcher's library, cycling
+ *                                one to the next (one, still, with fewer).
  *
  * Every input is the already-sanitised view row (life-hub.mjs wallView / gamesView), so URLs are safe here.
  */
@@ -22,6 +23,7 @@
  *   seasonCount?: number, spine?: string, episodes: string, weight: number, tilt: number, ink: number}} WallTile */
 
 const CHANNELS = 5;
+const MONITOR = 4;
 const SPINE_MIN = 12;        // px: a one-season box set is still fatter than a DVD case
 const SPINE_PER = 7;         // px per season, to SPINE_SEASONS
 const SPINE_SEASONS = 8;
@@ -101,6 +103,8 @@ export function monitorView(boxes) {
   const lit = boxes.filter((b) => b.art);
   if (!lit.length) return null;
   const dated = lit.filter((b) => b.last).sort((a, b) => (a.last < b.last ? 1 : a.last > b.last ? -1 : 0));
-  const row = (dated.length ? [...dated, ...lit.filter((b) => !b.last)] : lit).slice(0, 4);
-  return { lead: row[0], row: row.map((b, i) => ({ ...b, on: i === 0 })) };
+  const all = dated.length ? [...dated, ...lit.filter((b) => !b.last)] : lit;
+  // the screen cycles through exactly MONITOR games (timed in CSS); with fewer it holds the newest, still
+  const row = all.length >= MONITOR ? all.slice(0, MONITOR) : all.slice(0, 1);
+  return { lead: row[0], n: row.length, row: row.map((b, i) => ({ ...b, i, on: i === 0 })) };
 }
