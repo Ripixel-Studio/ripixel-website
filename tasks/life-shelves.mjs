@@ -15,7 +15,8 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 /** Audible covers, YouTube Music art and artist photos, video stills. */
 const ART = /^https:\/\/(m\.media-amazon\.com\/images\/I\/|yt3\.googleusercontent\.com\/|lh3\.googleusercontent\.com\/|yt3\.ggpht\.com\/|i\.ytimg\.com\/vi\/)[A-Za-z0-9._~%/+=-]*$/;
 /** @param {unknown} u */
-export const shelfArt = (u) => (typeof u === 'string' && ART.test(u) ? u : '');
+const PODCAST_ART = /^https:\/\/i\.ytimg\.com\/pl_c\/[A-Za-z0-9_-]+\/studio_square_thumbnail\.jpg\?[A-Za-z0-9_=&%-]+$/;
+export const shelfArt = (u) => (typeof u === 'string' && (ART.test(u) || PODCAST_ART.test(u)) ? u : '');
 
 const num = (/** @type {unknown} */ n) => (typeof n === 'number' && Number.isFinite(n) ? n : null);
 const group = (/** @type {number} */ n) => Math.round(n).toLocaleString('en-GB');
@@ -205,7 +206,10 @@ export function listeningView(sec) {
   const pods = list(sec.podcasts).filter((x) => str(x.name));
   const podMax = Math.max(1, ...pods.map((x) => num(x.episodes) ?? 0));
   const tapes = list(sec.playlists).filter((p) => str(p.title));
-  const years = list(sec.recapYears).filter((y) => num(y.year) && list(y.songs).length);
+  const years = list(sec.musicYears).filter((y) => num(y.year) && list(y.songs).length);
+  const since = /^\d{4}-\d{2}$/.test(String(m.since || '')) ? String(m.since) : '';
+  const deck = list(sec.deck).filter((d) => str(d.title)).slice(0, 4);
+  const deckN = deck.length >= 4 ? 4 : Math.min(1, deck.length);
   return {
     numbers: [
       { value: group(num(m.loves) ?? 0), label: 'songs liked', sub: num(m.lovedArtists) ? `by ${group(/** @type {number} */ (num(m.lovedArtists)))} artists` : '' },
@@ -241,7 +245,7 @@ export function listeningView(sec) {
         title: str(p.title), tracks: plural(tracks, 'song', 'songs'), hours: hoursLabel(p.hours),
         artists: (Array.isArray(p.artists) ? p.artists : []).map(str).filter(Boolean).slice(0, 3).join(', '),
         arts: arts(p.arts, 4), loved: num(p.loved) ?? 0,
-        heard: heard && tracks ? `${Math.round((heard / tracks) * 100)}% played lately` : '',
+        heard: heard && tracks ? `${Math.round((heard / tracks) * 100)}% of it played` : '',
         ink: h % 5, tilt: ((h % 7) - 3) * 0.6,
       };
     }),
@@ -253,17 +257,28 @@ export function listeningView(sec) {
         year: String(y.year), ink: (num(y.year) ?? 0) % 5,
         lead: { rank: num(lead.rank) ?? 1, title: str(lead.title), by: str(lead.by), art: shelfArt(lead.art) },
         rest: songs.slice(1, 5).map((t) => ({ rank: num(t.rank) ?? '', title: str(t.title), by: str(t.by), art: shelfArt(t.art) })),
-        topArtist: ta ? `${str(ta.name)}: ${plural(num(ta.tracks) ?? 0, 'song', 'songs')} in the top ${group(num(y.tracks) ?? 100)}` : '',
+        leadPlays: plural(num(lead.plays) ?? 0, 'play', 'plays'),
+        topArtist: ta ? `${str(ta.name)}, ${plural(num(ta.plays) ?? 0, 'play', 'plays')}` : '',
         loved: num(y.loved) ?? 0, artists: group(num(y.artists) ?? 0),
+        totals: `${plural(num(y.plays) ?? 0, 'play', 'plays')}${num(y.hours) ? ` · ${hoursLabel(y.hours)}` : ''}`,
+        part: since.startsWith(`${y.year}-`) && !since.endsWith('-01') ? `from ${MONTHS[+since.slice(5) - 1]}` : '',
       };
     }),
     stayers: list(sec.stayers).filter((t) => str(t.title)).slice(0, 8).map((t) => ({
       title: str(t.title), by: str(t.by), art: shelfArt(t.art),
       years: (Array.isArray(t.years) ? t.years : []).filter((v) => num(v)).join(' · '),
     })),
+    deck: deck.length ? {
+      n: deckN,
+      items: deck.slice(0, deckN === 4 ? 4 : 1).map((d, i) => ({
+        i, podcast: d.kind === 'podcast', title: str(d.title), by: str(d.by), art: shelfArt(d.art),
+        plays: d.kind === 'podcast' ? plural(num(d.plays) ?? 0, 'episode', 'episodes') : plural(num(d.plays) ?? 0, 'play', 'plays'),
+      })),
+    } : null,
+    sinceLabel: monthOf(since),
     podcasts: pods.map((x, i) => {
       const since = monthOf(x.since), last = monthOf(x.last);
-      return { name: str(x.name), episodes: group(num(x.episodes) ?? 0), one: num(x.episodes) === 1, hours: hoursLabel(x.hours),
+      return { name: str(x.name), art: shelfArt(x.art), episodes: group(num(x.episodes) ?? 0), one: num(x.episodes) === 1, hours: hoursLabel(x.hours),
         span: since && last && since !== last ? `${since} to ${last}` : since, both: (num(x.apps) ?? 0) > 1, ink: i % 5,
         pct: Math.round(((num(x.episodes) ?? 0) / podMax) * 100) };
     }),

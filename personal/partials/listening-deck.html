@@ -1,0 +1,25 @@
+<!-- Context: lifeSections.listening.deck {n, items [{i, podcast, title, by, art, plays}]} (tasks/life-shelves.mjs listeningView)
+     — on the deck: a hi-fi stack whose display flicks through what I have had on lately (the most played songs of
+     the last two weeks and the podcast I am in the middle of), the art in the window, the reels turning under it.
+     Four, cycling, or one, still; with reduced motion it holds the first. -->
+<figure class="hifi" aria-label="On the deck lately: {{#each items}}{{title}}{{#if by}} by {{by}}{{/if}}{{#unless @last}}, {{/unless}}{{/each}}">
+  <div class="hifi__unit">
+    <span class="hifi__brand" aria-hidden="true">ON THE DECK <i>last two weeks</i></span>
+    <div class="hifi__display" style="--n: {{n}}">
+      {{#each items}}
+      <div class="hifi__slide" style="--i: {{i}}">
+        <span class="hifi__art{{#if podcast}} hifi__art--pod{{/if}}">{{#if art}}<img src="{{art}}" alt="" decoding="async" width="240" height="240"{{#unless @first}} loading="lazy"{{/unless}}>{{/if}}</span>
+        <span class="hifi__lcd">
+          <span class="hifi__mode">{{#if podcast}}PODCAST{{else}}NOW PLAYING{{/if}}</span>
+          <strong class="hifi__title">{{title}}</strong>
+          {{#if by}}<span class="hifi__by">{{by}}</span>{{/if}}
+          <span class="hifi__plays">{{plays}}</span>
+        </span>
+      </div>
+      {{/each}}
+    </div>
+    <span class="hifi__tape" aria-hidden="true"><i></i><i></i></span>
+    <span class="hifi__keys" aria-hidden="true"><b>&#9664;&#9664;</b><b class="hifi__play">&#9654;</b><b>&#9654;&#9654;</b><b>&#9632;</b></span>
+  </div>
+  <span class="hifi__shelf" aria-hidden="true"></span>
+</figure>

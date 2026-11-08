@@ -25,6 +25,8 @@
     {{#if empty}}
     {{> life-empty}}
     {{else}}
+    {{#if deck}}{{> listening-deck deck}}{{/if}}
+
     {{#if numbers.length}}{{> life-bignums numbers}}{{/if}}
 
     {{#if poster.length}}
@@ -37,21 +39,22 @@
 
     {{#if years.length}}
     <h2 class="fit-header">year by <span>year</span>.</h2>
-    <p class="watch-note">YouTube Music's own top songs of each year, number one first.</p>
+    <p class="watch-note">Each year's most played songs, number one first, counted from every play since {{sinceLabel}}.</p>
     <ol class="music-years">
       {{#each years}}
       <li class="music-year music-year--ink{{ink}}">
-        <span class="music-year__y">{{year}}</span>
+        <span class="music-year__y">{{year}}{{#if part}} <small>{{part}}</small>{{/if}}</span>
         <figure class="music-year__one">
           {{#if lead.art}}<img src="{{lead.art}}" alt="" loading="lazy" decoding="async" width="226" height="226">{{/if}}
           <span class="music-year__no">No.&nbsp;{{lead.rank}}</span>
         </figure>
         <span class="music-year__t">{{lead.title}}</span>
-        <span class="music-year__by">{{lead.by}}</span>
+        <span class="music-year__by">{{lead.by}} · {{leadPlays}}</span>
         <ol class="music-year__rest">
           {{#each rest}}<li><span class="music-year__rank">{{rank}}</span>{{#if art}}<img src="{{art}}" alt="" loading="lazy" decoding="async" width="40" height="40">{{/if}}<span class="music-year__rt">{{title}}<em>{{by}}</em></span></li>{{/each}}
         </ol>
         {{#if topArtist}}<span class="music-year__top">{{topArtist}}</span>{{/if}}
+        <span class="music-year__sum">{{totals}} · {{artists}} artists</span>
       </li>
       {{/each}}
     </ol>
@@ -85,11 +88,11 @@
 
     {{#if podcasts.length}}
     <h2 class="fit-header">the <span>feed</span>.</h2>
-    <p class="watch-note">The podcasts, most episodes first, whichever app I heard them in. Pointing at a cover lifts it.</p>
+    <p class="watch-note">The podcasts I keep coming back to (ten episodes or more), most first, whichever app I heard them in.</p>
     <ol class="pod-feed" aria-label="Podcasts, most episodes first">
       {{#each podcasts}}
       <li class="pod-feed__show pod-feed__show--ink{{ink}}" tabindex="0">
-        <span class="pod-feed__cover" aria-hidden="true"><span class="pod-feed__name-art">{{name}}</span><span class="pod-feed__badge">{{episodes}}</span></span>
+        <span class="pod-feed__cover{{#if art}} pod-feed__cover--art{{/if}}" aria-hidden="true">{{#if art}}<img src="{{art}}" alt="" loading="lazy" decoding="async" width="240" height="240">{{else}}<span class="pod-feed__name-art">{{name}}</span>{{/if}}<span class="pod-feed__badge">{{episodes}}</span></span>
         <span class="pod-feed__name">{{name}}</span>
         <span class="pod-feed__meta">{{episodes}} {{#if one}}episode{{else}}episodes{{/if}}{{#if hours}} · {{hours}}{{/if}}</span>
         <span class="pod-feed__bar" aria-hidden="true"><span style="width: {{pct}}%"></span></span>
@@ -101,7 +104,7 @@
 
     {{#if chart.length}}
     <h2 class="fit-header">the <span>chart</span>.</h2>
-    <p class="watch-note">Who I have played most since YouTube Music started keeping count for me. A heart is a song of theirs I liked.</p>
+    <p class="watch-note">Who I have played most, every play since {{sinceLabel}}. A heart is a song of theirs I liked.</p>
     <ol class="music-chart">
       {{#each chart}}
       <li class="music-chart__row music-chart__row--ink{{ink}}{{#if lead}} music-chart__row--lead{{/if}}">
