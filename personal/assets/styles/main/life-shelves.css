@@ -754,3 +754,38 @@
   .music-year__t { font-size: 21px; }
 }
 @media (prefers-reduced-motion: reduce) { .pl-tape, .pl-tape:hover { transition: none; } }
+
+/* Listening: hours a month, music with podcasts stacked on top */
+.ear-months--stack .ear-months__m { flex-direction: column; justify-content: flex-end; }
+.ear-months--stack .ear-months__fill, .ear-months__pod { flex: none; }
+.ear-months__pod { display: block; width: 100%; height: var(--pct); background: repeating-linear-gradient(135deg, var(--ink-magenta) 0 3px, color-mix(in srgb, var(--ink-magenta) 45%, var(--paper, #fff)) 3px 6px); border: 1px solid var(--ink); border-bottom: 0; }
+.ear-months__pod[style*="--pct: 0%"] { border: 0; }
+.ear-legend { display: flex; gap: 16px; margin: -6px 0 12px; font-family: var(--f-mono); font-size: 12px; }
+.ear-legend__k::before { content: ''; display: inline-block; width: 12px; height: 12px; margin-right: 6px; vertical-align: -2px; border: 1px solid var(--ink); }
+.ear-legend__k--music::before { background: var(--ink-section); }
+.ear-legend__k--pod::before { background: repeating-linear-gradient(135deg, var(--ink-magenta) 0 3px, color-mix(in srgb, var(--ink-magenta) 45%, var(--paper, #fff)) 3px 6px); }
+
+/* the podcast feed: a podcast app's library grid, a cover per show (its name set big, as the
+   shows' own covers mostly are), a badge with the episodes heard; pointing at one lifts it */
+.pod-feed { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 22px 18px; margin: 0 0 50px; padding: 0; list-style: none; }
+.pod-feed__show { --c: var(--ink-section); display: flex; flex-direction: column; gap: 4px; outline: none; }
+.pod-feed__show--ink1 { --c: var(--ink-magenta); }
+.pod-feed__show--ink2 { --c: var(--ink-orange); }
+.pod-feed__show--ink3 { --c: var(--ink-green); }
+.pod-feed__show--ink4 { --c: var(--ink-red); }
+.pod-feed__cover {
+  position: relative; display: flex; align-items: flex-end; aspect-ratio: 1; padding: 10px; overflow: hidden;
+  background: var(--c); border: 2px solid var(--ink); border-radius: 14px; box-shadow: 4px 4px 0 var(--ink);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.pod-feed__cover::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 78% 22%, rgba(255,255,255,0.35) 0 18%, transparent 19%), repeating-radial-gradient(circle at 78% 22%, transparent 0 9px, rgba(0,0,0,0.08) 9px 11px); }
+.pod-feed__name-art { position: relative; font-family: var(--f-disp); font-size: 22px; line-height: 0.95; color: #fff; text-shadow: 2px 2px 0 var(--ink); overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.pod-feed__badge { position: absolute; top: 8px; left: 8px; min-width: 26px; padding: 2px 7px; border: 2px solid var(--ink); border-radius: 999px; background: var(--paper, #fff); color: var(--ink); font-family: var(--f-mono); font-size: 12px; font-weight: 700; text-align: center; }
+.pod-feed__show:hover .pod-feed__cover, .pod-feed__show:focus-visible .pod-feed__cover { transform: translate(-2px, -4px) rotate(-1.5deg); box-shadow: 7px 9px 0 var(--ink); }
+.pod-feed__name { margin-top: 6px; font-weight: 700; font-size: 15px; line-height: 1.2; }
+.pod-feed__meta, .pod-feed__span { font-family: var(--f-mono); font-size: 12px; }
+.pod-feed__span { opacity: 0.75; }
+.pod-feed__bar { display: block; height: 6px; border: 1px solid var(--ink); background: var(--paper, #fff); }
+.pod-feed__bar > span { display: block; height: 100%; background: var(--c); }
+@media (max-width: 520px) { .pod-feed { grid-template-columns: repeat(2, 1fr); gap: 18px 14px; } .pod-feed__name-art { font-size: 18px; } }
+@media (prefers-reduced-motion: reduce) { .pod-feed__cover { transition: none; } }

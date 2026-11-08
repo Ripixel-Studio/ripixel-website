@@ -108,3 +108,19 @@ test('listeningView: tapes, years with the real rank, stayers', () => {
   assert.equal(v.stayers[0].years, '2023 · 2024');
   assert.ok(v.numbers.some((n) => n.label === 'playlists made'));
 });
+
+test('listening: podcasts feed and stacked ear months', () => {
+  const v = listeningView({
+    podcasts: [{ name: 'The Show', episodes: 40, hours: 30.5, since: '2024-01', last: '2026-10', apps: 2 },
+      { name: 'Small', episodes: 1, hours: 0.8, since: '2026-09', last: '2026-09', apps: 1 }],
+    earMonths: [{ month: '2026-01', musicHours: 30, podcastHours: 10 }, { month: '2026-02', musicHours: 20, podcastHours: 0 }],
+  });
+  assert.equal(v.podcasts[0].pct, 100);
+  assert.equal(v.podcasts[0].both, true);
+  assert.equal(v.podcasts[0].span, 'Jan 2024 to Oct 2026');
+  assert.equal(v.podcasts[1].one, true);
+  assert.equal(v.podcasts[1].span, 'Sep 2026');
+  assert.deepEqual(v.earBars.map((b) => [b.music, b.podcast]), [[75, 25], [50, 0]]);
+  assert.equal(v.earBars[0].newYear, true);
+  assert.equal(v.earPodcasts, true);
+});
