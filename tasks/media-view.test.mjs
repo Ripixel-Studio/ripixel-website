@@ -32,6 +32,8 @@ test('monitor: the most recently played with art leads, undated games after', ()
   assert.equal(m?.lead.name, 'Middling');
   assert.deepEqual(m?.row.map((x) => x.name), ['Middling', 'Big One', 'League of Legends', 'Barely']);
   assert.equal(m?.row[0].on, true);
+  assert.equal(m?.n, 4);
+  assert.equal(monitorView(boxesView(WALL.slice(0, 2), []))?.n, 1, 'fewer than four: one, still');
   assert.equal(monitorView([]), null);
 });
 

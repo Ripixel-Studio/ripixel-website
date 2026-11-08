@@ -1,25 +1,30 @@
-<!-- Context: lifeSections.games.monitor {lead, row [{name, art, hours, lastLabel, doneLabel, done, on}]} (tasks/media-view.mjs
-     monitorView) — a flat-panel monitor on its stand, showing a game launcher's library (no service's branding): the most
-     recently played game large, with its hours, when it was last played and how finished it is, and the next few as a
-     row of covers. -->
-<figure class="monitor" aria-label="On the monitor: {{lead.name}}">
+<!-- Context: lifeSections.games.monitor {lead, n, row [{i, name, art, hours, lastLabel, doneLabel, done, on}]} (tasks/media-view.mjs
+     monitorView) — a flat-panel monitor on its stand, showing a game launcher's library (no service's branding): the four most
+     recently played, one at a time large with its hours, when it was last played and how finished it is, the selection moving
+     along the row of covers under it. One game, still, with fewer; with reduced motion it holds the first. -->
+<figure class="monitor" aria-label="On the monitor, recently played: {{#each row}}{{name}}{{#unless @last}}, {{/unless}}{{/each}}">
   <div class="monitor__panel">
-    <div class="monitor__screen" style="--bg: url('{{lead.art}}')">
+    <div class="monitor__screen" style="--n: {{n}}">
+      {{#each row}}<span class="monitor__bg" style="--i: {{i}}; background-image:url('{{art}}')" aria-hidden="true"></span>{{/each}}
       <div class="launcher">
         <span class="launcher__bar" aria-hidden="true"><b>LIBRARY</b><span>recently played</span><i></i><i></i><i></i></span>
         <div class="launcher__hero">
-          <img class="launcher__cover" src="{{lead.art}}" alt="" decoding="async" width="600" height="900">
-          <div class="launcher__about">
-            <strong class="launcher__name">{{lead.name}}</strong>
-            {{#if lead.lastLabel}}<span class="launcher__meta">last played <b>{{lead.lastLabel}}</b></span>{{/if}}
-            {{#if lead.hours}}<span class="launcher__meta">played <b>{{lead.hours}}</b></span>{{/if}}
-            {{#if lead.doneLabel}}<span class="launcher__meta">achievements <b>{{lead.doneLabel}}</b></span><span class="launcher__progress"><span style="width: {{lead.done}}%"></span></span>{{/if}}
-            <span class="launcher__play" aria-hidden="true">&#9654; PLAY</span>
-          </div>
-        </div>
-        <ol class="launcher__row" aria-label="Recently played">
           {{#each row}}
-          <li class="launcher__tile{{#if on}} launcher__tile--on{{/if}}"><img src="{{art}}" alt="{{name}}" loading="lazy" decoding="async" width="600" height="900"><span>{{name}}</span></li>
+          <div class="launcher__slide" style="--i: {{i}}">
+            <img class="launcher__cover" src="{{art}}" alt="" decoding="async" width="600" height="900"{{#unless @first}} loading="lazy"{{/unless}}>
+            <div class="launcher__about">
+              <strong class="launcher__name">{{name}}</strong>
+              {{#if lastLabel}}<span class="launcher__meta">last played <b>{{lastLabel}}</b></span>{{/if}}
+              {{#if hours}}<span class="launcher__meta">played <b>{{hours}}</b></span>{{/if}}
+              {{#if doneLabel}}<span class="launcher__meta">achievements <b>{{doneLabel}}</b></span><span class="launcher__progress"><span style="width: {{done}}%"></span></span>{{/if}}
+              <span class="launcher__play" aria-hidden="true">&#9654; PLAY</span>
+            </div>
+          </div>
+          {{/each}}
+        </div>
+        <ol class="launcher__row" aria-hidden="true">
+          {{#each row}}
+          <li class="launcher__tile" style="--i: {{i}}"><img src="{{art}}" alt="" loading="lazy" decoding="async" width="600" height="900"></li>
           {{/each}}
         </ol>
       </div>
