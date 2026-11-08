@@ -18,8 +18,8 @@
 
     {{!-- Listening (lifeSections.listening, tasks/life-shelves.mjs): the big numbers, the chart (top artists by
           plays), the loves poster (artists set by how many of their songs I liked), year by year (the recaps),
-          the stayers, my playlists as tapes, the mixtape (latest likes), on repeat, and the crate (albums as CD jewel
-          cases). Audiobooks are Reading's. --}}
+          the stayers, my playlists as tapes, the mixtape (latest likes), on repeat, the crate (albums as CD jewel
+          cases), hours a month (music and podcasts stacked) and the podcast feed. Audiobooks are Reading's. --}}
     {{#with section}}
     {{> life-section-head snapTop="TURN IT" snapAccent="UP"}}
     {{#if empty}}
@@ -67,6 +67,33 @@
         <span class="music-stayers__title">{{title}}</span>
         <span class="music-stayers__by">{{by}}</span>
         <span class="music-stayers__years">{{years}}</span>
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+
+    {{#if earBars.length}}
+    <h2 class="fit-header">in my <span>ears</span>.</h2>
+    <p class="watch-note">Hours a month, the last three years: music (each play counted at the song's length){{#if earPodcasts}} and podcasts{{/if}}.</p>
+    {{#if earPodcasts}}<p class="ear-legend" aria-hidden="true"><span class="ear-legend__k ear-legend__k--music">music</span><span class="ear-legend__k ear-legend__k--pod">podcasts</span></p>{{/if}}
+    <ol class="ear-months ear-months--stack" aria-label="Hours of music and podcasts a month">
+      {{#each earBars}}
+      <li class="ear-months__m{{#if newYear}} ear-months__m--new{{/if}}" title="{{title}}"><span class="ear-months__pod" style="--pct: {{podcast}}%"></span><span class="ear-months__fill" style="--pct: {{music}}%"></span>{{#if newYear}}<span class="ear-months__y">{{year}}</span>{{/if}}</li>
+      {{/each}}
+    </ol>
+    {{/if}}
+
+    {{#if podcasts.length}}
+    <h2 class="fit-header">the <span>feed</span>.</h2>
+    <p class="watch-note">The podcasts, most episodes first, whichever app I heard them in. Pointing at a cover lifts it.</p>
+    <ol class="pod-feed" aria-label="Podcasts, most episodes first">
+      {{#each podcasts}}
+      <li class="pod-feed__show pod-feed__show--ink{{ink}}" tabindex="0">
+        <span class="pod-feed__cover" aria-hidden="true"><span class="pod-feed__name-art">{{name}}</span><span class="pod-feed__badge">{{episodes}}</span></span>
+        <span class="pod-feed__name">{{name}}</span>
+        <span class="pod-feed__meta">{{episodes}} {{#if one}}episode{{else}}episodes{{/if}}{{#if hours}} · {{hours}}{{/if}}</span>
+        <span class="pod-feed__bar" aria-hidden="true"><span style="width: {{pct}}%"></span></span>
+        <span class="pod-feed__span">{{span}}{{#if both}} · in two apps{{/if}}</span>
       </li>
       {{/each}}
     </ol>

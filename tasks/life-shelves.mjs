@@ -200,6 +200,10 @@ export function listeningView(sec) {
   const maxLoves = Math.max(1, ...loved.map((a) => num(a.loves) ?? 0));
   const repeatDays = num(sec.repeatDays) ?? 0;
   const crate = list(sec.crate).filter((c) => str(c.title));
+  const ear = list(sec.earMonths).filter((x) => /^\d{4}-\d{2}$/.test(String(x.month || '')));
+  const earMax = Math.max(1, ...ear.map((x) => (num(x.musicHours) ?? 0) + (num(x.podcastHours) ?? 0)));
+  const pods = list(sec.podcasts).filter((x) => str(x.name));
+  const podMax = Math.max(1, ...pods.map((x) => num(x.episodes) ?? 0));
   const tapes = list(sec.playlists).filter((p) => str(p.title));
   const years = list(sec.recapYears).filter((y) => num(y.year) && list(y.songs).length);
   return {
@@ -257,6 +261,19 @@ export function listeningView(sec) {
       title: str(t.title), by: str(t.by), art: shelfArt(t.art),
       years: (Array.isArray(t.years) ? t.years : []).filter((v) => num(v)).join(' · '),
     })),
+    podcasts: pods.map((x, i) => {
+      const since = monthOf(x.since), last = monthOf(x.last);
+      return { name: str(x.name), episodes: group(num(x.episodes) ?? 0), one: num(x.episodes) === 1, hours: hoursLabel(x.hours),
+        span: since && last && since !== last ? `${since} to ${last}` : since, both: (num(x.apps) ?? 0) > 1, ink: i % 5,
+        pct: Math.round(((num(x.episodes) ?? 0) / podMax) * 100) };
+    }),
+    earBars: ear.map((x) => {
+      const mo = String(x.month), mh = num(x.musicHours) ?? 0, ph = num(x.podcastHours) ?? 0;
+      return { newYear: mo.endsWith('-01'), year: mo.slice(0, 4),
+        title: `${monthOf(mo)}: ${hoursLabel(mh) || '0 h'} of music${ph ? `, ${hoursLabel(ph)} of podcasts` : ''}`,
+        music: Math.round((mh / earMax) * 100), podcast: Math.round((ph / earMax) * 100) };
+    }),
+    earPodcasts: ear.some((x) => (num(x.podcastHours) ?? 0) > 0),
     mixtape: list(sec.latestLoves).filter((t) => str(t.title)).slice(0, 12).map((t, i) => ({
       n: i + 1, side: i < 6 ? 'A' : 'B', title: str(t.title), by: str(t.by), art: shelfArt(t.art),
     })),
