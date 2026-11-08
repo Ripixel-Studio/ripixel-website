@@ -1,0 +1,32 @@
+<!-- Context: lifeSections.games.shelves [{box, boxes}] (a shelf per kind of box), each box {name, art, box, league, idle, badge, quip, hours, lastLabel, done, doneLabel, count, tilt, ink}]
+     (tasks/media-view.mjs boxesView) — the big-box shelf, League first: the box is what the wall's weight says (big, box, dvd,
+     jewel), its side panel shows the depth, a completion sticker says how finished, the claim is a banner across the corner,
+     and James's own line is a note stuck under the shelf. Pointing at a box (or tabbing to it) lifts it and turns it round. -->
+<div class="gshelf">
+  {{#each this}}
+  <ol class="gshelf__row gshelf__row--{{box}}" aria-label="{{#if @first}}The games, most played first{{else}}More games{{/if}}">
+    {{#each boxes}}
+    <li class="gbox gbox--{{box}} gbox--ink{{ink}}{{#unless art}} gbox--type{{/unless}}{{#if idle}} gbox--idle{{/if}}{{#if quip}} gbox--quip{{/if}}" style="--tilt: {{tilt}}deg" tabindex="0">
+      <span class="gbox__body">
+        <span class="gbox__front">
+          <span class="gbox__name"{{#if art}} aria-hidden="true"{{/if}}>{{name}}</span>
+          {{#if art}}<img class="gbox__art" src="{{art}}" alt="{{name}}" loading="lazy" decoding="async" width="600" height="900">{{/if}}
+          {{#if doneLabel}}<span class="gbox__done" aria-hidden="true"><b>{{doneLabel}}</b>complete</span>{{/if}}
+          {{#if badge}}<span class="gbox__badge{{#if idle}} gbox__badge--idle{{/if}}">{{badge}}</span>{{/if}}
+        </span>
+        <span class="gbox__side" aria-hidden="true"><span>{{name}}</span></span>
+      </span>
+      {{#if quip}}<span class="gbox__quip">“{{quip}}”</span>{{/if}}
+      <span class="gbox__back" role="tooltip">
+        <strong>{{name}}</strong>
+        {{#if hours}}<span>played <b>{{hours}}</b></span>{{/if}}
+        {{#if lastLabel}}<span>last played {{lastLabel}}</span>{{/if}}
+        {{#if count}}<span>{{count}} achievements{{#if doneLabel}} · {{doneLabel}}{{/if}}</span>{{/if}}
+        {{#if idle}}<span>an idle game, left running: its hours do not count</span>{{/if}}
+        {{#if quip}}<span class="gbox__back-quip">“{{quip}}”</span>{{/if}}
+      </span>
+    </li>
+    {{/each}}
+  </ol>
+  {{/each}}
+</div>

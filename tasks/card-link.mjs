@@ -123,7 +123,7 @@ export function auditHtml(html) {
 }
 
 /** Wall tiles with their own hover (straighten to be read): decorative, so never a link. */
-export const DECORATIVE = ['games-tile', 'watch-tile', 'stub', 'book-spine', 'cd', 'pl-tape'];
+export const DECORATIVE = ['gbox', 'vcase', 'stub', 'book-spine', 'cd', 'pl-tape'];
 
 /** Hover rules that may move or lift something that is not a card-link, and why. */
 export const HOVER_ALLOW = {
@@ -133,8 +133,8 @@ export const HOVER_ALLOW = {
   'fit-more': 'a button-styled link under the latest sessions',
   'ss-filter': 'the sessions list filter chips (buttons)',
   // Decorative, non-clickable: straighten to be read, never a link (auditHtml checks there is no link inside).
-  'games-tile': 'decorative wall tile, straightens to be read',
-  'watch-tile': 'decorative wall tile, straightens to be read',
+  'gbox': 'a game box on the games shelf, lifted to show its back',
+  'vcase': 'a DVD case or box set on the rental wall, lifted to show its back',
   'stub': 'decorative ticket stub, straightens to be read',
   'book-spine': 'a spine on the reading shelf, pulled out to show its cover card',
   'cd': 'a CD case in the listening crate, straightens to be read',
