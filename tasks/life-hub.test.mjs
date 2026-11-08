@@ -374,7 +374,7 @@ test('no league', async () => {
     const full = await render(buildSection('games', fixture.sections.games, now));
     assert.ok(full.indexOf('games-league') > 0 && full.indexOf('games-league') < full.indexOf('games-wall'), 'League comes first');
     assert.match(full, /Gold II · 54 LP/);
-    assert.match(full, /1\.2 % of players/);
+    assert.match(full, /<small>1 in<\/small> <b>83<\/b>/);   // 1.2 % of players: the trophy reads it as odds
     // the ribbon comes from the export's claim; an idle tile says so; champion months carry their icon
     assert.match(full, /games-tile__badge">most played, by far</);
     assert.match(full, /games-tile__badge games-tile__badge--idle">left running</);
@@ -453,7 +453,7 @@ test('code view splits', () => {
   assert.deepEqual(plain, {
     name: 'sample-tool', description: 'A small invented command-line helper that tidies folders of sample files.',
     years: '2025–now', lastCommit: 'Oct 2026', commits: '1,212', commitsUnit: 'commits', languages: ['Python', 'Shell'],
-    url: 'https://github.com/Ripixel-Studio/sample-tool', started: '2025-08-02',
+    url: 'https://github.com/Ripixel-Studio/sample-tool', spark: null, started: '2025-08-02',
   });
   assert.equal(card.name, 'sample-tool');
   assert.equal(card.bar, 100);

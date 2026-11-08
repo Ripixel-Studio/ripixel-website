@@ -1,0 +1,43 @@
+/* /life/code: the boom (commits a year), the week's rhythm, a project's last 12 months (tasks/code-view.mjs). */
+
+.code-boom {
+  display: grid; grid-template-columns: minmax(220px, 1fr) 2.2fr; gap: 28px; align-items: end;
+  margin: 0 0 26px;
+}
+.code-boom__story { font-family: var(--f-scrib); font-size: clamp(26px, 3.2vw, 36px); line-height: 1.15; margin: 0 0 12px; }
+.code-boom__story b { color: var(--ink-green); font-weight: 700; }
+.code-boom__cols {
+  list-style: none; margin: 0; padding: 16px 16px 0;
+  display: flex; align-items: flex-end; gap: 8px; height: 260px;
+  background: #fff; border: 2px solid var(--ink); box-shadow: 6px 6px 0 var(--ink-green);
+  position: relative;
+}
+.code-boom__col { flex: 1 1 0; height: calc(100% - 26px); display: flex; flex-direction: column; justify-content: flex-end; position: relative; min-width: 0; }
+.code-boom__bar { display: block; min-height: 2px; background: color-mix(in srgb, var(--ink-green) 35%, #fff); border: 1.5px solid var(--ink); border-bottom: 0; }
+.code-boom__col--none .code-boom__bar { border: 0; border-top: 2px dotted color-mix(in srgb, var(--ink) 40%, transparent); }
+.code-boom__col--now .code-boom__bar { background: var(--ink-green); }
+.code-boom__n { font-family: var(--f-disp); font-size: 15px; text-align: center; line-height: 1; margin-bottom: 4px; }
+.code-boom__col--now .code-boom__n { font-size: 26px; color: var(--ink-green); }
+.code-boom__year { position: absolute; top: calc(100% + 6px); left: 0; right: 0; text-align: center; font-family: var(--f-mono); font-size: 10px; }
+.code-boom__col--now .code-boom__year { font-weight: 700; }
+
+.code-week { display: flex; align-items: flex-end; gap: 28px; flex-wrap: wrap; margin: 0 0 34px; }
+.code-week__story { font-family: var(--f-scrib); font-size: 26px; line-height: 1.15; margin: 0; max-width: 24ch; }
+.code-week__story b { color: var(--ink-green); font-weight: 700; }
+.code-week__days { list-style: none; margin: 0; padding: 0 0 18px; display: flex; align-items: flex-end; gap: 6px; height: 110px; }
+.code-week__day { width: 34px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; position: relative; }
+.code-week__bar { display: block; background: color-mix(in srgb, var(--ink-green) 30%, #fff); border: 1.5px solid var(--ink); }
+.code-week__day--top .code-week__bar { background: var(--ink-green); }
+.code-week__label { position: absolute; top: 100%; left: 0; right: 0; text-align: center; font-family: var(--f-mono); font-size: 10px; padding-top: 3px; }
+.code-week__day--weekend .code-week__label { font-weight: 700; }
+
+.code-card__spark { display: flex; align-items: flex-end; gap: 2px; height: 22px; border-bottom: 1.5px solid var(--ink); }
+.code-card__spark i { flex: 1 1 0; background: var(--ink-green); min-width: 0; }
+
+@media (max-width: 760px) {
+  .code-boom { grid-template-columns: 1fr; gap: 10px; }
+  .code-boom__cols { height: 200px; gap: 4px; padding: 12px 10px 0; }
+  .code-boom__n { font-size: 11px; }
+  .code-boom__col--now .code-boom__n { font-size: 18px; }
+  .code-week__day { width: 28px; }
+}

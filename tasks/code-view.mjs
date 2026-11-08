@@ -44,8 +44,11 @@ const longDay = (d) => `${DAYS[weekday(d)]} ${d.getUTCDate()} ${MONTHS[d.getUTCM
  * @param {any} commitsByDay [{day, n}]
  * @param {string} endDay YYYY-MM-DD: the last day drawn (the export's `updated`)
  * @param {number} [weeks] columns drawn (the hub's mini grid draws fewer)
+ * @param {{noun?: [string, string], cuts?: number[]}} [opts] another daily count drawn the same way
+ *   (body's steps): its noun, and fixed level cuts in place of the quartiles
  */
-export function commitGrid(commitsByDay, endDay, weeks = WEEKS) {
+export function commitGrid(commitsByDay, endDay, weeks = WEEKS, opts = {}) {
+  const [one, many] = opts.noun || ['commit', 'commits'];
   if (!Array.isArray(commitsByDay) || !commitsByDay.length || !DAY.test(String(endDay))) return null;
   if (!Number.isInteger(weeks) || weeks < 1 || weeks > WEEKS) return null;
   const end = utc(endDay);
@@ -63,7 +66,7 @@ export function commitGrid(commitsByDay, endDay, weeks = WEEKS) {
   // four levels: quartiles of the days that had any commits
   const busy = [...counts.values()].sort((a, b) => a - b);
   const q = (/** @type {number} */ f) => busy[Math.min(busy.length - 1, Math.ceil(f * busy.length) - 1)];
-  const cuts = [q(0.25), q(0.5), q(0.75)];
+  const cuts = Array.isArray(opts.cuts) && opts.cuts.length === 3 ? opts.cuts : [q(0.25), q(0.5), q(0.75)];
   const level = (/** @type {number} */ n) => (n <= 0 ? 0 : n <= cuts[0] ? 1 : n <= cuts[1] ? 2 : n <= cuts[2] ? 3 : 4);
 
   const cells = [];
@@ -94,7 +97,7 @@ export function commitGrid(commitsByDay, endDay, weeks = WEEKS) {
     cells.push({
       day: key, n, col, row, level: level(n),
       x: LEFT + col * STEP, y: TOP + row * STEP,
-      title: `${n ? `${group(n)} ${n === 1 ? 'commit' : 'commits'}` : 'No commits'}, ${longDay(d)}`,
+      title: `${n ? `${group(n)} ${n === 1 ? one : many}` : `No ${many}`}, ${longDay(d)}`,
     });
   }
   const t = /** @type {{n: number, d: Date}} */ (top);
@@ -206,4 +209,56 @@ export function projectCards(projects, series, endDay) {
   const ticks = [];
   for (let y = from; y <= to; y++) ticks.push({ label: String(y), short: `’${String(y).slice(2)}`, left: pct((y - from) * 12) });
   return { cards, axis: { from, to, ticks }, nowPct };
+}
+
+/**
+ * Every year's commits as columns, first commit to now (an empty year is a column of nothing), and
+ * how this year compares with all the years before it together.
+ * @param {any} commitsByMonth [{month, n}] @param {string} endDay YYYY-MM-DD
+ */
+export function yearsView(commitsByMonth, endDay) {
+  const rows = (Array.isArray(commitsByMonth) ? commitsByMonth : []).filter((m) => m && /^\d{4}-\d{2}$/.test(String(m.month)) && num(m.n) != null);
+  if (!rows.length || !DAY.test(String(endDay))) return null;
+  /** @type {Map<number, number>} */
+  const by = new Map();
+  for (const m of rows) by.set(+m.month.slice(0, 4), (by.get(+m.month.slice(0, 4)) ?? 0) + m.n);
+  const end = +endDay.slice(0, 4);
+  const first = Math.min(...by.keys());
+  if (end - first < 2) return null;
+  const top = Math.max(1, ...by.values());
+  const cols = [];
+  for (let y = first; y <= end; y++) {
+    const n = by.get(y) ?? 0;
+    cols.push({ year: String(y), short: `’${String(y).slice(2)}`, n: group(n), h: r1((100 * n) / top), now: y === end, none: n === 0 });
+  }
+  const now = by.get(end) ?? 0;
+  const before = [...by.entries()].filter(([y]) => y < end).reduce((a, [, n]) => a + n, 0);
+  const times = before > 0 ? now / before : 0;
+  return {
+    cols, now: group(now), before: group(before), year: String(end), since: String(first),
+    times: times >= 2 ? `${r1(times)}×` : '',
+  };
+}
+
+/** Commits by weekday over the daily window, Monday first, the busiest marked. @param {any} commitsByDay [{day, n}] */
+export function weekdaysView(commitsByDay) {
+  const rows = (Array.isArray(commitsByDay) ? commitsByDay : []).filter((r) => r && DAY.test(String(r.day)) && num(r.n) != null && r.n > 0);
+  if (rows.length < 14) return null;
+  const sums = [0, 0, 0, 0, 0, 0, 0];
+  for (const r of rows) sums[weekday(utc(r.day))] += r.n;
+  const top = Math.max(...sums);
+  const busiest = sums.indexOf(top);
+  const NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  return {
+    busiest: NAMES[busiest], quietest: NAMES[sums.indexOf(Math.min(...sums))],
+    days: sums.map((n, i) => ({ label: DAYS[i], n: group(n), h: r1((100 * n) / (top || 1)), top: i === busiest, weekend: i >= 5 })),
+  };
+}
+
+/** A project's last 12 months as bar heights against its own busiest month. @param {unknown} recent */
+export function sparkOf(recent) {
+  const xs = Array.isArray(recent) ? recent.map((n) => num(n) ?? 0) : [];
+  if (xs.length !== 12 || !xs.some((n) => n > 0)) return null;
+  const top = Math.max(...xs);
+  return xs.map((n) => ({ h: n ? Math.max(6, r1((100 * n) / top)) : 0, n }));
 }

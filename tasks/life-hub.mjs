@@ -20,7 +20,8 @@
 
 import { lineChart, stackedShare, clockBars, columnBars } from './chart-axes.mjs';
 import { cleanPoints } from './route-map.mjs';
-import { commitGrid, projectCards } from './code-view.mjs';
+import { commitGrid, projectCards, yearsView, weekdaysView, sparkOf } from './code-view.mjs';
+import { recompView, engineView, nightsView, stepsView } from './body-view.mjs';
 import { readingView, listeningView, shelfArt } from './life-shelves.mjs';
 
 export const SECTION_ORDER = ['fitness', 'body', 'games', 'code', 'watching', 'listening', 'reading', 'live'];
@@ -219,7 +220,8 @@ function bodyView(/** @type {any} */ sec) {
       weeklyChart(weekly, 'bodyFatPct', 'Body fat', '%', 1),
       weeklyChart(weekly, 'restingHr', 'Resting heart rate', 'bpm'),
       weeklyChart(weekly, 'hrvMs', 'HRV', 'ms'),
-      weeklyChart(weekly, 'vo2Max', 'VO₂ max', 'ml/kg/min', 1),
+      // VO2 max stopped coming from the tracker in June: a chart of one or two weeks is the gauge's job
+      column(weekly, 'vo2Max').filter((v) => v != null).length >= 6 && weeklyChart(weekly, 'vo2Max', 'VO₂ max', 'ml/kg/min', 1),
       weeklyChart(weekly, 'spo2Pct', 'SpO₂', '%', 1),
       weeklyChart(weekly, 'breathsPerMin', 'Breathing rate', 'breaths/min', 1),
     ].filter(Boolean),
@@ -269,7 +271,13 @@ function bodyView(/** @type {any} */ sec) {
     ].filter(Boolean),
   });
 
-  return { measures, sleep: sleep || null, food: food || null, movement: movement || null, measurements: measurementsView(sec.measurements) };
+  const endDay = /^\d{4}-\d{2}-\d{2}$/.test(String(sec.updated || '')) ? String(sec.updated) : new Date().toISOString().slice(0, 10);
+  if (sleep) sleep.nights = nightsView(s?.nights);
+  if (movement) movement.steps = stepsView(mv?.steps, endDay);
+  return {
+    measures, sleep: sleep || null, food: food || null, movement: movement || null, measurements: measurementsView(sec.measurements),
+    recomp: recompView(sec.journey), engine: engineView(sec.journey, l),
+  };
 }
 
 // ─── games (C6) ───
@@ -447,6 +455,9 @@ function gamesView(sec) {
     // the typographic tile's ink (shown when there is no art, or it fails to load): cycled, so neighbours differ
     ink: i % 5,
   }));
+  // achievements name their game; its cover comes from the wall (or recently played) by name
+  const arts = new Map([...list(sec.recent), ...list(sec.wall)].filter((g) => g.name && safeArt(g.art)).map((g) => [String(g.name), safeArt(g.art)]));
+  const artOf = (/** @type {unknown} */ name) => arts.get(String(name)) || '';
   return {
     stats: gamesStats(sec),
     idleNote: num(sec.allTime?.idle) ? `Idle games left running don't count: another ${group(/** @type {number} */ (num(sec.allTime.idle)))}h.` : '',
@@ -457,8 +468,14 @@ function gamesView(sec) {
     league: leagueView(sec.league),
     recent: list(sec.recent).filter((g) => g.name).map((g) => ({ name: String(g.name), hours: num(g.hours) != null ? hours(g.hours) : '', art: safeArt(g.art) })),
     achieved: num(a.unlocked) != null && num(a.total) ? `${group(a.unlocked)} of ${group(a.total)}` : '',
-    rarest: list(a.rarest).filter((r) => r.name && r.game && num(r.pct) != null).map((r) => ({ game: String(r.game), name: String(r.name), pct: one(r.pct) })),
-    completion: list(a.completion).filter((c) => c.game && num(c.pct) != null).map((c) => ({ game: String(c.game), pct: Math.max(0, Math.min(100, Math.round(c.pct))) })),
+    rarest: list(a.rarest).filter((r) => r.name && r.game && num(r.pct) != null && r.pct > 0).map((r, i) => ({
+      game: String(r.game), name: String(r.name), pct: one(r.pct), art: artOf(r.game), rank: i + 1,
+      oneIn: group(100 / r.pct), tier: r.pct < 5 ? 'gold' : r.pct < 10 ? 'silver' : 'bronze',
+    })),
+    completion: list(a.completion).filter((c) => c.game && num(c.pct) != null).map((c) => ({
+      game: String(c.game), pct: Math.max(0, Math.min(100, Math.round(c.pct))), todo: 100 - Math.max(0, Math.min(100, Math.round(c.pct))), art: artOf(c.game),
+      count: num(c.unlocked) != null && num(c.total) ? `${group(c.unlocked)} of ${group(c.total)}` : '',
+    })),
   };
 }
 
@@ -742,6 +759,7 @@ function codeView(sec) {
           commitsUnit: p.commits === 1 ? 'commit' : 'commits',
           languages: (Array.isArray(p.languages) ? p.languages : []).filter((l) => typeof l === 'string' && l),
           url: typeof p.url === 'string' && REPO_URL.test(p.url) ? p.url : '',
+          spark: sparkOf(p.recent),
           started,
         },
       };
@@ -757,6 +775,8 @@ function codeView(sec) {
     commits: lineChart(months.map((m) => num(m.n) ?? 0), { label: 'Commits', unit: 'a month', x: { kind: 'months', months: months.map((m) => String(m.month || '')) } }),
     languages,
     grid: commitGrid(sec.commitsByDay, endDay),
+    years: yearsView(months, endDay),
+    weekdays: weekdaysView(sec.commitsByDay),
     timeline: { axis: drawn.axis, nowPct: drawn.nowPct },
     active: live.map((p, i) => ({ ...p.view, card: drawn.cards[i] })),
   };
@@ -1284,6 +1304,12 @@ export function lifeHubTask(config = {}) {
         SECTION_ORDER.filter((n) => n !== 'fitness').map((n) => [n, buildSection(n, idx?.sections?.[n], now, outs)]),
       );
       const lifeHub = buildHub(idx, g.fitnessLife, now, g.fitnessIndex);
+      // body's own insights sit on its page as notes (the hub strip keeps showing every section's)
+      if (lifeSections.body && !lifeSections.body.empty) {
+        lifeSections.body.notes = (Array.isArray(idx?.insights) ? idx.insights : [])
+          .filter((/** @type {any} */ r) => r && r.section === 'body' && typeof r.text === 'string' && r.text.length > 0 && r.text.length <= 160)
+          .map((/** @type {any} */ r) => r.text).slice(0, 3);
+      }
       ctx.logger.info(`Life hub: ${lifeHub.cards.filter((c) => !c.empty).length}/${lifeHub.cards.length} sections have data`);
       return { lifeHub, ...homeLifeGlobals(lifeHub), lifeSections, lifeFacts: lifeFacts(idx?.facts),
         lifeInsights: lifeInsights(idx),
