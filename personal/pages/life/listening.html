@@ -18,8 +18,8 @@
 
     {{!-- Listening (lifeSections.listening, tasks/life-shelves.mjs): the big numbers, the chart (top artists by
           plays), the loves poster (artists set by how many of their songs I liked), year by year (the recaps),
-          the stayers, my playlists as tapes, the mixtape (latest likes), on repeat, the crate (albums as CD jewel
-          cases), then audiobook hours a month. --}}
+          the stayers, my playlists as tapes, the mixtape (latest likes), on repeat, and the crate (albums as CD jewel
+          cases). Audiobooks are Reading's. --}}
     {{#with section}}
     {{> life-section-head snapTop="TURN IT" snapAccent="UP"}}
     {{#if empty}}
@@ -162,15 +162,6 @@
     </ol>
     {{/if}}
 
-    {{#if monthBars.length}}
-    <h2 class="fit-header">in my <span>ears</span>.</h2>
-    <p class="watch-note">Hours of audiobooks a month, the last three years. The books themselves are on <a href="/life/reading">Reading</a>.</p>
-    <ol class="ear-months" aria-label="Audiobook hours a month">
-      {{#each monthBars}}
-      <li class="ear-months__m{{#if newYear}} ear-months__m--new{{/if}}" style="--pct: {{pct}}%" title="{{title}}"><span class="ear-months__fill"></span>{{#if newYear}}<span class="ear-months__y">{{year}}</span>{{/if}}</li>
-      {{/each}}
-    </ol>
-    {{/if}}
     {{/if}}
     {{/with}}
 
