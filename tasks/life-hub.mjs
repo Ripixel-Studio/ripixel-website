@@ -23,6 +23,7 @@ import { cleanPoints } from './route-map.mjs';
 import { commitGrid, projectCards, yearsView, weekdaysView, sparkOf } from './code-view.mjs';
 import { recompView, engineView, nightsView, stepsView } from './body-view.mjs';
 import { readingView, listeningView, shelfArt } from './life-shelves.mjs';
+import { tvView, rackView, boxesView, shelvesOf, monitorView } from './media-view.mjs';
 
 export const SECTION_ORDER = ['fitness', 'body', 'games', 'code', 'watching', 'listening', 'reading', 'live'];
 /** @param {string} name */
@@ -450,6 +451,8 @@ function gamesView(sec) {
   const wall = list(sec.wall).filter((t) => typeof t.name === 'string' && t.name.trim()).map((t, i) => ({
     name: t.name, art: safeArt(t.art), weight: Math.min(4, Math.max(1, Math.round(num(t.weight) ?? 1))), tilt: tiltOf(t.name),
     quip: typeof t.quip === 'string' ? t.quip.trim() : '', league: t.source === 'league', idle: t.idle === true,
+    hours: num(t.hours) != null && t.hours > 0 ? hoursText(t.hours) : '', last: /^\d{4}-\d{2}$/.test(String(t.last || '')) ? String(t.last) : '',
+    lastLabel: monthLabel(String(t.last || '')),
     // an idle game (left running) never carries a claim, only the reason it is small
     badge: t.idle === true ? 'left running' : (CLAIMS[t.claim] || ''),
     // the typographic tile's ink (shown when there is no art, or it fails to load): cycled, so neighbours differ
@@ -651,24 +654,11 @@ function wallView(sec) {
       // the stamps say "big screen" and the service already
       reason: (t.bigScreen === true && t.reason === 'on the big screen') || PLACE_ONLY.test(String(t.reason || '')) ? '' : String(t.reason || ''),
       month: String(t.month || ''), monthLabel: monthLabel(t.month), year: num(t.year) ?? '',
-      seasonsLabel: seasonsLabel(t.seasons), episodes: num(t.episodes) != null ? plural(/** @type {number} */ (num(t.episodes)), 'episode', 'episodes') : '',
+      seasonsLabel: seasonsLabel(t.seasons), seasonCount: Array.isArray(t.seasons) ? t.seasons.filter((n) => num(n) != null).length : 0,
+      firstLabel: t.firstMonth && t.firstMonth !== t.month ? monthLabel(t.firstMonth) : '',
+      episodes: num(t.episodes) != null ? plural(/** @type {number} */ (num(t.episodes)), 'episode', 'episodes') : '',
       weight: num(t.weight) === 2 ? 2 : 1, tilt: tiltOf(String(t.title)), ink: i % 5,
     }));
-}
-
-/** The wall as laid out: a year card leads each year's tiles. @param {any[]} wall */
-function wallTiles(wall) {
-  const out = [];
-  let year = '';
-  for (const t of wall) {
-    const y = t.month.slice(0, 4);
-    if (/^\d{4}$/.test(y) && y !== year) {
-      year = y;
-      out.push({ yearMark: true, year: y, count: wall.filter((x) => x.month.startsWith(y)).length });
-    }
-    out.push(t);
-  }
-  return out;
 }
 
 /** The last twelve months: mini posters (by wall key) and the counts behind them. @param {any} sec @param {any[]} wall */
@@ -796,14 +786,18 @@ export function buildSection(name, sec, now = new Date(), liveNotables = []) {
   switch (name) {
     case 'body':
       return { ...view, ...bodyView(sec) };
-    case 'games':
-      return { ...view, ...gamesView(sec) };
+    case 'games': {
+      const g = gamesView(sec);
+      const boxes = boxesView(g.wall, g.completion);
+      return { ...view, ...g, boxes, shelves: shelvesOf(boxes), monitor: monitorView(boxes) };
+    }
     case 'code':
       return { ...view, ...codeView(sec) };
     case 'watching': {
       const m = mediaView(sec);
       const wall = wallView(sec);
-      return { ...view, ...m, latest: latestOf(sec.notable), wall, wallTiles: wallTiles(wall), strip: stripView(sec, wall), channels: channelsView(sec),
+      return { ...view, ...m, latest: latestOf(sec.notable), wall,
+        tv: tvView(wall, String(now.getUTCFullYear())), racks: rackView(wall), strip: stripView(sec, wall), channels: channelsView(sec),
         stats: [
           ['This year', m.totals.year], ['This month', m.totals.month],
         ].map(([label, t]) => /** @type {any} */ (t) && Object.keys(/** @type {any} */ (t)).length ? ({

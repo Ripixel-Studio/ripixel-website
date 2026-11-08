@@ -48,13 +48,13 @@ test('auditHtml: a decorative card-tilt never holds a link or the arrow', () => 
   assert.deepEqual(auditHtml('<article class="role-card card-tilt"><p>x</p></article>'), []);
   assert.match(auditHtml('<article class="role-card card-tilt"><a href="/x">x</a></article>').join('\n'), /should be a card-link/);
   assert.match(auditHtml(`<article class="card-tilt">${ARROW}</article>`).join('\n'), /outside a card-link/);
-  assert.match(auditHtml('<li class="watch-tile"><a href="/x">x</a></li>').join('\n'), /should be a card-link/);
+  assert.match(auditHtml('<li class="vcase"><a href="/x">x</a></li>').join('\n'), /should be a card-link/);
 });
 
 test('auditCss: hover motion outside the convention is flagged, the convention and allowed ones are not', () => {
   assert.deepEqual(auditCss('.card-link:hover { rotate: 1deg; translate: -2px -2px; box-shadow: 0 0 0 red; }'), []);
   assert.deepEqual(auditCss('.card-tilt:hover { rotate: 1deg }'), []);
-  assert.deepEqual(auditCss('.games-tile:hover { transform: rotate(0) scale(1.03) } .games-tile--w1:hover { transform: none }'), []);
+  assert.deepEqual(auditCss('.gbox:hover .gbox__body { transform: translateY(-14px) } .vcase:focus-visible .vcase__body { transform: none }'), []);
   assert.deepEqual(auditCss('.x:hover { background: red } .y:hover .z { opacity: 1 }'), []);
   assert.deepEqual(auditCss('.proj-card:hover { transform: rotate(1deg) } .role-card:hover { cursor: pointer }'), ['.proj-card:hover', '.role-card:hover']);
   assert.deepEqual(auditCss('@media (x) { .hub-card:hover { box-shadow: 1px 1px 0 red } }'), ['.hub-card:hover']);

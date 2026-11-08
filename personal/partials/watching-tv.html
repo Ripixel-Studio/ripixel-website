@@ -1,0 +1,29 @@
+<!-- Context: lifeSections.watching.tv {channels [{ch, i, title, poster, osd, stamp}], n, count, thisYear, year} (tasks/media-view.mjs
+     tvView) — the telly at the top of the page: the newest posters are the channels the screen flicks through (pillarboxed
+     over a blur of themselves, under scanlines), with the on-screen display saying what is on; the set-top box under it
+     counts the wall. With reduced motion the screen stays on channel 01. -->
+<figure class="tv" aria-label="On the telly: {{#each channels}}{{title}}{{#unless @last}}, {{/unless}}{{/each}}">
+  <div class="tv__set">
+    <div class="tv__screen" style="--n: {{n}}">
+      {{#each channels}}
+      <div class="tv__ch" style="--i: {{i}}">
+        <span class="tv__blur" style="background-image:url('{{poster}}')"></span>
+        <img class="tv__poster" src="{{poster}}" alt="" decoding="async" width="342" height="513"{{#unless @first}} loading="lazy"{{/unless}}>
+        <span class="tv__osd tv__osd--ch">CH {{ch}}</span>
+        <span class="tv__osd tv__osd--bar"><b>{{title}}</b>{{#if osd}}<span>{{osd}}</span>{{/if}}</span>
+      </div>
+      {{/each}}
+      <span class="tv__glass" aria-hidden="true"></span>
+    </div>
+    <div class="tv__side" aria-hidden="true">
+      <span class="tv__knob"></span><span class="tv__knob tv__knob--small"></span>
+      <span class="tv__grille"></span>
+      <span class="tv__power"></span>
+    </div>
+  </div>
+  <div class="tv__box" aria-hidden="true">
+    <span class="tv__led"><b>{{count}}</b> on the wall</span>
+    <span class="tv__led tv__led--dim">{{year}} · {{thisYear}}</span>
+    <span class="tv__rec"></span>
+  </div>
+</figure>

@@ -1,0 +1,36 @@
+<!-- Context: lifeSections.watching.racks [{year, count, films, series, cases}] (tasks/media-view.mjs rackView) — the rental wall:
+     a rack per year, newest first, every case face out. A film is a DVD case; a series a box set whose spine (--depth px)
+     grows with its seasons and carries their numbers; a cinema trip has its ticket stub tucked in the top; a film watched
+     again is a worn case; the reason is the staff-pick card clipped to the shelf under it. Where it streamed is the
+     rental sticker. Pointing at a case (or tabbing to it) lifts it off the rack and shows its back cover. -->
+<div class="vshop">
+  {{#each this}}
+  <section class="vrack" aria-label="{{year}}: {{count}} on the wall">
+    <h3 class="vrack__sign"><span class="vrack__y">{{year}}</span><span class="vrack__n">{{films}} film{{#unless (eq films 1)}}s{{/unless}} · {{series}} series</span></h3>
+    <ol class="vrack__shelf">
+      {{#each cases}}
+      <li class="vcase vcase--{{kind}} vcase--ink{{ink}}{{#unless poster}} vcase--type{{/unless}}{{#if worn}} vcase--worn{{/if}}{{#if bigScreen}} vcase--big{{/if}}{{#if pick}} vcase--pick{{/if}}" style="--tilt: {{tilt}}deg;{{#if depth}} --depth: {{depth}}px;{{/if}}" tabindex="0">
+        <span class="vcase__body">
+          {{#if series}}<span class="vcase__spine" aria-hidden="true"><span>{{seasonsLabel}}</span></span>{{/if}}
+          <span class="vcase__front">
+            <span class="vcase__name"{{#if poster}} aria-hidden="true"{{/if}}>{{title}}</span>
+            {{#if poster}}<img class="vcase__art" src="{{poster}}" alt="{{title}}" loading="lazy" decoding="async" width="342" height="513">{{/if}}
+            {{#if stamp}}<span class="vcase__sticker watch-stamp watch-stamp--{{stamp.key}}">{{stamp.label}}</span>{{/if}}
+          </span>
+        </span>
+        {{#if bigScreen}}<span class="vcase__stub" aria-hidden="true">admit one</span>{{/if}}
+        {{#if pick}}<span class="vcase__pick">{{pick}}</span>{{/if}}
+        <span class="vcase__back" role="tooltip">
+          <strong>{{title}}</strong>
+          <span class="vcase__back-kind">{{#if series}}box set{{#if seasonsLabel}} · {{seasonsLabel}}{{/if}}{{else}}film{{#if year}} · {{year}}{{/if}}{{/if}}</span>
+          {{#if series}}{{#if episodes}}<span>{{episodes}}</span>{{/if}}{{/if}}
+          <span>{{#if firstLabel}}{{firstLabel}} – {{monthLabel}}{{else}}{{monthLabel}}{{/if}}{{#if bigScreen}} · on the big screen{{/if}}</span>
+          {{#if stamp}}<span>on {{stamp.label}}</span>{{/if}}
+          {{#if pick}}<span class="vcase__back-pick">“{{pick}}”</span>{{/if}}
+        </span>
+      </li>
+      {{/each}}
+    </ol>
+  </section>
+  {{/each}}
+</div>

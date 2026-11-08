@@ -920,7 +920,7 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
   font-size: 12px;
 }
 
-/* ─── Games (R2d.5): League first and biggest, then the cover wall ───── */
+/* ─── Games (R2d.5): League first and biggest (the monitor and the big-box shelf: life-games.css) ───── */
 .games-league {
   position: relative;
   margin: 6px 0 34px;
@@ -1039,163 +1039,6 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
 }
 .games-pool__chip small { opacity: 0.8; }
 
-/* The cover wall: a list of games laid out as a collage. Columns come from the wall's own width
-   (a container), rows from the column width at a portrait 2:3, so every tile's box is fixed before
-   any art loads. Weight 4 is 2×2, 3 is 2×1, 2 and 1 are 1×1 (1 a size smaller). */
-.games-wall-wrap { container-type: inline-size; margin: 0 0 40px; padding: 8px 4px 14px; }
-.games-wall {
-  --cols: 8;
-  --gap: 6px;
-  --ratio: 1.5;
-  --col: calc((100cqi - (var(--cols) - 1) * var(--gap)) / var(--cols));
-  counter-reset: games-wall;
-  display: grid;
-  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
-  grid-auto-rows: calc(var(--col) * var(--ratio));
-  grid-auto-flow: dense;
-  gap: var(--gap);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-@container (max-width: 940px) { .games-wall { --cols: 6; } }
-@container (max-width: 640px) { .games-wall { --cols: 4; } }
-/* phones: two columns and shorter rows, so six big tiles are not six screens */
-@container (max-width: 460px) {
-  .games-wall { --cols: 2; --ratio: 0.85; }
-  /* the top twelve only: the rest of the wall (and its art) stays off a phone */
-  .games-tile:nth-child(n+13) { display: none; }
-  .games-tile__art { object-position: 50% 20%; }
-}
-
-.games-tile {
-  counter-increment: games-wall;
-  position: relative;
-  z-index: 1;
-  margin: -6px; /* overlap the neighbours a little, like pasted-up cuttings */
-  transform: rotate(var(--tilt, 0deg));
-  transition: transform 0.15s ease;
-}
-.games-tile--w4 { grid-column: span 2; grid-row: span 2; z-index: 3; }
-.games-tile--w3 { grid-column: span 2; z-index: 2; }
-.games-tile--w1 { transform: rotate(var(--tilt, 0deg)) scale(0.86); }
-.games-tile:has(.games-tile__quip) { z-index: 5; } /* the sticker sits over the neighbours */
-.games-tile:hover { z-index: 6; transform: rotate(0deg) scale(1.03); }
-
-.games-tile__figure {
-  container-type: size;
-  position: relative;
-  height: 100%;
-  margin: 0;
-  border: 3px solid var(--ink);
-  background: var(--paper-4);
-  box-shadow: 4px 4px 0 var(--ink);
-}
-.games-tile__art {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  color: transparent; /* a broken image shows the typeset name behind it, not its alt text */
-}
-.games-tile--w3 .games-tile__art { object-position: 50% 22%; }
-
-/* The name: under the art when there is some, the whole tile when there is none */
-.games-tile__name {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: flex-end;
-  padding: 10% 9% 12%;
-  overflow: hidden;
-  font-family: var(--f-disp);
-  font-size: clamp(13px, min(15cqi, 11cqh), 60px);
-  line-height: 0.98;
-  text-transform: uppercase;
-  overflow-wrap: anywhere;
-  hyphens: auto;
-}
-.games-tile--w1 .games-tile__name { font-size: clamp(12px, min(13cqi, 10cqh), 60px); }
-.games-tile--w3 .games-tile__name { font-size: clamp(13px, min(10cqi, 15cqh), 48px); padding-right: 24%; }
-/* with a quip sticker at the foot, the name moves to the head of the tile */
-.games-tile__figure:has(.games-tile__quip) .games-tile__name { align-items: flex-start; padding-top: max(8cqh, 46px); bottom: 32cqh; padding-bottom: 0; }
-.games-tile--w3 .games-tile__figure:has(.games-tile__quip) .games-tile__name { font-size: clamp(13px, min(10cqi, 10cqh), 48px); }
-.games-tile--type .games-tile__figure::after {
-  /* the issue number, top right, like a cover line */
-  content: '№ ' counter(games-wall);
-  content: '№ ' counter(games-wall) / '';
-  position: absolute;
-  top: 7px;
-  right: 8px;
-  font-family: var(--f-mono);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-}
-.games-tile--ink0 .games-tile__figure { background: var(--ink-magenta) radial-gradient(circle, rgba(23,19,17,0.28) 1px, transparent 1.5px) 0 0 / 6px 6px; color: var(--paper-4); }
-.games-tile--ink1 .games-tile__figure { background: var(--ink-yellow); color: var(--ink); }
-.games-tile--ink2 .games-tile__figure { background: var(--ink); color: var(--ink-yellow); }
-.games-tile--ink3 .games-tile__figure { background: var(--paper-4); color: var(--ink); }
-.games-tile--ink3 .games-tile__name { text-shadow: 2px 2px 0 var(--ink-magenta); }
-.games-tile--ink4 .games-tile__figure { background: var(--ink-blue) radial-gradient(circle, rgba(255,252,239,0.22) 1px, transparent 1.5px) 0 0 / 6px 6px; color: var(--paper-4); }
-
-/* tape on the big ones */
-.games-tile--w4 .games-tile__figure::before,
-.games-tile--w3 .games-tile__figure::before {
-  content: '';
-  position: absolute;
-  z-index: 2;
-  top: -11px;
-  left: calc(50% - 34px);
-  width: 68px;
-  height: 20px;
-  background: rgba(242, 193, 60, 0.78);
-  border-left: 1px dashed rgba(23,19,17,0.25);
-  border-right: 1px dashed rgba(23,19,17,0.25);
-  transform: rotate(-4deg);
-}
-
-.games-tile__badge {
-  position: absolute;
-  z-index: 3;
-  top: 10px;
-  left: -8px;
-  padding: 3px 8px;
-  background: var(--ink-magenta);
-  color: var(--paper-4);
-  border: 2px solid var(--ink);
-  font-family: var(--f-mono);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  transform: rotate(-3deg);
-}
-
-/* an idle game left running: a quieter label, not a claim */
-.games-tile__badge--idle { background: var(--paper-4); color: var(--ink); border-style: dashed; font-size: 10px; transform: rotate(2deg); }
-
-/* James's one-liner, stuck on */
-.games-tile__quip {
-  position: absolute;
-  z-index: 3;
-  left: 6%;
-  right: -6px;
-  bottom: 8px;
-  padding: 4px 9px 5px;
-  background: var(--ink-yellow);
-  color: var(--ink);
-  border: 2px solid var(--ink);
-  box-shadow: 2px 2px 0 var(--ink);
-  font-family: var(--f-scrib);
-  font-size: clamp(15px, 8cqi, 24px);
-  line-height: 1.05;
-  transform: rotate(calc(var(--tilt, 0deg) * -1.5 - 1deg));
-}
-.games-tile--w1 .games-tile__quip,
-.games-tile--w2 .games-tile__quip { font-size: clamp(14px, 11cqi, 20px); }
-
 /* below the wall */
 .games-rare,
 .games-done { margin: 0; padding: 0; list-style: none; border-top: 2px solid var(--ink); }
@@ -1227,11 +1070,6 @@ body.page-life[class*="life-ink--"] { --ink-section: var(--life-ink); }
   .games-league__tier { font-size: clamp(32px, 9vw, 54px); text-shadow: 3px 3px 0 var(--life-ink); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .games-tile { transition: none; }
-  .games-tile:hover { transform: rotate(var(--tilt, 0deg)); }
-  .games-tile--w1:hover { transform: rotate(var(--tilt, 0deg)) scale(0.86); }
-}
 
 /* ─── Responsive ───────────────────────── */
 @media (max-width: 1000px) {
@@ -1576,125 +1414,8 @@ a.hub-hero__route:hover .hub-hero__route-cta { background: var(--life-ink); colo
 .outings-kind { margin-left: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--life-ink, var(--ink-section)); }
 .life-notable__big { margin-left: 6px; font-family: var(--f-mono); font-size: 10px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.08em; padding: 1px 5px; border: 1px solid var(--life-ink, var(--ink-section)); color: var(--life-ink, var(--ink-section)); white-space: nowrap; vertical-align: middle; }
 
-/* ─── /life/watching: the poster wall, the year by month, the YouTube channels ─
-   The wall follows the games cover wall: columns from the wall's own width (a container), rows from
-   the column at a 2:3 poster, so every tile's box is fixed before a poster loads. Weight 2 is 2×2. */
+/* ─── /life/watching: the year by month, the YouTube channels (the telly and the rental wall: life-watching.css) ─ */
 .watch-note { margin: -14px 0 22px; max-width: 70ch; font-family: var(--f-mono); font-size: 12px; line-height: 1.55; color: color-mix(in srgb, var(--ink) 72%, #fff); }
-
-.watch-wall-wrap { container-type: inline-size; margin: 0 0 44px; padding: 10px 4px 14px; }
-.watch-wall {
-  --cols: 7;
-  --gap: 10px;
-  --col: calc((100cqi - (var(--cols) - 1) * var(--gap)) / var(--cols));
-  display: grid;
-  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
-  grid-auto-rows: calc(var(--col) * 1.5);
-  grid-auto-flow: dense;
-  gap: var(--gap);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-@container (max-width: 940px) { .watch-wall { --cols: 5; } }
-@container (max-width: 640px) { .watch-wall { --cols: 3; --gap: 8px; } }
-@container (max-width: 420px) { .watch-wall { --cols: 2; } }
-/* phones: the newest two dozen; the rest of the wall (and its posters) stays off a phone */
-@container (max-width: 460px) { .watch-wall > li:nth-child(n+25) { display: none; } }
-
-/* a year card: where each year's tiles begin */
-.watch-year {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 10px;
-  background: var(--ink);
-  color: var(--ink-yellow);
-  border: 3px solid var(--ink);
-  box-shadow: 4px 4px 0 var(--ink-red);
-  transform: rotate(-1.5deg);
-}
-.watch-year__y { font-family: var(--f-disp); font-size: clamp(34px, 5.5vw, 64px); line-height: 0.9; }
-.watch-year__n { margin-top: 6px; font-family: var(--f-mono); font-size: 11px; color: var(--paper-4); }
-
-.watch-tile { position: relative; z-index: 1; transform: rotate(var(--tilt, 0deg)); transition: transform 0.15s ease; }
-.watch-tile--w2 { grid-column: span 2; grid-row: span 2; z-index: 2; }
-.watch-tile:hover { z-index: 6; transform: rotate(0deg) scale(1.03); }
-.watch-tile__figure {
-  container-type: size;
-  position: relative;
-  height: 100%;
-  margin: 0;
-  overflow: hidden;
-  border: 3px solid var(--ink);
-  background: var(--paper-4);
-  box-shadow: 4px 4px 0 var(--ink);
-}
-/* typeset tiles under the stamp: the title starts below it */
-.watch-tile--big.watch-tile--type .watch-tile__name { padding-top: max(22%, 38px); }
-.watch-tile--big .watch-tile__figure { box-shadow: 4px 4px 0 var(--ink-magenta), 7px 7px 0 var(--ink); }
-.watch-tile__art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; color: transparent; }
-.watch-tile__name {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: flex-start;
-  padding: 12% 9% 0;
-  overflow: hidden;
-  font-family: var(--f-disp);
-  font-size: clamp(14px, min(16cqi, 12cqh), 64px);
-  line-height: 0.98;
-  text-transform: uppercase;
-  overflow-wrap: anywhere;
-  hyphens: auto;
-}
-.watch-tile--ink0 .watch-tile__figure { background: var(--ink-red) radial-gradient(circle, rgba(23,19,17,0.28) 1px, transparent 1.5px) 0 0 / 6px 6px; color: var(--paper-4); }
-.watch-tile--ink1 .watch-tile__figure { background: var(--ink-yellow); color: var(--ink); }
-.watch-tile--ink2 .watch-tile__figure { background: var(--ink); color: var(--ink-yellow); }
-.watch-tile--ink3 .watch-tile__figure { background: var(--paper-4); color: var(--ink); }
-.watch-tile--ink4 .watch-tile__figure { background: var(--ink-blue) radial-gradient(circle, rgba(255,252,239,0.22) 1px, transparent 1.5px) 0 0 / 6px 6px; color: var(--paper-4); }
-
-/* the label: a strip of paper pasted over the foot of the poster */
-.watch-tile__cap {
-  position: absolute;
-  z-index: 2;
-  left: -3px;
-  right: 10%;
-  bottom: 8px;
-  padding: 5px 8px 6px;
-  background: var(--paper-4);
-  color: var(--ink);
-  border: 2px solid var(--ink);
-  border-left: 0;
-  font-family: var(--f-mono);
-  font-size: 10.5px;
-  line-height: 1.3;
-  transform: rotate(-1.2deg);
-}
-.watch-tile__when { display: block; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 9.5px; color: var(--ink-red); }
-.watch-tile__why { display: block; overflow-wrap: anywhere; }
-.watch-tile--w2 .watch-tile__cap { right: 22%; bottom: 14px; padding: 8px 12px 9px; font-size: 14px; }
-.watch-tile--w2 .watch-tile__when { font-size: 11px; }
-.watch-tile--w2 .watch-tile__why { font-family: var(--f-scrib); font-size: 25px; line-height: 1; margin-top: 3px; }
-
-/* "big screen": a ticket stamp */
-.watch-tile__stamp {
-  position: absolute;
-  z-index: 3;
-  top: 9px;
-  right: -6px;
-  padding: 3px 8px 3px 10px;
-  background: var(--ink-magenta);
-  color: var(--paper-4);
-  border: 2px solid var(--ink);
-  font-family: var(--f-mono);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  transform: rotate(4deg);
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 6px 50%);
-}
-.watch-tile--w2 .watch-tile__stamp { font-size: 12px; top: 14px; }
 
 /* the year by month */
 .watch-strip-wrap { margin: 0 0 44px; }
@@ -2403,34 +2124,6 @@ a.hub-hero__route:hover .hub-hero__route-cta { background: var(--life-ink); colo
 .watch-stamp--now      { --stamp-bg: #0E8A80; --stamp-fg: #FFFCEF; }
 .watch-stamp--dropout  { --stamp-bg: #FFD21F; --stamp-fg: #141111; }
 
-.watch-tile__figure > .watch-stamp {
-  position: absolute;
-  z-index: 3;
-  top: 9px;
-  left: -4px;
-  max-width: calc(100% - 14px);
-  padding: 3px 7px 2px 9px;
-  background: var(--stamp-bg);
-  color: var(--stamp-fg);
-  border: 2px solid var(--ink);
-  box-shadow: 2px 2px 0 var(--ink);
-  font-family: var(--f-disp);
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 1;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: clip;
-  transform: rotate(-4deg);
-  /* a rubber stamp's uneven ink: a fine paper grain over the colour */
-  background-image: radial-gradient(circle, rgba(255, 252, 239, 0.16) 0.8px, transparent 1.2px);
-  background-size: 4px 4px;
-}
-.watch-tile--w2 .watch-tile__figure > .watch-stamp { top: 14px; font-size: 17px; padding: 4px 10px 3px 12px; }
-/* a title set in type (no poster, or one that failed to load) starts below the stamp */
-.watch-tile__figure:has(> .watch-stamp) .watch-tile__name { padding-top: max(22%, 38px); }
-
 .watch-mini__stamp {
   position: absolute;
   z-index: 1;
@@ -2449,7 +2142,3 @@ a.hub-hero__route:hover .hub-hero__route-cta { background: var(--life-ink); colo
   text-align: center;
 }
 
-@media (max-width: 600px) {
-  .watch-tile__figure > .watch-stamp { font-size: 10.5px; padding: 2px 5px 1px 7px; top: 7px; }
-  .watch-tile--w2 .watch-tile__figure > .watch-stamp { font-size: 13px; }
-}

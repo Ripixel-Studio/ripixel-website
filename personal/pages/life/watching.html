@@ -17,24 +17,25 @@
     </svg>
 
     {{!-- Watching (lifeSections.watching): the numbers (film and TV hours are an estimate from TMDB runtimes;
-          YouTube hours, apart, an estimate from video lengths and watched bars), the poster wall (a service stamp per
-          tile), the year by month, then the YouTube channels.
+          YouTube hours, apart, an estimate from video lengths and watched bars), the telly (the newest posters as channels), the rental wall (a rack a year,
+          DVD cases and box sets, tasks/media-view.mjs), the year by month, then the YouTube channels.
           An older export with no wall falls back to the list. --}}
     {{#with section}}
     {{> life-section-head snapTop="SCREEN" snapAccent="TIME"}}
     {{#if empty}}
     {{> life-empty}}
     {{else}}
+    {{#if tv}}{{> watching-tv tv}}{{/if}}
     {{#each stats}}
     <section class="life-period">
       <h2 class="life-period__label">{{label}}</h2>
       {{> life-stats items}}
     </section>
     {{/each}}
-    {{#if wall.length}}
-    <h2 class="fit-header">the <span>wall</span>.</h2>
-    <p class="watch-note">Every film, and every series I binged, finished or kept coming back to, stamped with where I watched it. Newest first.</p>
-    {{> watching-wall wallTiles}}
+    {{#if racks.length}}
+    <h2 class="fit-header">the <span>rental wall</span>.</h2>
+    <p class="watch-note">Every film, and every series I binged, finished or kept coming back to, a rack a year, newest first. A box set is as fat as its seasons, a ticket stub means the cinema, a worn case got watched again, and the staff-pick cards say why it made the wall. Point at one for the back of the case.</p>
+    {{> watching-rack racks}}
     {{else}}
     <h2 class="fit-header">worth <span>talking about</span>.</h2>
     {{#if notable.length}}

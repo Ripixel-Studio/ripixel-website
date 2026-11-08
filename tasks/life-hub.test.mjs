@@ -361,31 +361,31 @@ test('no league', async () => {
     };
     const html = await render(g);
     assert.doesNotMatch(html, /games-league/);
-    const wall = /<ol class="games-wall"[\s\S]*?<\/ol>/.exec(html)?.[0] || '';
-    assert.equal((wall.match(/<li class="games-tile/g) || []).length, g.wall.length);
+    const wall = /<div class="gshelf">[\s\S]*?<\/div>\n/.exec(html)?.[0] || '';
+    assert.equal((wall.match(/<li class="gbox /g) || []).length, g.wall.length);
     for (const t of g.wall) assert.ok(wall.includes(t.name.replace(/'/g, '&#x27;')), t.name);
     // an art tile is a lazy image named for the game; a tile without art is the name in type
     const img = /<img [^>]*alt="Fixture Quest"[^>]*>/.exec(wall)?.[0] || '';
     assert.match(img, /loading="lazy"/);
     assert.match(img, /width="600" height="900"/);
-    assert.match(wall, /games-tile--type/);
+    assert.match(wall, /gbox--type/);
     assert.doesNotMatch(wall, /<svg/);
 
     const full = await render(buildSection('games', fixture.sections.games, now));
-    assert.ok(full.indexOf('games-league') > 0 && full.indexOf('games-league') < full.indexOf('games-wall'), 'League comes first');
+    assert.ok(full.indexOf('games-league') > 0 && full.indexOf('games-league') < full.indexOf('class="gshelf"'), 'League comes first');
     assert.match(full, /Gold II · 54 LP/);
     assert.match(full, /<small>1 in<\/small> <b>83<\/b>/);   // 1.2 % of players: the trophy reads it as odds
     // the ribbon comes from the export's claim; an idle tile says so; champion months carry their icon
-    assert.match(full, /games-tile__badge">most played, by far</);
-    assert.match(full, /games-tile__badge games-tile__badge--idle">left running</);
-    assert.equal((full.match(/class="games-tile__badge/g) || []).length, 2);
+    assert.match(full, /gbox__badge">most played, by far</);
+    assert.match(full, /gbox__badge gbox__badge--idle">left running</);
+    assert.equal((full.match(/class="gbox__badge/g) || []).length, 2);
     assert.match(full, /Idle games left running don&#x27;t count: another 816h\./);
     assert.match(full, /<img class="games-months__icon" src="https:\/\/ddragon\.leagueoflegends\.com\/cdn\/16\.22\.1\/img\/champion\/Jinx\.png" alt="" loading="lazy" decoding="async" width="40" height="40">/);
     assert.match(full, /games-months__icon games-months__icon--none/);
     // and with no claim on any tile, no ribbon: it is never assumed for League
     const quiet = structuredClone(fixture.sections.games);
     for (const t of quiet.wall) t.claim = null;
-    assert.doesNotMatch(await render(buildSection('games', quiet, now)), /games-tile__badge">most/);
+    assert.doesNotMatch(await render(buildSection('games', quiet, now)), /gbox__badge">most/);
   } finally {
     await fs.rm(tmp, { recursive: true, force: true });
   }

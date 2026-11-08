@@ -106,14 +106,30 @@ test('posters hero: three or four safe posters fanned, else nothing', () => {
   assert.equal(card?.hero?.type, 'posters');
 });
 
-test('the wall as laid out: a year card leads each year, cinema tiles do not repeat the stamp', () => {
+test('the rental wall: a rack a year, box sets as fat as their seasons, stubs, worn cases, staff picks', () => {
   const v = w();
-  const marks = v.wallTiles.filter((/** @type {any} */ t) => t.yearMark);
-  assert.deepEqual(marks.map((/** @type {any} */ m) => m.year), ['2026', '2025', '2024', '2021']);
-  assert.equal(v.wallTiles[0].yearMark, true);
-  assert.equal(marks[0].count, v.wall.filter((/** @type {any} */ t) => t.month.startsWith('2026')).length);
-  const big = v.wall.find((/** @type {any} */ t) => t.bigScreen);
-  assert.equal(big.reason, '');
+  assert.deepEqual(v.racks.map((/** @type {any} */ r) => r.year), ['2026', '2025', '2024', '2021']);
+  const r26 = v.racks[0];
+  assert.equal(r26.count, v.wall.filter((/** @type {any} */ t) => t.month.startsWith('2026')).length);
+  assert.equal(r26.films + r26.series, r26.count);
+  const cases = v.racks.flatMap((/** @type {any} */ r) => r.cases);
+  assert.equal(cases.length, v.wall.length, 'every wall tile is on a rack');
+  const one = cases.find((/** @type {any} */ c) => c.title === 'Lanterns of the Quiet Coast');
+  const two = cases.find((/** @type {any} */ c) => c.title === 'Sample Precinct');
+  assert.ok(one.depth > 0 && two.depth > one.depth, 'two seasons make a fatter spine than one');
+  assert.ok(cases.filter((/** @type {any} */ c) => !c.series).every((/** @type {any} */ c) => c.depth === 0));
+  assert.equal(one.pick, 'binged season 1 in 4 days');
+  const big = cases.find((/** @type {any} */ c) => c.bigScreen);
+  assert.equal(big.reason, '', 'the stub says the cinema, so no card repeats it');
+});
+
+test('the telly: the newest posters as channels, the box counts the wall', () => {
+  const v = w();
+  assert.ok(v.tv && (v.tv.n === 5 || v.tv.n === 1));
+  assert.equal(v.tv.channels[0].ch, '01');
+  assert.ok(v.tv.channels.every((/** @type {any} */ c) => c.poster));
+  assert.equal(v.tv.count, v.wall.length);
+  assert.equal(v.tv.year, '2026');
 });
 
 test('service stamps: one per tile from the provider, a set of text stamps, never a logo file', async () => {
@@ -143,8 +159,8 @@ test('service stamps: one per tile from the provider, a set of text stamps, neve
   // the rendered page: stamps as text, styled per service, no logo images
   const html = await fs.readFile(new URL('../public/personal/life/watching.html', import.meta.url), 'utf8').catch(() => '');
   if (html) {
-    assert.match(html, /class="watch-stamp watch-stamp--netflix"[^>]*>NETFLIX</);
-    assert.match(html, /class="watch-stamp watch-stamp--youtube"/);
+    assert.match(html, /class="vcase__sticker watch-stamp watch-stamp--netflix"[^>]*>NETFLIX</);
+    assert.match(html, /class="vcase__sticker watch-stamp watch-stamp--youtube"/);
     assert.match(html, /watch-mini__stamp watch-stamp--/);
     assert.doesNotMatch(html, /streamed on/);
     assert.doesNotMatch(html, /<img[^>]+(netflix|youtube|logo)[^>]*\.(svg|png)/i);

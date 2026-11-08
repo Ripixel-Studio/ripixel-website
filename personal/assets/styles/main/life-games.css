@@ -71,3 +71,242 @@
   .games-fill { grid-template-columns: repeat(3, 1fr); gap: 12px; }
   .games-fill__pct { font-size: 28px; }
 }
+
+/* ─── the monitor: a flat panel on a stand, a launcher's library on it (partials/games-monitor.html) ─── */
+.monitor { display: grid; justify-items: center; margin: 4px 0 40px; }
+.monitor__panel {
+  width: min(100%, 760px);
+  padding: 10px 10px 0;
+  background: linear-gradient(180deg, #2b2b2e, #18181a);
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 7px 7px 0 var(--ink-magenta);
+}
+.monitor__screen {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 3px;
+  background: #0b0d12;
+  color: #e8ecf4;
+}
+/* the launcher's backdrop: the lead game's own art, blurred and darkened */
+.monitor__screen::before {
+  content: '';
+  position: absolute; inset: -30px;
+  background: var(--bg) center 25% / cover no-repeat;
+  filter: blur(22px) brightness(0.4) saturate(1.4);
+}
+.monitor__glare { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(125deg, rgba(255,255,255,0.1), transparent 30%); }
+.launcher { position: relative; display: flex; flex-direction: column; height: 100%; padding: 2.4% 3%; gap: 3%; font-family: var(--f-sans); }
+.launcher__bar { display: flex; align-items: center; gap: 12px; font-family: var(--f-mono); font-size: clamp(8px, 1.4vw, 11px); letter-spacing: 0.12em; text-transform: uppercase; color: #9aa3b5; }
+.launcher__bar b { color: #fff; }
+.launcher__bar i { width: 9px; height: 9px; border-radius: 50%; background: #454b58; }
+.launcher__bar i:first-of-type { margin-left: auto; }
+.launcher__hero { flex: 1; min-height: 0; display: flex; gap: 4%; align-items: stretch; }
+.launcher__cover { height: 100%; width: auto; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); outline: 2px solid rgba(255,255,255,0.2); }
+.launcher__about { display: flex; flex-direction: column; justify-content: center; gap: 6px; min-width: 0; }
+.launcher__name { font-family: var(--f-disp); font-weight: 400; font-size: clamp(20px, 4.4vw, 42px); line-height: 1; color: #fff; }
+.launcher__meta { font-family: var(--f-mono); font-size: clamp(9px, 1.5vw, 12px); color: #aeb6c6; text-transform: uppercase; letter-spacing: 0.06em; }
+.launcher__meta b { color: #fff; }
+.launcher__progress { display: block; width: min(220px, 100%); height: 6px; border-radius: 3px; background: rgba(255,255,255,0.15); overflow: hidden; }
+.launcher__progress span { display: block; height: 100%; background: linear-gradient(90deg, #4cc9f0, #7bf1a8); }
+.launcher__play { align-self: flex-start; margin-top: 6px; padding: 6px 18px; border-radius: 3px; background: linear-gradient(180deg, #5fd36a, #2e9e3e); color: #fff; font-family: var(--f-disp); font-size: clamp(12px, 2vw, 17px); letter-spacing: 0.08em; box-shadow: 0 3px 0 #1d6b29; }
+.launcher__row { display: flex; gap: 2%; margin: 0; padding: 0; list-style: none; height: 26%; }
+.launcher__tile { position: relative; height: 100%; aspect-ratio: 2 / 3; border-radius: 3px; overflow: hidden; opacity: 0.7; }
+.launcher__tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.launcher__tile span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.launcher__tile--on { opacity: 1; outline: 3px solid #4cc9f0; outline-offset: -3px; }
+.monitor__chin { display: flex; justify-content: flex-end; height: 18px; padding: 5px 10px; }
+.monitor__chin i { width: 6px; height: 6px; border-radius: 50%; background: #4cc9f0; box-shadow: 0 0 6px #4cc9f0; }
+.monitor__neck { width: 70px; height: 46px; background: linear-gradient(90deg, #1d1d20, #3a3a3f 50%, #1d1d20); border: 3px solid var(--ink); border-top: 0; }
+.monitor__foot { width: 240px; height: 14px; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, #3a3a3f, #18181a); border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); }
+@media (max-width: 560px) {
+  .monitor__panel { padding: 6px 6px 0; border-radius: 7px; }
+  .launcher__row { display: none; }
+  .launcher__play { display: none; }
+  .monitor__neck { width: 44px; height: 28px; }
+  .monitor__foot { width: 150px; }
+}
+
+/* ─── the games shelf: big boxes to jewel cases, each with its side panel (partials/games-boxes.html) ─── */
+.gshelf {
+  --s: 1;                                    /* the scale every box is drawn at */
+  --lip: 12px;
+  --talk: 46px;
+  margin: 8px 0 44px;
+  padding: 18px 14px 4px;
+  background: linear-gradient(180deg, #2a211b, #3b2f25 60%, #2a211b);
+  border: 3px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.gshelf__row {
+  --top: 214px;                              /* the tallest box on this shelf, and some headroom */
+  --row-h: calc(var(--top) * var(--s) + var(--lip) + var(--talk));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0 16px;
+  margin: 0;
+  padding: 0 6px;
+  list-style: none;
+  background: linear-gradient(to bottom,
+      transparent calc(var(--top) * var(--s)),
+      #c8a37a calc(var(--top) * var(--s)), #c8a37a calc(var(--top) * var(--s) + 3px),
+      #8a6a4f calc(var(--top) * var(--s) + 3px), #8a6a4f calc(var(--top) * var(--s) + var(--lip)),
+      var(--ink) calc(var(--top) * var(--s) + var(--lip)), var(--ink) calc(var(--top) * var(--s) + var(--lip) + 3px),
+      transparent calc(var(--top) * var(--s) + var(--lip) + 3px))
+    0 0 / 100% var(--row-h);
+}
+.gshelf__row--box { --top: 178px; }
+.gshelf__row--dvd { --top: 160px; }
+.gshelf__row--jewel { --top: 110px; }
+.gbox {
+  --inkc: var(--ink-magenta);
+  --w: 150px; --h: 196px; --d: 30px;         /* the front's size and the side's depth, before --s */
+  position: relative;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: calc((var(--w) + var(--d)) * var(--s));
+  height: var(--row-h);
+  padding-bottom: calc(var(--lip) + var(--talk));
+  outline: none;
+}
+.gbox--box { --w: 122px; --h: 160px; --d: 22px; }
+.gbox--dvd { --w: 100px; --h: 142px; --d: 9px; }
+.gbox--jewel { --w: 104px; --h: 92px; --d: 7px; }
+.gbox--ink1 { --inkc: var(--ink-blue); }
+.gbox--ink2 { --inkc: var(--ink-yellow); }
+.gbox--ink3 { --inkc: var(--ink-red); }
+.gbox--ink4 { --inkc: var(--ink-green, var(--ink-blue)); }
+.gbox__body {
+  position: relative;
+  display: flex;
+  height: calc(var(--h) * var(--s));
+  transform: rotate(calc(var(--tilt, 0deg) * 0.3));
+  transform-origin: bottom center;
+  transition: transform 0.18s ease;
+}
+.gbox__front {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: calc(var(--w) * var(--s));
+  overflow: hidden;
+  background: var(--inkc);
+  color: var(--paper-4);
+  border: 3px solid var(--ink);
+}
+/* the card box's printed sheen, the plastic of a case */
+.gbox__front::after { content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none; background: linear-gradient(118deg, rgba(255,255,255,0.22), transparent 30%); }
+.gbox--dvd .gbox__front, .gbox--jewel .gbox__front { border-color: #151515; border-radius: 3px; }
+.gbox--dvd .gbox__front::before { content: ''; position: absolute; z-index: 2; inset: 0 auto 0 0; width: 6px; background: linear-gradient(90deg, #111, #3a3a3a); }
+/* a jewel case: the clear hinge strip down the left */
+.gbox--jewel .gbox__front::before { content: ''; position: absolute; z-index: 2; inset: 0 auto 0 0; width: 9px; background: repeating-linear-gradient(180deg, rgba(255,255,255,0.5) 0 2px, rgba(255,255,255,0.15) 2px 5px); border-right: 1px solid rgba(0,0,0,0.4); }
+.gbox__art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; color: transparent; }
+.gbox--jewel .gbox__art { object-position: 50% 30%; }
+.gbox__name { position: absolute; inset: 0; display: flex; align-items: center; padding: 10px; overflow: hidden; font-family: var(--f-disp); font-size: calc(18px * var(--s)); line-height: 1; text-transform: uppercase; overflow-wrap: anywhere; }
+/* the side panel: the box's depth, in perspective, with the name down it on the big ones */
+.gbox__side {
+  flex: none;
+  width: calc(var(--d) * var(--s));
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(90deg, rgba(0,0,0,0.25), rgba(0,0,0,0.5)), var(--inkc);
+  border: 3px solid var(--ink);
+  border-left: 0;
+  color: var(--paper-4);
+  transform: skewY(-28deg);
+  transform-origin: left bottom;
+}
+.gbox--dvd .gbox__side, .gbox--jewel .gbox__side { background: linear-gradient(90deg, #333, #111); transform: skewY(-35deg); }
+.gbox__side span { writing-mode: vertical-rl; font-family: var(--f-disp); font-size: calc(12px * var(--s)); letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; transform: skewY(28deg); }
+.gbox--dvd .gbox__side span, .gbox--jewel .gbox__side span { display: none; }
+/* the completion sticker: a starburst */
+.gbox__done {
+  position: absolute; z-index: 3;
+  top: 6px; right: 6px;
+  display: grid; place-items: center; align-content: center;
+  width: calc(54px * var(--s)); height: calc(54px * var(--s));
+  background: var(--ink-yellow);
+  color: var(--ink);
+  font-family: var(--f-mono);
+  font-size: calc(6.5px * var(--s));
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1;
+  clip-path: polygon(50% 0, 61% 12%, 77% 6%, 80% 22%, 96% 25%, 90% 40%, 100% 52%, 88% 62%, 93% 79%, 76% 80%, 70% 96%, 56% 88%, 43% 100%, 34% 86%, 18% 92%, 16% 76%, 2% 70%, 10% 56%, 0 42%, 13% 33%, 8% 17%, 25% 16%, 31% 2%, 44% 11%);
+  transform: rotate(12deg);
+}
+.gbox__done b { font-family: var(--f-disp); font-weight: 400; font-size: calc(17px * var(--s)); letter-spacing: 0; }
+.gbox--jewel .gbox__done, .gbox--dvd .gbox__done { width: calc(44px * var(--s)); height: calc(44px * var(--s)); }
+.gbox--jewel .gbox__done b, .gbox--dvd .gbox__done b { font-size: calc(14px * var(--s)); }
+/* the claim: a banner across the corner; left running: a plain sticker */
+.gbox__badge {
+  position: absolute; z-index: 3;
+  left: -4px; right: -4px; bottom: 12px;
+  padding: 4px 6px 3px;
+  background: var(--ink-red);
+  color: var(--paper-4);
+  border-block: 2px solid var(--ink);
+  font-family: var(--f-mono);
+  font-size: calc(10px * var(--s));
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+  transform: rotate(-5deg);
+}
+.gbox__badge--idle { left: 6px; right: auto; bottom: 6px; padding: 2px 6px; border: 2px solid var(--ink); background: var(--paper-4); color: var(--ink); transform: rotate(-3deg); }
+.gbox--idle .gbox__front { filter: grayscale(0.6); }
+/* James's own line: a note stuck under the shelf */
+.gbox__quip {
+  position: absolute; z-index: 2;
+  left: 0; right: calc(var(--d) * var(--s) - 30px);
+  top: calc(var(--row-h) - var(--talk) + 2px);
+  padding: 4px 8px;
+  background: var(--ink-yellow);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  font-family: var(--f-scrib);
+  font-size: 15px;
+  line-height: 1;
+  transform: rotate(-2deg);
+}
+/* pointing at a box lifts it off the shelf and shows its back */
+.gbox:hover, .gbox:focus-visible { z-index: 8; }
+.gbox:hover .gbox__body, .gbox:focus-visible .gbox__body { transform: translateY(-14px) rotate(0deg) scale(1.05); }
+.gbox:hover .gbox__front, .gbox:focus-visible .gbox__front { box-shadow: 0 12px 0 -4px rgba(0,0,0,0.45); }
+.gbox__back {
+  position: absolute; z-index: 9;
+  bottom: calc(var(--h) * var(--s) + var(--lip) + var(--talk) + 18px);
+  left: 50%;
+  display: none;
+  width: 220px;
+  padding: 10px 12px;
+  transform: translateX(-50%) rotate(1.2deg);
+  background: var(--paper-4);
+  color: var(--ink);
+  border: 3px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--inkc);
+  font-family: var(--f-mono);
+  font-size: 11px;
+  line-height: 1.45;
+}
+.gbox__back strong { display: block; margin-bottom: 3px; font-family: var(--f-disp); font-weight: 400; font-size: 19px; line-height: 1.02; }
+.gbox__back span { display: block; }
+.gbox__back b { font-family: var(--f-disp); font-weight: 400; font-size: 15px; }
+.gbox__back-quip { margin-top: 4px; font-family: var(--f-scrib); font-size: 18px; line-height: 1; }
+.gbox:hover .gbox__back, .gbox:focus-visible .gbox__back { display: block; }
+.gbox:first-child .gbox__back { left: 0; transform: rotate(1.2deg); }
+@media (max-width: 640px) {
+  .gshelf { --s: 0.56; --talk: 34px; padding: 14px 6px 2px; }
+  .gshelf__row { gap: 0 10px; padding: 0; }
+  .gbox__quip { font-size: 13px; }
+  .gbox__badge { font-size: 7px; bottom: 8px; padding: 2px 3px; }
+  .gbox__back { width: 170px; }
+}
+@media (prefers-reduced-motion: reduce) { .gbox__body { transition: none; } }

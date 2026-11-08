@@ -16,14 +16,15 @@
       <line x1="9" y1="0" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/>
     </svg>
 
-    {{!-- Games (C6, lifeSections.games): League first and biggest, the headline numbers, the year by
-          week, time of day (weekday daytime blurred to one block), the League numbers, the cover wall,
+    {{!-- Games (C6, lifeSections.games): the monitor (the launcher's recently played), League first and biggest, the headline numbers, the year by
+          week, time of day (weekday daytime blurred to one block), the League numbers, the big-box shelf (tasks/media-view.mjs),
           then recently played, the rarest achievements and completion. --}}
     {{#with section}}
     {{> life-section-head snapTop="BUTTON" snapAccent="MASHING"}}
     {{#if empty}}
     {{> life-empty}}
     {{else}}
+    {{#if monitor}}{{> games-monitor monitor}}{{/if}}
     {{#if league}}
     {{> games-league league}}
     {{/if}}
@@ -89,9 +90,10 @@
       {{/if}}
     </div>
     {{/if}}
-    {{#if wall.length}}
-    <h2 class="fit-header">the <span>cover wall</span>.</h2>
-    {{> games-wall wall}}
+    {{#if boxes.length}}
+    <h2 class="fit-header">the <span>games shelf</span>.</h2>
+    <p class="games-note">The most played get the big boxes, the dabbles get jewel cases. The stickers say how many achievements are done. Point at one to turn the box round.</p>
+    {{> games-boxes shelves}}
     {{/if}}
     {{#if recent.length}}
     <div class="life-columns games-rest">
