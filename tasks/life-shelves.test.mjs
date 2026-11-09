@@ -99,7 +99,7 @@ test('listeningView: tapes, years from the plays, stayers, the deck', () => {
     playlists: [{ title: 'Running', tracks: 50, hours: 3.2, artists: ['A', 'B', 'C', 'D'], arts: [art, art, art, art], loved: 5, heard: 8 }],
     musicYears: [{ year: 2024, plays: 300, hours: 20.5, artists: 40, songs: [{ rank: 2, title: 'Two', by: 'X', art, plays: 9 }], topArtist: { name: 'X', plays: 40 } },
       { year: 2018, plays: 26, hours: 2.9, artists: 5, songs: [{ rank: 1, title: 'One', by: 'X', art, plays: 3 }], topArtist: null }],
-    deck: [{ kind: 'song', title: 'A', by: 'X', art, plays: 6 }, { kind: 'podcast', title: 'P', art: 'https://i.ytimg.com/pl_c/PLab-1/studio_square_thumbnail.jpg?sqp=x-Y&rs=1', plays: 3 },
+    deck: [{ kind: 'song', title: 'A', by: 'X', art, plays: 6 }, { kind: 'podcast', title: 'P', art: 'https://storage.googleapis.com/fitglue-server-prod-showcase-assets/site/james/life/podcasts/0123456789abcdef.jpg', plays: 3 },
       { kind: 'song', title: 'B', plays: 2 }, { kind: 'song', title: 'C', plays: 1 }],
     stayers: [{ title: 'S', by: 'Y', years: [2023, 2024] }],
   });
@@ -115,7 +115,8 @@ test('listeningView: tapes, years from the plays, stayers, the deck', () => {
   assert.equal(v.deck?.n, 4);
   assert.equal(v.deck?.items[1].podcast, true);
   assert.equal(v.deck?.items[1].plays, '3 episodes');
-  assert.ok(v.deck?.items[1].art.startsWith('https://i.ytimg.com/pl_c/'));
+  assert.ok(v.deck?.items[1].art.endsWith('/podcasts/0123456789abcdef.jpg'));
+  assert.equal(shelfArt('https://i.ytimg.com/pl_c/PLab-1/studio_square_thumbnail.jpg?sqp=x-Y&rs=1'), '', 'signed YouTube covers expire: never linked');
   assert.equal(v.stayers[0].years, '2023 · 2024');
   assert.ok(v.numbers.some((n) => n.label === 'playlists made'));
 });

@@ -4,6 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import { buildSection, buildHub, heroView, safeMedia } from './life-hub.mjs';
+import { rackView, RACK_MIN } from './media-view.mjs';
 
 const fixture = JSON.parse(await fs.readFile(new URL('../fixtures/fitness/life/index.json', import.meta.url), 'utf8'));
 const now = new Date('2026-11-03T08:00:00Z');
@@ -121,8 +122,15 @@ test('posters hero: three or four safe posters fanned, else nothing', () => {
   assert.equal(card?.hero?.type, 'posters');
 });
 
+test('a past year with too few tiles gets no rack; this year always does', () => {
+  const tile = (/** @type {string} */ month) => /** @type {any} */ ({ month, series: false, weight: 1, reason: '' });
+  const wall = [tile('2026-01'), ...Array.from({ length: RACK_MIN }, () => tile('2023-05')), tile('2021-03'), tile('2021-02')];
+  assert.deepEqual(rackView(wall).map((r) => r.year), ['2026', '2023']);
+});
+
 test('the rental wall: a rack a year, box sets as fat as their seasons, stubs, worn cases, staff picks', () => {
-  const v = w();
+  const v = { ...w() };
+  v.racks = rackView(v.wall, 1);
   assert.deepEqual(v.racks.map((/** @type {any} */ r) => r.year), ['2026', '2025', '2024', '2021']);
   const r26 = v.racks[0];
   assert.equal(r26.count, v.wall.filter((/** @type {any} */ t) => t.month.startsWith('2026')).length);
