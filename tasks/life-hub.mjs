@@ -653,9 +653,10 @@ function wallView(sec) {
       poster: safeMedia(t.poster), bigScreen: t.bigScreen === true, stamp: stampOf(t.provider),
       // the stamps say "big screen" and the service already
       reason: (t.bigScreen === true && t.reason === 'on the big screen') || PLACE_ONLY.test(String(t.reason || '')) ? '' : String(t.reason || ''),
-      month: String(t.month || ''), monthLabel: monthLabel(t.month), year: num(t.year) ?? '',
+      // a first-sighting backfill (iPlayer, Channel 4) has no watched date: "by" its month
+      month: String(t.month || ''), monthLabel: (t.approxBy ? 'by ' : '') + monthLabel(t.month), year: num(t.year) ?? '',
       seasonsLabel: seasonsLabel(t.seasons), seasonCount: Array.isArray(t.seasons) ? t.seasons.filter((n) => num(n) != null).length : 0,
-      firstLabel: t.firstMonth && t.firstMonth !== t.month ? monthLabel(t.firstMonth) : '',
+      firstLabel: t.firstMonth && t.firstMonth !== t.month && !t.approxBy ? monthLabel(t.firstMonth) : '',
       episodes: num(t.episodes) != null ? plural(/** @type {number} */ (num(t.episodes)), 'episode', 'episodes') : '',
       weight: num(t.weight) === 2 ? 2 : 1, tilt: tiltOf(String(t.title)), ink: i % 5,
     }));
