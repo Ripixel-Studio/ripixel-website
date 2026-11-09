@@ -15,7 +15,8 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 /** Audible covers, YouTube Music art and artist photos, video stills. */
 const ART = /^https:\/\/(m\.media-amazon\.com\/images\/I\/|yt3\.googleusercontent\.com\/|lh3\.googleusercontent\.com\/|yt3\.ggpht\.com\/|i\.ytimg\.com\/vi\/)[A-Za-z0-9._~%/+=-]*$/;
 /** @param {unknown} u */
-const PODCAST_ART = /^https:\/\/i\.ytimg\.com\/pl_c\/[A-Za-z0-9_-]+\/studio_square_thumbnail\.jpg\?[A-Za-z0-9_=&%-]+$/;
+// podcast covers: YouTube's are signed and expire within a day, so the export hosts a copy, named by its hash
+const PODCAST_ART = /^https:\/\/storage\.googleapis\.com\/fitglue-server-prod-showcase-assets\/site\/james\/life\/podcasts\/[0-9a-f]{16}\.jpg$/;
 export const shelfArt = (u) => (typeof u === 'string' && (ART.test(u) || PODCAST_ART.test(u)) ? u : '');
 
 const num = (/** @type {unknown} */ n) => (typeof n === 'number' && Number.isFinite(n) ? n : null);

@@ -5,7 +5,7 @@
  *   tvView(wall, year)           the telly: the newest five posters as channels the screen flicks through (one,
  *                                still, with fewer), and the
  *                                set-top box's count of everything on the wall.
- *   rackView(wall)               the rental wall: a rack per year, newest first. A film is a DVD case; a series
+ *   rackView(wall)               the rental wall: a rack per year with RACK_MIN tiles or more, newest first. A film is a DVD case; a series
  *                                is a box set whose spine is as fat as its seasons; a cinema trip has its ticket
  *                                stub tucked in; a film watched again is a worn case; the reason, when there is
  *                                one, is the staff-pick card clipped to the shelf.
@@ -27,6 +27,9 @@ const MONITOR = 4;
 const SPINE_MIN = 12;        // px: a one-season box set is still fatter than a DVD case
 const SPINE_PER = 7;         // px per season, to SPINE_SEASONS
 const SPINE_SEASONS = 8;
+/** A year's rack needs this many tiles to be drawn (this year always is): before 2022 the accounts were barely
+ * used, so those racks were a handful of cases. Their tiles still count everywhere else (the set-top box, the strip). */
+export const RACK_MIN = 12;
 
 /** @param {WallTile[]} wall @param {string} year YYYY, this year */
 export function tvView(wall, year) {
@@ -47,8 +50,8 @@ export function tvView(wall, year) {
   };
 }
 
-/** @param {WallTile[]} wall */
-export function rackView(wall) {
+/** @param {WallTile[]} wall @param {number} [min] tiles a past year's rack needs */
+export function rackView(wall, min = RACK_MIN) {
   /** @type {{year: string, count: number, films: number, series: number, cases: any[]}[]} */
   const racks = [];
   for (const t of wall) {
@@ -65,7 +68,7 @@ export function rackView(wall) {
       pick: t.reason,
     });
   }
-  return racks;
+  return racks.filter((r, i) => i === 0 || r.count >= min);
 }
 
 /** Which box a weight is: the shelf sets each one's size. */
