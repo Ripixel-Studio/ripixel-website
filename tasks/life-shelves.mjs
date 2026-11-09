@@ -17,7 +17,12 @@ const ART = /^https:\/\/(m\.media-amazon\.com\/images\/I\/|yt3\.googleuserconten
 /** @param {unknown} u */
 // podcast covers: YouTube's are signed and expire within a day, so the export hosts a copy, named by its hash
 const PODCAST_ART = /^https:\/\/storage\.googleapis\.com\/fitglue-server-prod-showcase-assets\/site\/james\/life\/podcasts\/[0-9a-f]{16}\.jpg$/;
-export const shelfArt = (u) => (typeof u === 'string' && (ART.test(u) || PODCAST_ART.test(u)) ? u : '');
+/**
+ * A picture James chose himself (the box's Needs-you "Pictures for the site", jarvis lifehub/art.py):
+ * any row's poster, cover or photo where nothing was found, re-encoded and hosted by its hash.
+ */
+export const OWN_ART = /^https:\/\/storage\.googleapis\.com\/fitglue-server-prod-showcase-assets\/site\/james\/life\/art\/[0-9a-f]{16}\.jpg$/;
+export const shelfArt = (u) => (typeof u === 'string' && (ART.test(u) || PODCAST_ART.test(u) || OWN_ART.test(u)) ? u : '');
 
 const num = (/** @type {unknown} */ n) => (typeof n === 'number' && Number.isFinite(n) ? n : null);
 const group = (/** @type {number} */ n) => Math.round(n).toLocaleString('en-GB');
