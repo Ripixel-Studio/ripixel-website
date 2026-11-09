@@ -39,6 +39,21 @@ test('the wall: films and series as posters, newest first, big screen and binges
   assert.ok(v.wall.every((/** @type {any} */ t) => typeof t.tilt === 'number' && t.ink >= 0 && t.ink < 5));
 });
 
+test('a backfilled tile (no watched date) reads "by" its month, and one show can be several runs', () => {
+  const sec = structuredClone(fixture.sections.watching);
+  sec.wall = [
+    { key: 'a1', kind: 'series', title: 'Run Show', month: '2026-11', firstMonth: '2026-11', seasons: [3], episodes: 6, approxBy: '2026-11' },
+    { key: 'a2', kind: 'series', title: 'Run Show', month: '2025-03', firstMonth: '2025-02', seasons: [1, 2], episodes: 16 },
+  ];
+  const v = /** @type {any} */ (buildSection('watching', sec, now));
+  const [late, early] = v.wall;
+  assert.equal(late.monthLabel, 'by Nov 2026');
+  assert.equal(late.firstLabel, '');
+  assert.equal(early.monthLabel, 'Mar 2025');
+  assert.equal(early.firstLabel, 'Feb 2025');
+  assert.deepEqual([late.seasonsLabel, early.seasonsLabel], ['season 3', 'seasons 1–2']);
+});
+
 test('the year by month: twelve months, mini posters by key, quiet months flagged', () => {
   const v = w();
   assert.equal(v.strip.length, 12);
