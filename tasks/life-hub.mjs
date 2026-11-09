@@ -22,7 +22,7 @@ import { lineChart, stackedShare, clockBars, columnBars } from './chart-axes.mjs
 import { cleanPoints } from './route-map.mjs';
 import { commitGrid, projectCards, yearsView, weekdaysView, sparkOf } from './code-view.mjs';
 import { recompView, engineView, nightsView, stepsView } from './body-view.mjs';
-import { readingView, listeningView, shelfArt } from './life-shelves.mjs';
+import { readingView, listeningView, shelfArt, OWN_ART } from './life-shelves.mjs';
 import { tvView, rackView, boxesView, shelvesOf, monitorView } from './media-view.mjs';
 
 export const SECTION_ORDER = ['fitness', 'body', 'games', 'code', 'watching', 'listening', 'reading', 'live'];
@@ -283,10 +283,10 @@ function bodyView(/** @type {any} */ sec) {
 
 // ─── games (C6) ───
 
-/** Art is hotlinked from Steam's CDN or Riot's Data Dragon only, and only as a plain URL. */
+/** Art is hotlinked from Steam's CDN or Riot's Data Dragon only, and only as a plain URL (or James's own, OWN_ART). */
 const ART = /^https:\/\/(shared\.akamai\.steamstatic\.com|ddragon\.leagueoflegends\.com)\/[A-Za-z0-9._~%/+=&?-]*$/;
 /** @param {unknown} u */
-export const safeArt = (u) => (typeof u === 'string' && ART.test(u) ? u : '');
+export const safeArt = (u) => (typeof u === 'string' && (ART.test(u) || OWN_ART.test(u)) ? u : '');
 
 /** FNV-1a, 32-bit unsigned: a stable number per game name. @param {string} s */
 function hash(s) {
@@ -608,10 +608,10 @@ function mediaView(sec) {
 
 // ─── watching: the poster wall, the year by month, the YouTube channels ───
 
-/** Posters, thumbnails and avatars are hotlinked from TMDB and YouTube's image hosts only, as plain URLs. */
+/** Posters, thumbnails and avatars are hotlinked from TMDB and YouTube's image hosts only, as plain URLs (or James's own, OWN_ART). */
 const MEDIA = /^https:\/\/(image\.tmdb\.org\/t\/p\/|i\.ytimg\.com\/vi\/|yt3\.ggpht\.com\/|yt3\.googleusercontent\.com\/)[A-Za-z0-9._~%/+=-]*$/;
 /** @param {unknown} u */
-export const safeMedia = (u) => (typeof u === 'string' && MEDIA.test(u) ? u : '');
+export const safeMedia = (u) => (typeof u === 'string' && (MEDIA.test(u) || OWN_ART.test(u)) ? u : '');
 
 /** `seasons 7–8`, `seasons 1, 3`, `season 2`; '' without any. @param {unknown} list */
 function seasonsLabel(list) {
