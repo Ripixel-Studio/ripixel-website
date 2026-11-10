@@ -1,0 +1,11 @@
+<!-- Context: lifeSections.games.labels [{tag, n, size 1-4, ink, tilt, hours, names}] (tasks/games-rel.mjs labelsView) —
+     the label gun: Steam players' tags on my games, a price-gun sticker each on the pegboard, as big as the number of
+     games behind it; the first three games are its small print. -->
+<ul class="glabels">
+  {{#each this}}
+  <li class="glabel glabel--s{{size}} glabel--ink{{ink}}" style="--tilt: {{tilt}}deg" title="{{names}}">
+    <b>{{tag}}</b><span class="glabel__n">{{n}}</span>
+    {{#if names}}<small class="glabel__names">{{names}}</small>{{/if}}
+  </li>
+  {{/each}}
+</ul>

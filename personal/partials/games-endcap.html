@@ -1,0 +1,22 @@
+<!-- Context: lifeSections.games.endcap {shelves[{key, label, one, note, wins, noms, games, more, boxes[face + won, haul,
+     best]}], winners, games, nominated, most} (tasks/games-rel.mjs endcapView) — the prize endcap at the end of the
+     aisle: a shelf per ceremony, its header card on the left, the winners standing on it in gold foil with their haul
+     (the most decorated first, six at most). -->
+<div class="gendcap">
+  {{#each shelves}}
+  <section class="gendcap__shelf gendcap__shelf--{{key}}" aria-label="{{label}}: {{wins}} won">
+    <h3 class="gendcap__head"><b>{{label}}</b> <span>{{note}}</span> <span class="gendcap__count">{{wins}} won by {{games}}, from {{noms}} nominations</span></h3>
+    <ol class="gendcap__row">
+      {{#each boxes}}
+      <li class="gendcap__box gbox--ink{{ink}}" style="--tilt: {{tilt}}deg" title="{{name}}{{#if best}}: {{best}}{{/if}}">
+        <span class="gendcap__front">
+          <span class="gface__type"{{#if art}} aria-hidden="true"{{/if}}>{{name}}</span>{{#if art}}<img src="{{art}}" alt="{{name}}" loading="lazy" decoding="async" width="600" height="900">{{/if}}
+          <span class="gfoil" aria-label="{{won}} won">{{#if haul}}<b>{{haul}}</b>{{/if}}<small>won</small></span>
+        </span>
+      </li>
+      {{/each}}
+      {{#if more}}<li class="gendcap__more">{{more}}</li>{{/if}}
+    </ol>
+  </section>
+  {{/each}}
+</div>
