@@ -3369,7 +3369,10 @@
      ],
      "episodes": 10,
      "reason": "binged season 1 in 4 days",
-     "weight": 2
+     "weight": 2,
+     "rating": 8.6,
+     "votes": 1200,
+     "imdb": "tt9000001"
     },
     {
      "key": "a1b2c3d4e5",
@@ -3381,7 +3384,24 @@
      "provider": "netflix",
      "month": "2026-10",
      "reason": "watched twice",
-     "weight": 2
+     "weight": 2,
+     "rating": 7.9,
+     "votes": 1140,
+     "imdb": "tt9000002",
+     "awards": [
+      {
+       "award": "oscar",
+       "won": 3,
+       "noms": 8,
+       "best": "Best Picture"
+      },
+      {
+       "award": "bafta",
+       "won": 1,
+       "noms": 4,
+       "best": "Best Film"
+      }
+     ]
     },
     {
      "key": "aa00000002",
@@ -3398,7 +3418,10 @@
      ],
      "episodes": 12,
      "reason": "binged 8 episodes in 4 days",
-     "weight": 1
+     "weight": 1,
+     "rating": 6.4,
+     "votes": 1080,
+     "imdb": "tt9000003"
     },
     {
      "key": "ab00000009",
@@ -3410,7 +3433,10 @@
      "provider": "youtube",
      "month": "2026-09",
      "reason": "",
-     "weight": 1
+     "weight": 1,
+     "rating": 5.8,
+     "votes": 1020,
+     "imdb": "tt9000004"
     },
     {
      "key": "aa00000003",
@@ -3422,7 +3448,18 @@
      "provider": null,
      "month": "2026-08",
      "reason": "on the big screen",
-     "weight": 1
+     "weight": 1,
+     "rating": 7.1,
+     "votes": 960,
+     "imdb": "tt9000005",
+     "awards": [
+      {
+       "award": "hugo",
+       "won": 1,
+       "noms": 1,
+       "best": "Best Dramatic Presentation"
+      }
+     ]
     },
     {
      "key": "aa00000004",
@@ -3434,7 +3471,10 @@
      "provider": null,
      "month": "2026-08",
      "reason": "on the big screen",
-     "weight": 1
+     "weight": 1,
+     "rating": 7.4,
+     "votes": 900,
+     "imdb": "tt9000006"
     },
     {
      "key": "aa00000005",
@@ -3452,7 +3492,10 @@
      ],
      "episodes": 20,
      "reason": "binged season 8 in 3 days",
-     "weight": 2
+     "weight": 2,
+     "rating": 8.2,
+     "votes": 840,
+     "imdb": "tt9000007"
     },
     {
      "key": "aa00000006",
@@ -3470,7 +3513,10 @@
      ],
      "episodes": 9,
      "reason": "came back across 5 weeks, 6 episodes",
-     "weight": 1
+     "weight": 1,
+     "rating": 8.8,
+     "votes": 780,
+     "imdb": "tt9000008"
     },
     {
      "key": "aa00000007",
@@ -3482,7 +3528,10 @@
      "provider": "netflix",
      "month": "2026-06",
      "reason": "streamed on Netflix",
-     "weight": 1
+     "weight": 1,
+     "rating": 6.1,
+     "votes": 720,
+     "imdb": "tt9000009"
     },
     {
      "key": "aa00000008",
@@ -3494,7 +3543,18 @@
      "provider": null,
      "month": "2026-05",
      "reason": "on the big screen",
-     "weight": 1
+     "weight": 1,
+     "rating": 7.7,
+     "votes": 660,
+     "imdb": "tt9000010",
+     "awards": [
+      {
+       "award": "emmy",
+       "won": 2,
+       "noms": 3,
+       "best": "Outstanding Drama Series"
+      }
+     ]
     },
     {
      "key": "aa00000009",
@@ -3506,7 +3566,10 @@
      "provider": "netflix",
      "month": "2026-04",
      "reason": "streamed on Netflix",
-     "weight": 1
+     "weight": 1,
+     "rating": 6.9,
+     "votes": 600,
+     "imdb": "tt9000011"
     },
     {
      "key": "aa00000010",
@@ -3523,7 +3586,10 @@
      ],
      "episodes": 8,
      "reason": "binged season 3 in a week",
-     "weight": 2
+     "weight": 2,
+     "rating": 7.2,
+     "votes": 540,
+     "imdb": "tt9000012"
     },
     {
      "key": "aa00000011",
@@ -3535,7 +3601,10 @@
      "provider": null,
      "month": "2025-08",
      "reason": "on the big screen",
-     "weight": 1
+     "weight": 1,
+     "rating": 5.6,
+     "votes": 480,
+     "imdb": "tt9000013"
     },
     {
      "key": "aa00000012",
@@ -3547,7 +3616,10 @@
      "provider": null,
      "month": "2024-10",
      "reason": "on the big screen",
-     "weight": 1
+     "weight": 1,
+     "rating": 7.0,
+     "votes": 420,
+     "imdb": "tt9000014"
     },
     {
      "key": "aa00000013",
@@ -3559,7 +3631,18 @@
      "provider": null,
      "month": "2021-10",
      "reason": "on the big screen",
-     "weight": 1
+     "weight": 1,
+     "rating": 7.8,
+     "votes": 360,
+     "imdb": "tt9000015",
+     "awards": [
+      {
+       "award": "oscar",
+       "won": 0,
+       "noms": 2,
+       "best": ""
+      }
+     ]
     }
    ],
    "strip": [
@@ -3901,7 +3984,85 @@
      ],
      "hours": 1.0
     }
-   ]
+   ],
+   "aisles": [
+    {
+     "genre": "Comedy",
+     "n": 6,
+     "films": 4,
+     "series": 2,
+     "keys": [
+      "aa00000006",
+      "aa00000005",
+      "a1b2c3d4e5"
+     ],
+     "tags": [
+      "sitcoms",
+      "satire"
+     ]
+    },
+    {
+     "genre": "Sci-Fi",
+     "n": 4,
+     "films": 3,
+     "series": 1,
+     "keys": [
+      "aa00000006",
+      "aa00000013",
+      "aa00000004"
+     ],
+     "tags": [
+      "space"
+     ]
+    },
+    {
+     "genre": "Drama",
+     "n": 3,
+     "films": 2,
+     "series": 1,
+     "keys": [
+      "aa00000010",
+      "aa00000012"
+     ],
+     "tags": []
+    }
+   ],
+   "tags": [
+    {
+     "tag": "space",
+     "n": 3,
+     "keys": [
+      "aa00000013",
+      "aa00000004",
+      "aa00000008"
+     ]
+    },
+    {
+     "tag": "from the book",
+     "n": 3,
+     "keys": [
+      "aa00000010",
+      "a1b2c3d4e5",
+      "aa00000003"
+     ]
+    }
+   ],
+   "makers": [
+    {
+     "name": "Ada Inventa",
+     "kind": "director",
+     "keys": [
+      "aa00000004",
+      "aa00000008"
+     ]
+    }
+   ],
+   "crowd": {
+    "source": "TMDB",
+    "titles": 15,
+    "rated": 15,
+    "mean": 7.2
+   }
   },
   "listening": {
    "updated": "2026-11-03",

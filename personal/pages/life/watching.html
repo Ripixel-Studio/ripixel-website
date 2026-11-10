@@ -44,6 +44,26 @@
     <p class="life-empty">Nothing has made the list yet.</p>
     {{/if}}
     {{/if}}
+    {{#if aisles.length}}
+    <h2 class="fit-header">browse the <span>aisles</span>.</h2>
+    <p class="watch-note">The same wall sorted the way a shop would, by genre (TMDB's, and a title can stand in more than one aisle). Each aisle's spines are as long as it is full, its films in the aisle's colour and its series in yellow; face out are its crowd favourites, with what TMDB's users score them on the price sticker.</p>
+    {{> watching-aisles aisles}}
+    {{/if}}
+    {{#if talkers}}
+    <h2 class="fit-header">the <span>shelf-talkers</span>.</h2>
+    <p class="watch-note">The themes that keep turning up across everything on the wall, from TMDB's keywords, and the people whose names keep turning up on the boxes.</p>
+    {{> watching-talkers talkers}}
+    {{/if}}
+    {{#if crowd}}
+    <h2 class="fit-header">me against <span>the crowd</span>.</h2>
+    <p class="watch-note">How everyone else rates what I watch: {{crowd.source}} users' scores out of ten (IMDb's own ratings need an API key, so these are TMDB's, and each case links to its IMDb page). Only titles with a real crowd behind them, fifty votes or more, get a score.</p>
+    {{> watching-crowd crowd}}
+    {{/if}}
+    {{#if cabinet}}
+    <h2 class="fit-header">the awards <span>cabinet</span>.</h2>
+    <p class="watch-note">{{cabinet.nominated}} of the {{cabinet.titles}} titles on the wall were nominated for one of the big prizes and {{cabinet.winners}} won at least one. Counted from Wikidata, film and show and the people in them together, so a Best Actor counts for its film.</p>
+    {{> watching-cabinet cabinet}}
+    {{/if}}
     {{#if strip.length}}
     <h2 class="fit-header">the year by <span>month</span>.</h2>
     {{> watching-strip strip}}

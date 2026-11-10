@@ -23,7 +23,7 @@ import { cleanPoints } from './route-map.mjs';
 import { commitGrid, projectCards, yearsView, weekdaysView, sparkOf } from './code-view.mjs';
 import { recompView, engineView, nightsView, stepsView } from './body-view.mjs';
 import { readingView, listeningView, shelfArt, OWN_ART } from './life-shelves.mjs';
-import { tvView, rackView, boxesView, shelvesOf, monitorView } from './media-view.mjs';
+import { tvView, rackView, boxesView, shelvesOf, monitorView, awardsOf, aislesView, talkersView, crowdView, cabinetView } from './media-view.mjs';
 
 export const SECTION_ORDER = ['fitness', 'body', 'games', 'code', 'watching', 'listening', 'reading', 'live'];
 /** @param {string} name */
@@ -644,6 +644,9 @@ const stampOf = (p) => (typeof p === 'string' && Object.hasOwn(STAMPS, p) ? { ke
 /** "streamed on Netflix" (and "watched at home") only say where: the stamp says that now. @param {string} r */
 const PLACE_ONLY = /^(?:streamed on .+|watched at home)$/;
 
+/** A TMDB score out of ten, one decimal, or null. @param {unknown} r */
+const ratingOf = (r) => { const n = num(r); return n != null && n > 0 && n <= 10 ? Math.round(n * 10) / 10 : null; };
+
 /** The wall: export order (newest first), a tile per film or series. @param {any} sec */
 function wallView(sec) {
   return (Array.isArray(sec.wall) ? sec.wall : [])
@@ -659,6 +662,10 @@ function wallView(sec) {
       firstLabel: t.firstMonth && t.firstMonth !== t.month && !t.approxBy ? monthLabel(t.firstMonth) : '',
       episodes: num(t.episodes) != null ? plural(/** @type {number} */ (num(t.episodes)), 'episode', 'episodes') : '',
       weight: num(t.weight) === 2 ? 2 : 1, tilt: tiltOf(String(t.title)), ink: i % 5,
+      // relations (jarvis watchrel): the crowd's TMDB score, the IMDb id to link out, the awards
+      rating: ratingOf(t.rating), ratingLabel: ratingOf(t.rating)?.toFixed(1) ?? '', votes: num(t.votes) ?? 0,
+      imdb: typeof t.imdb === 'string' && /^tt\d{5,10}$/.test(t.imdb) ? `https://www.imdb.com/title/${t.imdb}/` : '',
+      ...awardsOf(t.awards),
     }));
 }
 
@@ -799,6 +806,8 @@ export function buildSection(name, sec, now = new Date(), liveNotables = []) {
       const wall = wallView(sec);
       return { ...view, ...m, latest: latestOf(sec.notable), wall,
         tv: tvView(wall, String(now.getUTCFullYear())), racks: rackView(wall), strip: stripView(sec, wall), channels: channelsView(sec),
+        aisles: aislesView(sec.aisles, wall), talkers: talkersView(sec.tags, sec.makers, wall),
+        crowd: crowdView(sec.crowd, wall), cabinet: cabinetView(wall),
         stats: [
           ['This year', m.totals.year], ['This month', m.totals.month],
         ].map(([label, t]) => /** @type {any} */ (t) && Object.keys(/** @type {any} */ (t)).length ? ({

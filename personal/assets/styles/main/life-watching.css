@@ -358,3 +358,327 @@
   .vcase__back { width: 170px; }
 }
 @media (prefers-reduced-motion: reduce) { .vcase__body { transition: none; } }
+
+/* ─── relations (tasks/media-view.mjs aislesView, talkersView, crowdView, cabinetView) ─── */
+
+/* the laurel: a gold wreath sticker, as on a prize-winner's case */
+.vlaurel {
+  position: absolute; z-index: 3;
+  right: 6px; bottom: 6px;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff3b0, #e3b23c 45%, #a8781a 100%);
+  border: 1.5px solid var(--ink);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+.vlaurel::after {
+  content: '';
+  position: absolute; inset: 3px;
+  background: #5a3d06;
+  -webkit-mask: var(--wreath) center / contain no-repeat;
+          mask: var(--wreath) center / contain no-repeat;
+}
+.vlaurel, .vcab__statue {
+  --wreath: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='%23000'%3E%3Cpath d='M20 35c-6 0-12-5-13-13' fill='none' stroke='%23000' stroke-width='1.6'/%3E%3Cpath d='M20 35c6 0 12-5 13-13' fill='none' stroke='%23000' stroke-width='1.6'/%3E%3Cellipse cx='8' cy='25' rx='2' ry='4' transform='rotate(-30 8 25)'/%3E%3Cellipse cx='7' cy='18' rx='2' ry='4' transform='rotate(-5 7 18)'/%3E%3Cellipse cx='9' cy='11' rx='2' ry='3.6' transform='rotate(25 9 11)'/%3E%3Cellipse cx='12' cy='30' rx='2' ry='3.6' transform='rotate(-60 12 30)'/%3E%3Cellipse cx='32' cy='25' rx='2' ry='4' transform='rotate(30 32 25)'/%3E%3Cellipse cx='33' cy='18' rx='2' ry='4' transform='rotate(5 33 18)'/%3E%3Cellipse cx='31' cy='11' rx='2' ry='3.6' transform='rotate(-25 31 11)'/%3E%3Cellipse cx='28' cy='30' rx='2' ry='3.6' transform='rotate(60 28 30)'/%3E%3Cpath d='M20 9l2 5h5l-4 3 1.6 5-4.6-3-4.6 3 1.6-5-4-3h5z'/%3E%3C/g%3E%3C/svg%3E");
+}
+.vlaurel--annie, .vlaurel--hugo, .vlaurel--game { background: radial-gradient(circle at 35% 30%, #ffffff, #c9ccd2 45%, #7d828c 100%); }
+
+/* small cases face out (aisles, the crowd's shelves): the price-gun sticker carries the crowd's score */
+.vfaces { display: flex; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.vface {
+  --inkc: var(--ink-red);
+  position: relative;
+  flex: none;
+  width: var(--face-w, 78px);
+  aspect-ratio: 2 / 3;
+  transform: rotate(calc(var(--tilt, 0deg) * 0.5));
+}
+.vface--ink1 { --inkc: var(--ink-blue); } .vface--ink2 { --inkc: var(--ink-purple, var(--ink)); }
+.vface--ink3 { --inkc: var(--ink-green, var(--ink-blue)); } .vface--ink4 { --inkc: var(--ink-orange, var(--ink-red)); }
+.vface > a, .vface > img, .vface > .vface__name { display: block; width: 100%; height: 100%; }
+.vface img { color: transparent; }
+.vface img, .vface__name {
+  width: 100%; height: 100%; object-fit: cover;
+  background: var(--inkc);
+  border: 2.5px solid #161412;
+  border-radius: 3px;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.vface__name {
+  box-sizing: border-box; padding: 8px 6px; overflow: hidden;
+  color: var(--paper-4); font-family: var(--f-disp); font-size: 13px; line-height: 1; text-transform: uppercase; overflow-wrap: anywhere;
+}
+.vface a:focus-visible { outline: 3px solid var(--ink-blue); outline-offset: 3px; }
+.vface__price {
+  position: absolute; z-index: 3;
+  top: -9px; right: -10px;
+  display: grid; place-items: center;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: #ff8a1f;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  font-family: var(--f-disp);
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  transform: rotate(12deg);
+}
+.vface .vlaurel { right: 4px; bottom: 4px; width: 24px; height: 24px; }
+.vface__haul {
+  position: absolute; z-index: 3; left: -6px; bottom: 8px;
+  padding: 1px 6px; background: var(--ink); color: #f4cf63;
+  font-family: var(--f-disp); font-size: 16px;
+}
+.vface__why {
+  position: absolute; left: -4px; right: -4px; top: calc(100% + 10px);
+  padding: 5px 5px 4px; background: #fffbe0; border: 2px solid var(--ink);
+  box-shadow: 2px 2px 0 var(--inkc);
+  font-family: var(--f-scrib); font-size: 14px; line-height: 0.95; color: var(--ink);
+  transform: rotate(-1.5deg);
+}
+
+/* ── the aisles: a hanging sign, the aisle's spines, its crowd favourites face out, its shelf-talkers ── */
+.vaisles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 46px 34px; margin: 30px 0 52px; }
+.vaisle {
+  --inkc: var(--ink-red);
+  position: relative;
+  padding: 34px 16px 16px;
+  background: var(--paper-4);
+  border: 3px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--inkc);
+}
+.vaisle--ink1 { --inkc: var(--ink-blue); } .vaisle--ink2 { --inkc: var(--ink-purple, var(--ink)); }
+.vaisle--ink3 { --inkc: var(--ink-green, var(--ink-blue)); } .vaisle--ink4 { --inkc: var(--ink-orange, var(--ink-red)); }
+/* the sign hangs from the ceiling on two wires */
+.vaisle__sign {
+  position: absolute; top: -24px; left: 50%;
+  display: flex; flex-direction: column; align-items: center;
+  min-width: 56%;
+  margin: 0;
+  padding: 3px 18px 5px;
+  background: var(--inkc);
+  color: var(--paper-4);
+  border: 3px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  font-family: var(--f-disp); font-weight: 400; font-size: 30px; line-height: 1; text-transform: uppercase; letter-spacing: 0.02em;
+  transform: translateX(-50%);
+}
+.vaisle__sign::before, .vaisle__sign::after {
+  content: ''; position: absolute; bottom: 100%; width: 2px; height: 18px; background: var(--ink);
+}
+.vaisle__sign::before { left: 18%; } .vaisle__sign::after { right: 18%; }
+.vaisle__sign small { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.14em; color: var(--ink-yellow); }
+/* the run of spines: films (cases) then series (box sets, fatter), on one scale across the aisles */
+.vaisle__run {
+  display: flex; height: 44px; margin-top: 14px;
+  border-bottom: 7px solid #8a6a4f;
+  box-shadow: 0 2px 0 var(--ink);
+}
+.vaisle__spines { width: var(--w); height: 100%; border-right: 0; }
+.vaisle__spines--film {
+  background:
+    linear-gradient(180deg, transparent 0 14%, rgba(255,255,255,0.35) 14% 18%, transparent 18% 78%, rgba(0,0,0,0.25) 78% 82%, transparent 82%),
+    repeating-linear-gradient(90deg, var(--ink) 0 2px, var(--inkc) 2px 8px);
+  height: 86%; align-self: flex-end;
+}
+.vaisle__spines--series {
+  background:
+    linear-gradient(180deg, transparent 0 10%, rgba(0,0,0,0.3) 10% 14%, transparent 14% 86%, rgba(0,0,0,0.3) 86% 90%, transparent 90%),
+    repeating-linear-gradient(90deg, var(--ink) 0 2px, var(--ink-yellow) 2px 13px);
+}
+.vaisle__count { margin: 8px 0 14px; font-family: var(--f-mono); font-size: 12px; }
+.vaisle__count b { font-family: var(--f-disp); font-weight: 400; font-size: 24px; margin-right: 4px; }
+.vaisle .vfaces { gap: 12px; padding-right: 10px; }
+.vaisle .vface { width: calc((100% - 10px - 48px) / 5); }
+.vaisle__tags { display: flex; flex-wrap: wrap; gap: 6px 8px; margin: 14px 0 0; }
+.vaisle__tags span {
+  padding: 3px 8px 2px; background: #fffbe0; border: 1.5px solid var(--ink);
+  font-family: var(--f-scrib); font-size: 17px; line-height: 1;
+}
+.vaisle__tags span:nth-child(odd) { transform: rotate(-2deg); } .vaisle__tags span:nth-child(even) { transform: rotate(1.5deg); }
+
+/* ── the shelf-talker board: handwritten cards pinned up; the till's notepad of names ── */
+.vtalk { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 28px; align-items: start; margin: 18px 0 52px; }
+.vtalk__board {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 18px 16px;
+  margin: 0; padding: 22px 18px;
+  list-style: none;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(0,0,0,0.08) 1px, transparent 2px) 0 0 / 9px 9px,
+    #b98b5a;
+  border: 3px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.vtalk__card {
+  --inkc: var(--ink-red);
+  position: relative;
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 16px 12px 11px;
+  background: #fffbe0;
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 rgba(23,19,17,0.55);
+  transform: rotate(var(--tilt, 0deg));
+}
+.vtalk__card--ink1 { --inkc: var(--ink-blue); } .vtalk__card--ink2 { --inkc: var(--ink-purple, var(--ink)); }
+.vtalk__card--ink3 { --inkc: var(--ink-green, var(--ink-blue)); } .vtalk__card--ink4 { --inkc: var(--ink-orange, var(--ink-red)); }
+/* a drawing pin */
+.vtalk__card::before {
+  content: ''; position: absolute; top: -6px; left: 50%; width: 13px; height: 13px; margin-left: -6px;
+  border-radius: 50%; background: var(--inkc); border: 2px solid var(--ink);
+}
+.vtalk__tag { font-family: var(--f-scrib); font-size: 26px; line-height: 0.9; color: var(--inkc); }
+.vtalk__n { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+.vtalk__titles { display: flex; flex-direction: column; margin-top: 3px; padding-top: 5px; border-top: 1px dashed var(--ink); font-size: 12.5px; line-height: 1.3; }
+.vtalk__titles span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vtalk__pad {
+  padding: 16px 16px 12px;
+  background: repeating-linear-gradient(180deg, transparent 0 25px, rgba(33,72,192,0.25) 25px 26px), var(--paper-4);
+  border: 3px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink-red);
+  transform: rotate(1deg);
+}
+.vtalk__pad h3 { margin: 0 0 8px; font-family: var(--f-disp); font-weight: 400; font-size: 22px; text-transform: uppercase; }
+.vtalk__pad ul { margin: 0; padding: 0; list-style: none; }
+.vtalk__pad li { padding: 4px 0; font-size: 13px; line-height: 1.35; }
+.vtalk__pad li + li { border-top: 1px dashed rgba(23,19,17,0.35); }
+.vtalk__pad b { font-family: var(--f-scrib); font-weight: 400; font-size: 21px; line-height: 1; }
+.vtalk__pad i { font-style: normal; font-weight: 700; }
+
+/* ── me against the crowd: stacks of tapes by score, then three shelves ── */
+.vcrowd { margin: 18px 0 56px; }
+.vcrowd__stacks { margin: 0 0 30px; }
+.vcrowd__floor {
+  --tape: 5px;
+  position: relative;
+  display: grid; grid-template-columns: repeat(var(--bins), minmax(0, 1fr)); gap: 10px;
+  align-items: end;
+  padding: 58px 16px 0;
+  min-height: calc(var(--tall) * var(--tape) + 104px);
+  background: color-mix(in srgb, var(--ink-section, var(--ink-red)) 10%, var(--paper-4));
+  border: 3px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.vcrowd__bin { display: flex; flex-direction: column; align-items: center; }
+.vcrowd__pile { display: flex; flex-direction: column-reverse; align-items: center; width: 100%; }
+/* a cassette lying flat: a film; a box-set tape, thicker and paler: a series */
+.vtape {
+  --inkc: var(--ink-red);
+  display: block; width: min(100%, 76px); height: var(--tape);
+  background: var(--inkc);
+  border: 1px solid var(--ink); border-bottom: 0;
+}
+.vtape--ink1 { --inkc: var(--ink-blue); } .vtape--ink2 { --inkc: var(--ink-purple, var(--ink)); }
+.vtape--ink3 { --inkc: var(--ink-green, var(--ink-blue)); } .vtape--ink4 { --inkc: var(--ink-orange, var(--ink-red)); }
+.vtape:nth-child(3n) { transform: translateX(3px); } .vtape:nth-child(5n) { transform: translateX(-2px); }
+.vtape--series { background: var(--ink-yellow); width: min(100%, 64px); }
+.vcrowd__n { margin-top: 4px; font-family: var(--f-disp); font-size: 15px; line-height: 1; order: -1; margin-bottom: 4px; }
+.vcrowd__tick {
+  align-self: stretch; margin: 0 -5px; padding: 5px 0 6px;
+  border-top: 7px solid #8a6a4f;
+  box-shadow: 0 -2px 0 var(--ink);
+  text-align: center; font-family: var(--f-disp); font-size: 20px; line-height: 1; min-height: 31px; box-sizing: border-box;
+}
+.vcrowd__bin:not(.vcrowd__bin--major) .vcrowd__tick { font-size: 13px; padding-top: 9px; color: rgba(23,19,17,0.6); }
+.vcrowd__mean {
+  position: absolute; top: 8px; bottom: 31px; left: calc(16px + (100% - 32px) * var(--at));
+  border-left: 3px dashed var(--ink);
+  padding-left: 6px;
+  font-family: var(--f-mono); font-size: 11px; white-space: nowrap;
+}
+.vcrowd__mean b { font-family: var(--f-disp); font-weight: 400; font-size: 22px; margin-right: 3px; }
+.vcrowd__stacks figcaption { margin-top: 10px; font-family: var(--f-mono); font-size: 11px; opacity: 0.8; }
+.vcrowd__shelves { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.vcrowd__shelf {
+  padding: 14px 14px 18px;
+  background: var(--paper-4);
+  border: 3px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.vcrowd__shelf h3 { margin: 0 0 16px; font-family: var(--f-disp); font-weight: 400; font-size: 26px; line-height: 1; text-transform: uppercase; }
+.vcrowd__shelf h3 small { display: block; margin-top: 3px; font-family: var(--f-mono); font-size: 11px; text-transform: none; letter-spacing: 0; }
+.vcrowd__shelf .vfaces { --face-w: calc((100% - 36px) / 5); gap: 9px; padding: 0 0 6px; border-bottom: 7px solid #8a6a4f; flex-wrap: wrap; }
+.vcrowd__shelf .vface { width: calc((100% - 36px) / 5); }
+.vcrowd__shelf .vface__price { width: 28px; height: 28px; font-size: 12.5px; top: -8px; right: -7px; }
+.vcrowd__shelf--top { background: color-mix(in srgb, var(--ink-yellow) 22%, var(--paper-4)); }
+.vcrowd__shelf--bin { background: repeating-linear-gradient(45deg, transparent 0 10px, rgba(23,19,17,0.05) 10px 20px), var(--paper-4); }
+.vcrowd__shelf--bin .vface:nth-child(odd) { transform: rotate(-7deg) translateY(4px); } .vcrowd__shelf--bin .vface:nth-child(even) { transform: rotate(6deg); }
+.vcrowd__shelf--picks .vfaces { border-bottom: 0; padding-bottom: 66px; }
+.vcrowd__gem { margin: 8px 0 0; font-family: var(--f-scrib); font-size: 20px; line-height: 1.05; }
+
+/* ── the awards cabinet: dark wood, glass shelves, a brass plate each, the winners with their statuettes ── */
+.vcab { margin: 18px 0 56px; }
+.vcab__glass {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 30px;
+  padding: 14px 14px 4px;
+  background: linear-gradient(180deg, #3b2a1f, #2a1d15);
+  border: 3px solid var(--ink);
+  border-radius: 6px 6px 0 0;
+  box-shadow: inset 0 0 0 8px #4f3828, inset 0 0 0 10px var(--ink), 7px 7px 0 var(--ink-yellow);
+  padding: 22px 26px 6px;
+}
+.vcab__shelf { position: relative; padding: 30px 0 16px; }
+.vcab__shelf--wide { grid-column: 1 / -1; }
+.vcab__plate {
+  position: absolute; top: 0; left: 0;
+  display: flex; align-items: baseline; gap: 10px;
+  margin: 0; padding: 3px 12px 3px;
+  background: linear-gradient(180deg, #f6dc8a, #c9992e);
+  color: #2a1d15;
+  border: 2px solid var(--ink);
+  font-family: var(--f-mono); font-size: 11px; font-weight: 400;
+}
+.vcab__plate b { font-family: var(--f-disp); font-weight: 400; font-size: 19px; text-transform: uppercase; letter-spacing: 0.04em; }
+.vcab__row {
+  display: flex; flex-wrap: wrap; gap: 26px 18px; align-items: flex-end;
+  margin: 0; padding: 14px 6px 12px; list-style: none;
+  /* the glass shelf: a pale edge with a shine */
+  background: linear-gradient(180deg, transparent calc(100% - 9px), rgba(200,235,255,0.55) calc(100% - 9px), rgba(255,255,255,0.85) calc(100% - 7px), rgba(150,200,230,0.35) 100%);
+}
+.vcab__winner { position: relative; width: 70px; aspect-ratio: 2 / 3; transform: rotate(calc(var(--tilt, 0deg) * 0.4)); }
+.vcab__winner img { color: transparent; }
+.vcab__winner img, .vcab__winner .vface__name { display: block; width: 100%; height: 100%; object-fit: cover; border: 2px solid #000; border-radius: 2px; box-shadow: 0 0 18px rgba(255, 210, 120, 0.18); }
+.vcab__winner .vface__name { box-sizing: border-box; padding: 6px 5px; overflow: hidden; background: var(--ink-red); color: var(--paper-4); font-family: var(--f-disp); font-size: 12px; line-height: 1; text-transform: uppercase; overflow-wrap: anywhere; }
+.vcab__statue {
+  position: absolute; z-index: 2; right: -12px; bottom: -6px;
+  display: grid; place-items: end center;
+  width: 30px; height: 30px; padding-bottom: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff3b0, #e3b23c 45%, #a8781a 100%);
+  border: 1.5px solid #000;
+  color: #000; font-family: var(--f-disp); font-size: 0;
+}
+.vcab__statue::after { content: ''; position: absolute; inset: 3px; background: #5a3d06; -webkit-mask: var(--wreath) center / contain no-repeat; mask: var(--wreath) center / contain no-repeat; }
+.vcab__winner:has(.vcab__statue:not(:empty)) .vcab__statue { width: auto; height: auto; padding: 2px 6px 1px; border-radius: 3px; font-size: 15px; place-items: center; }
+.vcab__winner:has(.vcab__statue:not(:empty)) .vcab__statue::after { display: none; }
+.vcab__best {
+  position: absolute; top: calc(100% + 4px); left: -8px; right: -8px;
+  color: #f2dfae; font-family: var(--f-mono); font-size: 9px; line-height: 1.15; text-align: center;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.vcab__row:has(.vcab__best) { padding-bottom: 40px; }
+.vcab__row:has(.vcab__best) { background-position: 0 0; }
+
+@media (max-width: 900px) {
+  .vaisles { grid-template-columns: minmax(0, 1fr); }
+  .vtalk { grid-template-columns: minmax(0, 1fr); }
+  .vcrowd__shelves { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 560px) {
+  .vaisle { padding: 30px 10px 12px; }
+  .vaisle__sign { font-size: 24px; min-width: 70%; }
+  .vaisle .vfaces { gap: 9px; }
+  .vaisle .vface { width: calc((100% - 10px - 36px) / 5); }
+  .vaisle .vface__price { width: 26px; height: 26px; font-size: 11.5px; top: -7px; right: -7px; }
+  .vtalk__board { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 16px 10px; gap: 14px 10px; }
+  .vtalk__tag { font-size: 21px; }
+  .vtalk__titles { font-size: 11px; }
+  .vcrowd__floor { --tape: 4px; gap: 3px; padding: 58px 6px 0; }
+  .vcrowd__mean { font-size: 10px; } .vcrowd__mean b { font-size: 18px; }
+  .vcrowd__tick { font-size: 15px; }
+  .vcrowd__mean { left: calc(6px + (100% - 12px) * var(--at)); }
+  .vcab__glass { padding: 18px 12px 4px; grid-template-columns: minmax(0, 1fr); }
+  .vcab__best { display: none; }
+  .vcab__row:has(.vcab__best) { padding-bottom: 12px; }
+  .vcab__winner { width: 56px; }
+  .vcab__row { gap: 22px 14px; }
+}

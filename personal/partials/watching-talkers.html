@@ -1,0 +1,26 @@
+<!-- Context: lifeSections.watching.talkers {cards[{tag, n, titles, tilt, ink}], people[{name, role, titles}]}
+     (tasks/media-view.mjs talkersView) — the shelf-talker board: a handwritten card per theme that keeps turning up
+     (three titles on each), and the directors and creators I keep coming back to, on the till's notepad. -->
+<div class="vtalk">
+  {{#if cards.length}}
+  <ul class="vtalk__board">
+    {{#each cards}}
+    <li class="vtalk__card vtalk__card--ink{{ink}}" style="--tilt: {{tilt}}deg">
+      <span class="vtalk__tag">{{tag}}</span>
+      <span class="vtalk__n">{{n}} on the wall</span>
+      <span class="vtalk__titles">{{#each titles}}<span>{{this}}</span>{{/each}}</span>
+    </li>
+    {{/each}}
+  </ul>
+  {{/if}}
+  {{#if people.length}}
+  <div class="vtalk__pad">
+    <h3>Names I keep renting</h3>
+    <ul>
+      {{#each people}}
+      <li><b>{{name}}</b> {{role}} <span>{{#each titles}}{{#unless @first}}{{#if @last}} and {{else}}, {{/if}}{{/unless}}<i>{{this}}</i>{{/each}}</span></li>
+      {{/each}}
+    </ul>
+  </div>
+  {{/if}}
+</div>

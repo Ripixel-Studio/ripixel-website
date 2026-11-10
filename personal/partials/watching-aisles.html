@@ -1,0 +1,17 @@
+<!-- Context: lifeSections.watching.aisles [{no, genre, n, films, series, count, filmPct, seriesPct, cases[{title, poster,
+     ink, ratingLabel, imdb, laurel}], tags, ink}] (tasks/media-view.mjs aislesView) — the shop's genre aisles, fullest first:
+     a hanging sign each, the aisle's titles as a run of spines (films, then series; one scale across every aisle), its
+     best-rated cases face out with the crowd's score on a price sticker, and its shelf-talkers. -->
+<div class="vaisles">
+  {{#each this}}
+  <section class="vaisle vaisle--ink{{ink}}" aria-label="Aisle {{no}}, {{genre}}: {{count}}">
+    <h3 class="vaisle__sign"><small>aisle {{no}}</small>{{genre}}</h3>
+    <div class="vaisle__run" aria-hidden="true">
+      <span class="vaisle__spines vaisle__spines--film" style="--w: {{filmPct}}%"></span><span class="vaisle__spines vaisle__spines--series" style="--w: {{seriesPct}}%"></span>
+    </div>
+    <p class="vaisle__count"><b>{{n}}</b> {{count}}</p>
+    {{> watching-faces cases}}
+    {{#if tags.length}}<p class="vaisle__tags">{{#each tags}}<span>{{this}}</span>{{/each}}</p>{{/if}}
+  </section>
+  {{/each}}
+</div>
