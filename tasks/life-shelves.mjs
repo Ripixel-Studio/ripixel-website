@@ -285,6 +285,7 @@ export function listeningView(sec) {
     podcasts: pods.map((x, i) => {
       const since = monthOf(x.since), last = monthOf(x.last);
       return { name: str(x.name), art: shelfArt(x.art), episodes: group(num(x.episodes) ?? 0), one: num(x.episodes) === 1, hours: hoursLabel(x.hours),
+        genre: str(x.genre),
         span: since && last && since !== last ? `${since} to ${last}` : since, both: (num(x.apps) ?? 0) > 1, ink: i % 5,
         pct: Math.round(((num(x.episodes) ?? 0) / podMax) * 100) };
     }),
@@ -298,5 +299,95 @@ export function listeningView(sec) {
     mixtape: list(sec.latestLoves).filter((t) => str(t.title)).slice(0, 12).map((t, i) => ({
       n: i + 1, side: i < 6 ? 'A' : 'B', title: str(t.title), by: str(t.by), art: shelfArt(t.art),
     })),
+    ...relationsView(sec),
+  };
+}
+
+// ─── listening relations (jarvis lifehub/musicrel.py) ───
+
+/** The prize a gold disc is framed for, as its plaque says it: [one, many]. */
+const PRIZES = {
+  grammy: ['Grammy', 'Grammys'], brit: ['Brit', 'Brits'], mercury: ['Mercury Prize', 'Mercury Prizes'],
+  ivor: ['Ivor Novello', 'Ivor Novellos'], eurovision: ['Eurovision win', 'Eurovision wins'], oscar: ['Oscar', 'Oscars'],
+  globe: ['Golden Globe', 'Golden Globes'], mtv: ['MTV award', 'MTV awards'], mobo: ['MOBO', 'MOBOs'],
+};
+const SCREEN_KIND = { film: 'film', show: 'TV', game: 'game' };
+const SCREEN_PAGE = { watching: { href: '/life/watching', label: 'on my telly too' }, games: { href: '/life/games', label: 'on my games shelf too' } };
+
+/** "3 Grammys" for wins, "2 Brit nominations" when there are none. @param {any} a */
+const prizeLine = (a) => {
+  const [one, many] = PRIZES[str(a.award)] || [];
+  if (!one) return '';
+  const won = num(a.won) ?? 0, noms = num(a.noms) ?? 0;
+  if (won) return `${won} ${won === 1 ? one : many}`;
+  return noms ? `${noms} ${one.replace(/ win$/, '')} ${noms === 1 ? 'nomination' : 'nominations'}` : '';
+};
+
+/** @param {any} sec */
+export function relationsView(sec) {
+  const racks = list(sec.racks).filter((r) => str(r.rack) && num(r.share) != null).slice(0, 10);
+  const inkOf = new Map(racks.map((r, i) => [str(r.rack), i]));
+  const cov = sec.relCoverage && typeof sec.relCoverage === 'object' ? sec.relCoverage : null;
+  const years = list(sec.rackYears).filter((y) => num(y.year) && y.shares && typeof y.shares === 'object');
+  const gold = list(sec.goldDiscs).filter((g) => str(g.name) && list(g.awards).length);
+  const origins = list(sec.origins).filter((o) => str(o.name) && num(o.share) != null);
+  const oMax = Math.max(1, ...origins.map((o) => num(o.share) ?? 0));
+  const eras = list(sec.eras).filter((e) => num(e.decade) && num(e.share) != null);
+  const eMax = Math.max(1, ...eras.map((e) => num(e.share) ?? 0));
+  const screens = list(sec.screenMusic).filter((x) => str(x.title) && list(x.songs).length);
+  return {
+    racks: racks.map((r, i) => ({
+      name: str(r.rack), share: num(r.share) ?? 0, ink: i, off: (i % 3) * 18,
+      plays: plural(num(r.plays) ?? 0, 'play', 'plays'), artistsN: plural(num(r.artists) ?? 0, 'artist', 'artists'),
+      top: (Array.isArray(r.top) ? r.top : []).map(str).filter(Boolean).slice(0, 4),
+      // the divider stands as tall as its share of the racks, never so short its name will not fit
+      height: Math.max(34, Math.round(((num(r.share) ?? 0) / Math.max(1, num(racks[0].share) ?? 1)) * 100)),
+    })),
+    rackYears: years.map((y) => {
+      const parts = Object.entries(y.shares).filter(([k, v]) => inkOf.has(k) && num(v)).sort((a, b) => /** @type {number} */ (inkOf.get(a[0])) - /** @type {number} */ (inkOf.get(b[0])));
+      const total = parts.reduce((n, [, v]) => n + /** @type {number} */ (v), 0) || 1;
+      return {
+        year: String(y.year), lead: str(y.lead),
+        parts: parts.map(([k, v]) => ({ rack: k, ink: inkOf.get(k), pct: Math.round((/** @type {number} */ (v) / total) * 1000) / 10 })),
+        title: parts.map(([k, v]) => `${k} ${v}%`).join(', '),
+      };
+    }),
+    rackNote: cov && num(cov.artists) ? `${group(/** @type {number} */ (num(cov.artists)))} most played artists of ${group(num(cov.of) ?? 0)}, which is ${num(cov.racked) ?? num(cov.plays) ?? 0}% of every play` : '',
+    gold: gold.map((g, i) => {
+      const aw = list(g.awards);
+      const won = num(g.won) ?? 0;
+      const mine = list(g.mine).filter((m) => str(m.title))[0];
+      const best = aw.find((a) => str(a.best) && (num(a.won) ?? 0) > 0);
+      return {
+        name: str(g.name), tier: won ? 'gold' : 'silver', n: i,
+        lines: aw.map(prizeLine).filter(Boolean).slice(0, 3),
+        best: best ? `${(PRIZES[str(best.award)] || [''])[0].replace(/ win$/, '')}: ${str(best.best)}` : '',
+        mine: mine ? `including ${str(mine.title)}, ${plural(num(mine.plays) ?? 0, 'play', 'plays')} from me` : '',
+        tilt: ((hash(str(g.name)) % 5) - 2) * 0.6,
+      };
+    }),
+    goldNote: cov && num(cov.awarded) ? `${group(/** @type {number} */ (num(cov.awarded)))} of my ${group(num(cov.artists) ?? 0)} most played artists have a music prize or a nomination on Wikidata` : '',
+    origins: origins.map((o, i) => ({
+      code: str(o.code), name: str(o.name), share: num(o.share) ?? 0, ink: i % 5,
+      size: Math.max(0.8, Math.sqrt((num(o.share) ?? 0) / oMax) * 2.6),
+      artists: plural(num(o.artists) ?? 0, 'artist', 'artists'),
+      top: (Array.isArray(o.top) ? o.top : []).map(str).filter(Boolean).slice(0, 3).join(', '),
+    })),
+    eras: eras.map((e) => ({
+      decade: `${String(e.decade).slice(2)}s`, share: num(e.share) ?? 0, pct: Math.round(((num(e.share) ?? 0) / eMax) * 100),
+      top: (Array.isArray(e.top) ? e.top : []).map(str).filter(Boolean).slice(0, 2).join(', '),
+      artists: plural(num(e.artists) ?? 0, 'artist', 'artists'),
+    })),
+    screens: screens.map((x, i) => {
+      const page = SCREEN_PAGE[str(x.page)] || null;
+      const song = list(x.songs)[0];
+      return {
+        title: str(x.title), kind: SCREEN_KIND[str(x.kind)] || '', art: shelfArt(x.art), ink: i % 5,
+        plays: plural(num(x.plays) ?? 0, 'play', 'plays'), across: (num(x.tracks) ?? 0) > 1 ? `across ${group(/** @type {number} */ (num(x.tracks)))} songs` : '',
+        song: str(song.title), by: str(song.by),
+        href: page ? page.href : '', tie: page ? page.label : '',
+        tilt: ((hash(str(x.title)) % 5) - 2) * 0.7,
+      };
+    }),
   };
 }

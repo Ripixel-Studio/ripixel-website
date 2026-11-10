@@ -136,3 +136,34 @@ test('listening: podcasts feed and stacked ear months', () => {
   assert.equal(v.earBars[0].newYear, true);
   assert.equal(v.earPodcasts, true);
 });
+
+test('relationsView: racks share one ink with their years, gold or silver discs, soundtrack tie-ins', () => {
+  const v = listeningView({
+    racks: [{ rack: 'Drum & bass', share: 40, plays: 400, artists: 3, top: ['A', 'B'] }, { rack: 'Pop', share: 10, plays: 100, artists: 1, top: ['C'] }],
+    rackYears: [{ year: 2024, shares: { Pop: 30, 'Drum & bass': 60, Unknown: 10 }, lead: 'Drum & bass' }],
+    relCoverage: { artists: 250, of: 4000, plays: 50, racked: 45, awarded: 2 },
+    goldDiscs: [
+      { name: 'Winner', won: 3, noms: 5, awards: [{ award: 'grammy', won: 2, noms: 3, best: 'Song of the Year' }, { award: 'brit', won: 1, noms: 2, best: '' }],
+        mine: [{ title: 'Hit', plays: 12, award: 'grammy' }] },
+      { name: 'Nearly', won: 0, noms: 1, awards: [{ award: 'mercury', won: 0, noms: 1, best: '' }], mine: [] },
+      { name: 'Bad', won: 1, noms: 1, awards: [] },
+    ],
+    origins: [{ code: 'GB', name: 'UK', share: 60, artists: 10, top: ['A'] }],
+    eras: [{ decade: 2010, share: 70, artists: 5, top: ['A'] }],
+    screenMusic: [{ title: 'Film', kind: 'film', plays: 9, tracks: 2, songs: [{ title: 'Theme', by: 'Comp' }], page: 'watching', key: 'k' },
+      { title: 'Game', kind: 'game', plays: 5, tracks: 1, songs: [{ title: 'Song', by: 'X' }], page: 'nowhere', art: 'https://evil.example/a.jpg' },
+      { title: 'Empty', plays: 5, songs: [] }],
+  });
+  assert.deepEqual(v.racks.map((r) => [r.name, r.ink, r.height]), [['Drum & bass', 0, 100], ['Pop', 1, 34]]);
+  assert.deepEqual(v.rackYears[0].parts.map((p) => [p.rack, p.ink]), [['Drum & bass', 0], ['Pop', 1]], 'unknown racks never drawn, rack order kept');
+  assert.equal(v.rackYears[0].parts[0].pct, 66.7);
+  assert.match(v.rackNote, /250 most played artists of 4,000, which is 45%/);
+  assert.deepEqual(v.gold.map((g) => [g.name, g.tier]), [['Winner', 'gold'], ['Nearly', 'silver']]);
+  assert.deepEqual(v.gold[0].lines, ['2 Grammys', '1 Brit']);
+  assert.equal(v.gold[0].best, 'Grammy: Song of the Year');
+  assert.equal(v.gold[0].mine, 'including Hit, 12 plays from me');
+  assert.deepEqual(v.gold[1].lines, ['1 Mercury Prize nomination']);
+  assert.equal(v.eras[0].decade, '10s');
+  assert.deepEqual(v.screens.map((s) => [s.title, s.kind, s.href, s.art]), [['Film', 'film', '/life/watching', ''], ['Game', 'game', '', '']]);
+  assert.equal(v.screens[0].across, 'across 2 songs');
+});
