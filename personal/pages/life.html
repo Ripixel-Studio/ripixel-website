@@ -86,6 +86,59 @@
     </ol>
     {{/if}}
 
+    {{#if lifeHub.connects}}{{#with lifeHub.connects}}
+    <!-- How it all connects (jarvis crossrel, tasks/life-rel.mjs): a corkboard of the genres that run through
+         several pages, each pin its page's share, and the titles pinned on more than one page. -->
+    <section class="cork-wrap" aria-labelledby="connects-h">
+      <h2 class="fit-header" id="connects-h">how it all <span>connects</span>.</h2>
+      <div class="cork">
+        {{#if genres.length}}
+        <p class="cork__note">Same taste, every shelf. Each pin is that page's share.</p>
+        <ol class="cork-genres">
+          {{#each genres}}
+          <li class="cork-genre">
+            <p class="cork-genre__name">{{genre}}</p>
+            <ul class="cork-genre__pins">
+              {{#each shelves}}
+              <li class="cork-pin life-ink--{{page}}">
+                <a class="cork-pin__card" href="{{href}}">
+                  <span class="cork-pin__page">{{pageName}}</span>
+                  <b class="cork-pin__share">{{share}}<small>%</small></b>
+                  <span class="cork-pin__of">{{n}} of {{of}} {{what}}</span>
+                  {{#if eg}}<span class="cork-pin__eg">like {{eg}}</span>{{/if}}
+                </a>
+              </li>
+              {{/each}}
+            </ul>
+          </li>
+          {{/each}}
+        </ol>
+        {{/if}}
+        {{#if threads.length}}
+        <p class="cork__note cork__note--threads">One thing, more than one shelf.</p>
+        <ul class="cork-threads">
+          {{#each threads}}
+          <li class="cork-thread">
+            <ul class="cork-thread__cards">
+              {{#each cards}}
+              <li class="polaroid life-ink--{{page}}">
+                <a class="polaroid__link" href="{{href}}">
+                  <span class="polaroid__pic">{{#if art}}<img src="{{art}}" alt="" loading="lazy" decoding="async" width="300" height="300">{{else}}<span class="polaroid__type">{{pageName}}</span>{{/if}}</span>
+                  <span class="polaroid__say">{{say}}</span>
+                  <span class="polaroid__page">{{pageName}}</span>
+                </a>
+              </li>
+              {{/each}}
+            </ul>
+            <p class="cork-thread__title">{{title}}</p>
+          </li>
+          {{/each}}
+        </ul>
+        {{/if}}
+      </div>
+    </section>
+    {{/with}}{{/if}}
+
   </div>
 
   {{> footer}}
