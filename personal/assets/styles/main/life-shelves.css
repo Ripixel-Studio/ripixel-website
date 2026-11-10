@@ -1018,3 +1018,176 @@
   font-family: var(--f-mono); font-size: 12px;
 }
 .gold-tally b { font-family: var(--f-disp); font-weight: 400; font-size: 16px; color: #fff; }
+
+/* ─── reading relations (tasks/reading-rel.mjs) ─── */
+
+/* the prize shelf: covers with foil seals stuck on, gold for a win, silver for a shortlist */
+.prize-tally { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 0; }
+.prize-tally__k {
+  padding: 3px 10px 3px 4px; border: 2px solid var(--ink); border-radius: 999px; background: #f6e7b0;
+  font-family: var(--f-mono); font-size: 12px; box-shadow: 2px 2px 0 var(--ink);
+}
+.prize-tally__k b {
+  display: inline-grid; place-items: center; min-width: 22px; height: 22px; margin-right: 6px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fbe7a0, #d4a93a 55%, #8c6a14); color: var(--ink);
+  font-family: var(--f-disp); font-weight: 400; font-size: 13px;
+}
+.prize-shelf {
+  list-style: none; margin: 0 0 44px; padding: 26px 0 0; display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 34px 26px;
+}
+.prize-book { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.prize-book__face {
+  position: relative; margin: 0 0 12px; aspect-ratio: 1; transform: rotate(var(--tilt));
+  border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); background: var(--paper-4);
+}
+.prize-book__art { display: block; width: 100%; height: 100%; object-fit: cover; }
+.prize-book__seals { position: absolute; top: -16px; right: -14px; display: flex; flex-direction: column; align-items: flex-end; }
+.prize-seal {
+  --metal: #d4a93a; --metal-hi: #fbe7a0; --metal-lo: #8c6a14;
+  display: grid; place-content: center; width: 62px; height: 62px; margin-top: -14px; border-radius: 50%;
+  text-align: center; color: #3a2a05; line-height: 1;
+  background:
+    repeating-conic-gradient(from 0deg, rgba(255,255,255,0.22) 0 4deg, rgba(0,0,0,0.0) 4deg 9deg),
+    radial-gradient(circle at 35% 30%, var(--metal-hi), var(--metal) 50%, var(--metal-lo));
+  /* the serrated rim of a foil sticker */
+  clip-path: polygon(50% 0%, 59% 6%, 69% 3%, 75% 11%, 85% 11%, 88% 21%, 97% 25%, 95% 35%, 100% 43%, 95% 51%, 99% 60%, 92% 67%, 93% 77%, 84% 80%, 80% 90%, 70% 90%, 63% 98%, 54% 94%, 45% 99%, 37% 93%, 27% 96%, 22% 87%, 12% 86%, 10% 76%, 2% 71%, 5% 62%, 0% 53%, 5% 45%, 1% 36%, 8% 30%, 8% 20%, 18% 16%, 22% 7%, 32% 7%, 39% 1%);
+  filter: drop-shadow(1px 2px 0 rgba(0,0,0,0.35));
+  transform: rotate(calc(var(--tilt, 0deg) * -2 + 8deg));
+}
+.prize-seal--silver { --metal: #b9bec6; --metal-hi: #f4f6f8; --metal-lo: #6c727b; color: #26292e; width: 52px; height: 52px; }
+.prize-seal--n0 { margin-top: 0; z-index: 3; }
+.prize-seal--n1 { z-index: 2; margin-right: 6px; }
+.prize-seal--n2 { z-index: 1; margin-right: -4px; }
+.prize-seal b { font-family: var(--f-disp); font-weight: 400; font-size: 13px; letter-spacing: 0.01em; padding: 0 6px; }
+.prize-seal--silver b { font-size: 11px; }
+.prize-seal i { font-style: normal; font-family: var(--f-mono); font-size: 8px; margin-top: 2px; }
+.prize-book__ribbon {
+  position: absolute; left: -8px; bottom: 14px; padding: 3px 10px; background: var(--ink-red); color: var(--paper-4);
+  border: 2px solid var(--ink); font-family: var(--f-disp); font-size: 13px; letter-spacing: 0.02em; transform: rotate(-4deg);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.prize-book__ribbon--seen { background: var(--ink-yellow); color: var(--ink); }
+.prize-book__title { font-family: var(--f-disp); font-size: 20px; line-height: 1.05; }
+.prize-book__by { font-family: var(--f-mono); font-size: 11px; }
+.prize-book__more { font-family: var(--f-mono); font-size: 10.5px; line-height: 1.35; color: color-mix(in srgb, var(--ink) 70%, transparent); }
+.prize-book__screen { font-family: var(--f-scrib); font-size: 19px; line-height: 1.05; color: var(--ink-section); }
+a.prize-book__screen { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.prize-book__screen--not { color: color-mix(in srgb, var(--ink) 65%, transparent); }
+@media (max-width: 520px) {
+  .prize-shelf { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 30px 22px; }
+  .prize-seal { width: 52px; height: 52px; }
+  .prize-seal--silver { width: 44px; height: 44px; }
+  .prize-seal b { font-size: 11px; }
+  .prize-seal--n2 { display: none; }
+  .prize-book__seals { right: -10px; }
+}
+
+/* the voices: a mixing desk, a channel a narrator, the fader's meter lit to their hours, names on masking tape */
+.voice-desk {
+  list-style: none; margin: 18px 0 44px; padding: 18px 16px 16px; display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 22px 10px;
+  background: linear-gradient(#2d2f33, #1c1d20); border: 3px solid var(--ink); box-shadow: 7px 7px 0 var(--ink-section);
+  border-radius: 6px; color: #e9e6dc;
+}
+.voice-desk__ch {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; padding: 0 6px;
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+.voice-desk__cover { width: 64px; height: 64px; object-fit: cover; border: 2px solid #000; border-radius: 50%; box-shadow: 0 0 0 3px #44474d; }
+.voice-desk__meter {
+  position: relative; width: 22px; height: 150px; padding: 3px; background: #0d0e10; border: 2px solid #000; border-radius: 3px;
+}
+.voice-desk__fill {
+  position: absolute; left: 3px; right: 3px; bottom: 3px; height: calc(var(--pct) * 0.96);
+  background: linear-gradient(to top, #3fbf5a 0 60%, #f2c13c 60% 85%, #e6452e 85%) 0 100% / 100% 144px no-repeat;
+  -webkit-mask: repeating-linear-gradient(to top, #000 0 5px, transparent 5px 7px);
+  mask: repeating-linear-gradient(to top, #000 0 5px, transparent 5px 7px);
+}
+.voice-desk__hours { font-family: var(--f-mono); font-size: 11px; color: #f2c13c; }
+.voice-desk__tape {
+  width: 100%; padding: 4px 4px 3px; background: #efe6c8; color: var(--ink); transform: rotate(-1.5deg);
+  font-family: var(--f-scrib); font-size: 20px; line-height: 0.95; text-align: center;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.4); clip-path: polygon(2% 0, 98% 4%, 100% 96%, 0 100%);
+}
+.voice-desk__ch:nth-child(even) .voice-desk__tape { transform: rotate(1.2deg); }
+.voice-desk__n { font-family: var(--f-mono); font-size: 10.5px; color: #bdb8aa; }
+.voice-desk__for { font-family: var(--f-mono); font-size: 10px; line-height: 1.35; color: #8f8b80; text-align: center; }
+@media (max-width: 520px) {
+  .voice-desk { grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 14px 8px; gap: 18px 4px; }
+  .voice-desk__ch { padding: 0 2px; }
+  .voice-desk__cover { width: 44px; height: 44px; }
+  .voice-desk__meter { height: 100px; width: 18px; }
+  .voice-desk__fill { background-size: 100% 94px; }
+  .voice-desk__tape { font-size: 16px; }
+  .voice-desk__for { display: none; }
+}
+
+/* the card catalogue: oak drawers, a brass label holder, the cards poking out of the top */
+.card-cat {
+  list-style: none; margin: 0 0 44px; padding: 22px 18px 18px; display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 30px 12px;
+  background: #6b4423; border: 3px solid var(--ink); box-shadow: 7px 7px 0 var(--ink);
+  background-image: repeating-linear-gradient(90deg, rgba(0,0,0,0.06) 0 2px, transparent 2px 9px), linear-gradient(#7a4f2a, #5e3b1e);
+}
+.card-cat__drawer { position: relative; display: flex; flex-direction: column; justify-content: flex-end; min-height: 150px; }
+.card-cat__cards { display: flex; flex-direction: column; align-items: stretch; padding: 0 12px; }
+.card-cat__card {
+  margin-top: -6px; padding: 4px 8px 6px; background: #fbf6e6; border: 1px solid #b9ad8c;
+  font-family: var(--f-mono); font-size: 10.5px; line-height: 1.25; color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.card-cat__card:first-child { margin-top: 0; transform: rotate(-1.2deg); }
+.card-cat__card:nth-child(2) { transform: translateX(4px) rotate(0.8deg); }
+.card-cat__front {
+  position: relative; z-index: 1; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px;
+  padding: 12px 12px 24px; background: linear-gradient(#a8743f, #8d5d30); border: 2px solid #2a1a0c;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.18), inset 0 -3px 0 rgba(0,0,0,0.25), 0 3px 0 #2a1a0c;
+}
+.card-cat__label {
+  display: flex; flex-direction: column; gap: 2px; padding: 5px 8px; background: #fbf6e6; color: var(--ink);
+  border: 3px solid #c79b3c; border-radius: 3px; box-shadow: 0 0 0 1px #6e5216, inset 0 1px 3px rgba(0,0,0,0.2);
+}
+.card-cat__mark { font-family: var(--f-mono); font-size: 10px; color: var(--ink-red); }
+.card-cat__heading { font-family: var(--f-disp); font-size: 17px; line-height: 1.05; }
+.card-cat__n { font-family: var(--f-disp); font-size: 34px; line-height: 1; color: #fbe7a0; text-shadow: 2px 2px 0 #2a1a0c; }
+.card-cat__pull {
+  position: absolute; left: 50%; bottom: 6px; width: 36px; height: 10px; margin-left: -18px; border-radius: 0 0 12px 12px;
+  background: linear-gradient(#f2d27a, #a77d22); border: 1px solid #5a420f;
+}
+@media (max-width: 520px) {
+  .card-cat { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 18px 10px 12px; gap: 24px 8px; }
+  .card-cat__heading { font-size: 15px; }
+  .card-cat__n { font-size: 26px; }
+  .card-cat__card:nth-child(n+3) { display: none; }
+}
+
+/* first printed: a library's date-due slip, a stamp a decade and a tally mark a book */
+.date-slip {
+  max-width: 640px; margin: 18px 0 44px; padding: 16px 22px 18px; background: #fbf3d4; color: var(--ink);
+  border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink-section); transform: rotate(-0.6deg);
+}
+.date-slip__head { display: block; padding: 0 0 8px; border-bottom: 3px double var(--ink); font-family: var(--f-disp); font-size: 22px; text-align: center; }
+.date-slip__rows { list-style: none; margin: 0; padding: 0; }
+.date-slip__row { border-bottom: 1px solid #a9b8d8; display: grid; grid-template-columns: 92px minmax(0, auto) 1fr; align-items: center; gap: 14px; min-height: 40px; }
+.date-slip__stamp {
+  justify-self: start; padding: 1px 8px; border: 2px solid var(--ink-purple); border-radius: 4px; color: var(--ink-purple);
+  font-family: var(--f-mono); font-weight: 700; font-size: 15px; letter-spacing: 0.04em; transform: rotate(var(--tilt));
+  opacity: 0.85; -webkit-mask: repeating-linear-gradient(115deg, #000 0 3px, rgba(0,0,0,0.75) 3px 4px);
+}
+.date-slip__tally { display: flex; flex-wrap: wrap; gap: 4px 9px; align-items: center; }
+.tally { width: 3px; height: 20px; background: var(--ink); border-radius: 2px; transform: rotate(4deg); }
+.tally--5 {
+  position: relative; width: 26px; background:
+    linear-gradient(90deg, var(--ink) 0 3px, transparent 3px 7.5px, var(--ink) 7.5px 10.5px, transparent 10.5px 15px, var(--ink) 15px 18px, transparent 18px 22.5px, var(--ink) 22.5px 25.5px, transparent 25.5px);
+  transform: none; border-radius: 0;
+}
+.tally--5::after { content: ''; position: absolute; left: -3px; top: 8px; width: 33px; height: 3px; background: var(--ink); transform: rotate(-24deg); border-radius: 2px; }
+.date-slip__titles { font-family: var(--f-scrib); font-size: 19px; line-height: 1; color: color-mix(in srgb, var(--ink) 75%, transparent); }
+.date-slip__note { margin: 12px 0 0; font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; }
+@media (max-width: 520px) {
+  .date-slip { padding: 12px 12px 14px; }
+  .date-slip__row { grid-template-columns: 70px 1fr; row-gap: 0; padding: 6px 0; }
+  .date-slip__stamp { font-size: 13px; }
+  .date-slip__titles { grid-column: 2; font-size: 17px; }
+}

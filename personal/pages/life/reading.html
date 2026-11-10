@@ -18,7 +18,8 @@
 
     {{!-- Reading (lifeSections.reading, tasks/life-shelves.mjs): the big numbers, the books on the go, the shelf
           (a plank per year, a spine per finished audiobook cut from its own cover, thicker for a longer book),
-          authors and series as fanned covers, the years in hours, then odd facts on index cards. --}}
+          authors and series as fanned covers, the prize shelf, the voices, the card catalogue and the date-due
+          slip (tasks/reading-rel.mjs), the years in hours, then odd facts on index cards. --}}
     {{#with section}}
     {{> life-section-head snapTop="PAGE" snapAccent="TURNERS"}}
     {{#if empty}}
@@ -68,6 +69,7 @@
             <strong>{{title}}</strong>
             <span>{{#if by}}{{by}}{{/if}}{{#if series}} · {{series}}{{/if}}</span>
             <span>{{#if audio}}audiobook{{else}}book{{/if}} · finished {{monthLabel}}{{#if hours}} · {{hours}}{{/if}}</span>
+            {{#if printed}}<span>first printed {{printed}}</span>{{/if}}
             {{#if again}}<span class="book-spine__card-again">heard more than once</span>{{/if}}
           </span>
         </li>
@@ -94,6 +96,29 @@
     </ol>
     {{/if}}
 
+    {{#if prizes.length}}
+    <h2 class="fit-header">the prize <span>shelf</span>.</h2>
+    <p class="watch-note">{{prizeNote}}. A gold seal is a win, a silver one a shortlist. {{prizeSource}}</p>
+    {{#if prizeTally.length}}<p class="prize-tally">{{#each prizeTally}}<span class="prize-tally__k"><b>{{n}}</b> {{name}}</span>{{/each}}</p>{{/if}}
+    <ol class="prize-shelf">
+      {{#each prizes}}
+      <li class="prize-book" style="--tilt: {{tilt}}deg">
+        <figure class="prize-book__face">
+          {{#if cover}}<img class="prize-book__art" src="{{cover}}" alt="{{title}}" loading="lazy" decoding="async" width="200" height="200">{{else}}<span class="book-face__type">{{title}}</span>{{/if}}
+          <span class="prize-book__seals">
+            {{#each seals}}<span class="prize-seal prize-seal--{{#if won}}gold{{else}}silver{{/if}} prize-seal--n{{n}}" title="{{title}}"><b>{{name}}</b>{{#if series}}<i>Series</i>{{else}}{{#if won}}<i>winner</i>{{else}}<i>shortlist</i>{{/if}}{{/if}}</span>{{/each}}
+          </span>
+          {{#if screen}}<span class="prize-book__ribbon{{#if screen.watched}} prize-book__ribbon--seen{{/if}}">{{#if screen.tv}}now on TV{{else}}now a film{{/if}}</span>{{/if}}
+        </figure>
+        <span class="prize-book__title">{{title}}</span>
+        <span class="prize-book__by">{{by}}{{#if year}}, {{year}}{{/if}}</span>
+        {{#if more}}<span class="prize-book__more">also {{more}}</span>{{/if}}
+        {{#if screen}}{{#if screen.href}}<a class="prize-book__screen" href="{{screen.href}}">{{screen.line}}</a>{{else}}<span class="prize-book__screen prize-book__screen--not">{{screen.line}}</span>{{/if}}{{/if}}
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+
     {{#if authors.length}}
     <h2 class="fit-header">who I <span>read</span>.</h2>
     <ol class="book-authors">
@@ -110,6 +135,23 @@
     </ol>
     {{/if}}
 
+    {{#if voices.length}}
+    <h2 class="fit-header">the <span>voices</span>.</h2>
+    <p class="watch-note">{{voicesNote}} Each fader is up as far as the hours I have spent with that voice.</p>
+    <ol class="voice-desk">
+      {{#each voices}}
+      <li class="voice-desk__ch">
+        {{#if cover}}<img class="voice-desk__cover" src="{{cover}}" alt="" loading="lazy" decoding="async" width="120" height="120">{{/if}}
+        <span class="voice-desk__meter" style="--pct: {{pct}}%" aria-hidden="true"><span class="voice-desk__fill"></span></span>
+        <span class="voice-desk__hours">{{hours}}</span>
+        <span class="voice-desk__tape">{{name}}</span>
+        <span class="voice-desk__n">{{books}}</span>
+        {{#if own}}<span class="voice-desk__for">the author, reading their own</span>{{else}}{{#if authors}}<span class="voice-desk__for">reading {{authors}}</span>{{/if}}{{/if}}
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+
     {{#if series.length}}
     <h2 class="fit-header">series I <span>stuck with</span>.</h2>
     <ol class="book-series">
@@ -121,6 +163,42 @@
       </li>
       {{/each}}
     </ol>
+    {{/if}}
+
+    {{#if catalogue.length}}
+    <h2 class="fit-header">the card <span>catalogue</span>.</h2>
+    <p class="watch-note">What the books are about, filed the way a library would: a drawer for each subject, a card in it for every book. One book can sit in several drawers. Subjects from Wikidata, Open Library and Audible.</p>
+    <ol class="card-cat">
+      {{#each catalogue}}
+      <li class="card-cat__drawer card-cat__drawer--n{{n}}">
+        <span class="card-cat__cards" aria-hidden="true">{{#each titles}}<span class="card-cat__card">{{this}}</span>{{/each}}</span>
+        <span class="card-cat__front">
+          <span class="card-cat__label"><span class="card-cat__mark">{{mark}}</span><span class="card-cat__heading">{{heading}}</span></span>
+          <span class="card-cat__n">{{books}}</span>
+          <span class="card-cat__pull" aria-hidden="true"></span>
+        </span>
+        <span class="visually-hidden">{{#each titles}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</span>
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+
+    {{#if printed.length}}
+    <h2 class="fit-header">first <span>printed</span>.</h2>
+    <p class="watch-note">When the books I have finished first came out (not the audiobook, the book). A tally mark a book.</p>
+    <div class="date-slip">
+      <span class="date-slip__head">First printed</span>
+      <ol class="date-slip__rows">
+        {{#each printed}}
+        <li class="date-slip__row">
+          <span class="date-slip__stamp" style="--tilt: {{tilt}}deg">{{decade}}</span>
+          <span class="date-slip__tally" aria-label="{{books}} books">{{#each fives}}<span class="tally tally--5"></span>{{/each}}{{#each ones}}<span class="tally"></span>{{/each}}</span>
+          <span class="date-slip__titles">{{titles}}</span>
+        </li>
+        {{/each}}
+      </ol>
+      {{#if printedNote}}<p class="date-slip__note">{{printedNote}}</p>{{/if}}
+    </div>
     {{/if}}
 
     {{#if yearBars.length}}
@@ -167,12 +245,6 @@
     </ol>
     {{/if}}
 
-    {{#if genres.length}}
-    <h2 class="fit-header">what <span>kind</span>.</h2>
-    <ul class="book-genres">
-      {{#each genres}}<li class="book-genres__g" style="--pct: {{pct}}%"><span class="book-genres__name">{{name}}</span><span class="book-genres__n">{{books}}</span></li>{{/each}}
-    </ul>
-    {{/if}}
     {{/if}}
     {{/with}}
 
