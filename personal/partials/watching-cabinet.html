@@ -1,0 +1,23 @@
+<!-- Context: lifeSections.watching.cabinet {shelves[{key, label, one, wins, noms, titles, nominatedOnly, cases[face + won,
+     haul, best]}], nominated, winners, titles} (tasks/media-view.mjs cabinetView) — the awards cabinet behind the till:
+     a glass shelf per ceremony with its brass plate (wins, nominations), the winners standing on it with their haul. -->
+<div class="vcab">
+  <div class="vcab__glass">
+    {{#each shelves}}
+    <section class="vcab__shelf vcab__shelf--{{key}}{{#if wide}} vcab__shelf--wide{{/if}}" aria-label="{{label}}: {{wins}} won">
+      <h3 class="vcab__plate"><b>{{label}}</b> <span>{{wins}} won, from {{noms}} nominations</span></h3>
+      <ol class="vcab__row">
+        {{#each cases}}
+        <li class="vcab__winner" style="--tilt: {{tilt}}deg">
+          {{#if imdb}}<a href="{{imdb}}" rel="noopener" title="{{title}} on IMDb">{{/if}}
+          {{#if poster}}<img src="{{poster}}" alt="{{title}}" loading="lazy" decoding="async" width="342" height="513">{{else}}<span class="vface__name">{{title}}</span>{{/if}}
+          {{#if imdb}}</a>{{/if}}
+          <span class="vcab__statue" aria-label="{{won}} won">{{#if haul}}{{haul}}{{/if}}</span>
+          {{#if best}}<span class="vcab__best">{{best}}</span>{{/if}}
+        </li>
+        {{/each}}
+      </ol>
+    </section>
+    {{/each}}
+  </div>
+</div>

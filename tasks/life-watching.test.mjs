@@ -202,3 +202,72 @@ test('YouTube hours: an estimate from video lengths, per period and per channel'
     totals: { year: { films: 2, hours: null, youtubeHours: null }, month: { films: 0, youtubeHours: 0 } } }, now));
   assert.ok(!JSON.stringify(none.stats).includes('"YouTube"'));
 });
+
+// ─── relations: the crowd's scores, the awards, the genre aisles, the shelf-talkers ───
+
+test('a tile carries the crowd score, an IMDb link and its laurel; junk is dropped', () => {
+  const v = w();
+  const harbour = v.wall.find((/** @type {any} */ t) => t.title === 'The Invented Harbour');
+  assert.equal(harbour.rating, 7.9);
+  assert.equal(harbour.ratingLabel, '7.9');
+  assert.equal(harbour.imdb, 'https://www.imdb.com/title/tt9000002/');
+  assert.equal(harbour.awardsLine, '3 Oscars, 1 BAFTA');
+  assert.deepEqual(harbour.laurel, { award: 'oscar', label: 'Oscar' });
+  const dune = v.wall.find((/** @type {any} */ t) => t.title === 'Dune Sample');
+  assert.equal(dune.awardsLine, 'nominated for 2 Oscars');
+  assert.equal(dune.laurel, null);
+  const sec = structuredClone(fixture.sections.watching);
+  Object.assign(sec.wall[0], { rating: 42, imdb: 'javascript:alert(1)', awards: [{ award: 'razzie', won: 9, noms: 9 }, { award: 'oscar', won: 5, noms: 2 }] });
+  const t = /** @type {any} */ (buildSection('watching', sec, now)).wall[0];
+  assert.equal(t.rating, null);
+  assert.equal(t.imdb, '');
+  assert.deepEqual(t.awards.map((/** @type {any} */ a) => [a.award, a.won, a.noms]), [['oscar', 2, 2]], 'unknown prizes dropped, wins capped at nominations');
+});
+
+test('the aisles: a sign each, spines on one scale, each aisle shows its own faces first', () => {
+  const v = w();
+  assert.deepEqual(v.aisles.map((/** @type {any} */ a) => [a.no, a.genre, a.n]), [[1, 'Comedy', 6], [2, 'Sci-Fi', 4], [3, 'Drama', 3]]);
+  const [comedy, scifi] = v.aisles;
+  assert.equal(comedy.count, '4 films and 2 series');
+  assert.ok(comedy.filmPct > scifi.filmPct);
+  assert.equal(comedy.cases[0].title, 'Long Voyage Pirates');
+  // Long Voyage Pirates is face out in Comedy, so Sci-Fi leads with its next title and puts it last
+  assert.deepEqual(scifi.cases.map((/** @type {any} */ c) => c.title), ['Dune Sample', 'Sample Rocket', 'Long Voyage Pirates']);
+  assert.equal(scifi.cases[0].ratingLabel, '7.8');
+  assert.deepEqual(comedy.tags, ['sitcoms', 'satire']);
+});
+
+test('the shelf-talkers: a card a theme with three titles, and the names that recur', () => {
+  const v = w();
+  assert.deepEqual(v.talkers.cards.map((/** @type {any} */ c) => [c.tag, c.n, c.titles.length]), [['space', 3, 3], ['from the book', 3, 3]]);
+  assert.deepEqual(v.talkers.people, [{ name: 'Ada Inventa', role: 'directed', titles: ['Sample Rocket', 'The Paper Moon Landing'] }]);
+  const sec = structuredClone(fixture.sections.watching);
+  sec.tags = []; sec.makers = [];
+  assert.equal(/** @type {any} */ (buildSection('watching', sec, now)).talkers, null);
+});
+
+test('me against the crowd: tapes stacked by the nearest half point, the mean placed, three shelves', () => {
+  const c = w().crowd;
+  assert.equal(c.n, 15);
+  assert.equal(c.source, 'TMDB');
+  assert.equal(c.bins[0].from, 5.5);
+  assert.equal(c.bins.at(-1).from, 9);
+  assert.equal(c.bins.reduce((/** @type {number} */ s, /** @type {any} */ b) => s + b.tapes.length, 0), 15);
+  assert.ok(c.meanAt > 0 && c.meanAt < 1);
+  assert.equal(c.top[0].title, 'Long Voyage Pirates');
+  assert.equal(c.bin[0].title, 'Placeholder Nights', 'the bargain bin starts with the lowest');
+  assert.ok(c.picks.every((/** @type {any} */ p) => p.why), 'staff picks say why');
+  assert.ok(c.gem && c.gem.why);
+  const sec = structuredClone(fixture.sections.watching);
+  for (const t of sec.wall) delete t.rating;
+  assert.equal(/** @type {any} */ (buildSection('watching', sec, now)).crowd, null, 'too few scores: no section');
+});
+
+test('the awards cabinet: a shelf per ceremony with a winner, wins and nominations counted', () => {
+  const cab = w().cabinet;
+  assert.deepEqual(cab.shelves.map((/** @type {any} */ s) => [s.key, s.wins, s.noms]), [['oscar', 3, 10], ['bafta', 1, 4], ['emmy', 2, 3], ['hugo', 1, 1]]);
+  assert.equal(cab.shelves[0].cases[0].haul, '×3');
+  assert.equal(cab.shelves[0].nominatedOnly, 1);
+  assert.equal(cab.nominated, 4);
+  assert.equal(cab.winners, 3);
+});

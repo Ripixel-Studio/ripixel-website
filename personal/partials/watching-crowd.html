@@ -1,0 +1,34 @@
+<!-- Context: lifeSections.watching.crowd {bins[{from, label, major, tapes[{title, rating, series, ink}]}], tallest, n, mean,
+     meanAt, source, top[face], bin[face], picks[face + why], gem{title, rating, why}} (tasks/media-view.mjs crowdView) —
+     every rated title as a tape on a stack by its crowd score (half-point stacks, films then series), the wall's mean
+     marked; then the top shelf (the crowd's favourites), the bargain bin (their least) and the staff picks. -->
+<div class="vcrowd">
+  <figure class="vcrowd__stacks" aria-label="{{n}} titles by their {{source}} score: the wall averages {{mean}}">
+    <div class="vcrowd__floor" style="--bins: {{bins.length}}; --tall: {{tallest}}">
+      {{#each bins}}
+      <div class="vcrowd__bin{{#if major}} vcrowd__bin--major{{/if}}">
+        <span class="vcrowd__pile">{{#each tapes}}<i class="vtape vtape--ink{{ink}}{{#if series}} vtape--series{{/if}}" title="{{title}}: {{rating}}"></i>{{/each}}</span>
+        <span class="vcrowd__n">{{tapes.length}}</span>
+        <span class="vcrowd__tick">{{label}}</span>
+      </div>
+      {{/each}}
+      <span class="vcrowd__mean" style="--at: {{meanAt}}"><b>{{mean}}</b> my wall's average</span>
+    </div>
+    <figcaption>Each tape is a title on the wall, stacked by what {{source}}'s users score it out of ten. Films are tapes in their case colours, series are the yellow ones.</figcaption>
+  </figure>
+  <div class="vcrowd__shelves">
+    <section class="vcrowd__shelf vcrowd__shelf--top">
+      <h3>Top shelf <small>the crowd's favourites</small></h3>
+      {{> watching-faces top}}
+    </section>
+    <section class="vcrowd__shelf vcrowd__shelf--picks">
+      <h3>Staff picks <small>what I went back for</small></h3>
+      {{> watching-faces picks}}
+      {{#if gem}}<p class="vcrowd__gem">The crowd gives <b>{{gem.title}}</b> {{gem.rating}}. I {{gem.why}}.</p>{{/if}}
+    </section>
+    <section class="vcrowd__shelf vcrowd__shelf--bin">
+      <h3>Bargain bin <small>the crowd's least favourites</small></h3>
+      {{> watching-faces bin}}
+    </section>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+<!-- Context: [face] (tasks/media-view.mjs face, plus an optional `why`) — small cases face out with the crowd's score on a
+     price sticker, the laurel when it won something, an IMDb link when the id is known. -->
+<ol class="vfaces">
+  {{#each this}}
+  <li class="vface vface--ink{{ink}}" style="--tilt: {{tilt}}deg">
+    {{#if imdb}}<a href="{{imdb}}" rel="noopener" title="{{title}} on IMDb">{{/if}}
+    {{#if poster}}<img src="{{poster}}" alt="{{title}}" loading="lazy" decoding="async" width="342" height="513">{{else}}<span class="vface__name">{{title}}</span>{{/if}}
+    {{#if imdb}}</a>{{/if}}
+    {{#if ratingLabel}}<span class="vface__price" title="TMDB users' score">{{ratingLabel}}</span>{{/if}}
+    {{#if haul}}<span class="vface__haul">{{haul}}</span>{{/if}}
+    {{#if laurel}}<span class="vlaurel vlaurel--{{laurel.award}}" title="won a {{laurel.label}}" aria-label="won a {{laurel.label}}"></span>{{/if}}
+    {{#if why}}<span class="vface__why">{{why}}</span>{{/if}}
+  </li>
+  {{/each}}
+</ol>
