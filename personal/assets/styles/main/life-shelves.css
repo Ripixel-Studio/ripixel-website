@@ -950,7 +950,7 @@
 }
 
 /* pressed in: import stickers sized by share, and a vinyl per decade */
-.pressed { display: grid; gap: 14px; margin-top: 18px; }
+.pressed { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; margin-top: 18px; }
 .pressed__cap { margin: 14px 0 0; font-family: var(--f-scrib); font-size: 22px; line-height: 1; }
 .pressed__stickers { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 12px 12px; align-items: center; }
 .pressed__sticker {
@@ -985,7 +985,7 @@
 .pressed__decade { font-family: var(--f-disp); font-size: 18px; line-height: 1; }
 .pressed__eshare { font-family: var(--f-mono); font-size: 11px; }
 .pressed__etop { max-width: 100%; font-family: var(--f-scrib); font-size: 15px; line-height: 1; text-align: center; color: color-mix(in srgb, var(--ink) 75%, transparent); }
-@media (max-width: 640px) { .pressed__eras { padding: 10px 8px; gap: 4px; min-height: 110px; } .pressed__decade { font-size: 15px; } .pressed__etop { display: none; } }
+@media (max-width: 640px) { .pressed__eras { padding: 10px 8px; gap: 10px 4px; min-height: 110px; flex-wrap: wrap; justify-content: space-around; } .pressed__era { flex: 0 0 calc(25% - 4px); } .pressed__decade { font-size: 15px; } .pressed__etop { display: none; } }
 
 /* the soundtracks bin: sleeves with a medium stamp and a tie-in sticker */
 .ost-bin { list-style: none; margin: 18px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 28px 20px; }
