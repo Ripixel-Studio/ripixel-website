@@ -19,7 +19,9 @@
     {{!-- Listening (lifeSections.listening, tasks/life-shelves.mjs): the big numbers, the chart (top artists by
           plays), the loves poster (artists set by how many of their songs I liked), year by year (the recaps),
           the stayers, my playlists as tapes, the mixtape (latest likes), on repeat, the crate (albums as CD jewel
-          cases), hours a month (music and podcasts stacked) and the podcast feed. Audiobooks are Reading's. --}}
+          cases), hours a month (music and podcasts stacked) and the podcast feed. Relations (musicrel): the racks
+          (genres as record-shop dividers, then year by year), gold discs (music prizes), pressed in (countries and
+          decades), and from the screen (soundtracks, linked to Watching and Games). Audiobooks are Reading's. --}}
     {{#with section}}
     {{> life-section-head snapTop="TURN IT" snapAccent="UP"}}
     {{#if empty}}
@@ -95,6 +97,7 @@
         <span class="pod-feed__cover{{#if art}} pod-feed__cover--art{{/if}}" aria-hidden="true">{{#if art}}<img src="{{art}}" alt="" loading="lazy" decoding="async" width="240" height="240">{{else}}<span class="pod-feed__name-art">{{name}}</span>{{/if}}<span class="pod-feed__badge">{{episodes}}</span></span>
         <span class="pod-feed__name">{{name}}</span>
         <span class="pod-feed__meta">{{episodes}} {{#if one}}episode{{else}}episodes{{/if}}{{#if hours}} · {{hours}}{{/if}}</span>
+        {{#if genre}}<span class="pod-feed__genre">{{genre}}</span>{{/if}}
         <span class="pod-feed__bar" aria-hidden="true"><span style="width: {{pct}}%"></span></span>
         <span class="pod-feed__span">{{span}}{{#if both}} · in two apps{{/if}}</span>
       </li>
@@ -116,6 +119,85 @@
       </li>
       {{/each}}
     </ol>
+    {{/if}}
+
+    {{#if racks.length}}
+    <h2 class="fit-header">the <span>racks</span>.</h2>
+    <p class="watch-note">If my plays were a record shop, this is how much of it each rack would take. Every artist filed once, by their genres on MusicBrainz{{#if rackNote}}: the {{rackNote}}{{/if}}.</p>
+    <ol class="rack-bin" aria-label="Genres, by share of plays">
+      {{#each racks}}
+      <li class="rack-div rack-ink{{ink}}" style="--h: {{height}}; --off: {{off}}%">
+        <span class="rack-div__tab">{{name}}</span>
+        <span class="rack-div__card">
+          <span class="rack-div__pct">{{share}}<small>%</small></span>
+          <span class="rack-div__meta">{{artistsN}} · {{plays}}</span>
+          <span class="rack-div__who">{{#each top}}<span>{{this}}</span>{{/each}}</span>
+        </span>
+      </li>
+      {{/each}}
+    </ol>
+    {{#if rackYears.length}}
+    <h3 class="rack-years__h">the racks, year by year</h3>
+    <ol class="rack-years" aria-label="Genres each year">
+      {{#each rackYears}}
+      <li class="rack-years__y" title="{{year}}: {{title}}">
+        <span class="rack-years__label">{{year}}</span>
+        <span class="rack-years__stack">{{#each parts}}<span class="rack-years__part rack-ink{{ink}}" style="--w: {{pct}}%" title="{{rack}}"></span>{{/each}}</span>
+        <span class="rack-years__lead">{{lead}}</span>
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+    {{/if}}
+
+    {{#if gold.length}}
+    <h2 class="fit-header">gold <span>discs</span>.</h2>
+    <p class="watch-note">The silverware of the artists I play most: Grammys, Brits, the Mercury, Ivor Novellos, Eurovision, an Oscar for a song. Gold for a win, silver for nominations only. {{goldNote}}.</p>
+    {{#if goldTally.length}}<p class="gold-tally">{{#each goldTally}}<span><b>{{n}}</b> with {{prize}}</span>{{/each}}</p>{{/if}}
+    <ol class="gold-wall">
+      {{#each gold}}
+      <li class="gold-frame gold-frame--{{tier}}" style="--tilt: {{tilt}}deg">
+        <span class="gold-frame__mat">
+          <span class="gold-frame__disc" aria-hidden="true"><span class="gold-frame__label">{{name}}</span></span>
+          <span class="gold-frame__plaque">
+            <b>{{name}}</b>
+            {{#each lines}}<span>{{this}}</span>{{/each}}
+          </span>
+        </span>
+        {{#if best}}<span class="gold-frame__best">{{best}}</span>{{/if}}
+        {{#if mine}}<span class="gold-frame__mine">{{mine}}</span>{{/if}}
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+
+    {{#if origins.length}}
+    <h2 class="fit-header">pressed <span>in</span>.</h2>
+    <p class="watch-note">Where the artists I play come from, by share of their plays, and the decade each of them started out.</p>
+    <div class="pressed">
+      <ol class="pressed__stickers" aria-label="Artists' countries">
+        {{#each origins}}
+        <li class="pressed__sticker pressed__sticker--ink{{ink}}" style="--s: {{size}}">
+          <span class="pressed__code">{{code}}</span>
+          <span class="pressed__name">{{name}} <b>{{share}}%</b></span>
+          <span class="pressed__who">{{artists}}{{#if top}}: {{top}}{{/if}}</span>
+        </li>
+        {{/each}}
+      </ol>
+      {{#if eras.length}}
+      <p class="pressed__cap">and when they started out</p>
+      <ol class="pressed__eras" aria-label="The decade the artists started">
+        {{#each eras}}
+        <li class="pressed__era" style="--p: {{pct}}" title="{{artists}}">
+          <span class="pressed__vinyl" aria-hidden="true"><span></span></span>
+          <span class="pressed__decade">{{decade}}</span>
+          <span class="pressed__eshare">{{share}}%</span>
+          {{#if top}}<span class="pressed__etop">{{top}}</span>{{/if}}
+        </li>
+        {{/each}}
+      </ol>
+      {{/if}}
+    </div>
     {{/if}}
 
     {{#if tapes.length}}
@@ -187,6 +269,25 @@
         </figure>
         <span class="cd__title">{{title}}</span>
         <span class="cd__by">{{by}}{{#if year}} · {{year}}{{/if}}</span>
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+
+    {{#if screens.length}}
+    <h2 class="fit-header">from the <span>screen</span>.</h2>
+    <p class="watch-note">The soundtracks bin: films, shows and games I play the music of, most played first. A sticker means it is on another page of mine too.</p>
+    <ol class="ost-bin">
+      {{#each screens}}
+      <li class="ost ost--ink{{ink}}" style="--tilt: {{tilt}}deg">
+        <figure class="ost__sleeve">
+          {{#if art}}<img src="{{art}}" alt="" loading="lazy" decoding="async" width="226" height="226">{{else}}<span class="ost__type">{{title}}</span>{{/if}}
+          {{#if kind}}<span class="ost__kind">{{kind}}</span>{{/if}}
+          {{#if href}}<a class="ost__tie" href="{{href}}">{{tie}}</a>{{/if}}
+        </figure>
+        <span class="ost__title">{{title}}</span>
+        <span class="ost__song">{{song}}{{#if by}} <em>{{by}}</em>{{/if}}</span>
+        <span class="ost__plays">{{plays}}{{#if across}} {{across}}{{/if}}</span>
       </li>
       {{/each}}
     </ol>
