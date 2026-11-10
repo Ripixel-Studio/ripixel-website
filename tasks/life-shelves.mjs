@@ -11,6 +11,8 @@
  * this only shapes rows for the templates. Images are hotlinked from the hosts below only.
  */
 
+import { readingRelView, readingRelFacts } from './reading-rel.mjs';
+
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 /** Audible covers, YouTube Music art and artist photos, video stills. */
 const ART = /^https:\/\/(m\.media-amazon\.com\/images\/I\/|yt3\.googleusercontent\.com\/|lh3\.googleusercontent\.com\/|yt3\.ggpht\.com\/|i\.ytimg\.com\/vi\/)[A-Za-z0-9._~%/+=-]*$/;
@@ -99,6 +101,7 @@ function spine(b, i) {
   return {
     key: str(b.key), title, spineTitle: set, by: str(b.by), cover: shelfArt(b.cover),
     series: seriesLabel(b), monthLabel: monthOf(b.finished), hours: hoursLabel(b.hours), genre: str(b.genre),
+    printed: num(b.printed) ? String(b.printed) : '',
     width: fit.width, font: fit.font, height, format, audio: format === 'audio', again: b.again === true,
     lean: i % 9 === 4 ? (h % 2 ? 4 : -4) : 0,
     ink: h % 5, pos: 20 + (h % 60),   // which strip of the cover the spine shows
@@ -160,11 +163,12 @@ export function readingView(sec) {
     sec.longest && str(sec.longest.title) ? { kicker: 'the doorstop', big: hoursLabel(sec.longest.value), line: `${str(sec.longest.title)}${sec.longest.by ? `, ${str(sec.longest.by)}` : ''}. That is ${(num(sec.longest.value) ?? 0) >= 24 ? `${((num(sec.longest.value) ?? 0) / 24).toFixed(1)} days` : 'a day'} of somebody reading to me.`, ink: 0 } : null,
     sec.shortest && str(sec.shortest.title) ? { kicker: 'the quick one', big: hoursLabel(sec.shortest.value), line: `${str(sec.shortest.title)}${sec.shortest.by ? `, ${str(sec.shortest.by)}` : ''}. Gone in an afternoon.`, ink: 1 } : null,
     sec.slowBurn && num(sec.slowBurn.value) && /** @type {number} */ (num(sec.slowBurn.value)) >= 365 ? { kicker: 'the slow burn', big: `${Math.floor(/** @type {number} */ (num(sec.slowBurn.value)) / 365)} yrs`, line: `${str(sec.slowBurn.title)} sat in my library that long before I finished it.`, ink: 2 } : null,
-    sec.narrator && str(sec.narrator.name) ? { kicker: 'the voice in my head', big: String(num(sec.narrator.books) ?? ''), line: `books read to me by ${str(sec.narrator.name)}, more than anyone else.`, ink: 3 } : null,
+    sec.narrator && str(sec.narrator.name) && !list(sec.voices).length ? { kicker: 'the voice in my head', big: String(num(sec.narrator.books) ?? ''), line: `books read to me by ${str(sec.narrator.name)}, more than anyone else.`, ink: 3 } : null,
     topGenre && finished ? { kicker: 'the habit', big: `${Math.round(((num(topGenre.books) ?? 0) / finished) * 100)}%`, line: `of everything I have finished is ${str(topGenre.name).toLowerCase()}.`, ink: 4 } : null,
     num(st.unstarted) ? { kicker: 'the pile', big: String(num(st.unstarted)), line: `bought and not started: ${hoursLabel(st.pileHours)} of listening, or ${Math.round((num(st.pileHours) ?? 0) / 24)} days without sleeping.`, ink: 0 } : null,
     num(st.again) && list(sec.heardAgain)[0] ? { kicker: 'the comfort listen', big: `${group(/** @type {number} */ (num(st.again)))}`, line: `books I have gone back to for another listen. Most recently: ${str(list(sec.heardAgain)[0].title)}.`, ink: 2 } : null,
     busiest ? { kicker: 'the big month', big: hoursLabel(busiest.hours), line: `in ${monthOf(busiest.month)}, my most listened month on record.`, ink: 1 } : null,
+    ...readingRelFacts(sec),
   ].filter(Boolean);
 
   return {
@@ -193,6 +197,7 @@ export function readingView(sec) {
     yearBars, monthBars, hasMonths: monthBars.some((m) => m.pct > 0),
     genres: genres.filter((g) => (num(g.books) ?? 0) >= 2).slice(0, 5).map((g) => ({ name: str(g.name), books: num(g.books) ?? 0, pct: Math.round(((num(g.books) ?? 0) / Math.max(1, finished)) * 100) })),
     facts,
+    ...readingRelView(sec),
   };
 }
 
