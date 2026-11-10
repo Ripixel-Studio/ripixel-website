@@ -1,0 +1,54 @@
+<!-- Context: lifeSections.games.critics {mean, meanByHours, meanTier, byHourTier, scored, games, gapLine, steamMean,
+     steamByHours, darlings[face], mustAll, mine[face + why], bounced[face], tally[{verdict, short, n, good, pct}]}
+     (tasks/games-rel.mjs criticsView) — the review pages: a games magazine's spread, the two score boxes (by game,
+     by hour), Steam's verdicts as a tally, then three columns of boxes with their score stickers. -->
+<div class="greview">
+  <div class="greview__scores">
+    <figure class="greview__score">
+      <span class="gmc gmc--{{meanTier}} gmc--big">{{mean}}</span>
+      <figcaption><b>the average game</b> I've played, by Metacritic ({{scored}} of {{games}} have a score)</figcaption>
+    </figure>
+    <figure class="greview__score">
+      <span class="gmc gmc--{{byHourTier}} gmc--big">{{meanByHours}}</span>
+      <figcaption><b>the average hour</b> I've played: each game counted by the time I gave it</figcaption>
+    </figure>
+    <p class="greview__gap">{{gapLine}}</p>
+  </div>
+  {{#if tally.length}}
+  <div class="greview__tally">
+    <h3 class="life-period__label">What Steam's players say</h3>
+    <ol class="greview__verdicts">
+      {{#each tally}}
+      <li class="greview__verdict{{#if good}} greview__verdict--good{{/if}}">
+        <span class="greview__vname">{{verdict}}</span>
+        <span class="greview__vbar"><span style="width: {{pct}}%"></span></span>
+        <b>{{n}}</b>
+      </li>
+      {{/each}}
+    </ol>
+  </div>
+  {{/if}}
+  <div class="greview__cols">
+    {{#if darlings.length}}
+    <section class="greview__col">
+      <h3 class="greview__head">Critics' darlings</h3>
+      <p class="greview__sub">{{mustAll}} games scored 90 or more. The ones I played most:</p>
+      <ol class="greview__list">{{#each darlings}}{{> games-face}}{{/each}}</ol>
+    </section>
+    {{/if}}
+    {{#if mine.length}}
+    <section class="greview__col">
+      <h3 class="greview__head">Better than they said</h3>
+      <p class="greview__sub">Lukewarm reviews, and I kept playing anyway:</p>
+      <ol class="greview__list">{{#each mine}}{{> games-face}}{{/each}}</ol>
+    </section>
+    {{/if}}
+    {{#if bounced.length}}
+    <section class="greview__col">
+      <h3 class="greview__head">Bounced off</h3>
+      <p class="greview__sub">Scored 85 or more, and I gave them under two hours:</p>
+      <ol class="greview__list">{{#each bounced}}{{> games-face}}{{/each}}</ol>
+    </section>
+    {{/if}}
+  </div>
+</div>

@@ -1,4 +1,5 @@
-<!-- Context: lifeSections.games.shelves [{box, boxes}] (a shelf per kind of box), each box {name, art, box, league, idle, badge, quip, hours, lastLabel, done, doneLabel, count, tilt, ink}]
+<!-- Context: lifeSections.games.shelves [{box, boxes}] (a shelf per kind of box), each box {name, art, box, league, idle, badge, quip, hours, lastLabel, done, doneLabel, count, tilt, ink,
+     and the stickers (tasks/games-rel.mjs stickersOf): metacritic, mcTier, mustPlay, verdict, reviewPct, foil, prizeLine, madeLine}]
      (tasks/media-view.mjs boxesView) — the big-box shelf, League first: the box is what the wall's weight says (big, box, dvd,
      jewel), its side panel shows the depth, a completion sticker says how finished, the claim is a banner across the corner,
      and James's own line is a note stuck under the shelf. Pointing at a box (or tabbing to it) lifts it and turns it round. -->
@@ -13,6 +14,8 @@
           <span class="gbox__name"{{#if art}} aria-hidden="true"{{/if}}>{{name}}</span>
           {{#if art}}<img class="gbox__art" src="{{art}}" alt="{{name}}" loading="lazy" decoding="async" width="600" height="900">{{/if}}
           {{#if doneLabel}}<span class="gbox__done" aria-hidden="true"><b>{{doneLabel}}</b>complete</span>{{/if}}
+          {{#if foil}}<span class="gfoil gfoil--box" title="{{prizeLine}}"><small>{{foil.label}}</small><small>winner</small></span>{{/if}}
+          {{#if metacritic}}<span class="gmc gmc--{{mcTier}} gmc--box{{#if mustPlay}} gmc--must{{/if}}" aria-hidden="true">{{metacritic}}</span>{{/if}}
           {{#if badge}}<span class="gbox__badge{{#if idle}} gbox__badge--idle{{/if}}">{{badge}}</span>{{/if}}
         </span>
         <span class="gbox__side" aria-hidden="true"><span>{{name}}</span></span>
@@ -23,6 +26,10 @@
         {{#if hours}}<span>played <b>{{hours}}</b></span>{{/if}}
         {{#if lastLabel}}<span>last played {{lastLabel}}</span>{{/if}}
         {{#if count}}<span>{{count}} achievements{{#if doneLabel}} · {{doneLabel}}{{/if}}</span>{{/if}}
+        {{#if madeLine}}<span class="gbox__made">{{madeLine}}</span>{{/if}}
+        {{#if metacritic}}<span>Metacritic <b>{{metacritic}}</b>{{#if mustPlay}}, a must-play{{/if}}</span>{{/if}}
+        {{#if verdict}}<span>Steam: {{verdict}}{{#if reviewPct}} ({{reviewPct}}%){{/if}}</span>{{/if}}
+        {{#if prizeLine}}<span class="gbox__prizes">{{prizeLine}}{{#if foil.best}}, including {{foil.best}}{{/if}}</span>{{/if}}
         {{#if idle}}<span>an idle game, left running: its hours do not count</span>{{/if}}
         {{#if quip}}<span class="gbox__back-quip">“{{quip}}”</span>{{/if}}
       </span>

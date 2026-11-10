@@ -351,3 +351,278 @@
   .gbox__back { width: 170px; }
 }
 @media (prefers-reduced-motion: reduce) { .gbox__body { transition: none; } }
+
+/* ─── the shelf's relations (tasks/games-rel.mjs): stickers, the bargain bins, the label gun, the review pages,
+       the prize endcap ─── */
+
+/* the Metacritic sticker: Metacritic's own square, its own three colours; a must-play (90+) gets the gold rim */
+.gmc {
+  --mc: #66cc33;
+  display: inline-grid; place-items: center;
+  min-width: 26px; height: 26px; padding: 0 3px;
+  background: var(--mc); color: #fff;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  font-family: var(--f-disp); font-size: 15px; font-weight: 400; line-height: 1;
+  letter-spacing: 0.02em;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.35);
+}
+.gmc--mixed { --mc: #f2b628; color: var(--ink); text-shadow: none; }
+.gmc--bad { --mc: #e4402c; }
+.gmc--box { position: absolute; z-index: 3; right: 5px; bottom: 5px; width: calc(30px * var(--s)); height: calc(30px * var(--s)); min-width: 0; font-size: calc(17px * var(--s)); }
+.gmc--must { box-shadow: 0 0 0 2px #f6d66b, 0 0 0 4px var(--ink); }
+.gbox--jewel .gmc--box, .gbox--dvd .gmc--box { width: calc(24px * var(--s)); height: calc(24px * var(--s)); font-size: calc(13px * var(--s)); }
+.gmc--mini { position: absolute; z-index: 2; right: 3px; top: 3px; min-width: 0; width: 22px; height: 22px; font-size: 12px; border-width: 1.5px; }
+.gmc--big { width: 92px; height: 92px; font-size: 54px; border-width: 3px; border-radius: 8px; box-shadow: 5px 5px 0 var(--ink); }
+
+/* the award foil: a gold roundel stuck on the box's top left */
+.gfoil {
+  display: grid; place-items: center; align-content: center;
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff6c8, #e8c04a 38%, #b88a1c 72%, #f3d777);
+  border: 2px solid var(--ink);
+  color: var(--ink);
+  font-family: var(--f-mono); font-size: 7px; font-weight: 700; line-height: 1.05; letter-spacing: 0.04em; text-transform: uppercase; text-align: center;
+  box-shadow: inset 0 0 0 3px rgba(255,255,255,0.35), inset 0 0 0 5px rgba(120,80,0,0.35);
+}
+.gfoil b { font-family: var(--f-disp); font-size: 17px; font-weight: 400; letter-spacing: 0; }
+.gfoil--box { position: absolute; z-index: 3; left: 5px; top: 5px; width: calc(50px * var(--s)); height: calc(50px * var(--s)); font-size: calc(6.5px * var(--s)); transform: rotate(-10deg); padding: 0 2px; }
+.gbox--dvd .gfoil--box, .gbox--jewel .gfoil--box { width: calc(40px * var(--s)); height: calc(40px * var(--s)); font-size: calc(5.5px * var(--s)); left: 10px; }
+.gbox__made { margin-top: 4px; padding-top: 4px; border-top: 1px dashed currentColor; }
+.gbox__prizes { font-weight: 700; }
+
+/* ── the bargain bins: wire baskets with the boxes standing in them, a price card on the front ── */
+.gbins {
+  list-style: none; margin: 8px 0 44px; padding: 6px 0 0;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 30px 22px;
+}
+.gbin {
+  --inkc: var(--ink-magenta);
+  --stock-h: 190px;                          /* the tallest boxes, in the fullest bin */
+  position: relative;
+  display: grid;
+  grid-template-rows: var(--stock-h) auto;
+}
+.gbin--ink1 { --inkc: var(--ink-blue); }
+.gbin--ink2 { --inkc: var(--ink-yellow); }
+.gbin--ink3 { --inkc: var(--ink-green); }
+.gbin--ink4 { --inkc: var(--ink-orange); }
+/* the boxes, standing in the bin: as tall as the bin is full; their feet are inside the basket */
+.gbin__stock {
+  grid-area: 1 / 1;
+  position: relative; z-index: 1;
+  display: flex; align-items: flex-end; justify-content: center;
+  padding: 0 12px 18px;
+  overflow: hidden;
+}
+.gbin__box {
+  --bh: calc((var(--stock-h) - 22px) * (0.42 + 0.58 * var(--fill) / 100));
+  position: relative;
+  flex: none;
+  height: var(--bh);
+  width: calc(var(--bh) * 2 / 3);
+  margin: 0 calc(var(--bh) * -0.2);
+  overflow: hidden;
+  background: var(--inkc);
+  border: 2px solid var(--ink);
+  transform: rotate(var(--lean, 0deg));
+  transform-origin: bottom center;
+  box-shadow: 3px 0 0 rgba(0,0,0,0.25);
+}
+.gbin__box:nth-child(2) { z-index: 2; margin-bottom: 6px; }
+.gbin__box:nth-child(3) { margin-bottom: 2px; }
+.gbin__box img, .gface__box img, .gendcap__front img { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; object-fit: cover; display: block; color: transparent; }
+.gbin__type { position: absolute; inset: 0; padding: 6px; display: flex; align-items: center; font-family: var(--f-disp); font-size: 13px; line-height: 1; color: var(--paper-4); text-transform: uppercase; overflow-wrap: anywhere; }
+/* the wire basket: a front of mesh, its rim, its shadow */
+.gbin__basket {
+  position: relative; z-index: 2;
+  grid-area: 1 / 1; align-self: end;
+  height: 66px;
+  margin: 0 2px;
+  border: 3px solid #5d6168;
+  border-top-width: 5px;
+  border-radius: 2px 2px 6px 6px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 13px, #8b9098 13px 15px),
+    repeating-linear-gradient(0deg, transparent 0 13px, #8b9098 13px 15px),
+    linear-gradient(180deg, rgba(40,44,50,0.08), rgba(40,44,50,0.35));
+  box-shadow: 0 6px 0 -2px rgba(0,0,0,0.18), inset 0 2px 0 rgba(255,255,255,0.4);
+}
+/* the price card, clipped to the basket's front */
+.gbin__card {
+  position: relative; z-index: 3;
+  grid-row: 2;
+  justify-self: center;
+  width: min(92%, 210px);
+  margin-top: -38px;
+  padding: 8px 10px 9px;
+  background: var(--paper-4);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--inkc);
+  transform: rotate(-1.4deg);
+  display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 0 8px;
+}
+.gbin:nth-child(even) .gbin__card { transform: rotate(1.2deg); }
+.gbin__card::before {                        /* the clip */
+  content: ''; position: absolute; top: -9px; left: 50%; width: 26px; height: 12px; margin-left: -13px;
+  background: linear-gradient(180deg, #c9ccd1, #8b9098); border: 2px solid var(--ink); border-radius: 3px 3px 0 0;
+}
+.gbin__name { font-family: var(--f-scrib); font-size: 27px; font-weight: 700; line-height: 0.95; color: var(--ink); }
+.gbin__hours { font-family: var(--f-disp); font-size: 25px; line-height: 1; color: var(--inkc); -webkit-text-stroke: 0.5px var(--ink); }
+.gbin--ink2 .gbin__hours { color: var(--ink); }
+.gbin__games, .gbin__top { grid-column: 1 / -1; font-family: var(--f-mono); font-size: 10.5px; line-height: 1.35; opacity: 0.8; }
+.gbin__top { opacity: 0.6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── the label gun: price-gun stickers on a pegboard ── */
+.glabels {
+  list-style: none; margin: 8px 0 44px; padding: 26px 22px;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 16px 14px;
+  background:
+    radial-gradient(circle, rgba(0,0,0,0.35) 2.2px, transparent 2.8px) 0 0 / 22px 22px,
+    linear-gradient(180deg, #c9a679, #b8925f);
+  border: 3px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.glabel {
+  --inkc: var(--ink-magenta);
+  position: relative;
+  display: inline-flex; align-items: baseline; flex-wrap: wrap; gap: 0 7px;
+  max-width: 260px;
+  padding: 5px 12px 6px 14px;
+  background: var(--paper-4);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-left: 7px solid var(--inkc);
+  /* the label gun's notched ends */
+  clip-path: polygon(0 0, 100% 0, calc(100% - 5px) 50%, 100% 100%, 0 100%, 5px 50%);
+  transform: rotate(var(--tilt, 0deg));
+  filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.3));
+}
+.glabel--ink1 { --inkc: var(--ink-blue); }
+.glabel--ink2 { --inkc: var(--ink-yellow); }
+.glabel--ink3 { --inkc: var(--ink-green); }
+.glabel--ink4 { --inkc: var(--ink-orange); }
+.glabel b { font-family: var(--f-disp); font-weight: 400; font-size: 17px; line-height: 1.05; text-transform: uppercase; letter-spacing: 0.02em; }
+.glabel__n { font-family: var(--f-mono); font-size: 12px; font-weight: 700; color: var(--inkc); }
+.glabel--ink2 .glabel__n { color: var(--ink); }
+.glabel__names { flex-basis: 100%; font-family: var(--f-mono); font-size: 9.5px; line-height: 1.3; opacity: 0.65; }
+.glabel--s1 b { font-size: 15px; }
+.glabel--s1 .glabel__names { display: none; }
+.glabel--s2 b { font-size: 20px; }
+.glabel--s3 b { font-size: 27px; }
+.glabel--s3 .glabel__n { font-size: 15px; }
+.glabel--s4 { padding: 8px 18px 9px 20px; }
+.glabel--s4 b { font-size: 38px; }
+.glabel--s4 .glabel__n { font-size: 19px; }
+
+/* ── the usual suspects: studios, a row of small boxes each ── */
+.gstudios { list-style: none; margin: 8px 0 44px; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 22px 28px; }
+.gstudio .greview__list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.gstudio__name { margin: 0 0 8px; font-family: var(--f-disp); font-weight: 400; font-size: 24px; line-height: 1; border-bottom: 3px solid var(--ink); padding-bottom: 4px; }
+.gstudio__name small { font-family: var(--f-mono); font-size: 11px; opacity: 0.7; }
+
+/* ── small boxes for lists (games-face.html) ── */
+.greview__list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 14px 12px; }
+.gface { --inkc: var(--ink-magenta); display: flex; flex-direction: column; min-width: 0; }
+.gface__box { position: relative; display: block; aspect-ratio: 2 / 3; overflow: hidden; background: var(--inkc); border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); }
+.gface__box .gmc { position: absolute; z-index: 2; right: 3px; bottom: 3px; min-width: 0; width: 26px; height: 24px; font-size: 14px; }
+.gface__type { position: absolute; inset: 0; overflow: hidden; padding: 6px; display: flex; align-items: center; font-family: var(--f-disp); font-size: 13px; line-height: 1; color: var(--paper-4); text-transform: uppercase; overflow-wrap: anywhere; }
+.gface__name { margin-top: 7px; font-family: var(--f-disp); font-size: 14px; line-height: 1.05; overflow-wrap: anywhere; }
+.gface__meta { margin-top: 2px; font-family: var(--f-mono); font-size: 10px; line-height: 1.3; opacity: 0.7; }
+
+/* ── the review pages: a games magazine's spread ── */
+.greview {
+  margin: 8px 0 44px;
+  padding: 22px 24px 26px;
+  background: var(--paper-4);
+  border: 3px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink-magenta);
+  display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 22px 34px;
+}
+.greview__scores { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; align-content: start; }
+.greview__score { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.greview__score figcaption { font-family: var(--f-mono); font-size: 11px; line-height: 1.4; }
+.greview__score figcaption b { display: block; font-family: var(--f-disp); font-weight: 400; font-size: 21px; line-height: 1; }
+.greview__gap { grid-column: 1 / -1; margin: 0; font-family: var(--f-scrib); font-size: 22px; line-height: 1.1; transform: rotate(-0.8deg); }
+.greview__verdicts { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.greview__verdict { display: grid; grid-template-columns: 14.5em 1fr 2.4em; align-items: center; gap: 10px; font-family: var(--f-mono); font-size: 11px; }
+.greview__verdict b { font-family: var(--f-disp); font-weight: 400; font-size: 17px; text-align: right; }
+.greview__vbar { height: 12px; border: 2px solid var(--ink); background: var(--paper-2); }
+.greview__vbar span { display: block; height: 100%; background: #e4402c; }
+.greview__verdict--good .greview__vbar span { background: #66c0f4; }
+.greview__cols { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 22px 30px; padding-top: 18px; border-top: 3px double var(--ink); }
+.greview__head { margin: 0; font-family: var(--f-disp); font-weight: 400; font-size: 26px; line-height: 1; }
+.greview__sub { margin: 4px 0 12px; font-family: var(--f-mono); font-size: 11px; line-height: 1.4; opacity: 0.75; }
+.greview__col .greview__list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+/* ── the prize endcap: a shelf per ceremony, its card on the left, the winners in gold foil on the shelf ── */
+.gendcap {
+  margin: 8px 0 44px;
+  padding: 10px 18px 14px;
+  background: linear-gradient(180deg, #1f2a44, #16203a);
+  border: 3px solid var(--ink);
+  box-shadow: 6px 6px 0 #e8c04a;
+}
+.gendcap__shelf { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 0 22px; align-items: end; padding-top: 16px; }
+.gendcap__head {
+  display: flex; flex-direction: column; gap: 3px;
+  margin: 0 0 12px; padding: 8px 10px 9px;
+  background: linear-gradient(100deg, #f3d777, #c9971f);
+  color: var(--ink); border: 2px solid var(--ink);
+  font-family: var(--f-mono); font-size: 10px; line-height: 1.3; font-weight: 400;
+  transform: rotate(-1deg);
+}
+.gendcap__head b { font-family: var(--f-disp); font-weight: 400; font-size: 23px; line-height: 1; }
+.gendcap__count { font-weight: 700; }
+.gendcap__row {
+  list-style: none; margin: 0; padding: 14px 8px 0;
+  display: flex; flex-wrap: nowrap; gap: 14px; align-items: flex-end;
+  border-bottom: 9px solid #8a6a4f;
+  box-shadow: 0 3px 0 var(--ink);
+}
+.gendcap__box { --inkc: var(--ink-magenta); flex: none; position: relative; width: 74px; transform: rotate(calc(var(--tilt, 0deg) * 0.4)); }
+.gendcap__front { position: relative; display: block; aspect-ratio: 2 / 3; background: var(--inkc); border: 2px solid var(--ink); }
+.gendcap__front .gface__type { font-size: 11px; padding: 4px; }
+.gendcap__front .gfoil { position: absolute; z-index: 2; right: -12px; top: -12px; width: 34px; height: 34px; font-size: 6px; transform: rotate(8deg); }
+.gendcap__front .gfoil b { font-size: 13px; }
+.gendcap__more { align-self: center; font-family: var(--f-scrib); font-size: 20px; line-height: 1; color: #f3d777; white-space: nowrap; }
+
+@media (max-width: 900px) {
+  .gbins { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .greview { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .gbins { gap: 26px 14px; }
+  .gbin { --stock-h: 130px; }
+  .gbin__stock { padding: 0 4px 14px; }
+  .gbin__basket { height: 50px; }
+  .gbin__card { width: 94%; margin-top: -30px; padding: 6px 7px 7px; }
+  .gbin__name { font-size: 21px; }
+  .gbin__hours { font-size: 19px; }
+  .gbin__games { font-size: 9.5px; }
+  .gbin__top { display: none; }
+  .glabels { padding: 18px 10px; gap: 12px 8px; }
+  .glabel--s4 b { font-size: 28px; }
+  .glabel--s3 b { font-size: 22px; }
+  .glabel__names { display: none; }
+  .gstudios { grid-template-columns: 1fr; }
+  .greview { padding: 16px 14px 18px; }
+  .gmc--big { width: 72px; height: 72px; font-size: 42px; }
+  .greview__verdict { grid-template-columns: 12.5em 1fr 2em; font-size: 10px; }
+  .gendcap { padding: 4px 10px 12px; }
+  .gendcap__shelf { grid-template-columns: 1fr; }
+  .gendcap__head { margin-bottom: 4px; }
+  .gendcap__row { gap: 12px; padding-top: 12px; }
+  .gendcap__row { flex-wrap: wrap; gap: 12px 10px; }
+  .gendcap__box { width: 44px; }
+  .gendcap__front .gfoil { width: 28px; height: 28px; right: -9px; top: -10px; font-size: 5px; }
+  .gendcap__front .gfoil b { font-size: 11px; }
+  .greview__col .gface:nth-child(n+5) { display: none; }
+  .gendcap__more { font-size: 16px; white-space: normal; }
+  .greview__list, .greview__col .greview__list { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 8px; }
+  .gface__name { font-size: 12px; }
+  .gface__box .gmc { width: 22px; height: 20px; font-size: 12px; }
+  .gfoil--box { font-size: calc(5px * var(--s)); }
+}

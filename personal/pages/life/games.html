@@ -92,8 +92,37 @@
     {{/if}}
     {{#if boxes.length}}
     <h2 class="fit-header">the <span>games shelf</span>.</h2>
-    <p class="games-note">The most played get the big boxes, the dabbles get jewel cases. The stickers say how many achievements are done. Point at one to turn the box round.</p>
+    <p class="games-note">The most played get the big boxes, the dabbles get jewel cases. The starburst says how many achievements are done, the corner sticker is the Metacritic score (gold for a must-play), the foil is a big prize won. Point at one to turn the box round.</p>
     {{> games-boxes shelves}}
+    {{/if}}
+    {{#if bins}}
+    <h2 class="fit-header">the <span>bargain bins</span>.</h2>
+    <p class="games-note">Every game in one bin, by the kind Steam's players vote it most. The bins are sorted by the hours I've put in ({{bins.hours}}h in all), not by how many games are in them, so one long love affair outweighs a pile of dabbles. League is the MOBA bin on its own; idle games stay out.</p>
+    {{> games-bins bins.bins}}
+    {{/if}}
+    {{#if labels}}
+    <h2 class="fit-header">the <span>label gun</span>.</h2>
+    <p class="games-note">What else Steam's players tag my games with. Each sticker is as big as the number of games behind it: this is what I keep picking up, whatever the hours.</p>
+    {{> games-labels labels}}
+    {{/if}}
+    {{#if studios}}
+    <h2 class="fit-header">the <span>usual suspects</span>.</h2>
+    <p class="games-note">Studios with three games or more on my shelf.</p>
+    <ol class="gstudios">
+      {{#each studios}}
+      <li class="gstudio"><h3 class="gstudio__name">{{name}} <small>{{games}} games, {{hours}}</small></h3><ol class="greview__list">{{#each boxes}}{{> games-face}}{{/each}}</ol></li>
+      {{/each}}
+    </ol>
+    {{/if}}
+    {{#if critics}}
+    <h2 class="fit-header">the <span>review pages</span>.</h2>
+    <p class="games-note">The critics' Metacritic scores (from the Steam store) and Steam's own player reviews against what I actually play.</p>
+    {{> games-critics critics}}
+    {{/if}}
+    {{#if endcap}}
+    <h2 class="fit-header">the <span>prize endcap</span>.</h2>
+    <p class="games-note">{{endcap.winners}} of the {{endcap.games}} games on my shelf have won a big games prize, and {{endcap.nominated}} were up for one{{#if endcap.most}}. The most decorated is {{endcap.most.name}}, with {{endcap.most.won}}{{/if}}. Counted from Wikidata, so a prize nobody has entered there is missing.</p>
+    {{> games-endcap endcap}}
     {{/if}}
     {{#if recent.length}}
     <div class="life-columns games-rest">

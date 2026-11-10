@@ -1,0 +1,9 @@
+<!-- Context: one small box (tasks/games-rel.mjs face): {name, art, ink, metacritic, mcTier, mustPlay, hours, why?, foil?}. -->
+<li class="gface gbox--ink{{ink}}">
+  <span class="gface__box">
+    <span class="gface__type"{{#if art}} aria-hidden="true"{{/if}}>{{name}}</span>{{#if art}}<img src="{{art}}" alt="{{name}}" loading="lazy" decoding="async" width="600" height="900">{{/if}}
+    {{#if metacritic}}<span class="gmc gmc--{{mcTier}}" aria-label="Metacritic {{metacritic}}">{{metacritic}}</span>{{/if}}
+  </span>
+  <span class="gface__name">{{name}}</span>
+  <span class="gface__meta">{{#if hours}}played {{hours}}{{/if}}{{#if why}}; {{why}}{{/if}}</span>
+</li>

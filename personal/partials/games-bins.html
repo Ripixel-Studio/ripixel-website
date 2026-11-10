@@ -1,0 +1,22 @@
+<!-- Context: lifeSections.games.bins {bins[{bin, games, hours, share, fill, ink, boxes[face + lean], top}], hours}
+     (tasks/games-rel.mjs binsView) — the bargain bins: a wire bin per kind of game, most hours first. The most played
+     boxes stand up in it, taller the fuller the bin (by area: a square root of the hours); the price card on the front
+     says the hours, the games and the share of all my hours. -->
+<ol class="gbins">
+  {{#each this}}
+  <li class="gbin gbin--ink{{ink}}" style="--fill: {{fill}}">
+    <span class="gbin__stock" aria-hidden="true">
+      {{#each boxes}}
+      <span class="gbin__box gbox--ink{{ink}}" style="--lean: {{lean}}deg"><span class="gbin__type">{{name}}</span>{{#if art}}<img src="{{art}}" alt="" loading="lazy" decoding="async" width="600" height="900">{{/if}}{{#if metacritic}}<span class="gmc gmc--{{mcTier}} gmc--mini">{{metacritic}}</span>{{/if}}</span>
+      {{/each}}
+    </span>
+    <span class="gbin__basket" aria-hidden="true"></span>
+    <span class="gbin__card">
+      <b class="gbin__name">{{bin}}</b>
+      <span class="gbin__hours">{{hours}}</span>
+      <span class="gbin__games">{{games}}{{#if share}}, {{share}}% of my hours{{/if}}</span>
+      {{#if top}}<span class="gbin__top">mostly {{top}}</span>{{/if}}
+    </span>
+  </li>
+  {{/each}}
+</ol>

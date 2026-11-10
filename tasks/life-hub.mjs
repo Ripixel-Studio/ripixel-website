@@ -24,6 +24,7 @@ import { commitGrid, projectCards, yearsView, weekdaysView, sparkOf } from './co
 import { recompView, engineView, nightsView, stepsView } from './body-view.mjs';
 import { readingView, listeningView, shelfArt, OWN_ART } from './life-shelves.mjs';
 import { tvView, rackView, boxesView, shelvesOf, monitorView, awardsOf, aislesView, talkersView, crowdView, cabinetView } from './media-view.mjs';
+import { stickersOf, binsView, labelsView, criticsView, endcapView, studiosView } from './games-rel.mjs';
 
 export const SECTION_ORDER = ['fitness', 'body', 'games', 'code', 'watching', 'listening', 'reading', 'live'];
 /** @param {string} name */
@@ -449,7 +450,10 @@ function gamesView(sec) {
   const a = sec.achievements && typeof sec.achievements === 'object' ? sec.achievements : {};
   const list = (/** @type {any} */ l) => (Array.isArray(l) ? l.filter((x) => x && typeof x === 'object') : []);
   const wall = list(sec.wall).filter((t) => typeof t.name === 'string' && t.name.trim()).map((t, i) => ({
-    name: t.name, art: safeArt(t.art), weight: Math.min(4, Math.max(1, Math.round(num(t.weight) ?? 1))), tilt: tiltOf(t.name),
+    key: String(t.key ?? ''), name: t.name, art: safeArt(t.art), weight: Math.min(4, Math.max(1, Math.round(num(t.weight) ?? 1))), tilt: tiltOf(t.name),
+    hoursN: num(t.hours) != null && t.hours > 0 ? Number(t.hours) : 0,
+    // the shelf's relations (jarvis gamerel): the stickers and the back of the box (games-rel.mjs)
+    ...stickersOf(t),
     quip: typeof t.quip === 'string' ? t.quip.trim() : '', league: t.source === 'league', idle: t.idle === true,
     hours: num(t.hours) != null && t.hours > 0 ? hoursText(t.hours) : '', last: /^\d{4}-\d{2}$/.test(String(t.last || '')) ? String(t.last) : '',
     lastLabel: monthLabel(String(t.last || '')),
@@ -797,7 +801,9 @@ export function buildSection(name, sec, now = new Date(), liveNotables = []) {
     case 'games': {
       const g = gamesView(sec);
       const boxes = boxesView(g.wall, g.completion);
-      return { ...view, ...g, boxes, shelves: shelvesOf(boxes), monitor: monitorView(boxes) };
+      return { ...view, ...g, boxes, shelves: shelvesOf(boxes), monitor: monitorView(boxes),
+        bins: binsView(sec.bins, g.wall), labels: labelsView(sec.labels, g.wall), critics: criticsView(sec.critics, g.wall),
+        endcap: endcapView(g.wall), studios: studiosView(sec.studios, g.wall) };
     }
     case 'code':
       return { ...view, ...codeView(sec) };
