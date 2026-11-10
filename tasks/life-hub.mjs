@@ -8,7 +8,8 @@
  *
  * Globals set by `lifeHubTask()`:
  *   lifeHub       { cards[{name, href, title, headline, latest, note, staleLabel, empty}], live[],
- *                   hero[{name, title, size, side, href, headline, staleLabel, caption, hero}] (C8; [] → the old rows) }
+ *                   hero[{name, title, size, side, href, headline, staleLabel, caption, hero}] (C8; [] → the old rows),
+ *                   connects {genres, threads} | null (life-rel.mjs: how it all connects)
  *   lifeSections  { [name]: view }
  *   lifeFacts     { [key]: value }
  *   lifeInsights  [{ id, text, href }]  (C5, at most 6)
@@ -25,6 +26,7 @@ import { recompView, engineView, nightsView, stepsView } from './body-view.mjs';
 import { readingView, listeningView, shelfArt, OWN_ART } from './life-shelves.mjs';
 import { tvView, rackView, boxesView, shelvesOf, monitorView, awardsOf, aislesView, talkersView, crowdView, cabinetView } from './media-view.mjs';
 import { stickersOf, binsView, labelsView, criticsView, endcapView, studiosView } from './games-rel.mjs';
+import { afterShowView, encoresView, connectsView } from './life-rel.mjs';
 
 export const SECTION_ORDER = ['fitness', 'body', 'games', 'code', 'watching', 'listening', 'reading', 'live'];
 /** @param {string} name */
@@ -838,7 +840,9 @@ export function buildSection(name, sec, now = new Date(), liveNotables = []) {
         }) : null).filter(Boolean) };
     }
     case 'live':
-      return { ...view, ...(liveView(liveNotables) || { total: 0, stats: [], charts: [], yearRows: [], kinds: [] }) };
+      // the nights out that turn up on other pages (jarvis crossrel, life-rel.mjs)
+      return { ...view, ...(liveView(liveNotables) || { total: 0, stats: [], charts: [], yearRows: [], kinds: [] }),
+        afterShow: afterShowView(sec), encores: encoresView(sec) };
     default:
       return view;
   }
@@ -933,6 +937,8 @@ export function buildHub(lifeIndex, fitnessLife, now = new Date(), fitnessIndex 
     cards,
     live: sortedNotables(outs).map((n) => ({ ...n, sawLabel: sawLabel(n.month) })),
     hero: heroCards(lifeIndex, cards, now, { fitnessLife, fitnessIndex }),
+    // how it all connects: genres across the pages and titles on more than one (life-rel.mjs)
+    connects: connectsView(lifeIndex?.connects),
   };
 }
 

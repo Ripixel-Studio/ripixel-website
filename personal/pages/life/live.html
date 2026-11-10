@@ -45,6 +45,56 @@
     </section>
     {{/if}}
 
+    {{#if afterShow.length}}
+    {{!-- after the show (jarvis crossrel, tasks/life-rel.mjs): the nights out that turn up on another page --}}
+    <h2 class="fit-header">after the <span>show</span>.</h2>
+    <p class="live-rel__lede">The nights out that followed me home: the bands still on the deck, the shows on the telly, the book on the shelf.</p>
+    <ol class="live-after">
+      {{#each afterShow}}
+      <li class="live-after__row{{#if music}} live-after__row--music{{/if}}">
+        {{> live-stub-mini}}
+        <div class="live-after__then">
+          {{#each links}}
+          <div class="after-link life-ink--{{page}}{{#if music}} after-link--music{{/if}}">
+            {{#if music}}
+            <p class="after-link__head"><a href="{{href}}">{{title}}</a> <span class="after-link__total">{{total}}</span></p>
+            {{#if strip}}{{#with strip}}
+            <div class="fit-strip after-link__chart">
+              <p class="after-link__yaxis" aria-hidden="true"><span>{{peak}}</span><span>0</span></p>
+              <svg class="after-link__strip" viewBox="0 0 {{width}} {{height}}" preserveAspectRatio="none" role="img" aria-label="Plays a month from {{from}} to now, at most {{peak}}; the dashed line is the night">
+                {{#each bars}}<rect x="{{x}}" y="{{y}}" width="{{w}}" height="{{h}}"/>{{/each}}
+                <line class="after-link__night" x1="{{mark}}" x2="{{mark}}" y1="0" y2="{{height}}"/>
+              </svg>
+              <p class="after-link__axis"><span>{{from}}</span><span>now</span></p>
+            </div>
+            {{/with}}{{/if}}
+            <p class="after-link__line">{{line}}</p>
+            {{else}}
+            <a class="after-link__card" href="{{href}}">
+              {{#if art}}<img class="after-link__art" src="{{art}}" alt="" loading="lazy" decoding="async" width="120" height="180">{{/if}}
+              <span class="after-link__line">{{line}}</span>
+            </a>
+            {{/if}}
+          </div>
+          {{/each}}
+        </div>
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+
+    {{#if encores.length}}
+    <h2 class="fit-header">the <span>encores</span>.</h2>
+    <ul class="live-encores">
+      {{#each encores}}
+      <li class="live-encore">
+        <div class="live-encore__stubs">{{#each nights}}{{> live-stub-mini}}{{/each}}<span class="live-encore__staple" aria-hidden="true"></span></div>
+        <p class="live-encore__label"><b>{{times}}.</b> {{title}}</p>
+      </li>
+      {{/each}}
+    </ul>
+    {{/if}}
+
     {{#if yearRows.length}}
     <h2 class="fit-header">every <span>stub</span>.</h2>
     {{#each yearRows}}

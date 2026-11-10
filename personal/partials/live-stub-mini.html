@@ -1,0 +1,16 @@
+{{!-- A small ticket stub (the live page's own stub, fewer parts): context {title, stamp, kind, kindLabel, art, hasArt}. --}}
+<div class="stub stub--{{kind}} stub--mini">
+  <div class="stub__shadow">
+  <div class="stub__ticket">
+    <div class="stub__art{{#unless hasArt}} stub__art--type{{/unless}}">
+      {{#if hasArt}}<img class="stub__img" src="{{art}}" alt="" loading="lazy" decoding="async" width="600" height="450">{{else}}<span class="stub__glyph stub__glyph--l" aria-hidden="true">{{kindLabel}}</span>{{/if}}
+    </div>
+    <div class="stub__body">
+      <span class="stub__stamp">{{stamp}}</span>
+      <p class="stub__kind">{{kindLabel}}</p>
+      <p class="stub__title">{{title}}</p>
+    </div>
+    <div class="stub__tear"><span class="stub__code" aria-hidden="true"></span></div>
+  </div>
+  </div>
+</div>
