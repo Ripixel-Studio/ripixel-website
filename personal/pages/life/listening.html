@@ -152,7 +152,8 @@
 
     {{#if gold.length}}
     <h2 class="fit-header">gold <span>discs</span>.</h2>
-    <p class="watch-note">Artists I play who have the silverware: Grammys, Brits, the Mercury, Ivor Novellos, Eurovision, an Oscar for a song. Gold for a win, silver for nominations only. {{goldNote}}.</p>
+    <p class="watch-note">The silverware of the artists I play most: Grammys, Brits, the Mercury, Ivor Novellos, Eurovision, an Oscar for a song. Gold for a win, silver for nominations only. {{goldNote}}.</p>
+    {{#if goldTally.length}}<p class="gold-tally">{{#each goldTally}}<span><b>{{n}}</b> with {{prize}}</span>{{/each}}</p>{{/if}}
     <ol class="gold-wall">
       {{#each gold}}
       <li class="gold-frame gold-frame--{{tier}}" style="--tilt: {{tilt}}deg">
@@ -184,12 +185,14 @@
         {{/each}}
       </ol>
       {{#if eras.length}}
+      <p class="pressed__cap">and when they started out</p>
       <ol class="pressed__eras" aria-label="The decade the artists started">
         {{#each eras}}
-        <li class="pressed__era" style="--p: {{pct}}" title="{{artists}}{{#if top}}, such as {{top}}{{/if}}">
+        <li class="pressed__era" style="--p: {{pct}}" title="{{artists}}">
           <span class="pressed__vinyl" aria-hidden="true"><span></span></span>
           <span class="pressed__decade">{{decade}}</span>
           <span class="pressed__eshare">{{share}}%</span>
+          {{#if top}}<span class="pressed__etop">{{top}}</span>{{/if}}
         </li>
         {{/each}}
       </ol>

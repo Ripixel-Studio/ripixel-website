@@ -366,6 +366,11 @@ export function relationsView(sec) {
         tilt: ((hash(str(g.name)) % 5) - 2) * 0.6,
       };
     }),
+    // the wall's brass plate: how many of my artists have won each prize, the most first
+    goldTally: cov && cov.wins && typeof cov.wins === 'object'
+      ? Object.entries(cov.wins).filter(([k, n]) => PRIZES[k] && num(n)).sort((a, b) => /** @type {number} */ (b[1]) - /** @type {number} */ (a[1]))
+        .slice(0, 6).map(([k, n]) => ({ n: group(/** @type {number} */ (n)), prize: `${['oscar', 'mtv', 'ivor'].includes(k) ? 'an' : 'a'} ${PRIZES[k][0]}` }))
+      : [],
     goldNote: cov && num(cov.awarded) ? `${group(/** @type {number} */ (num(cov.awarded)))} of my ${group(num(cov.artists) ?? 0)} most played artists have a music prize or a nomination on Wikidata` : '',
     origins: origins.map((o, i) => ({
       code: str(o.code), name: str(o.name), share: num(o.share) ?? 0, ink: i % 5,
@@ -373,7 +378,7 @@ export function relationsView(sec) {
       artists: plural(num(o.artists) ?? 0, 'artist', 'artists'),
       top: (Array.isArray(o.top) ? o.top : []).map(str).filter(Boolean).slice(0, 3).join(', '),
     })),
-    eras: eras.map((e) => ({
+    eras: eras.filter((e) => (num(e.share) ?? 0) >= 1).map((e) => ({
       decade: `${String(e.decade).slice(2)}s`, share: num(e.share) ?? 0, pct: Math.round(((num(e.share) ?? 0) / eMax) * 100),
       top: (Array.isArray(e.top) ? e.top : []).map(str).filter(Boolean).slice(0, 2).join(', '),
       artists: plural(num(e.artists) ?? 0, 'artist', 'artists'),

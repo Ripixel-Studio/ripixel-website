@@ -164,6 +164,7 @@ test('relationsView: racks share one ink with their years, gold or silver discs,
   assert.equal(v.gold[0].mine, 'including Hit, 12 plays from me');
   assert.deepEqual(v.gold[1].lines, ['1 Mercury Prize nomination']);
   assert.equal(v.eras[0].decade, '10s');
+  assert.deepEqual(listeningView({ relCoverage: { wins: { grammy: 4, oscar: 1, nope: 3 } } }).goldTally, [{ n: '4', prize: 'a Grammy' }, { n: '1', prize: 'an Oscar' }]);
   assert.deepEqual(v.screens.map((s) => [s.title, s.kind, s.href, s.art]), [['Film', 'film', '/life/watching', ''], ['Game', 'game', '', '']]);
   assert.equal(v.screens[0].across, 'across 2 songs');
 });

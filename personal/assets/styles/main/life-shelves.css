@@ -950,7 +950,8 @@
 }
 
 /* pressed in: import stickers sized by share, and a vinyl per decade */
-.pressed { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 28px; margin-top: 18px; align-items: start; }
+.pressed { display: grid; gap: 14px; margin-top: 18px; }
+.pressed__cap { margin: 14px 0 0; font-family: var(--f-scrib); font-size: 22px; line-height: 1; }
 .pressed__stickers { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 12px 12px; align-items: center; }
 .pressed__sticker {
   --c: var(--ink-section); display: grid; grid-template-columns: auto 1fr; column-gap: 8px; align-items: center;
@@ -971,10 +972,10 @@
 .pressed__name b { font-weight: 400; color: var(--c); }
 .pressed__who { font-family: var(--f-mono); font-size: 10px; color: color-mix(in srgb, var(--ink) 70%, transparent); max-width: 30ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pressed__eras { list-style: none; margin: 0; padding: 14px; display: flex; gap: 8px; align-items: flex-end; justify-content: space-between;
-  border: 3px solid var(--ink); background: var(--paper-4, #fffdf6); box-shadow: 6px 6px 0 var(--ink-section); min-height: 180px; }
+  border: 3px solid var(--ink); background: var(--paper-4, #fffdf6); box-shadow: 6px 6px 0 var(--ink-section); min-height: 170px; }
 .pressed__era { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; min-width: 0; }
 .pressed__vinyl {
-  display: grid; place-items: center; width: calc(18px + var(--p) * 0.62px); max-width: 100%; aspect-ratio: 1; border-radius: 50%;
+  display: grid; place-items: center; width: calc(16px + var(--p) * 1.1px); max-width: 100%; aspect-ratio: 1; border-radius: 50%;
   background: repeating-radial-gradient(circle, #1a1a1a 0 2px, #2b2b2b 2px 3px);
   box-shadow: 0 0 0 1px var(--ink);
 }
@@ -983,7 +984,8 @@
 .pressed__era:nth-child(3n+2) .pressed__vinyl span { background: var(--ink-section); box-shadow: none; }
 .pressed__decade { font-family: var(--f-disp); font-size: 18px; line-height: 1; }
 .pressed__eshare { font-family: var(--f-mono); font-size: 11px; }
-@media (max-width: 760px) { .pressed { grid-template-columns: 1fr; } }
+.pressed__etop { max-width: 100%; font-family: var(--f-scrib); font-size: 15px; line-height: 1; text-align: center; color: color-mix(in srgb, var(--ink) 75%, transparent); }
+@media (max-width: 640px) { .pressed__eras { padding: 10px 8px; gap: 4px; min-height: 110px; } .pressed__decade { font-size: 15px; } .pressed__etop { display: none; } }
 
 /* the soundtracks bin: sleeves with a medium stamp and a tie-in sticker */
 .ost-bin { list-style: none; margin: 18px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 28px 20px; }
@@ -1006,6 +1008,13 @@
 .ost__song { font-size: 13px; line-height: 1.2; }
 .ost__song em { font-style: normal; font-family: var(--f-mono); font-size: 11px; opacity: 0.75; }
 .ost__plays { font-family: var(--f-mono); font-size: 11px; color: var(--c); font-weight: 700; }
-@media (max-width: 520px) { .ost-bin { grid-template-columns: repeat(2, 1fr); gap: 26px 16px; } .ost__title { font-size: 16px; } }
+@media (max-width: 520px) { .ost-bin { grid-template-columns: repeat(2, 1fr); gap: 26px 16px; } .ost-bin > li:nth-child(n+9) { display: none; } .ost__title { font-size: 16px; } }
 
 .pod-feed__genre { align-self: flex-start; padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 999px; background: var(--c); color: #fff; font-family: var(--f-mono); font-size: 11px; }
+
+.gold-tally { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; }
+.gold-tally span {
+  padding: 4px 10px; border: 2px solid #8c6a14; background: linear-gradient(#2c2c2c, #151515); color: #fbe7a0;
+  font-family: var(--f-mono); font-size: 12px;
+}
+.gold-tally b { font-family: var(--f-disp); font-weight: 400; font-size: 16px; color: #fff; }
