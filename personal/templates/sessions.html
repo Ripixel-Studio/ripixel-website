@@ -17,7 +17,7 @@
     </svg>
 
     <nav class="thought-breadcrumb" aria-label="Breadcrumb">
-      <a href="/life">life</a> / {{#if fitnessSessions.filterLabel}}<a href="/life/sessions">sessions</a> / {{fitnessSessions.filterLabel}}{{else}}sessions{{/if}}{{#unless fitnessSessions.isFirst}} / page {{fitnessSessions.page}}{{/unless}}
+      <a href="/life">life</a> / <a href="/life/fitness">fitness</a> / {{#if fitnessSessions.filterLabel}}<a href="/life/sessions">sessions</a> / {{fitnessSessions.filterLabel}}{{else}}sessions{{/if}}{{#unless fitnessSessions.isFirst}} / page {{fitnessSessions.page}}{{/unless}}
     </nav>
 
     <div class="page-hero fit-hero fit-hero--sessions">
@@ -82,7 +82,7 @@
 
     <footer class="roundup-foot">
       <div class="roundup-foot__meta">
-        <a class="roundup-foot__back" href="/life">← back to life</a>
+        <a class="roundup-foot__back" href="/life/fitness">← back to fitness</a>
       </div>
     </footer>
   </div>

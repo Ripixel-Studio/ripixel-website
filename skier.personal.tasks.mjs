@@ -328,6 +328,7 @@ export const tasks = [
 
             return {
                 page,
+                pageHref: page === 'home' ? '/' : undefined, // the masthead label links to its section
                 description: (() => {
                     switch (page) {
                         case 'thoughts':  return 'A peak inside my brain you ask? Reader, beware...';

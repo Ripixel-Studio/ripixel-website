@@ -21,6 +21,7 @@ body.page-activity .masthead { --ink-section: #7C3AED; }
 .act-crumb {
   display: flex; gap: 8px; align-items: center;
   font-family: var(--f-mono); font-size: 12px; margin-bottom: 14px;
+  position: relative; z-index: 2;
 }
 .act-crumb__back { color: var(--ink-section); border-bottom: 1px solid var(--ink-section); }
 .act-crumb__back:hover { background: var(--ink-section); color: var(--paper); }
