@@ -257,12 +257,12 @@
     <p class="watch-note">Started, not finished, not heard lately. They are not going anywhere.</p>
     <ol class="book-marks">
       {{#each bookmarks}}
-      <li class="book-marks__item" title="{{title}}{{#if by}}, {{by}}{{/if}}: {{percent}}% in{{#if heard}}, last heard {{heard}}{{/if}}">
+      <li class="book-marks__item" title="{{title}}{{#if by}}, {{by}}{{/if}}: {{#if paused}}paused{{else}}{{percent}}% in{{/if}}{{#if heard}}, last heard {{heard}}{{/if}}">
         <figure class="book-face book-face--{{format}} book-face--tiny">
           {{#if cover}}<img class="book-face__art" src="{{cover}}" alt="{{title}}" loading="lazy" decoding="async" width="120" height="120">{{else}}<span class="book-face__type">{{title}}</span>{{/if}}
-          <span class="book-face__mark" style="--pct: {{percent}}%" aria-hidden="true"></span>
+          {{#unless paused}}<span class="book-face__mark" style="--pct: {{percent}}%" aria-hidden="true"></span>{{/unless}}
         </figure>
-        <span class="book-marks__pct">{{percent}}%{{#if heard}} · {{heard}}{{/if}}</span>
+        <span class="book-marks__pct">{{#if paused}}paused{{else}}{{percent}}%{{/if}}{{#if heard}} · {{heard}}{{/if}}</span>
       </li>
       {{/each}}
     </ol>
