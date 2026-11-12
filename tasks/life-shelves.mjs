@@ -15,7 +15,7 @@ import { readingRelView, readingRelFacts } from './reading-rel.mjs';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 /** Audible covers, YouTube Music art and artist photos, video stills. */
-const ART = /^https:\/\/(m\.media-amazon\.com\/images\/I\/|yt3\.googleusercontent\.com\/|lh3\.googleusercontent\.com\/|yt3\.ggpht\.com\/|i\.ytimg\.com\/vi\/)[A-Za-z0-9._~%/+=-]*$/;
+const ART = /^https:\/\/(m\.media-amazon\.com\/images\/I\/|yt3\.googleusercontent\.com\/|lh3\.googleusercontent\.com\/|yt3\.ggpht\.com\/|i\.ytimg\.com\/vi\/|assets\.hardcover\.app\/(?:editions?|external_data|books)\/)[A-Za-z0-9._~%/+=-]*$/;
 /** @param {unknown} u */
 // podcast covers: YouTube's are signed and expire within a day, so the export hosts a copy, named by its hash
 const PODCAST_ART = /^https:\/\/storage\.googleapis\.com\/fitglue-server-prod-showcase-assets\/site\/james\/life\/podcasts\/[0-9a-f]{16}\.jpg$/;
@@ -49,7 +49,15 @@ const arts = (a, max) => (Array.isArray(a) ? a : []).map(shelfArt).filter(Boolea
 // ─── reading ───
 
 /** "audio" (an audiobook: square art) or "print" (a book: book-shaped). @param {any} b */
-const formatOf = (b) => (b && b.format === 'print' ? 'print' : 'audio');
+const formatOf = (b) => (b && (b.format === 'print' || b.format === 'ebook') ? 'print' : 'audio');
+/** "Mar 2021", or "2018" for a book known only to the year it was read (Hardcover). @param {unknown} f */
+const finishedLabel = (f) => monthOf(f) || (/^\d{4}$/.test(String(f)) ? String(f) : '');
+/** "459 pages" for a book on paper. @param {unknown} p */
+const pagesLabel = (p) => (num(p) ? `${group(/** @type {number} */ (num(p)))} pages` : '');
+/** How long a book is, in its own unit: hours for an audiobook, pages for a book on paper. @param {any} b */
+const lengthLabel = (b) => (formatOf(b) === 'print' ? pagesLabel(b.pages) || hoursLabel(b.hours) : hoursLabel(b.hours));
+/** How many times a book was finished, when it was more than once. @param {any} b */
+const timesOf = (b) => Math.max(2, num(b.reads) ?? 2);
 
 // The spine's type has to carry the whole title: Anton is condensed, about this wide a
 // character for its size, and the spine gives it SPINE_TEXT of its height (the rest is the
@@ -91,7 +99,8 @@ export function fitSpine(t, width, height) {
 /** @param {any} b @param {number} i */
 function spine(b, i) {
   const title = str(b.title);
-  const hours = num(b.hours) ?? 10;
+  // a book on paper is as thick as its pages: about 30 to the hour of an audiobook
+  const hours = num(b.hours) ?? (num(b.pages) ? /** @type {number} */ (num(b.pages)) / 30 : 10);
   const h = hash(title);
   const set = spineTitle(title);
   // a thick book is a fat spine: 3 h is a pamphlet, 40 h a doorstop
@@ -100,7 +109,8 @@ function spine(b, i) {
   const format = formatOf(b);
   return {
     key: str(b.key), title, spineTitle: set, by: str(b.by), cover: shelfArt(b.cover),
-    series: seriesLabel(b), monthLabel: monthOf(b.finished), hours: hoursLabel(b.hours), genre: str(b.genre),
+    series: seriesLabel(b), monthLabel: finishedLabel(b.finished), hours: lengthLabel(b), genre: str(b.genre),
+    times: timesOf(b), againLabel: num(b.reads) && /** @type {number} */ (num(b.reads)) >= 2 ? `finished ${timesOf(b)} times` : 'heard more than once',
     printed: num(b.printed) ? String(b.printed) : '',
     width: fit.width, font: fit.font, height, format, audio: format === 'audio', again: b.again === true,
     lean: i % 9 === 4 ? (h % 2 ? 4 : -4) : 0,
@@ -112,13 +122,14 @@ function spine(b, i) {
 function face(b) {
   const format = formatOf(b);
   return { title: str(b.title), by: str(b.by), cover: shelfArt(b.cover), series: seriesLabel(b), format,
-    percent: Math.max(1, Math.round((num(b.progress) ?? 0) * 100)), hours: hoursLabel(b.hours), heard: monthOf(b.heard) };
+    percent: Math.max(1, Math.round((num(b.progress) ?? 0) * 100)), hours: lengthLabel(b), heard: monthOf(b.heard),
+    times: timesOf(b), reads: num(b.reads) ?? 0 };
 }
 
 const AGAIN = /** @type {Record<string, (b: any) => string>} */ ({
   now: (b) => `on it again now, ${b.percent}% in`,
   paused: (b) => `second listen paused ${b.percent}% in${b.heard ? `, ${b.heard}` : ''}`,
-  twice: (b) => `heard twice${b.heard ? `, again in ${b.heard}` : ''}`,
+  twice: (b) => (b.reads >= 2 ? `finished ${b.times} times${b.format === 'print' ? ', on paper' : ''}` : `heard twice${b.heard ? `, again in ${b.heard}` : ''}`),
 });
 
 /** @param {any} sec */
@@ -137,13 +148,13 @@ export function readingView(sec) {
   const yearOf = (/** @type {string} */ y) => years.find((r) => String(r.year) === y) || {};
   // one bookcase: the spines run on from shelf to shelf, a bookend card where each year begins
   const shelf = [...byYear.entries()].flatMap(([year, spines]) => [
-    { bookend: true, year, count: plural(num(yearOf(year).books) ?? spines.length, 'book', 'books'), hours: hoursLabel(yearOf(year).hours) },
+    { bookend: true, year, count: plural(num(yearOf(year).books) ?? spines.length, 'book', 'books'), hours: hoursLabel(yearOf(year).hours) || pagesLabel(yearOf(year).pages) },
     ...spines,
   ]);
 
   const maxBooks = Math.max(1, ...years.map((r) => num(r.books) ?? 0));
   const yearBars = years.map((r) => ({
-    year: String(r.year), books: num(r.books) ?? 0, hours: hoursLabel(r.hours),
+    year: String(r.year), short: String(r.year).slice(2), books: num(r.books) ?? 0, hours: hoursLabel(r.hours) || pagesLabel(r.pages),
     pct: Math.round(((num(r.books) ?? 0) / maxBooks) * 100),
   }));
   const months = list(sec.monthly);
@@ -176,7 +187,8 @@ export function readingView(sec) {
       { value: group(finished), label: 'books finished', sub: st.since ? `since ${st.since}` : '' },
       { value: `≈${group(hours)}`, label: 'hours listened', sub: `about ${group(hours / 24)} days, end to end` },
       { value: group(num(st.authors) ?? 0), label: 'authors', sub: '' },
-      ...(num(st.again) ? [{ value: group(/** @type {number} */ (num(st.again))), label: 'heard again', sub: `${hoursLabel(st.againHours)} of going back for more` }] : []),
+      ...(num(st.pages) ? [{ value: group(/** @type {number} */ (num(st.pages))), label: 'pages turned', sub: `${plural(num(st.print) ?? 0, 'book', 'books')} on paper` }] : []),
+      ...(num(st.again) ? [{ value: group(/** @type {number} */ (num(st.again))), label: 'gone back to', sub: `${hoursLabel(st.againHours)} of going back for more` }] : []),
       { value: group(num(st.owned) ?? 0), label: 'in the library', sub: num(st.unstarted) ? `${group(/** @type {number} */ (num(st.unstarted)))} still waiting` : '' },
     ],
     onTheGo: list(sec.onTheGo).filter((b) => str(b.title)).map((b) => ({ ...face(b), again: b.again === true })),
@@ -186,6 +198,13 @@ export function readingView(sec) {
       return { ...f, state: String(b.state), label: AGAIN[b.state](f) };
     }),
     shelf,
+    bothWays: list(sec.bothWays).filter((b) => str(b.title) && list(b.times).length >= 2).slice(0, 8).map((b) => ({
+      title: str(b.title), by: str(b.by), cover: shelfArt(b.cover),
+      times: list(b.times).map((t) => ({
+        format: t.format === 'print' ? 'print' : 'audio', when: finishedLabel(t.when),
+        how: t.format === 'print' ? 'on paper' : str(t.narrator) ? `read by ${str(t.narrator)}` : 'audiobook',
+      })),
+    })),
     authors: list(sec.topAuthors).filter((a) => str(a.name)).slice(0, 8).map((a, i) => ({
       name: str(a.name), books: plural(num(a.books) ?? 0, 'book', 'books'), hours: hoursLabel(a.hours), rank: i + 1,
       covers: arts(a.covers, 4),
@@ -194,7 +213,7 @@ export function readingView(sec) {
       title: str(s.title), by: str(s.by), books: plural(num(s.books) ?? 0, 'book', 'books'),
       covers: arts(s.covers, 6),
     })),
-    yearBars, monthBars, hasMonths: monthBars.some((m) => m.pct > 0),
+    yearBars, yearsMany: yearBars.length > 8, monthBars, hasMonths: monthBars.some((m) => m.pct > 0),
     genres: genres.filter((g) => (num(g.books) ?? 0) >= 2).slice(0, 5).map((g) => ({ name: str(g.name), books: num(g.books) ?? 0, pct: Math.round(((num(g.books) ?? 0) / Math.max(1, finished)) * 100) })),
     facts,
     ...readingRelView(sec),

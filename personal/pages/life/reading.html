@@ -17,7 +17,7 @@
     </svg>
 
     {{!-- Reading (lifeSections.reading, tasks/life-shelves.mjs): the big numbers, the books on the go, the shelf
-          (a plank per year, a spine per finished audiobook cut from its own cover, thicker for a longer book),
+          (a plank per year, a spine per finished book, an audiobook cut from its own cover, thicker for a longer book),
           authors and series as fanned covers, the prize shelf, the voices, the card catalogue and the date-due
           slip (tasks/reading-rel.mjs), the years in hours, then odd facts on index cards. --}}
     {{#with section}}
@@ -48,7 +48,7 @@
     {{#if shelf.length}}
     <h2 class="fit-header">the <span>shelf</span>.</h2>
     <p class="watch-note">Every book I have finished, newest first, a bookend where each year starts. A fatter spine is a longer book. Point at one for the cover.</p>
-    <p class="book-legend" aria-hidden="true"><span class="book-legend__k book-legend__k--audio"><svg viewBox="0 0 16 16" width="14" height="14"><use href="#fmt-audio"/></svg> audiobook</span><span class="book-legend__k book-legend__k--print"><svg viewBox="0 0 16 16" width="14" height="14"><use href="#fmt-print"/></svg> on paper</span><span class="book-legend__k book-legend__k--again"><b>2&times;</b> heard again</span></p>
+    <p class="book-legend" aria-hidden="true"><span class="book-legend__k book-legend__k--audio"><svg viewBox="0 0 16 16" width="14" height="14"><use href="#fmt-audio"/></svg> audiobook</span><span class="book-legend__k book-legend__k--print"><svg viewBox="0 0 16 16" width="14" height="14"><use href="#fmt-print"/></svg> on paper</span><span class="book-legend__k book-legend__k--again"><b>2&times;</b> finished more than once</span></p>
     <svg width="0" height="0" style="position:absolute" aria-hidden="true">
       <symbol id="fmt-audio" viewBox="0 0 16 16"><path d="M2.5 10V8a5.5 5.5 0 0 1 11 0v2" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="1.5" y="9" width="3.5" height="5.5" rx="1" fill="currentColor"/><rect x="11" y="9" width="3.5" height="5.5" rx="1" fill="currentColor"/></symbol>
       <symbol id="fmt-print" viewBox="0 0 16 16"><path d="M8 4C6 2.6 3.5 2.3 1.5 2.6v10C3.5 12.3 6 12.6 8 14c2-1.4 4.5-1.7 6.5-1.4v-10C12.5 2.3 10 2.6 8 4zM8 4v10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
@@ -60,7 +60,7 @@
         <li class="bookend"><span class="bookend__y">{{year}}</span><span class="bookend__n">{{count}}{{#if hours}}<br>{{hours}}{{/if}}</span></li>
         {{else}}
         <li class="book-spine book-spine--{{format}} book-spine--ink{{ink}}{{#if lean}} book-spine--lean{{/if}}{{#if again}} book-spine--again{{/if}}" style="--w: {{width}}px; --h: {{height}}; --fs: {{font}}; --lean: {{lean}}deg; --pos: {{pos}}%;{{#if cover}} --cover: url('{{cover}}');{{/if}}" tabindex="0">
-          {{#if again}}<span class="book-spine__again" aria-hidden="true">2&times;</span>{{/if}}
+          {{#if again}}<span class="book-spine__again" aria-hidden="true">{{times}}&times;</span>{{/if}}
           <span class="book-spine__title">{{spineTitle}}</span>
           <span class="book-spine__by">{{by}}</span>
           <svg class="book-spine__fmt" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><use href="#fmt-{{format}}"/></svg>
@@ -68,9 +68,9 @@
             {{#if cover}}<img class="book-spine__cover book-spine__cover--{{format}}" src="{{cover}}" alt="" loading="lazy" decoding="async" width="160" height="160">{{/if}}
             <strong>{{title}}</strong>
             <span>{{#if by}}{{by}}{{/if}}{{#if series}} · {{series}}{{/if}}</span>
-            <span>{{#if audio}}audiobook{{else}}book{{/if}} · finished {{monthLabel}}{{#if hours}} · {{hours}}{{/if}}</span>
+            <span>{{#if audio}}audiobook{{else}}book{{/if}} · {{#if monthLabel}}finished {{monthLabel}}{{else}}finished{{/if}}{{#if hours}} · {{hours}}{{/if}}</span>
             {{#if printed}}<span>first printed {{printed}}</span>{{/if}}
-            {{#if again}}<span class="book-spine__card-again">heard more than once</span>{{/if}}
+            {{#if again}}<span class="book-spine__card-again">{{againLabel}}</span>{{/if}}
           </span>
         </li>
         {{/if}}
@@ -80,17 +80,40 @@
     {{/if}}
 
     {{#if heardAgain.length}}
-    <h2 class="fit-header">heard <span>again</span>.</h2>
-    <p class="watch-note">Books I went back to. Audible keeps no count of listens, so this is worked out: a book heard after a later one in its series was finished, or started again after it was done.</p>
+    <h2 class="fit-header">once <span>more</span>.</h2>
+    <p class="watch-note">Books I went back to. Hardcover counts the rereads of a book on paper. Audible keeps no count of listens, so for an audiobook this is worked out: a book heard after a later one in its series was finished, or started again after it was done.</p>
     <ol class="book-again">
       {{#each heardAgain}}
       <li class="book-again__item book-again__item--{{state}}">
         <figure class="book-face book-face--{{format}} book-face--small">
           {{#if cover}}<img class="book-face__art" src="{{cover}}" alt="{{title}}" loading="lazy" decoding="async" width="160" height="160">{{else}}<span class="book-face__type">{{title}}</span>{{/if}}
-          <span class="book-again__stamp" aria-hidden="true">2&times;</span>
+          <span class="book-again__stamp" aria-hidden="true">{{times}}&times;</span>
         </figure>
         <span class="book-midway__title">{{title}}</span>
         <span class="book-again__state">{{label}}</span>
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+
+    {{#if bothWays.length}}
+    <h2 class="fit-header">read it, <span>heard it</span>.</h2>
+    <p class="watch-note">Books I have finished more than one way: on paper and in my ears, or heard again in a different voice. Every finish, in order.</p>
+    <ol class="book-both">
+      {{#each bothWays}}
+      <li class="book-both__item">
+        <figure class="book-face book-face--audio book-face--small">
+          {{#if cover}}<img class="book-face__art" src="{{cover}}" alt="{{title}}" loading="lazy" decoding="async" width="160" height="160">{{else}}<span class="book-face__type">{{title}}</span>{{/if}}
+        </figure>
+        <div class="book-both__text">
+          <span class="book-midway__title">{{title}}</span>
+          {{#if by}}<span class="book-both__by">{{by}}</span>{{/if}}
+          <ol class="book-both__times">
+            {{#each times}}
+            <li class="book-both__t book-both__t--{{format}}"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><use href="#fmt-{{format}}"/></svg><span class="book-both__when">{{when}}</span><span class="book-both__how">{{how}}</span></li>
+            {{/each}}
+          </ol>
+        </div>
       </li>
       {{/each}}
     </ol>
@@ -203,10 +226,10 @@
 
     {{#if yearBars.length}}
     <h2 class="fit-header">year by <span>year</span>.</h2>
-    <div class="book-years">
+    <div class="book-years{{#if yearsMany}} book-years--many{{/if}}">
       <ol class="book-years__bars">
         {{#each yearBars}}
-        <li class="book-years__bar" style="--pct: {{pct}}%"><span class="book-years__n">{{books}}</span><span class="book-years__fill"></span><span class="book-years__y">{{year}}</span><span class="book-years__h">{{hours}}</span></li>
+        <li class="book-years__bar" style="--pct: {{pct}}%"><span class="book-years__n">{{books}}</span><span class="book-years__fill"></span><span class="book-years__y"><span class="book-years__full">{{year}}</span><span class="book-years__short">&rsquo;{{short}}</span></span><span class="book-years__h">{{hours}}</span></li>
         {{/each}}
       </ol>
       {{#if hasMonths}}

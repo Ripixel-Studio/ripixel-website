@@ -89,7 +89,7 @@ test('readingView: parts kept apart on a spine, format and re-listens carried, b
   assert.equal(v.onTheGo[0].percent, 85);
   assert.equal(v.bookmarks[0].heard, 'Jun 2025');
   assert.deepEqual(v.heardAgain.map((b) => b.label), ['on it again now, 85% in', 'heard twice, again in Sep 2025']);
-  assert.ok(v.numbers.some((n) => n.label === 'heard again' && n.value === '2'));
+  assert.ok(v.numbers.some((n) => n.label === 'gone back to' && n.value === '2'));
 });
 
 test('listeningView: tapes, years from the plays, stayers, the deck', () => {
@@ -167,4 +167,37 @@ test('relationsView: racks share one ink with their years, gold or silver discs,
   assert.deepEqual(listeningView({ relCoverage: { wins: { grammy: 4, oscar: 1, nope: 3 } } }).goldTally, [{ n: '4', prize: 'a Grammy' }, { n: '1', prize: 'an Oscar' }]);
   assert.deepEqual(v.screens.map((s) => [s.title, s.kind, s.href, s.art]), [['Film', 'film', '/life/watching', ''], ['Game', 'game', '', '']]);
   assert.equal(v.screens[0].across, 'across 2 songs');
+});
+
+test('reading: a book on paper from Hardcover (pages, a year-only finish, rereads)', () => {
+  const cover = 'https://assets.hardcover.app/external_data/1278417/409d17977aff8908e0fa9541b4b9e547ac1f8f55.jpeg';
+  assert.equal(shelfArt('https://assets.hardcover.app/editions/26853601/8a803516-635c-40a4-b430-a682a15f7a58-tforeverwar.jpg'), 'https://assets.hardcover.app/editions/26853601/8a803516-635c-40a4-b430-a682a15f7a58-tforeverwar.jpg');
+  const v = readingView({
+    shelf: [{ key: 'k1', title: 'Office Novel', by: 'A Writer', finished: '2018', format: 'print', pages: 466, reads: 3, again: true, cover }],
+    byYear: [{ year: '2018', books: 1, hours: 0, pages: 466 }],
+    bookStats: { finished: 1, hours: 0, print: 1, pages: 466, again: 1 },
+    heardAgain: [{ title: 'Office Novel', format: 'print', state: 'twice', reads: 3, cover }],
+  });
+  const sp = v.shelf.find((s) => !s.bookend);
+  assert.equal(sp.format, 'print');
+  assert.equal(sp.monthLabel, '2018');
+  assert.equal(sp.hours, '466 pages');
+  assert.equal(sp.times, 3);
+  assert.equal(sp.againLabel, 'finished 3 times');
+  assert.equal(sp.cover, cover);
+  assert.equal(v.shelf[0].hours, '466 pages');
+  assert.ok(v.numbers.some((n) => n.label === 'pages turned' && n.value === '466'));
+  assert.equal(v.heardAgain[0].label, 'finished 3 times, on paper');
+  assert.equal(v.yearBars[0].hours, '466 pages');
+});
+
+test('reading: read it, heard it', () => {
+  const v = readingView({ bothWays: [
+    { title: 'Space Book', by: 'E Writer', cover: COVER, times: [
+      { when: '2018', format: 'print' }, { when: '2021-06', format: 'audio', narrator: 'Voice One' }, { when: '2025-04', format: 'audio' }] },
+    { title: 'Lonely', times: [{ when: '2020', format: 'print' }] },
+  ] });
+  assert.equal(v.bothWays.length, 1);
+  assert.deepEqual(v.bothWays[0].times.map((t) => [t.when, t.how]),
+    [['2018', 'on paper'], ['Jun 2021', 'read by Voice One'], ['Apr 2025', 'audiobook']]);
 });
