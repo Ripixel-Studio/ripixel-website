@@ -45,6 +45,15 @@
     </nav>
     {{/if}}
 
+    <aside class="ss-key" aria-label="What the colours mean">
+      <ul class="ss-key__tags">
+        {{#each fitnessSessions.legend}}
+        <li class="ss-key__tag {{typeClass}}"><i aria-hidden="true"></i><b>{{label}}</b> <span>{{note}}</span></li>
+        {{/each}}
+      </ul>
+      <p class="ss-key__race"><span class="fit-chip fit-race">Race</span> marks the real thing: a race, a parkrun or an event done for time. It keeps its sport's colour.</p>
+    </aside>
+
     <div class="ss-list" data-fit-sessions>
       {{#each fitnessSessions.months}}
       <section class="ss-month" data-month="{{key}}">

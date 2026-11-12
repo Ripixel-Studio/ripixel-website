@@ -63,6 +63,46 @@
           "source": "/profile",
           "destination": "/work",
           "type": 301
+        },
+        {
+          "source": "/life/sessions/crossfit",
+          "destination": "/life/sessions/hyrox",
+          "type": 301
+        },
+        {
+          "source": "/life/sessions/crossfit/:page",
+          "destination": "/life/sessions/hyrox",
+          "type": 301
+        },
+        {
+          "source": "/life/sessions/hiit",
+          "destination": "/life/sessions/class",
+          "type": 301
+        },
+        {
+          "source": "/life/sessions/hiit/:page",
+          "destination": "/life/sessions/class",
+          "type": 301
+        },
+        {
+          "source": "/life/sessions/hike",
+          "destination": "/life/sessions/walk",
+          "type": 301
+        },
+        {
+          "source": "/life/sessions/hike/:page",
+          "destination": "/life/sessions/walk",
+          "type": 301
+        },
+        {
+          "source": "/life/sessions/sport",
+          "destination": "/life/sessions/other",
+          "type": 301
+        },
+        {
+          "source": "/life/sessions/sport/:page",
+          "destination": "/life/sessions/other",
+          "type": 301
         }
       ],
       "headers": [

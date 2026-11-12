@@ -18,7 +18,7 @@ import path from 'node:path';
 
 import { buildActivityView, fmtDateShort, isSafeSlug } from './fitness-activity-views.mjs';
 import { buildHyroxHistory, pbChase, eventUrl, clock } from './fitness-hyrox.mjs';
-import { activityTheme } from './fitness-theme.mjs';
+import { themeOf } from './fitness-theme.mjs';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -118,7 +118,7 @@ export function buildEventView(event, history, index, opts = {}) {
     canonical,
     publishedTime: event.start,
     ev: {
-      ...activityTheme(races[0]?.file?.activity?.activityType),
+      ...themeOf(races[0]?.file),
       slug: event.slug,
       name,
       range,

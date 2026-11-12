@@ -91,7 +91,7 @@ describe('item mapping', () => {
     const { activities, index } = await fixtures();
     const it = activityItem(activities.find((a) => a.slug === 'push-day-2026-10-13'), index, SITE);
     assert.ok(it);
-    assert.match(it.summary, /^Weight training · 18 sets · 6,286 kg · 57 min · 2 PRs\. Bench finally moved/);
+    assert.match(it.summary, /^Strength · 18 sets · 6,286 kg · 57 min · 2 PRs\. Bench finally moved/);
     assert.doesNotMatch(it.summary, /\+2|personal records/);
   });
   test('activity: no start time → no item', async () => {

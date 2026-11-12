@@ -26,7 +26,7 @@
  */
 import { buildHyroxHistory, clock, eventUrl } from './fitness-hyrox.mjs';
 import { recordLabel } from './fitness-records.mjs';
-import { activityTheme, typeKeyOf } from './fitness-theme.mjs';
+import { TAGS, tagTheme, tagOf, themeOf } from './fitness-theme.mjs';
 import { ymd } from './life-clock.mjs';
 
 export const FIRSTS_AFTER_DAYS = 60;
@@ -171,12 +171,6 @@ function pbOf(r) {
   return { name: label.name, value: `${Math.round(v)}${r.unit ? ` ${r.unit}` : ''}`, delta: '', score: 22 };
 }
 
-/** `ACTIVITY_TYPE_TABLE_TENNIS` → `table tennis`. @param {unknown} t */
-const typeWord = (t) => {
-  const bare = String(t || '').replace(/^ACTIVITY_TYPE_/, '');
-  return bare === 'HIGH_INTENSITY_INTERVAL_TRAINING' ? 'HIIT' : bare.toLowerCase().replace(/_/g, ' ');
-};
-
 /** @param {number} n */
 const thousands = (n) => n.toLocaleString('en-GB');
 
@@ -202,7 +196,7 @@ export function buildMoments({ files, entries, past = [] }) {
   /** @param {any} e @param {Partial<Moment> & { kind: string, stamp: string, title: string, score: number }} m */
   const fromEntry = (e, m) => {
     const t = Date.parse(e.startTime);
-    const theme = activityTheme(e.activityType);
+    const theme = themeOf(e);
     /** @type {Moment} */
     const moment = {
       id: `${m.kind}:${e.slug}`, value: '', unit: '', sub: '', t, date: dayLabel(t),
@@ -227,7 +221,7 @@ export function buildMoments({ files, entries, past = [] }) {
       id: `weekend:${ev.slug}`, kind: 'weekend', stamp: 'RACE WEEKEND', title: `Hyrox ${ev.name}`,
       value: String(races.length), unit: races.length === 1 ? 'race' : 'races',
       sub: races.map((r) => `${short(r?.divisionLabel || 'Race')} ${r?.total}${r?.isPB ? ' (PB)' : ''}`).join(' · '),
-      t, date: dayLabel(t), href: eventUrl(ev.slug), photo, ...activityTheme('ACTIVITY_TYPE_CROSSFIT'),
+      t, date: dayLabel(t), href: eventUrl(ev.slug), photo, ...tagTheme('hyrox'),
       score: 120 + pbs * 5, slug: '', slugs: [...ev.slugs], tags: [],
     });
     for (const s of ev.slugs) raceSlugs.add(s);
@@ -288,7 +282,7 @@ export function buildMoments({ files, entries, past = [] }) {
   let lastWeek = -1;
   for (const { e, t } of list) {
     const file = fileBySlug.get(e.slug);
-    const family = typeKeyOf(e.activityType);
+    const family = tagOf(e).tag;
     const metres = num(e.distanceMeters);
     const ok = settled(t);
     sessions++;
@@ -338,7 +332,7 @@ export function buildMoments({ files, entries, past = [] }) {
     }
     if (!familiesSeen.has(family)) {
       if (ok && family !== 'other') {
-        fromEntry(e, { kind: 'first', stamp: 'FIRST', title: `First ${typeWord(e.activityType)} on the record`, value: '', sub: e.title || '', score: 45 });
+        fromEntry(e, { kind: 'first', stamp: 'FIRST', title: `First ${TAGS[family].label.toLowerCase()} on the record`, value: '', sub: e.title || '', score: 45 });
       }
       familiesSeen.add(family);
     }

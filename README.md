@@ -97,10 +97,16 @@ latest six activity cards, the roundup teaser, the totals/streaks/PB block and t
 calendar" block. All formatting lives in that task (it is data, not markup); the
 `fitness-*` partials only loop and test.
 
-**Shared by the /life pages.** `tasks/fitness-theme.mjs` maps a FitGlue activity type to its
-family (`run`, `ride`, `crossfit`, `strength`, `yoga`, …: FitGlue's showcase family map) and
-`personal/assets/styles/main/fitness-types.css` gives each family an ink as
-`.fit-type--<family>` → `var(--type)` / `var(--type-on)`; colour anything about a session with
+**Shared by the /life pages: one tag per activity.** `tasks/fitness-theme.mjs` is the site's
+one taxonomy: `run`, `ride`, `spin`, `hyrox`, `class`, `strength`, `pilates`, `yoga`, `walk`,
+`other`, plus an independent `isRace` marker (a Race badge on top of the tag; a race keeps its
+sport's ink). The FitGlue export's per-activity `tag` / `isRace` win; without them `siteTagOf`
+decides from type, title and sets. `assemble` (fitness-fetch) stamps the answer on every
+activity file, its `entry` and its index entry, and every colour, label, glyph, filter chip and
+per-type stat reads it through `tagOf` / `themeOf` (never from the raw `activityType`; calendar
+entries with no activity yet use `tagOfTitle` in life-clock over the same keys).
+`personal/assets/styles/main/fitness-types.css` gives each tag an ink as
+`.fit-type--<tag>` → `var(--type)` / `var(--type-on)` / `var(--type-text)`; colour anything about a session with
 those rather than the page's section ink. `tasks/fitness-records.mjs` turns FitGlue's raw PR
 keys (`fastest_5k`, `leg_press_heaviest_weight`, `hybrid_race_hyrox_wall_balls`) into display
 names and merges PR lists into the current record per key.
@@ -144,7 +150,7 @@ globals (and draw the share cards). The render configuration is `tasks/life-page
 | `tasks/fitness-event-views.mjs` | `fitnessEventPages` | `generateDataPagesTask` + `personal/templates/event.html` | `/life/event/<slug>` — one page per race weekend (several races at one event within a few days) |
 | `tasks/fitness-roundup-views.mjs` | `fitnessRoundupPages` | `generateDataPagesTask` + `personal/templates/roundup.html` (`rl-week`, `rl-month`, `rl-year` partials) | `/life/roundup/<key>` — a week, a month and a year are three layouts, each led by its highlights |
 | `tasks/fitness-roundup-views.mjs` | `fitnessRoundupsIndex` | `generatePagesTask` + `personal/pages/life/roundups.html` | `/life/roundups` — one stream newest first: a year leads its year, a month its weeks |
-| `tasks/fitness-sessions.mjs` | `fitnessSessionsPages` | `generateDataPagesTask` + `personal/templates/sessions.html` | `/life/sessions[/<n>]`, `/life/sessions/<family>[/<n>]` — every session newest first, 60 a page; JS loads the next page on scroll, the pager works without it |
+| `tasks/fitness-sessions.mjs` | `fitnessSessionsPages` | `generateDataPagesTask` + `personal/templates/sessions.html` | `/life/sessions[/<n>]`, `/life/sessions/<tag>[/<n>]` — every session newest first, 60 a page; JS loads the next page on scroll, the pager works without it |
 | `tasks/fitness-feed-items.mjs` | `fitnessFeedItems` | `generateFeedTask` (Atom only) | **`/life/feed.xml`** — activities and roundups interleaved newest first, 50 entries |
 
 The sitemap is Skier's `generateSitemapTask` with `trailingSlash: false`.
@@ -168,7 +174,7 @@ pre-rendered share cards in three shapes — **Story** 1080×1920, **Square** 10
   (rides, walks, classes: the four numbers and the HR trace) and `roundup` (totals, sport
   donut, calendar heatmap, PR wall, vs last period).
 - `scripts/share-cards.mjs` — the drawing (SVG). Two looks: his photo full bleed under an
-  ink scrim, or the activity family's riso ink as the ground (`TYPE_INKS` in
+  ink scrim, or the activity tag's riso ink as the ground (`TYPE_INKS` in
   `tasks/fitness-theme.mjs`, kept equal to `fitness-types.css` by a test), with the zine
   frame, Anton and JetBrains Mono either way.
 - `tasks/fitness-og-images.mjs` — scope, backgrounds, rendering, cache, manifest. All three

@@ -1,125 +1,178 @@
 // @ts-check
 /**
- * Activity-type theme, shared by every /life page (F5.3).
+ * The site's one activity taxonomy (the tag), shared by every /life page.
  *
- * One place that says what colour, glyph and label an activity type gets, so
- * the /life index, /life/sessions, the calendar strip and (when they want it)
- * the activity and roundup pages agree. The colours live in CSS as
- * `.fit-type--<key>` classes (personal/assets/styles/main/fitness-types.css),
- * each setting `--type` (the ink) and `--type-on` (text on a solid `--type`
- * fill); a view model only carries `typeKey` / `typeClass`.
+ * Every activity gets exactly one tag, decided once, and every colour, label, glyph,
+ * filter chip and per-type stat on the site comes from it:
  *
- * The grouping is FitGlue's showcase family map (fitglue-web, deleted in
- * e333c4c: src/showcase/utils/activityFamily.ts), and the hues are its Aurora
- * tokens (pink #ff3da6, cyan #22d3ee, violet #8b5cf6, rose, gold, lime) moved
- * to riso-ink weights that hold contrast on the zine's cream paper. Where the
- * web app's two maps disagreed (the dashboard RunRow: run pink, ride cyan,
- * pilates/yoga/weights violet; the showcase stamps: strength pink, crossfit
- * rose, hiit gold, yoga violet, run/ride/hike plain paper), run and ride take
- * RunRow's colours and strength moves off pink so run and strength differ.
+ *   run  ride  spin  hyrox  class  strength  pilates  yoga  walk  other
+ *
+ * plus an independent Race marker (`isRace`): a badge on top of the tag, never a tag of
+ * its own, so a Hyrox race is a Hyrox-inked Hyrox tag with a Race badge and a parkrun is
+ * a Run with a Race badge.
+ *
+ * Source of truth: the FitGlue export's top-level `tag` and `isRace` on each activity
+ * file (and on its `entry`). When an activity has no valid `tag`, `siteTagOf` decides it
+ * locally (the one fallback). `assemble` in tasks/fitness-fetch.mjs stamps the decision
+ * onto the file, its `entry` and the index entry, so every view reads the same answer
+ * through `tagOf` / `themeOf`. Calendar entries with no activity yet use `tagOfTitle`
+ * (tasks/life-clock.mjs, which the page also runs in the browser), over the same keys.
+ *
+ * The inks live in CSS as `.fit-type--<tag>` (personal/assets/styles/main/fitness-types.css),
+ * each setting `--type`, `--type-on` and `--type-text`; `TYPE_INKS` repeats them as hex for
+ * drawings that cannot read CSS (the share cards), kept in step by a test.
  */
+import { activityKind } from './fitness-activity-kinds.mjs';
+import { tagOfTitle } from './life-clock.mjs';
 
-/**
- * @typedef {'run'|'ride'|'swim'|'hike'|'strength'|'crossfit'|'hiit'|'yoga'|'sport'|'paddle'|'other'} TypeKey
- */
+/** @typedef {'run'|'ride'|'spin'|'hyrox'|'class'|'strength'|'pilates'|'yoga'|'walk'|'other'} Tag */
+/** @typedef {Tag} TypeKey */
 
-/** FitGlue `ActivityType` → family key (fitglue-web activityFamily.ts FAMILY_MAP). */
-export const TYPE_FAMILY = /** @type {Record<string, TypeKey>} */ ({
-  RUN: 'run', TRAIL_RUN: 'run', VIRTUAL_RUN: 'run',
-  RIDE: 'ride', GRAVEL_RIDE: 'ride', MOUNTAIN_BIKE_RIDE: 'ride', EBIKE_RIDE: 'ride',
-  EMOUNTAIN_BIKE_RIDE: 'ride', VIRTUAL_RIDE: 'ride', VELOMOBILE: 'ride', HANDCYCLE: 'ride', ROLLER_SKI: 'ride',
-  SWIM: 'swim',
-  HIKE: 'hike', WALK: 'hike', SNOWSHOE: 'hike',
-  WEIGHT_TRAINING: 'strength', WORKOUT: 'strength',
-  CROSSFIT: 'crossfit',
-  HIGH_INTENSITY_INTERVAL_TRAINING: 'hiit', ELLIPTICAL: 'hiit', STAIR_STEPPER: 'hiit',
-  YOGA: 'yoga', PILATES: 'yoga',
-  TENNIS: 'sport', TABLE_TENNIS: 'sport', BADMINTON: 'sport', RACQUETBALL: 'sport', SQUASH: 'sport',
-  PICKLEBALL: 'sport', SOCCER: 'sport', GOLF: 'sport', ROCK_CLIMBING: 'sport',
-  STAND_UP_PADDLING: 'paddle', KAYAKING: 'paddle', CANOEING: 'paddle', ROWING: 'paddle', VIRTUAL_ROW: 'paddle',
-  SURFING: 'paddle', WINDSURF: 'paddle', KITESURF: 'paddle', SAIL: 'paddle',
+/** Tag → label, glyph and what goes in it, in the order the filter chips and the key show them. */
+export const TAGS = /** @type {Record<Tag, { label: string, glyph: string, note: string }>} */ ({
+  run: { label: 'Run', glyph: 'RUN', note: 'runs, parkruns, the treadmill' },
+  ride: { label: 'Ride', glyph: 'RDE', note: 'out on the bike' },
+  spin: { label: 'Spin', glyph: 'SPN', note: 'spin classes, the indoor bike' },
+  hyrox: { label: 'Hyrox', glyph: 'HYX', note: 'Hyrox and hybrid classes, PT and races' },
+  class: { label: 'Class', glyph: 'CLS', note: 'bootcamp, circuits, HIIT and the rest' },
+  strength: { label: 'Strength', glyph: 'GYM', note: 'weights, PT and the home workouts' },
+  pilates: { label: 'Pilates', glyph: 'PIL', note: 'mat and reformer' },
+  yoga: { label: 'Yoga', glyph: 'YOG', note: 'yoga, mostly hot' },
+  walk: { label: 'Walk', glyph: 'WLK', note: 'walks and hikes' },
+  other: { label: 'Other', glyph: 'ETC', note: 'everything else' },
 });
 
-/** Family key → filter label and glyph, in the order the filter chips show them. */
-export const FAMILIES = /** @type {Record<TypeKey, { label: string, glyph: string }>} */ ({
-  run: { label: 'Run', glyph: 'RUN' },
-  ride: { label: 'Ride', glyph: 'RDE' },
-  crossfit: { label: 'CrossFit & Hyrox', glyph: 'CF' },
-  strength: { label: 'Strength', glyph: 'GYM' },
-  hiit: { label: 'HIIT', glyph: 'HIT' },
-  yoga: { label: 'Pilates & Yoga', glyph: 'YOG' },
-  swim: { label: 'Swim', glyph: 'SWM' },
-  paddle: { label: 'On the water', glyph: 'ROW' },
-  hike: { label: 'Walk & Hike', glyph: 'WLK' },
-  sport: { label: 'Sport', glyph: 'RKT' },
-  other: { label: 'Other', glyph: '✦' },
-});
+/** @param {unknown} k @returns {k is Tag} */
+export function isTag(k) {
+  return typeof k === 'string' && Object.prototype.hasOwnProperty.call(TAGS, k);
+}
 
 /** `ACTIVITY_TYPE_TRAIL_RUN` → `TRAIL_RUN` @param {unknown} t */
-function bare(t) {
-  return String(t || '').replace(/^ACTIVITY_TYPE_/, '');
-}
+const bare = (t) => String(t ?? '').replace(/^ACTIVITY_TYPE_/, '');
 
-/** @param {unknown} activityType @returns {TypeKey} */
-export function typeKeyOf(activityType) {
-  return TYPE_FAMILY[bare(activityType)] || 'other';
+const RUN_TYPES = new Set(['RUN', 'TRAIL_RUN', 'VIRTUAL_RUN']);
+const WALK_TYPES = new Set(['WALK', 'HIKE', 'SNOWSHOE']);
+const RIDE_TYPES = new Set(['RIDE', 'GRAVEL_RIDE', 'MOUNTAIN_BIKE_RIDE', 'EBIKE_RIDE', 'EMOUNTAIN_BIKE_RIDE', 'VIRTUAL_RIDE', 'VELOMOBILE', 'HANDCYCLE']);
+const CLASS_TYPES = new Set(['CROSSFIT', 'HIGH_INTENSITY_INTERVAL_TRAINING', 'ELLIPTICAL', 'STAIR_STEPPER']);
+/** A home WORKOUT is strength unless its title names a class. */
+const CLASS_WORDS = /\b(class|bootcamp|crossfit|hiit|circuits?|box ?fit|body conditioning|instructor'?s choice|lyft fit|groove|kettlebell|burn|step|amrap|emom|metcon|intervals?)\b/i;
+/** A run for time: a parkrun, a marathon, a race, a 10k. */
+const RUN_RACE = /\b(parkrun|park run|marathon|race|\d+(\.\d+)?\s?k|\d+(\.\d+)?\s?km|\d+\s?miles?)\b/i;
+const NOT_RACE = /\b(zone|treadmill|recovery|easy|sprints?|club|training|tempo)\b/i;
+
+/** The sets logged on the file itself (an index entry alone carries only a count). @param {any} file */
+function loggedSets(file) {
+  const sessions = Array.isArray(file?.activity?.activityData?.sessions) ? file.activity.activityData.sessions : [];
+  return sessions.reduce((n, s) => n + (Array.isArray(s?.strengthSets) ? s.strengthSets.length : 0), 0);
 }
 
 /**
- * Theme for one activity type.
- * @param {unknown} activityType  `ACTIVITY_TYPE_RUN` or `RUN`
- * @returns {{ typeKey: TypeKey, typeClass: string, familyLabel: string, familyGlyph: string }}
+ * The one local fallback: an activity's tag and race marker from its own data, for an
+ * activity the export has not tagged.
+ * @param {any} x  an activity file (an element of `fitnessActivities`) or a bare index entry
+ * @returns {{ tag: Tag, isRace: boolean }}
  */
-export function activityTheme(activityType) {
-  const typeKey = typeKeyOf(activityType);
-  return {
-    typeKey,
-    typeClass: `fit-type--${typeKey}`,
-    familyLabel: FAMILIES[typeKey].label,
-    familyGlyph: FAMILIES[typeKey].glyph,
-  };
+export function siteTagOf(x) {
+  const wrapped = x && (x.activity || x.entry || x.indexEntry || x.race) ? x : { entry: x };
+  const file = wrapped.entry || !wrapped.indexEntry ? wrapped : { ...wrapped, entry: wrapped.indexEntry };
+  const activity = file.activity ?? {};
+  const entry = file.entry ?? {};
+  const t = bare(activity.activityType ?? entry.activityType);
+  const title = String(activity.title ?? entry.title ?? '');
+  const tag = fallbackTag(file, t, title);
+  const race = file.race;
+  const isRace = race ? !race.isSimulation : tag === 'run' && RUN_RACE.test(title) && !NOT_RACE.test(title);
+  return { tag, isRace };
 }
 
-export { typeKeyOfTitle } from './life-clock.mjs';
-
-/** Hybrid race brands, as a title or the export's `race` names them (F5.5). */
-const HYBRID_RACES = /** @type {[RegExp, string][]} */ ([
-  [/\bhyrox\b/i, 'HYROX'],
-  [/\bathx\b/i, 'ATHX'],
-  [/\bdeka\b/i, 'DEKA'],
-]);
+/** @param {any} file @param {string} t @param {string} title @returns {Tag} */
+function fallbackTag(file, t, title) {
+  if (file.race) return 'hyrox';
+  if (RUN_TYPES.has(t)) return 'run';
+  if (WALK_TYPES.has(t)) return 'walk';
+  if (t === 'PILATES') return 'pilates';
+  if (t === 'YOGA') return 'yoga';
+  if (RIDE_TYPES.has(t)) return activityKind(file) === 'ride' ? 'ride' : 'spin';
+  // A title names what the type cannot: Hyrox PT filed as weights, a spin class filed as crossfit.
+  const hint = tagOfTitle(title);
+  if (hint === 'spin' || hint === 'hyrox' || hint === 'pilates' || hint === 'yoga') return hint;
+  if (CLASS_TYPES.has(t)) return 'class';
+  if (t === 'WORKOUT' || t === 'WEIGHT_TRAINING') {
+    if (activityKind(file) === 'run') return 'run'; // a race or long run logged as one running set
+    if (CLASS_WORDS.test(title)) return 'class';
+    if (t === 'WORKOUT') return 'strength';
+    // Weights: a class only when the logged sets are mostly stations (activityKind reads them).
+    return loggedSets(file) > 0 && activityKind(file) === 'class' ? 'class' : 'strength';
+  }
+  if (!t) return hint;
+  return 'other';
+}
 
 /**
- * The type word for a hybrid race or class: FitGlue types Hyrox races CROSSFIT and
- * Hyrox classes WEIGHT_TRAINING, so the chip said "CROSSFIT" on a Hyrox race. Returns
- * the brand ("HYROX") when the activity has a Hyrox race breakdown or its title names
- * one, else "".
- * @param {unknown} title
- * @param {{ hasRace?: boolean, event?: unknown }} [opts]  `hasRace`: the export carries a `race` (always Hyrox today)
- * @returns {string}
+ * An activity's tag and race marker: the export's `tag` / `isRace` when present and valid
+ * (on the file, its `entry` or the index entry), else `siteTagOf`.
+ * @param {any} x  an activity file or an index entry
+ * @returns {{ tag: Tag, isRace: boolean }}
  */
-export function hybridRaceLabel(title, opts = {}) {
-  const text = `${String(title ?? '')} ${String(opts.event ?? '')}`;
-  for (const [re, label] of HYBRID_RACES) if (re.test(text)) return label;
-  return opts.hasRace ? 'HYROX' : '';
+export function tagOf(x) {
+  for (const src of [x, x?.entry, x?.indexEntry]) {
+    if (src && isTag(src.tag)) {
+      return { tag: src.tag, isRace: typeof src.isRace === 'boolean' ? src.isRace : siteTagOf(x).isRace };
+    }
+  }
+  return siteTagOf(x);
 }
 
 /**
- * The family inks as hex, for drawings that cannot read CSS (the share cards, F5.4).
+ * Theme for one tag (an unknown key is `other`).
+ * @param {unknown} tag
+ * @returns {{ typeKey: Tag, typeClass: string, tagLabel: string, tagGlyph: string }}
+ */
+export function tagTheme(tag) {
+  const typeKey = isTag(tag) ? tag : 'other';
+  return { typeKey, typeClass: `fit-type--${typeKey}`, tagLabel: TAGS[typeKey].label, tagGlyph: TAGS[typeKey].glyph };
+}
+
+/**
+ * Theme for one activity: its tag's colour, label and glyph, plus the race marker.
+ * @param {any} x  an activity file or an index entry
+ */
+export function themeOf(x) {
+  const { tag, isRace } = tagOf(x);
+  return { ...tagTheme(tag), isRace };
+}
+
+/**
+ * Decide each activity's tag once and write it where every view reads it: the file, its
+ * `entry` and its index entry. Data from the export wins; the fallback fills the rest.
+ * @param {any} file  an activity file (with `indexEntry` when assembled)
+ */
+export function stampTag(file) {
+  if (!file || typeof file !== 'object') return file;
+  const { tag, isRace } = tagOf(file);
+  for (const o of [file, file.entry, file.indexEntry]) {
+    if (o && typeof o === 'object') { o.tag = tag; o.isRace = isRace; }
+  }
+  return file;
+}
+
+export { tagOfTitle };
+
+/**
+ * The tag inks as hex, for drawings that cannot read CSS (the share cards, F5.4).
  * Kept in step with personal/assets/styles/main/fitness-types.css by
- * tasks/fitness-share-cards.test.mjs: `type` is --type, `on` is --type-on (ink → #171311),
+ * tasks/fitness-og-images.test.mjs: `type` is --type, `on` is --type-on (ink → #171311),
  * `text` is --type-text.
  */
-export const TYPE_INKS = /** @type {Record<TypeKey, { type: string, on: string, text: string }>} */ ({
+export const TYPE_INKS = /** @type {Record<Tag, { type: string, on: string, text: string }>} */ ({
   run: { type: '#C42A72', on: '#FFFFFF', text: '#C42A72' },
   ride: { type: '#18A9C4', on: '#171311', text: '#187384' },
-  swim: { type: '#2148C0', on: '#FFFFFF', text: '#2148C0' },
-  paddle: { type: '#1A6F94', on: '#FFFFFF', text: '#1A6F94' },
-  hike: { type: '#0B7A4B', on: '#FFFFFF', text: '#0B7A4B' },
+  spin: { type: '#2E5BBA', on: '#FFFFFF', text: '#2E5BBA' },
+  hyrox: { type: '#F2C13C', on: '#171311', text: '#806726' },
+  class: { type: '#00838A', on: '#FFFFFF', text: '#00727A' },
   strength: { type: '#F25B1C', on: '#171311', text: '#B54719' },
-  crossfit: { type: '#F2C13C', on: '#171311', text: '#806726' },
-  hiit: { type: '#E5484D', on: '#171311', text: '#BC3D41' },
-  yoga: { type: '#7C3AED', on: '#FFFFFF', text: '#7C3AED' },
-  sport: { type: '#7BB52A', on: '#171311', text: '#537420' },
+  pilates: { type: '#7C3AED', on: '#FFFFFF', text: '#7C3AED' },
+  yoga: { type: '#B79CF0', on: '#171311', text: '#6E4FC4' },
+  walk: { type: '#5E8C31', on: '#171311', text: '#4B7027' },
   other: { type: '#6B6259', on: '#FFFFFF', text: '#6B6259' },
 });

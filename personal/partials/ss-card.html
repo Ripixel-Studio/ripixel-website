@@ -9,7 +9,7 @@
     </span>
     {{#if mark}}<span class="rl-stamp ss-card__mark">{{mark}}</span>{{/if}}
     <span class="ss-card__body">
-      <span class="ss-card__top"><span class="fit-chip">{{typeLabel}}</span><time class="ss-card__date" datetime="{{dateTime}}">{{date}}</time></span>
+      <span class="ss-card__top"><span class="fit-chip">{{typeLabel}}</span>{{#if isRace}}<span class="fit-chip fit-race">Race</span>{{/if}}<time class="ss-card__date" datetime="{{dateTime}}">{{date}}</time></span>
       <span class="ss-card__title">{{title}}</span>
       {{#if markTitle}}<span class="ss-card__race">{{markTitle}}</span>{{/if}}
       <span class="ss-card__stats">

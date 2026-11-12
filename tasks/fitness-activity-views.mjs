@@ -23,7 +23,7 @@ import path from 'node:path';
 import { athleteWords } from './fitness-words.mjs';
 import { lineChart, niceTicks, formatTick } from './chart-axes.mjs';
 import { buildHyroxHistory, buildRaceView, pbChase, eventUrl } from './fitness-hyrox.mjs';
-import { activityTheme, hybridRaceLabel } from './fitness-theme.mjs';
+import { themeOf } from './fitness-theme.mjs';
 import { calorieFigure } from './fitness-calories.mjs';
 import { orientationOf } from './fitness-photo-dims.mjs';
 import { routeMapState, cleanPoints, activityMapData, scriptJson, ROUTE_EMPTY_LABELS } from './route-map.mjs';
@@ -184,41 +184,12 @@ export function titleCase(s) {
     .trim();
 }
 
-/** `ACTIVITY_TYPE_TRAIL_RUN` → `TRAIL RUN`. */
-export function typeLabel(activityType) {
-  const t = String(activityType ?? '').replace(/^ACTIVITY_TYPE_/, '').replace(/_/g, ' ').trim();
-  return t || 'ACTIVITY';
-}
-
 /** `SOURCE_PARKRUN_RESULTS` → `Parkrun Results` (File Upload → FIT Upload, as the web app does). */
 export function sourceLabel(source) {
   const s = String(source ?? '');
   if (!s) return '';
   const name = titleCase(s.replace(/^SOURCE_/, ''));
   return name === 'File Upload' ? 'FIT Upload' : name;
-}
-
-// Copied from fitglue-web src/showcase/utils/activityMeta.ts (ACTIVITY_TYPE_ICONS).
-export const ACTIVITY_ICONS = /** @type {Record<string, string>} */ ({
-  ACTIVITY_TYPE_RUN: 'RUN', ACTIVITY_TYPE_TRAIL_RUN: 'TRL', ACTIVITY_TYPE_VIRTUAL_RUN: 'RUN',
-  ACTIVITY_TYPE_WALK: 'WLK', ACTIVITY_TYPE_HIKE: 'HIK', ACTIVITY_TYPE_RIDE: 'RDE',
-  ACTIVITY_TYPE_MOUNTAIN_BIKE_RIDE: 'MTB', ACTIVITY_TYPE_GRAVEL_RIDE: 'RDE', ACTIVITY_TYPE_EBIKE_RIDE: 'RDE',
-  ACTIVITY_TYPE_EMOUNTAIN_BIKE_RIDE: 'MTB', ACTIVITY_TYPE_VIRTUAL_RIDE: 'RDE', ACTIVITY_TYPE_SWIM: 'SWM',
-  ACTIVITY_TYPE_ROWING: 'ROW', ACTIVITY_TYPE_VIRTUAL_ROW: 'ROW', ACTIVITY_TYPE_KAYAKING: 'PAD',
-  ACTIVITY_TYPE_STAND_UP_PADDLING: 'SRF', ACTIVITY_TYPE_SURFING: 'SRF', ACTIVITY_TYPE_WEIGHT_TRAINING: 'GYM',
-  ACTIVITY_TYPE_CROSSFIT: 'GYM', ACTIVITY_TYPE_HIGH_INTENSITY_INTERVAL_TRAINING: 'HIT', ACTIVITY_TYPE_YOGA: 'YOG',
-  ACTIVITY_TYPE_PILATES: 'YOG', ACTIVITY_TYPE_ELLIPTICAL: 'ELL', ACTIVITY_TYPE_STAIR_STEPPER: 'STR',
-  ACTIVITY_TYPE_ALPINE_SKI: 'SKI', ACTIVITY_TYPE_NORDIC_SKI: 'SKI', ACTIVITY_TYPE_BACKCOUNTRY_SKI: 'SKI',
-  ACTIVITY_TYPE_SNOWBOARD: 'SNO', ACTIVITY_TYPE_SNOWSHOE: 'HIK', ACTIVITY_TYPE_ROCK_CLIMBING: 'CLM',
-  ACTIVITY_TYPE_GOLF: 'GLF', ACTIVITY_TYPE_TENNIS: 'RKT', ACTIVITY_TYPE_BADMINTON: 'BAD',
-  ACTIVITY_TYPE_TABLE_TENNIS: 'TT', ACTIVITY_TYPE_SOCCER: 'FTB', ACTIVITY_TYPE_PICKLEBALL: 'TT',
-  ACTIVITY_TYPE_SQUASH: 'RKT', ACTIVITY_TYPE_RACQUETBALL: 'RKT', ACTIVITY_TYPE_SAIL: 'SAL',
-  ACTIVITY_TYPE_WINDSURF: 'KIT', ACTIVITY_TYPE_KITESURF: 'KIT', ACTIVITY_TYPE_WORKOUT: 'RUN',
-});
-
-/** @param {string|undefined} activityType */
-export function typeIcon(activityType) {
-  return ACTIVITY_ICONS[String(activityType ?? '')] ?? '★';
 }
 
 // ---------------------------------------------------------------------------
@@ -687,8 +658,8 @@ export function buildActivityView(file, index, opts = {}) {
   const category = file?.category || deriveCategory(activity);
   const kind = activityKind(file);
   const activityType = String(activity.activityType ?? entry.activityType ?? '');
-  // A run Hevy filed as a workout (one running set) is stamped and inked as the run it was.
-  const shownType = kind === 'run' && !/RUN$/.test(activityType) ? 'ACTIVITY_TYPE_RUN' : activityType;
+  // Colour, label and glyph come from the activity's one tag (fitness-theme.mjs), never the raw type.
+  const theme = themeOf(file);
   const applied = Array.isArray(activity.appliedEnrichments) ? activity.appliedEnrichments : [];
   const appliedSet = new Set(applied);
   const has = (/** @type {string} */ k) => appliedSet.has(P + k);
@@ -726,7 +697,7 @@ export function buildActivityView(file, index, opts = {}) {
   // A calm session has no records worth a stamp (Hevy files its minutes as one).
   const records = kind === 'mind' ? [] : race ? allRecords.filter((r) => !String(r?.recordType ?? '').startsWith('hybrid_race_')) : allRecords;
   const prCount = records.length + (race ? race.prCount : 0);
-  const icon = typeIcon(activityType);
+  const icon = theme.tagGlyph;
   const title = String(activity.title ?? entry.title ?? 'Activity');
   const locationName = shortLocation(en.location?.locationName ?? entry.locationName ?? '');
 
@@ -872,7 +843,7 @@ export function buildActivityView(file, index, opts = {}) {
   const chase = race && hyrox && divisionKey && !race.isSimulation ? pbChase(hyrox, divisionKey, [slug]) : null;
   const gallery = photos.map((src, i) => ({ src, id: `photo-${i + 1}`, n: i + 1, prev: `#photo-${i === 0 ? photos.length : i}`, next: `#photo-${i + 2 > photos.length ? 1 : i + 2}`, total: photos.length }));
 
-  const ogDescription = truncate(description || stripTags(aiSummaryHtml) || `${typeLabel(activityType).toLowerCase()} · ${fmtDateShort(startTime)}`, 200);
+  const ogDescription = truncate(description || stripTags(aiSummaryHtml) || `${theme.tagLabel.toLowerCase()} · ${fmtDateShort(startTime)}`, 200);
   const ogImage = (opts.ogCard && /^https?:\/\//.test(opts.ogCard) ? opts.ogCard : '') || photos[0] || '';
   const canonical = siteUrl ? `${siteUrl}${activityUrl(slug)}` : '';
   const pace = num(en.pace?.avgPaceSecondsPerKm);
@@ -898,8 +869,8 @@ export function buildActivityView(file, index, opts = {}) {
       icon,
       kind,
       is: { [kind]: true },
-      typeLabel: hybridRaceLabel(title, { hasRace: !!race, event: race?.event }) || typeLabel(shownType),
-      ...activityTheme(shownType),
+      typeLabel: theme.tagLabel.toUpperCase(),
+      ...theme,
       category,
       source: sourceLabel(activity.source ?? entry.source),
       dateStamp: fmtDateStamp(startTime),

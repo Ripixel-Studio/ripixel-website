@@ -136,7 +136,7 @@ describe('activity cards', () => {
     const d = await fixtures();
     const c = buildCard(d.index.activities[2]);
     assert.equal(c.family, 'strength');
-    assert.equal(c.typeLabel, 'WEIGHT TRAINING');
+    assert.equal(c.typeLabel, 'STRENGTH');
     assert.deepEqual(c.stats.map((s) => `${s.value}${s.unit}`), ['18', '6,286kg', '57m']);
     assert.equal(c.hasThumb, false);
     assert.equal(c.thumb, '');
@@ -174,12 +174,14 @@ describe('card pictures and type inks', () => {
     assert.equal(none.placeholder, true);
     assert.equal(none.pictureClass, 'fit-photo--placeholder');
   });
-  test('cards carry the FitGlue family ink', () => {
-    const t = (activityType) => buildCard({ slug: 's', activityType }).typeClass;
+  test('cards carry their tag ink', () => {
+    const t = (activityType, title = '') => buildCard({ slug: 's', activityType, title }).typeClass;
     assert.equal(t('ACTIVITY_TYPE_RUN'), 'fit-type--run');
     assert.equal(t('ACTIVITY_TYPE_TRAIL_RUN'), 'fit-type--run');
-    assert.equal(t('ACTIVITY_TYPE_CROSSFIT'), 'fit-type--crossfit');
-    assert.equal(t('ACTIVITY_TYPE_PILATES'), 'fit-type--yoga');
+    assert.equal(t('ACTIVITY_TYPE_CROSSFIT', 'Bootcamp'), 'fit-type--class');
+    assert.equal(t('ACTIVITY_TYPE_CROSSFIT', 'Hyrox Class'), 'fit-type--hyrox');
+    assert.equal(t('ACTIVITY_TYPE_PILATES'), 'fit-type--pilates');
+    assert.equal(t('ACTIVITY_TYPE_YOGA'), 'fit-type--yoga');
     assert.equal(t('ACTIVITY_TYPE_WORKOUT'), 'fit-type--strength');
     assert.equal(t('ACTIVITY_TYPE_SOMETHING_NEW'), 'fit-type--other');
   });
@@ -393,9 +395,9 @@ describe('on the calendar', () => {
       { id: 'r', calendar: 'events', title: 'Rutland Night 10k', start: '2026-11-01T17:30:00Z', end: '2026-11-01T18:30:00Z', allDay: false, kind: 'race' },
     ]), [], now, acts);
     assert.deepEqual(c.week.map((d) => d.state), ['rest', 'active', 'active', 'planned', 'open', 'open', 'planned']);
-    assert.deepEqual(c.week[1].done.map((x) => `${x.time} ${x.typeClass} ${x.href}`), ['12:10 fit-type--crossfit /life/activity/dbl']);
+    assert.deepEqual(c.week[1].done.map((x) => `${x.time} ${x.typeClass} ${x.href}`), ['12:10 fit-type--hyrox /life/activity/dbl']);
     assert.equal(c.week[2].isToday, true);
-    assert.equal(c.week[3].planned[0].typeClass, 'fit-type--crossfit');
+    assert.equal(c.week[3].planned[0].typeClass, 'fit-type--hyrox');
     // a race from the Events calendar shows in the week and stays the big Next Up callout
     assert.deepEqual(c.week[6].planned.map((p) => `${p.kind} ${p.isEvent}`), ['race true']);
     assert.deepEqual(c.nextUp.map((e) => e.title), ['Rutland Night 10k']);

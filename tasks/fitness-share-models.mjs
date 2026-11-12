@@ -19,7 +19,7 @@
 import { buildActivityView, fmtPace, prValue } from './fitness-activity-views.mjs';
 import { buildEventView } from './fitness-event-views.mjs';
 import { buildRoundupView, calendarDays } from './fitness-roundup-views.mjs';
-import { TYPE_INKS, FAMILIES, typeKeyOf } from './fitness-theme.mjs';
+import { TYPE_INKS, TAGS } from './fitness-theme.mjs';
 import { recordLabel } from './fitness-records.mjs';
 import { clock, deltaClock } from './fitness-hyrox.mjs';
 
@@ -276,7 +276,7 @@ export function activityShareModel(file, index, opts = {}) {
   return {
     ...base,
     template: 'other',
-    pill: FAMILIES[typeKey]?.label.toUpperCase().replace(/ & .*/, '') || 'FITNESS',
+    pill: TAGS[/** @type {keyof typeof TAGS} */ (typeKey)]?.label.toUpperCase() || 'FITNESS',
     label: (act.typeLabel || 'session').toLowerCase(),
     isRace: false,
     isPB: prs.length > 0,
@@ -322,7 +322,7 @@ export function eventShareModel(event, history, index, opts = {}) {
     template: 'event',
     watermark: `${ev.raceCount} races`,
     typeKey: ev.typeKey,
-    ink: TYPE_INKS[/** @type {keyof typeof TYPE_INKS} */ (ev.typeKey)] || TYPE_INKS.crossfit,
+    ink: TYPE_INKS[/** @type {keyof typeof TYPE_INKS} */ (ev.typeKey)] || TYPE_INKS.hyrox,
     pill: 'RACE WEEKEND',
     label: 'race weekend',
     isRace: true,
@@ -393,15 +393,9 @@ export function roundupLifeLines(life) {
 export function roundupShareModel(file, ctx) {
   const view = buildRoundupView(file, ctx);
   const r = file.roundup || {};
-  /** @type {Map<string, number>} */
-  const fam = new Map();
-  for (const b of r.activityTypeBreakdowns || []) {
-    if (!b) continue;
-    const k = typeKeyOf(b.activityType);
-    fam.set(k, (fam.get(k) || 0) + num(b.activityCount));
-  }
-  const sports = [...fam.entries()].filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1])
-    .map(([k, count]) => ({ label: FAMILIES[/** @type {keyof typeof FAMILIES} */ (k)].label, count, ink: TYPE_INKS[/** @type {keyof typeof TYPE_INKS} */ (k)].type }));
+  // Sessions per site tag, the same rows the roundup page's breakdown draws.
+  const sports = view.breakdown
+    .map((/** @type {any} */ b) => ({ label: b.label, count: b.count, ink: TYPE_INKS[/** @type {keyof typeof TYPE_INKS} */ (b.typeKey)].type }));
   const prs = view.records.flatMap((/** @type {any} */ g) => g.metrics.slice(0, 1).map((/** @type {any} */ m) => ({ name: g.label, metric: m.metric || '', value: m.value, unit: m.unit, delta: m.delta })));
   const end = r.periodEnd || '';
   const type = view.type;

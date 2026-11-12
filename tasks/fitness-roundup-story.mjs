@@ -17,7 +17,7 @@
  * period's own facts here: a run of active days, the busiest week/month on record.
  */
 import { buildMoments, dayStreak, momentsIn, pickHighlights } from './fitness-highlights.mjs';
-import { activityTheme, FAMILIES, typeKeyOf } from './fitness-theme.mjs';
+import { TAGS, tagOf, themeOf } from './fitness-theme.mjs';
 import { cardPicture } from './fitness-life.mjs';
 
 const DAY = 864e5;
@@ -55,9 +55,9 @@ const dur = (s) => { const h = Math.floor(s / 3600); const m = Math.round((s % 3
 
 /** The one number a session shows in a small card. @param {any} e */
 function stat(e) {
-  const fam = typeKeyOf(e.activityType);
+  const fam = tagOf(e).tag;
   const d = num(e.distanceMeters);
-  if (d > 500 && ['run', 'ride', 'hike', 'swim', 'paddle'].includes(fam)) return { value: km(d), unit: 'km' };
+  if (d > 500 && ['run', 'ride', 'walk'].includes(fam)) return { value: km(d), unit: 'km' };
   const kg = num(e.totalWeightKg);
   if (kg > 0) return kg >= 1000 ? { value: (kg / 1000).toFixed(1), unit: 't' } : { value: String(Math.round(kg)), unit: 'kg' };
   return { value: dur(num(e.durationSeconds)), unit: '' };
@@ -157,7 +157,7 @@ function mosaic(inPeriod, highlights, type) {
     const url = https(e.photoUrls?.[0]);
     if (!url || seen.has(url)) continue;
     seen.add(url);
-    out.push({ url, title: e.title || '', date: '', href: `/life/activity/${e.slug}`, typeClass: activityTheme(e.activityType).typeClass, stamp: '' });
+    out.push({ url, title: e.title || '', date: '', href: `/life/activity/${e.slug}`, typeClass: themeOf(e).typeClass, stamp: '' });
   }
   return out.slice(0, MOSAIC[type]);
 }
@@ -174,7 +174,7 @@ function routeShapes(inPeriod, ctx, type) {
     if (!file || !Array.isArray(file.routePoints) || file.routePoints.length < 10) continue;
     const pic = cardPicture({ ...e, photoUrls: [], routeThumbnailUrl: '' }, file);
     if (!pic.route) continue;
-    out.push({ ...pic.route, href: `/life/activity/${e.slug}`, title: e.title || '', km: num(e.distanceMeters) > 500 ? `${km(num(e.distanceMeters))} km` : '', typeClass: activityTheme(e.activityType).typeClass });
+    out.push({ ...pic.route, href: `/life/activity/${e.slug}`, title: e.title || '', km: num(e.distanceMeters) > 500 ? `${km(num(e.distanceMeters))} km` : '', typeClass: themeOf(e).typeClass });
     if (out.length >= ROUTES[type]) break;
   }
   return out;
@@ -208,7 +208,7 @@ function leadPhoto(lead, cover, ctx, slugs) {
 
 /** @param {{ e: any, t: number }} x @param {Map<string, string>} marks @param {boolean} showPhotos */
 function sessionCard({ e }, marks, showPhotos) {
-  const theme = activityTheme(e.activityType);
+  const theme = themeOf(e);
   const s = stat(e);
   return {
     title: e.title || 'Session', href: `/life/activity/${e.slug}`, ...theme,
@@ -229,7 +229,7 @@ export function buildStory(file, type, ctx) {
   const inPeriod = entriesIn(ctx, start, end);
   /** @type {Map<string, number>} */
   const famCount = new Map();
-  for (const x of inPeriod) famCount.set(typeKeyOf(x.e.activityType), (famCount.get(typeKeyOf(x.e.activityType)) || 0) + 1);
+  for (const x of inPeriod) famCount.set(tagOf(x.e).tag, (famCount.get(tagOf(x.e).tag) || 0) + 1);
   const dominant = [...famCount.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || 'other';
   const facts = periodFacts(file, type, inPeriod, ctx).map((f) => ({ ...f, typeKey: dominant, typeClass: `fit-type--${dominant}` }));
   const picked = pickHighlights([...momentsIn(ctx.moments, start, end), ...facts], type);
@@ -282,7 +282,7 @@ export function buildStory(file, type, ctx) {
       const top = here.find((x) => marks.has(x.e.slug)) || here.find((x) => https(x.e.photoUrls?.[0])) || here[0];
       cells.push({
         blank: false, num: String(i + 1), iso: isoDay(t0),
-        dots: here.map((x) => ({ typeClass: activityTheme(x.e.activityType).typeClass, title: x.e.title || '' })),
+        dots: here.map((x) => ({ typeClass: themeOf(x.e).typeClass, title: x.e.title || '' })),
         count: here.length, mark: dayMark.get(isoDay(t0)) || '',
         photo: ctx.showPhotos && top && marks.has(top.e.slug) ? https(top.e.photoUrls?.[0]) : '',
         href: top ? `/life/activity/${top.e.slug}` : null,
@@ -312,7 +312,7 @@ export function buildStory(file, type, ctx) {
       const here = inPeriod.filter((x) => x.t >= a && x.t < b);
       /** @type {Map<string, number>} */
       const fam = new Map();
-      for (const x of here) fam.set(typeKeyOf(x.e.activityType), (fam.get(typeKeyOf(x.e.activityType)) || 0) + 1);
+      for (const x of here) fam.set(tagOf(x.e).tag, (fam.get(tagOf(x.e).tag) || 0) + 1);
       const key = `month-${String(m + 1).padStart(2, '0')}-${year}`;
       const best = pickHighlights(momentsIn(ctx.moments, a, b), 'week')[0];
       const photo = !ctx.showPhotos ? '' : best?.photo || https([...here].reverse().find((x) => https(x.e.photoUrls?.[0]))?.e.photoUrls?.[0]);
@@ -323,21 +323,21 @@ export function buildStory(file, type, ctx) {
       };
     });
     const most = Math.max(1, ...months.map((m) => m.sessions));
-    const order = Object.keys(FAMILIES);
+    const order = Object.keys(TAGS);
     story.months = months.map(({ _fam, ...m }) => ({
       ...m,
       height: Math.round((m.sessions / most) * 100),
       stack: [..._fam.entries()].sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]))
-        .map(([k, n]) => ({ typeClass: `fit-type--${k}`, pct: Math.round((n / Math.max(1, m.sessions)) * 1000) / 10, label: FAMILIES[/** @type {keyof typeof FAMILIES} */ (k)]?.label || k, n })),
+        .map(([k, n]) => ({ typeClass: `fit-type--${k}`, pct: Math.round((n / Math.max(1, m.sessions)) * 1000) / 10, label: TAGS[/** @type {keyof typeof TAGS} */ (k)]?.label || k, n })),
     }));
     story.races = momentsIn(ctx.moments, start, end).filter((m) => ['weekend', 'race', 'event'].includes(m.kind)).map(ticket);
     story.hasRaces = story.races.length > 0;
     story.raceCount = story.races.filter((r) => r.isRace).length;
     /** @type {Map<string, number>} */
     const fams = new Map();
-    for (const x of inPeriod) fams.set(typeKeyOf(x.e.activityType), (fams.get(typeKeyOf(x.e.activityType)) || 0) + 1);
+    for (const x of inPeriod) fams.set(tagOf(x.e).tag, (fams.get(tagOf(x.e).tag) || 0) + 1);
     story.familyMix = [...fams.entries()].sort((a, b) => b[1] - a[1]).map(([k, n]) => ({
-      typeClass: `fit-type--${k}`, label: FAMILIES[/** @type {keyof typeof FAMILIES} */ (k)]?.label || k, n, pct: Math.round((n / Math.max(1, inPeriod.length)) * 1000) / 10,
+      typeClass: `fit-type--${k}`, label: TAGS[/** @type {keyof typeof TAGS} */ (k)]?.label || k, n, pct: Math.round((n / Math.max(1, inPeriod.length)) * 1000) / 10,
     }));
   }
   return story;

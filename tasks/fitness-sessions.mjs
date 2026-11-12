@@ -26,7 +26,7 @@
 
 import { buildCard, duration, filesBySlug, km, SESSIONS_HREF, TZ } from './fitness-life.mjs';
 import { buildMoments } from './fitness-highlights.mjs';
-import { FAMILIES } from './fitness-theme.mjs';
+import { TAGS } from './fitness-theme.mjs';
 
 export const PAGE_SIZE = 60;
 
@@ -98,7 +98,7 @@ export function buildSessionPages(index, files = [], opts = {}) {
   /** @type {Map<string, number>} */
   const counts = new Map();
   for (const c of cards) counts.set(c.typeKey, (counts.get(c.typeKey) || 0) + 1);
-  const familyKeys = /** @type {(keyof typeof FAMILIES)[]} */ (Object.keys(FAMILIES)).filter((k) => counts.has(k));
+  const familyKeys = /** @type {(keyof typeof TAGS)[]} */ (Object.keys(TAGS)).filter((k) => counts.has(k));
   const filterList = ['all', ...familyKeys];
 
   const pages = [];
@@ -129,7 +129,7 @@ export function buildSessionPages(index, files = [], opts = {}) {
             key: c._month, title: c._monthTitle, year: c._year,
             countLabel: `${st.n} session${st.n === 1 ? '' : 's'}`,
             stats: [duration(st.dur), st.dist > 500 ? `${km(st.dist)} km` : ''].filter(Boolean).join(' · '),
-            stack: [...st.fam.entries()].sort((a, b) => b[1] - a[1]).map(([k, v]) => ({ typeClass: `fit-type--${k}`, pct: Math.round((v / st.n) * 1000) / 10, label: FAMILIES[/** @type {keyof typeof FAMILIES} */ (k)]?.label || k, n: v })),
+            stack: [...st.fam.entries()].sort((a, b) => b[1] - a[1]).map(([k, v]) => ({ typeClass: `fit-type--${k}`, pct: Math.round((v / st.n) * 1000) / 10, label: TAGS[/** @type {keyof typeof TAGS} */ (k)]?.label || k, n: v })),
             roundupHref: roundupKeys.has(roundupKey) ? `/life/roundup/${roundupKey}` : null,
             items: [],
           };
@@ -139,7 +139,7 @@ export function buildSessionPages(index, files = [], opts = {}) {
         m.items.push(card);
       }
       const href = sessionsHref(filter, n);
-      const label = filter === 'all' ? '' : FAMILIES[/** @type {keyof typeof FAMILIES} */ (filter)].label;
+      const label = filter === 'all' ? '' : TAGS[/** @type {keyof typeof TAGS} */ (filter)].label;
       pages.push({
         href,
         fitnessSessions: {
@@ -149,11 +149,13 @@ export function buildSessionPages(index, files = [], opts = {}) {
           shownLabel: `${list.length.toLocaleString('en-GB')} ${label ? `${label.toLowerCase()} ` : ''}session${list.length === 1 ? '' : 's'}`,
           months,
           filters: filterList.map((k) => ({
-            key: k, label: k === 'all' ? 'All' : FAMILIES[/** @type {keyof typeof FAMILIES} */ (k)].label,
+            key: k, label: k === 'all' ? 'All' : TAGS[/** @type {keyof typeof TAGS} */ (k)].label,
             count: k === 'all' ? cards.length : counts.get(k), href: sessionsHref(k, 1), current: k === filter,
             typeClass: k === 'all' ? '' : `fit-type--${k}`,
           })),
           hasFilters: familyKeys.length > 1,
+          // The key under the chips: every tag's colour and what goes in it.
+          legend: (/** @type {(keyof typeof TAGS)[]} */ (Object.keys(TAGS))).map((k) => ({ key: k, label: TAGS[k].label, note: TAGS[k].note, typeClass: `fit-type--${k}` })),
           page: n, pageCount, isFirst: n === 1,
           prevHref: n > 1 ? sessionsHref(filter, n - 1) : null,
           nextHref: n < pageCount ? sessionsHref(filter, n + 1) : null,

@@ -21,7 +21,7 @@
 import path from 'node:path';
 
 import { buildStory, storyContext } from './fitness-roundup-story.mjs';
-import { activityTheme } from './fitness-theme.mjs';
+import { TAGS, tagOf, tagTheme } from './fitness-theme.mjs';
 
 export const ROUNDUP_URL_BASE = '/life/roundup';
 export const ROUNDUPS_INDEX_URL = '/life/roundups';
@@ -38,26 +38,6 @@ const MONTHS = [
 ];
 const MONTHS_SHORT = MONTHS.map((m) => m.slice(0, 3).toUpperCase());
 const DOW_SHORT = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']; // Mon-first, as periods are
-
-/** Emoji per activity type — copied from fitglue-web utils/activityMeta.ts (contract says copy, not import). */
-export const ACTIVITY_TYPE_ICONS = /** @type {Record<string, string>} */ ({
-  ACTIVITY_TYPE_RUN: 'RUN', ACTIVITY_TYPE_TRAIL_RUN: 'TRL', ACTIVITY_TYPE_VIRTUAL_RUN: 'RUN',
-  ACTIVITY_TYPE_WALK: 'WLK', ACTIVITY_TYPE_HIKE: 'HIK', ACTIVITY_TYPE_RIDE: 'RDE',
-  ACTIVITY_TYPE_MOUNTAIN_BIKE_RIDE: 'MTB', ACTIVITY_TYPE_GRAVEL_RIDE: 'RDE',
-  ACTIVITY_TYPE_EBIKE_RIDE: 'RDE', ACTIVITY_TYPE_EMOUNTAIN_BIKE_RIDE: 'MTB',
-  ACTIVITY_TYPE_VIRTUAL_RIDE: 'RDE', ACTIVITY_TYPE_SWIM: 'SWM', ACTIVITY_TYPE_ROWING: 'ROW',
-  ACTIVITY_TYPE_VIRTUAL_ROW: 'ROW', ACTIVITY_TYPE_KAYAKING: 'PAD', ACTIVITY_TYPE_CANOEING: 'PAD',
-  ACTIVITY_TYPE_STAND_UP_PADDLING: 'SRF', ACTIVITY_TYPE_SURFING: 'SRF',
-  ACTIVITY_TYPE_WEIGHT_TRAINING: 'GYM', ACTIVITY_TYPE_CROSSFIT: 'GYM',
-  ACTIVITY_TYPE_HIGH_INTENSITY_INTERVAL_TRAINING: 'HIT', ACTIVITY_TYPE_YOGA: 'YOG',
-  ACTIVITY_TYPE_PILATES: 'YOG', ACTIVITY_TYPE_ELLIPTICAL: 'ELL', ACTIVITY_TYPE_STAIR_STEPPER: 'STR',
-  ACTIVITY_TYPE_ALPINE_SKI: 'SKI', ACTIVITY_TYPE_NORDIC_SKI: 'SKI', ACTIVITY_TYPE_BACKCOUNTRY_SKI: 'SKI',
-  ACTIVITY_TYPE_SNOWBOARD: 'SNO', ACTIVITY_TYPE_SNOWSHOE: 'HIK', ACTIVITY_TYPE_ROCK_CLIMBING: 'CLM',
-  ACTIVITY_TYPE_GOLF: 'GLF', ACTIVITY_TYPE_TENNIS: 'RKT', ACTIVITY_TYPE_BADMINTON: 'BAD',
-  ACTIVITY_TYPE_TABLE_TENNIS: 'TT', ACTIVITY_TYPE_SOCCER: 'FTB', ACTIVITY_TYPE_PICKLEBALL: 'TT',
-  ACTIVITY_TYPE_SQUASH: 'RKT', ACTIVITY_TYPE_RACQUETBALL: 'RKT', ACTIVITY_TYPE_SAIL: 'SAL',
-  ACTIVITY_TYPE_WINDSURF: 'KIT', ACTIVITY_TYPE_KITESURF: 'KIT', ACTIVITY_TYPE_WORKOUT: 'RUN',
-});
 
 const STRENGTH_SUFFIXES = ['_1rm', '_set_volume', '_volume', '_reps'];
 const PR_METRIC_ORDER = ['1RM', 'SET VOLUME', 'VOLUME', 'REPS'];
@@ -247,7 +227,7 @@ export function fmtWeight(kg) {
   return { value: String(Math.round(kg)), unit: 'kg' };
 }
 
-/** `ACTIVITY_TYPE_WEIGHT_TRAINING` → `Weight Training` */
+/** `SOURCE_PARKRUN_RESULTS` → `Parkrun Results` */
 export function enumLabel(value, prefix) {
   const s = String(value || '').replace(prefix, '').toLowerCase().replace(/_/g, ' ');
   return s.replace(/\b\w/g, (c) => c.toUpperCase());
@@ -532,13 +512,44 @@ export function buildRoundupLife(period, labels) {
   return blocks.length ? { blocks, count: blocks.length } : null;
 }
 
+/**
+ * A period's sessions per site tag, most first: from the activities in the period when the
+ * build has them (each already tagged), else from the export's per-type breakdown with each
+ * type run through the same tag fallback.
+ * @param {any} r  the roundup
+ * @param {any[]} [entries]  index entries (fitnessIndex.activities)
+ * @returns {{ tag: import('./fitness-theme.mjs').Tag, count: number, dist: number, secs: number, sets: number, kg: number }[]}
+ */
+export function tagBreakdown(r, entries = []) {
+  const start = Date.parse(r?.periodStart || '');
+  const end = Date.parse(r?.periodEnd || '');
+  /** @type {Map<string, { tag: any, count: number, dist: number, secs: number, sets: number, kg: number }>} */
+  const rows = new Map();
+  const add = (/** @type {any} */ tag, /** @type {number} */ count, /** @type {any} */ x) => {
+    const row = rows.get(tag) || { tag, count: 0, dist: 0, secs: 0, sets: 0, kg: 0 };
+    row.count += count;
+    row.dist += num(x.distanceMeters ?? x.totalDistanceMeters);
+    row.secs += num(x.durationSeconds ?? x.totalDurationSeconds);
+    row.sets += num(x.totalSets);
+    row.kg += num(x.totalWeightKg);
+    rows.set(tag, row);
+  };
+  const inPeriod = Number.isFinite(start) && Number.isFinite(end)
+    ? (Array.isArray(entries) ? entries : []).filter((e) => { const t = Date.parse(e?.startTime || ''); return t >= start && t < end; })
+    : [];
+  if (inPeriod.length) for (const e of inPeriod) add(tagOf(e).tag, 1, e);
+  else for (const b of r?.activityTypeBreakdowns || []) if (b) add(tagOf({ activityType: b.activityType, distanceMeters: num(b.totalDistanceMeters) }).tag, num(b.activityCount), b);
+  const order = Object.keys(TAGS);
+  return [...rows.values()].filter((x) => x.count > 0).sort((a, b) => b.count - a.count || order.indexOf(a.tag) - order.indexOf(b.tag));
+}
+
 // ---------------------------------------------------------------------------
 // View models
 
 /**
  * Everything `personal/templates/roundup.html` renders, as plain data.
  * @param {{ key: string, previousKey?: string, roundup: any }} file
- * @param {{ byKey: Map<string, any>, neighbours: Map<string, any>, activitySlugs: Set<string>, showPhotoGallery: boolean, lifePeriods?: Record<string, any>, story?: ReturnType<typeof storyContext> }} ctx
+ * @param {{ byKey: Map<string, any>, neighbours: Map<string, any>, activitySlugs: Set<string>, showPhotoGallery: boolean, lifePeriods?: Record<string, any>, entries?: any[], story?: ReturnType<typeof storyContext> }} ctx
  *   `story`: the shared highlights context (tasks/fitness-roundup-story.mjs); without it the page has no story blocks
  */
 export function buildRoundupView(file, ctx) {
@@ -576,22 +587,21 @@ export function buildRoundupView(file, ctx) {
     ? { label: periodLabels(nb.comparison, prevFile.roundup).short, href: keyToUrl(nb.comparison), deltas: buildDeltas(r, prevFile.roundup || {}) }
     : null;
 
-  // --- sport breakdown
-  const breakdownsRaw = [...(r.activityTypeBreakdowns || [])].filter(Boolean).sort((a, b) => num(b.activityCount) - num(a.activityCount));
-  const sessionTotal = breakdownsRaw.reduce((s, b) => s + num(b.activityCount), 0);
-  const distanceTotal = breakdownsRaw.reduce((s, b) => s + num(b.totalDistanceMeters), 0);
-  const breakdown = breakdownsRaw.map((b, i) => {
-    const count = num(b.activityCount);
-    const dist = num(b.totalDistanceMeters);
-    const w = num(b.totalWeightKg);
+  // --- sport breakdown, by the site's tags (fitness-theme.mjs)
+  const tagRows = tagBreakdown(r, ctx.entries);
+  const sessionTotal = tagRows.reduce((s, b) => s + b.count, 0);
+  const distanceTotal = tagRows.reduce((s, b) => s + b.dist, 0);
+  const breakdown = tagRows.map((b, i) => {
+    const { count, dist, kg: w } = b;
     const stats = [];
     if (dist > 500) stats.push(`${fmtKm(dist)} km`);
-    if (num(b.totalDurationSeconds) > 0) stats.push(fmtDuration(num(b.totalDurationSeconds)));
-    if (num(b.totalSets) > 0) stats.push(`${num(b.totalSets)} sets`);
+    if (b.secs > 0) stats.push(fmtDuration(b.secs));
+    if (b.sets > 0) stats.push(`${b.sets} sets`);
     if (w > 0) { const fw = fmtWeight(w); stats.push(`${fw.value}${fw.unit} moved`); }
+    const theme = tagTheme(b.tag);
     return {
-      ...activityTheme(b.activityType),
-      ink: i % 6, glyph: ACTIVITY_TYPE_ICONS[b.activityType] || '★', label: enumLabel(b.activityType, 'ACTIVITY_TYPE_'),
+      ...theme,
+      ink: i % 6, glyph: theme.tagGlyph, label: theme.tagLabel,
       count, pct: sessionTotal ? Math.round((count / sessionTotal) * 100) : 0,
       share: sessionTotal ? (count / sessionTotal) * 100 : 0,
       distShare: distanceTotal ? (dist / distanceTotal) * 100 : 0,
@@ -771,6 +781,7 @@ export function fitnessRoundupViewsTask() {
         activitySlugs,
         showPhotoGallery: Boolean(index.profile?.showPhotoGallery),
         lifePeriods: g.lifePeriods || {},
+        entries: Array.isArray(index.activities) ? index.activities : [],
         // Highlights: every activity file, the index, and the calendar's past Fitness Events (Jarvis).
         story: storyContext({
           files: Array.isArray(g.fitnessActivities) ? g.fitnessActivities : [],

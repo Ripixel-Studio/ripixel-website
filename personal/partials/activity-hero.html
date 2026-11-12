@@ -17,6 +17,7 @@
   <div class="act-hero__body">
     <div class="act-hero__stamps">
       <span class="stamp act-stamp act-stamp--type">{{typeLabel}}</span>
+      {{#if isRace}}<span class="stamp act-stamp fit-race">Race</span>{{/if}}
       {{#if race.divisionLabel}}<span class="stamp act-stamp act-stamp--division">{{race.divisionLabel}}</span>{{/if}}
       {{#if source}}<span class="stamp act-stamp act-stamp--source">via {{source}}</span>{{/if}}
       {{#if dateStamp}}<span class="stamp act-stamp act-stamp--date">{{dateStamp}}</span>{{/if}}
