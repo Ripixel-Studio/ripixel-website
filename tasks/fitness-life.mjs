@@ -18,7 +18,7 @@
  * "Data contract (S0)" §2, §6 and §8.
  */
 import fs from 'node:fs/promises';
-import { activityTheme, FAMILIES, hybridRaceLabel, typeKeyOf } from './fitness-theme.mjs';
+import { TAGS, themeOf, tagOf } from './fitness-theme.mjs';
 import {
   TZ, WEEK_DAYS, NEXT_UP_COUNT, DAY_MS, parse, fmt, ymd, dayStamp, rangeLabel, countdown, weekMonday, weekKicker,
   calendarModel, renderCalendar, clientScript, publicEvent,
@@ -94,13 +94,8 @@ function monthYear(d) {
   return fmt(d, { month: 'short', year: 'numeric' }).toUpperCase();
 }
 
-/** `ACTIVITY_TYPE_WEIGHT_TRAINING` → `WEIGHT TRAINING` @param {string|undefined} t */
-export function typeLabel(t) {
-  return String(t || '').replace(/^ACTIVITY_TYPE_/, '').replace(/_/g, ' ') || 'ACTIVITY';
-}
-
 /**
- * What I do, from what I have actually done: the activity types with at least `min`
+ * What I do, from what I have actually done: the activity tags with at least `min`
  * sessions in the last `days`, most sessions first, at most 5, as title-cased labels.
  * Replaces FitGlue's hand-set `profile.subtitle`, which went stale.
  * @param {any[]} activities index entries ({activityType, startTime})
@@ -115,7 +110,7 @@ export function whatIDo(activities, now, days = 90, min = 2) {
   for (const e of Array.isArray(activities) ? activities : []) {
     const t = Date.parse(e?.startTime);
     if (!Number.isFinite(t) || t < from || t > now.getTime()) continue;
-    const label = typeLabel(e.activityType).toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+    const label = TAGS[tagOf(e).tag].label;
     counts.set(label, (counts.get(label) || 0) + 1);
   }
   return [...counts].filter(([, n]) => n >= min).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 5).map(([l]) => l);
@@ -127,34 +122,17 @@ export function sourceLabel(s) {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-const DISTANCE_TYPES = new Set([
-  'RUN', 'TRAIL_RUN', 'VIRTUAL_RUN', 'RIDE', 'GRAVEL_RIDE', 'MOUNTAIN_BIKE_RIDE', 'EMOUNTAIN_BIKE_RIDE',
-  'EBIKE_RIDE', 'VIRTUAL_RIDE', 'HANDCYCLE', 'VELOMOBILE', 'ROLLER_SKI', 'NORDIC_SKI', 'BACKCOUNTRY_SKI',
-  'ALPINE_SKI', 'SNOWSHOE', 'ICE_SKATE', 'INLINE_SKATE', 'WALK', 'HIKE', 'WHEELCHAIR', 'KAYAKING',
-  'CANOEING', 'ROWING', 'VIRTUAL_ROW', 'STAND_UP_PADDLING', 'SWIM', 'WINDSURF', 'KITESURF', 'SAIL',
-  'SURFING', 'SKATEBOARD',
-]);
-
 /**
- * Card family + glyph for an index entry (§8 "three metrics by family").
+ * Which three metrics a card shows (§8 "three metrics by family"), from the activity's tag:
+ * distance for runs, rides and walks, sets and weight for strength, time for the rest.
  * @param {any} e
- * @returns {{ family: 'distance'|'strength'|'other', glyph: string }}
+ * @returns {'distance'|'strength'|'other'}
  */
-export function familyOf(e) {
-  const t = String(e.activityType || '').replace(/^ACTIVITY_TYPE_/, '');
-  if ((e.totalSets || 0) > 0 || t === 'WEIGHT_TRAINING') return { family: 'strength', glyph: 'GYM' };
-  if (/RUN$/.test(t)) return { family: 'distance', glyph: 'RUN' };
-  if (/RIDE$|CYCLE$/.test(t)) return { family: 'distance', glyph: 'RDE' };
-  if (t === 'WALK' || t === 'HIKE' || t === 'SNOWSHOE') return { family: 'distance', glyph: 'WLK' };
-  if (t === 'SWIM') return { family: 'distance', glyph: 'SWM' };
-  if (/ROW|KAYAK|CANOE|PADDL|SAIL|SURF/.test(t)) return { family: 'distance', glyph: 'ROW' };
-  if (/SKI|SKATE/.test(t)) return { family: 'distance', glyph: 'SKI' };
-  if (DISTANCE_TYPES.has(t)) return { family: 'distance', glyph: 'RUN' };
-  if (t === 'YOGA' || t === 'PILATES') return { family: 'other', glyph: 'YOG' };
-  if (/TENNIS|BADMINTON|PICKLEBALL|RACQUETBALL|SQUASH|SOCCER|GOLF|CLIMBING/.test(t)) {
-    return { family: 'other', glyph: '★' };
-  }
-  return { family: 'other', glyph: 'HIT' };
+export function metricFamilyOf(e) {
+  const { tag } = tagOf(e);
+  if (tag === 'run' || tag === 'ride' || tag === 'walk') return 'distance';
+  if (tag === 'strength' || (Number(e?.totalSets) || 0) > 1) return 'strength';
+  return 'other';
 }
 
 // ---------------------------------------------------------------------------
@@ -253,7 +231,7 @@ export function dominantTypes(index) {
     const key = ymd(t);
     const secs = Number(e.durationSeconds) || 0;
     const cur = best.get(key);
-    if (!cur || secs > cur.secs) best.set(key, { typeKey: typeKeyOf(e.activityType), secs });
+    if (!cur || secs > cur.secs) best.set(key, { typeKey: tagOf(e).tag, secs });
   }
   return new Map([...best].map(([k, v]) => [k, v.typeKey]));
 }
@@ -401,8 +379,8 @@ function keyStatOf(family, stats) {
 
 /** @param {any} e index entry @param {any} [file] full activity file (for the route) */
 export function buildCard(e, file) {
-  const { family, glyph } = familyOf(e);
-  const theme = activityTheme(e.activityType);
+  const family = metricFamilyOf(e);
+  const theme = themeOf(e);
   const start = parse(e.startTime);
   /** @type {{value: string, unit: string, label: string}[]} */
   const stats = [];
@@ -432,17 +410,16 @@ export function buildCard(e, file) {
     push(bpm > 0, String(bpm), 'bpm', 'avg hr');
   }
   const thumb = httpsUrl(e.routeThumbnailUrl);
-  const typeText = hybridRaceLabel(e.title) || typeLabel(e.activityType);
   return {
     slug: e.slug,
     href: `${ACTIVITY_HREF}/${encodeURIComponent(e.slug)}`,
     title: e.title || 'Untitled activity',
     date: start ? dayStamp(start) : '',
     dateTime: start ? start.toISOString() : '',
-    typeLabel: typeText,
+    typeLabel: theme.tagLabel.toUpperCase(),
     ...theme,
     source: sourceLabel(e.source),
-    glyph,
+    glyph: theme.tagGlyph,
     family,
     stats,
     keyStat: keyStatOf(family, stats),
@@ -450,7 +427,7 @@ export function buildCard(e, file) {
     thumb,
     hasThumb: Boolean(thumb),
     ...cardPicture(e, file),
-    pictureWord: typeText.split(' ').slice(0, 2).join(' '),
+    pictureWord: theme.tagLabel,
     location: typeof e.locationName === 'string' ? e.locationName : '',
   };
 }
@@ -600,7 +577,7 @@ export function buildPbBoard(prs, hyrox = []) {
     { key: 'run', title: 'on foot', typeClass: 'fit-type--run', tiles: pick('run', RUN_PBS) },
     { key: 'ride', title: 'on the bike', typeClass: 'fit-type--ride', tiles: pick('ride', RIDE_PBS) },
     ...hyrox.filter((h) => h.total || h.stations.length).map((h) => ({
-      key: `hyrox-${h.key}`, title: `hyrox · ${h.label}`, typeClass: 'fit-type--crossfit', tiles: [], hyrox: h,
+      key: `hyrox-${h.key}`, title: `hyrox · ${h.label}`, typeClass: 'fit-type--hyrox', tiles: [], hyrox: h,
     })),
     { key: 'iron', title: 'iron · heaviest lift & est. 1RM', typeClass: 'fit-type--strength', tiles: iron },
   ].filter((g) => g.tiles.length > 0 || g.hyrox);
@@ -733,10 +710,10 @@ export function handwrittenEvents(handwritten) {
  * @param {any} e
  */
 export function doneEntry(e) {
-  const theme = activityTheme(e.activityType);
+  const theme = themeOf(e);
   return {
     start: e.startTime,
-    title: e.title || typeLabel(e.activityType),
+    title: e.title || theme.tagLabel,
     href: `${ACTIVITY_HREF}/${encodeURIComponent(e.slug)}`,
     typeClass: theme.typeClass,
     typeKey: theme.typeKey,

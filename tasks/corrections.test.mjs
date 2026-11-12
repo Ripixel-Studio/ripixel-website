@@ -86,7 +86,7 @@ describe('corrections', () => {
     assert.equal(got[0], 'Run');
     assert.ok(!got.includes('Yoga'), 'old yoga is gone');
     assert.ok(!got.includes('Swim'), 'one session is under the minimum');
-    assert.deepEqual(got, ['Run', 'Weight Training']);
+    assert.deepEqual(got, ['Run', 'Strength']);
     assert.deepEqual(whatIDo([], now), []);
     assert.ok(whatIDo(Array.from({ length: 8 }, (_, k) => Array.from({ length: 2 }, (_, i) => ({ activityType: `ACTIVITY_TYPE_T${k}`, startTime: at(i + 1) }))).flat(), now).length <= 5);
   });

@@ -58,7 +58,7 @@ function data() {
         { recordType: 'fastest_1k', newValue: 230, unit: 'seconds' }, // first ever: not a PB
       ] } },
     }),
-    act('tennis-2026-08-01', '2026-08-01T10:00:00Z', 'TENNIS', { title: 'Tennis with friends' }),
+    act('yoga-2026-08-01', '2026-08-01T10:00:00Z', 'YOGA', { title: 'Hotpod Yoga' }),
   );
   const past = [
     { calendar: 'events', title: 'Yorkshire Marathon', start: '2026-10-18T09:30:00+01:00', kind: 'race' },
@@ -135,9 +135,9 @@ describe('roundup highlights', () => {
   });
 
   test('a first: the first session of a kind never done before', () => {
-    const m = byId.get('tennis-2026-08-01');
+    const m = byId.get('yoga-2026-08-01');
     assert.equal(m.stamp, 'FIRST');
-    assert.match(m.title, /first tennis/i);
+    assert.match(m.title, /first yoga/i);
   });
 
   test('a calendar one-off with no activity still shows, quietly', () => {

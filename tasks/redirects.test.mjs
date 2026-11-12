@@ -11,7 +11,15 @@ const firebase = JSON.parse(await fs.readFile(path.join(REPO, 'firebase.json'), 
 
 test('personal target redirects /profile to /work with a 301', () => {
   const personal = firebase.hosting.find((/** @type {any} */ h) => h.target === 'personal');
-  assert.deepEqual(personal.redirects, [{ source: '/profile', destination: '/work', type: 301 }]);
+  assert.deepEqual(personal.redirects[0], { source: '/profile', destination: '/work', type: 301 });
+});
+
+test('the old /life/sessions family filters land on their tag (one tag system)', () => {
+  const personal = firebase.hosting.find((/** @type {any} */ h) => h.target === 'personal');
+  const to = (/** @type {string} */ src) => personal.redirects.find((/** @type {any} */ r) => r.source === src)?.destination;
+  assert.equal(to('/life/sessions/crossfit'), '/life/sessions/hyrox');
+  assert.equal(to('/life/sessions/hiit/:page'), '/life/sessions/class');
+  assert.equal(to('/life/sessions/hike'), '/life/sessions/walk');
 });
 
 test('corporate target has no /profile redirect', () => {

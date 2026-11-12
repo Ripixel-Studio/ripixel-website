@@ -3,7 +3,7 @@
   {{> fitness-picture}}
   <div class="fit-card__inner">
     <div class="fit-card__top">
-      <span class="fit-chip fit-card__type">{{typeLabel}}</span>
+      <span class="fit-chip fit-card__type">{{typeLabel}}</span>{{#if isRace}}<span class="fit-chip fit-race">Race</span>{{/if}}
       <time class="fit-card__date" datetime="{{dateTime}}">{{date}}</time>
     </div>
     <h3 class="fit-card__title">{{title}}</h3>

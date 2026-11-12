@@ -36,6 +36,7 @@
  *   fitnessUnavailable  boolean
  *   fitnessSource       'live' | 'cache' | 'fixtures' | 'none'
  */
+import { stampTag } from './fitness-theme.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
@@ -496,8 +497,12 @@ export function assemble(raw) {
   const activities = [];
   for (const entry of index.activities) {
     const file = entry && activityFiles.get(entry.slug);
-    if (!file) continue;
-    activities.push({ ...file, indexEntry: entry });
+    if (!file) {
+      if (entry && typeof entry === 'object') stampTag(entry);
+      continue;
+    }
+    // The site's one tag per activity (fitness-theme.mjs): decided here, read everywhere.
+    activities.push(stampTag({ ...file, indexEntry: entry }));
   }
   activities.sort(
     (a, b) =>

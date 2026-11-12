@@ -8,7 +8,7 @@ import fs from 'node:fs/promises';
 import vm from 'node:vm';
 
 import {
-  countdown, weekKicker, typeKeyOfTitle, calendarModel, renderCalendar, weekMonday, ymd, clientScript, esc,
+  countdown, weekKicker, tagOfTitle, calendarModel, renderCalendar, weekMonday, ymd, clientScript, esc,
 } from './life-clock.mjs';
 
 const SOURCE = await fs.readFile(new URL('./life-clock.mjs', import.meta.url), 'utf8');
@@ -48,10 +48,16 @@ describe('pure clock', () => {
     assert.equal(ymd(weekMonday(MON)), '2026-10-26');
   });
 
-  test('typeKeyOfTitle', () => {
-    assert.equal(typeKeyOfTitle('Hyrox Class'), 'crossfit');
-    assert.equal(typeKeyOfTitle('Spin'), 'ride');
-    assert.equal(typeKeyOfTitle('Book club'), 'other');
+  test('tagOfTitle: a calendar title guesses one of the ten site tags', () => {
+    assert.equal(tagOfTitle('Hyrox Class'), 'hyrox');
+    assert.equal(tagOfTitle('Spin'), 'spin');
+    assert.equal(tagOfTitle('Hybrid Spinning Class'), 'spin');
+    assert.equal(tagOfTitle('Tower Pilates'), 'pilates');
+    assert.equal(tagOfTitle('Hotpod Yoga'), 'yoga');
+    assert.equal(tagOfTitle('Bootcamp'), 'class');
+    assert.equal(tagOfTitle('Lower Body PT'), 'strength');
+    assert.equal(tagOfTitle('Newark parkrun'), 'run');
+    assert.equal(tagOfTitle('Book club'), 'other');
   });
 
   test('esc', () => {

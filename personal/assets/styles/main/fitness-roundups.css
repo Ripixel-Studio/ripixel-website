@@ -844,6 +844,17 @@ a.rl-yrmonth__box { --card-lift: 6px 7px 0 var(--ink); }
 .ss-filter[aria-current='page'] span { opacity: 0.85; }
 .ss-filter:focus-visible { outline: 3px solid var(--ink-blue); outline-offset: 2px; }
 
+/* The key: every tag's ink and what goes in it, then the Race badge. A printed legend,
+   not a control, so it sits quiet under the chips. */
+.ss-key { margin: -8px 0 28px; padding: 12px 14px; border: 1.5px solid var(--ink); background: #fff; }
+.ss-key__tags { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px 16px; }
+.ss-key__tag { display: grid; grid-template-columns: 14px minmax(0, 1fr); column-gap: 7px; align-items: baseline; align-content: start; font-size: 12px; line-height: 1.3; }
+.ss-key__tag i { grid-row: span 2; align-self: start; margin-top: 2px; width: 14px; height: 14px; background: var(--type); border: 1.5px solid var(--ink); }
+.ss-key__tag b { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--type-text); }
+.ss-key__tag span { opacity: 0.75; }
+.ss-key__race { margin: 12px 0 0; padding-top: 10px; border-top: 1.5px dashed color-mix(in srgb, var(--ink) 35%, transparent); font-size: 13px; }
+.ss-key__race .fit-chip { margin-right: 6px; }
+
 .ss-month { margin-bottom: 40px; }
 .ss-month__head {
   display: grid;
@@ -964,6 +975,7 @@ a.rl-yrmonth__box { --card-lift: 6px 7px 0 var(--ink); }
 @media (max-width: 720px) {
   .fit-hero--sessions .fit-hero__h1 { font-size: 72px; }
   .ss-month__head { grid-template-columns: minmax(0, 1fr); }
+  .ss-key__tags { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 480px) {
   .ss-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -975,4 +987,5 @@ a.rl-yrmonth__box { --card-lift: 6px 7px 0 var(--ink); }
   .ss-card__stat { display: none; }
   .ss-filters { gap: 6px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-left: -16px; margin-right: -16px; padding: 8px 16px; }
   .ss-filter { flex: 0 0 auto; font-size: 11px; padding: 4px 8px; }
+  .ss-key__tags { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

@@ -61,8 +61,8 @@ describe('theme', () => {
   });
   test('lighten mixes toward white; the photo theme lightens the ink for text, the ink theme uses --type-on', () => {
     assert.equal(lighten('#000000', 0.5), '#808080');
-    assert.equal(cardTheme('photo', TYPE_INKS.yoga).accent, lighten('#7C3AED', 0.3));
-    assert.equal(cardTheme('ink', TYPE_INKS.crossfit).fg, '#171311');
+    assert.equal(cardTheme('photo', TYPE_INKS.pilates).accent, lighten('#7C3AED', 0.3));
+    assert.equal(cardTheme('ink', TYPE_INKS.hyrox).fg, '#171311');
     assert.equal(cardTheme('ink', TYPE_INKS.run).fg, '#F5EFDF', 'white --type-on reads as paper');
   });
 });
@@ -209,8 +209,8 @@ describe('drawing', () => {
   test('every template draws in every shape and look, escaped, at the shape\'s size', async () => {
     const data = await fixtures();
     const jobs = cardJobs({ ...data, now: NOW });
-    const race = { template: 'race', kind: 'activity', id: 'r', ink: TYPE_INKS.crossfit, pill: 'HYROX', kicker: 'HYROX · <Open>', title: 'Hyrox & Friends', dateLine: 'WED', total: '1:29:42', badge: { kind: 'pb', text: 'New PB · was 1:30:00' }, ranks: [{ value: '#1', label: 'overall' }], runs: '43:10', stations: '39:16', roxzone: '7:24', avgHr: 168, rows: Array.from({ length: 16 }, (_, i) => ({ key: i % 2 ? 'skierg' : `run_${i / 2 + 1}`, label: i % 2 ? 'SkiErg' : `Run ${i / 2 + 1}`, isRun: !(i % 2), seconds: 300 + i, duration: '5:00', avgHr: 160 + i, delta: i ? '+0:01' : '', deltaTone: 'loss', isPB: i === 3 })) };
-    const event = { template: 'event', kind: 'event', id: 'e', ink: TYPE_INKS.crossfit, pill: 'RACE WEEKEND', kicker: 'RACE WEEKEND', title: 'Hyrox Birmingham', raceCount: 2, totalTime: '2:45:11', pbCount: 0, divisionCount: 2, races: [{ date: '27 Oct', division: 'Doubles', total: '1:15:29', badge: { kind: 'gap', tone: 'loss', text: '+2:55 vs PB 1:12:34' }, ranks: [], partner: 'Stephen', avgHr: '167' }, { date: '28 Oct', division: 'Solo', total: '1:29:42', badge: { kind: '', text: '' }, ranks: [{ value: '#270', label: 'overall' }], partner: '', avgHr: '' }] };
+    const race = { template: 'race', kind: 'activity', id: 'r', ink: TYPE_INKS.hyrox, pill: 'HYROX', kicker: 'HYROX · <Open>', title: 'Hyrox & Friends', dateLine: 'WED', total: '1:29:42', badge: { kind: 'pb', text: 'New PB · was 1:30:00' }, ranks: [{ value: '#1', label: 'overall' }], runs: '43:10', stations: '39:16', roxzone: '7:24', avgHr: 168, rows: Array.from({ length: 16 }, (_, i) => ({ key: i % 2 ? 'skierg' : `run_${i / 2 + 1}`, label: i % 2 ? 'SkiErg' : `Run ${i / 2 + 1}`, isRun: !(i % 2), seconds: 300 + i, duration: '5:00', avgHr: 160 + i, delta: i ? '+0:01' : '', deltaTone: 'loss', isPB: i === 3 })) };
+    const event = { template: 'event', kind: 'event', id: 'e', ink: TYPE_INKS.hyrox, pill: 'RACE WEEKEND', kicker: 'RACE WEEKEND', title: 'Hyrox Birmingham', raceCount: 2, totalTime: '2:45:11', pbCount: 0, divisionCount: 2, races: [{ date: '27 Oct', division: 'Doubles', total: '1:15:29', badge: { kind: 'gap', tone: 'loss', text: '+2:55 vs PB 1:12:34' }, ranks: [], partner: 'Stephen', avgHr: '167' }, { date: '28 Oct', division: 'Solo', total: '1:29:42', badge: { kind: '', text: '' }, ranks: [{ value: '#270', label: 'overall' }], partner: '', avgHr: '' }] };
     const models = [...jobs.map((j) => j.model), race, event];
     for (const m of models) {
       for (const shape of SHAPE_ORDER) {

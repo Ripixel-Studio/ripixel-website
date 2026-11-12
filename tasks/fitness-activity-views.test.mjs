@@ -20,8 +20,6 @@ import {
   fmtWeight,
   fmtNumber,
   fmtDateStamp,
-  typeLabel,
-  typeIcon,
   sourceLabel,
   descriptionPreamble,
   sanitizeAiHtml,
@@ -101,10 +99,6 @@ describe('unit formatting', () => {
     assert.equal(fmtDateStamp('nope'), '');
   });
   test('enum labels', () => {
-    assert.equal(typeLabel('ACTIVITY_TYPE_TRAIL_RUN'), 'TRAIL RUN');
-    assert.equal(typeLabel(undefined), 'ACTIVITY');
-    assert.equal(typeIcon('ACTIVITY_TYPE_RIDE'), 'RDE');
-    assert.equal(typeIcon('ACTIVITY_TYPE_SOMETHING_NEW'), '★');
     assert.equal(sourceLabel('SOURCE_PARKRUN_RESULTS'), 'Parkrun Results');
     assert.equal(sourceLabel('SOURCE_FILE_UPLOAD'), 'FIT Upload');
     assert.equal(sourceLabel(''), '');
@@ -484,7 +478,6 @@ describe('task', () => {
 
 describe('calories, the type chip and the type ink (F5.5)', async () => {
   const { calorieFigure, foodComparison } = await import('./fitness-calories.mjs');
-  const { hybridRaceLabel } = await import('./fitness-theme.mjs');
   test("the platform's calories over FitGlue's estimate", () => {
     const solo = { activityData: { sessions: [{ totalCalories: 1346 }] }, enrichments: { calories: { kcal: 523, comparisonText: '≈ 1.8 slice of pizza 🍕' } } };
     assert.deepEqual(calorieFigure(solo), { kcal: 1346, source: 'platform' });
@@ -495,10 +488,11 @@ describe('calories, the type chip and the type ink (F5.5)', async () => {
     assert.equal(foodComparison(1346), '≈ 4.7 slice of pizza');
     assert.equal(foodComparison(40), '');
   });
-  test('Hyrox races are labelled Hyrox, not CROSSFIT', () => {
-    assert.equal(hybridRaceLabel("Hyrox Birmingham - Open Men's Solo"), 'HYROX');
-    assert.equal(hybridRaceLabel('Morning WOD'), '');
-    assert.equal(hybridRaceLabel('Race', { hasRace: true }), 'HYROX', 'a race breakdown is a Hyrox race');
+  test('Hyrox races are labelled Hyrox, not CROSSFIT, with the Race marker', () => {
+    const v = buildActivityView({ slug: 'h', activity: { title: "Hyrox Birmingham - Open Men's Solo", activityType: 'ACTIVITY_TYPE_CROSSFIT', startTime: '2026-10-28T08:00:00Z' }, entry: {}, race: { raceType: 'hyrox', isSimulation: false, segments: [] } }, {});
+    assert.equal(v.act.typeLabel, 'HYROX');
+    assert.equal(v.act.typeClass, 'fit-type--hyrox');
+    assert.equal(v.act.isRace, true);
   });
   test('a run filed as a workout (one running set in Hevy) is stamped and inked as a run', () => {
     const sets = [{ exerciseName: 'Running', reps: 0, weightKg: 0, durationSeconds: 18751, distanceMeters: 42726 }];

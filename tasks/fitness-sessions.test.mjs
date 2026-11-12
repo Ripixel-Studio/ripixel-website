@@ -43,7 +43,7 @@ describe('/life/sessions', () => {
     assert.equal(runs[0].fitnessSessions.href, '/life/sessions/run');
     assert.ok(runs.flatMap((p) => p.fitnessSessions.months.flatMap((m) => m.items)).every((c) => c.typeKey === 'run'));
     assert.deepEqual(all[0].fitnessSessions.filters.map((f) => [f.key, f.href, f.current]), [
-      ['all', '/life/sessions', true], ['run', '/life/sessions/run', false], ['yoga', '/life/sessions/yoga', false],
+      ['all', '/life/sessions', true], ['run', '/life/sessions/run', false], ['pilates', '/life/sessions/pilates', false],
     ]);
   });
 

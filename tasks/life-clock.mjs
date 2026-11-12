@@ -110,17 +110,24 @@ export function weekKicker(start, end, now) {
 // ---------------------------------------------------------------------------
 // The calendar section's model
 
-/** A calendar title → the type family its colour comes from. @param {unknown} title */
-export function typeKeyOfTitle(title) {
+/**
+ * A title → one of the site's ten activity tags (tasks/fitness-theme.mjs): the guess for a
+ * calendar entry with no activity behind it yet, and the title hint the activity fallback
+ * uses. Same keys as the activity tags, so a planned class and the class it becomes match.
+ * @param {unknown} title
+ * @returns {'run'|'ride'|'spin'|'hyrox'|'class'|'strength'|'pilates'|'yoga'|'walk'|'other'}
+ */
+export function tagOfTitle(title) {
   const t = String(title || '').toLowerCase();
-  if (/hyrox|crossfit|hybrid/.test(t)) return 'crossfit';
-  if (/pilates|yoga|flexibility|stretch/.test(t)) return 'yoga';
-  if (/strength|\bpt\b|weights|gym|lift/.test(t)) return 'strength';
-  if (/\brun|parkrun|10k|5k|marathon/.test(t)) return 'run';
-  if (/ride|cycl|spin|sportive|bike/.test(t)) return 'ride';
-  if (/swim/.test(t)) return 'swim';
-  if (/hiit|erg|circuit/.test(t)) return 'hiit';
-  if (/walk|hike/.test(t)) return 'hike';
+  if (/\bspin(ning)?\b/.test(t)) return 'spin';
+  if (/hyrox|hybrid|\bathx\b|\bdeka\b/.test(t)) return 'hyrox';
+  if (/pilates|reformer/.test(t)) return 'pilates';
+  if (/yoga/.test(t)) return 'yoga';
+  if (/\brun\b|running|parkrun|park run|\b\d+k\b|marathon/.test(t)) return 'run';
+  if (/\bride\b|cycl|sportive|\bbike\b/.test(t)) return 'ride';
+  if (/bootcamp|crossfit|hiit|circuit|\berg|box ?fit|\bclass\b|conditioning|kettlebell/.test(t)) return 'class';
+  if (/strength|\bpt\b|weights|\bgym\b|\blift|press ups|\bcore\b/.test(t)) return 'strength';
+  if (/\bwalk|\bhike/.test(t)) return 'walk';
   return 'other';
 }
 
@@ -227,7 +234,7 @@ export function weekStrip(upcoming, done, now) {
           time: t.allDay ? '' : hm(t.start),
           kind: race ? (e.kind === 'race' ? 'race' : 'event') : (e.kind === 'class' ? 'class' : 'session'),
           isEvent: race,
-          typeClass: `fit-type--${typeKeyOfTitle(e.title)}`,
+          typeClass: `fit-type--${tagOfTitle(e.title)}`,
           location: publicLocation(e),
         };
       });
