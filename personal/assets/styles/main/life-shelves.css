@@ -287,6 +287,13 @@
 .book-years__y { position: absolute; top: calc(100% + 6px); left: 0; right: 0; text-align: center; font-family: var(--f-mono); font-size: 11px; font-weight: 700; }
 .book-years__h { position: absolute; top: calc(100% + 20px); left: 0; right: 0; text-align: center; font-family: var(--f-mono); font-size: 10px; opacity: 0.7; }
 .book-years + .watch-note, .book-years .watch-note { margin-top: 44px; }
+.book-years__short { display: none; }
+/* a shelf going back decades has too many bars for a whole year under each on a phone, or for its hours */
+@media (max-width: 640px) {
+  .book-years--many .book-years__full { display: none; }
+  .book-years--many .book-years__short { display: inline; }
+  .book-years--many .book-years__h { display: none; }
+}
 
 .ear-months {
   display: flex;
@@ -628,6 +635,20 @@
   transform: rotate(12deg);
 }
 .book-again__state { font-family: var(--f-scrib); font-size: 18px; line-height: 1.05; color: var(--ink-section); }
+
+/* ─── reading: read it, heard it (one book, every finish in order, a date-stamp each) ─── */
+.book-both { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 26px 28px; margin: 0 0 44px; padding: 0; list-style: none; }
+.book-both__item { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; align-items: start; }
+.book-both__item .book-face { transform: rotate(-1.5deg); box-shadow: 5px 5px 0 var(--ink-section), 9px 9px 0 var(--ink); }
+.book-both__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.book-both__by { font-family: var(--f-scrib); font-size: 17px; line-height: 1.05; color: var(--ink-section); }
+.book-both__times { position: relative; display: flex; flex-direction: column; gap: 6px; margin: 10px 0 0; padding: 0 0 0 14px; list-style: none; border-left: 2px dashed color-mix(in srgb, var(--ink) 45%, transparent); }
+.book-both__t { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-family: var(--f-mono); font-size: 11px; line-height: 1.3; }
+.book-both__t::before { content: ""; position: absolute; left: -20px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--paper-4); border: 2px solid var(--ink); }
+.book-both__t--print::before { background: var(--ink-section); }
+.book-both__t svg { flex: none; color: var(--ink-section); }
+.book-both__when { padding: 1px 6px; border: 1.5px solid var(--ink); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; transform: rotate(-1deg); }
+.book-both__how { color: color-mix(in srgb, var(--ink) 75%, transparent); }
 
 /* ─── reading: a bookmark still in (quiet: small covers, a ribbon each) ─── */
 .book-marks { display: flex; flex-wrap: wrap; gap: 16px 14px; margin: 0 0 44px; padding: 0; list-style: none; }
