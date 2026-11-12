@@ -2087,11 +2087,18 @@ a.hub-hero__route:hover .hub-hero__route-cta { background: var(--life-ink); colo
 .hub-session__stats span { font-family: var(--f-mono); font-size: 12px; font-weight: 700; }
 .hub-session .chart { margin-right: 6px; }
 
-/* the slim cards that end the grid share its last row; at two columns an odd card spans both */
+/* the wide grids: a brick wall placed by hubLayout (tasks/life-hub.mjs), every cell taken;
+   6 columns from 1001px, 12 from 1600px so a big screen shows more at once */
 @media (min-width: 1001px) {
-  .hub-card--sm.hub-card--wide3 { grid-column: span 3; }
-  .hub-card--sm.hub-card--wide6 { grid-column: span 6; }
+  .hub-grid .hub-card { grid-column: var(--x6) / span var(--w6); grid-row: var(--y6) / span var(--h6); align-self: stretch; }
 }
+@media (min-width: 1600px) {
+  .hub-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 26px 24px; }
+  .hub-grid .hub-card { grid-column: var(--x12) / span var(--w12); grid-row: var(--y12) / span var(--h12); }
+  .hub-card--lg .hub-card__name { font-size: 46px; }
+  .hub-card--lg .hub-card__caption { font-size: 24px; }
+}
+/* at two columns an odd card spans both */
 @media (max-width: 1000px) and (min-width: 641px) {
   .hub-card--solo { grid-column: span 2; }
 }

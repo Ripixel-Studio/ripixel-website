@@ -7,7 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { generatePagesTask } from 'skier';
-import { buildHub, buildSection, heroCards, heroView, hubLayout, isoWeekMonday, photoSession, routeSketch, lifeInsights } from './life-hub.mjs';
+import { brickWall, buildHub, buildSection, HUB_GRIDS, heroCards, heroView, hubLayout, isoWeekMonday, photoSession, routeSketch, lifeInsights } from './life-hub.mjs';
 import { runSkierTasks } from './skier-test-runner.mjs';
 import { templateHelpers } from './life-pages.mjs';
 
@@ -263,7 +263,7 @@ test('the page: a card per row, sized, each hero drawn, heading and insights kep
   // captions as text, sub-page links
   assert.match(html, /<p class="hub-card__caption">Sci-fi leads the shelf at 48%.<\/p>/);
   // the whole card is the link (card-link): the title stretches over it, the arrow tab says so
-  assert.match(html, /<li class="hub-card [^"]*life-ink--reading card-link">[\s\S]*?<a class="card-link__target" href="\/life\/reading">Reading<\/a>[\s\S]*?<span class="card-link__arrow" aria-hidden="true"><\/span>/);
+  assert.match(html, /<li class="hub-card [^"]*life-ink--reading card-link" style="--x6:[^"]*">[\s\S]*?<a class="card-link__target" href="\/life\/reading">Reading<\/a>[\s\S]*?<span class="card-link__arrow" aria-hidden="true"><\/span>/);
   assert.doesNotMatch(html, /hub-card__more/);
   assert.doesNotMatch(html, /id="life-outings-title"/);
   // the small print is gone
@@ -281,7 +281,7 @@ test('the page draws covers, an image and a stat, and an sm row shows only its c
   assert.match(html, /<div class="hub-hero__posters hub-hero__posters--covers">\s*<figure class="hub-hero__poster hub-hero__poster--n0" style="--tilt: [-0-9.]+deg"><img src="https:\/\/shared\.akamai\.steamstatic\.com\/[^"]+" alt="Game A" loading="lazy" decoding="async" width="600" height="900">/);
   assert.match(html, /<img class="hub-hero__img" src="\/card_life.png" alt="Space Farm" loading="lazy" decoding="async" width="400" height="600">/);
   assert.match(html, /<b class="hub-hero__value">212<\/b> <span class="hub-hero__what">commits this month<\/span>/);
-  const outings = /<li class="hub-card hub-card--sm hub-card--stat hub-card--wide6 hub-card--solo life-ink--live card-link">[\s\S]*?<\/li>/.exec(html)?.[0] || '';
+  const outings = /<li class="hub-card hub-card--sm hub-card--stat hub-card--solo life-ink--live card-link" style="[^"]*">[\s\S]*?<\/li>/.exec(html)?.[0] || '';
   assert.doesNotMatch(outings, /hub-hero/);
   assert.match(outings, /3 live events this year\./);
   assert.match(outings, /href="\/life\/live"/);
@@ -305,7 +305,7 @@ test('the page without a hub key: the old rows', async () => {
 
 test('the page keeps the stale sticker (the roundup links: life-links.test.mjs)', async () => {
   const html = await renderHub(fixture);
-  const reading = html.split('<li class="hub-card ').find((c) => c.includes('life-ink--reading card-link">')) || '';
+  const reading = html.split('<li class="hub-card ').find((c) => c.includes('life-ink--reading card-link" style=')) || '';
   assert.match(reading, /<p class="life-stale">last updated 4 days ago<\/p>/);
   assert.equal(buildHub(fixture, fitnessLife, now).hero.find((c) => c.name === 'body')?.staleLabel, '');
 });
@@ -350,17 +350,36 @@ test('a hidden duplicate headline is not "empty"; a section with no data is', ()
 /** Cards of the given sizes, lg alternating sides as heroCards does. @param {string[]} sizes */
 const sized = (sizes) => { let lg = 0; return sizes.map((size, i) => ({ name: `s${i}`, size, side: size === 'lg' ? (lg++ % 2 ? 'right' : 'left') : '' })); };
 
-test('hub layout: biggest first, the slim cards share the last row, odd cards span two columns', () => {
-  // today's shape: 3 lg + 3 md fill their rows; two sm share the last row half and half
-  const a = hubLayout(sized(['lg', 'lg', 'lg', 'md', 'md', 'md', 'sm', 'sm']));
-  assert.deepEqual(a.map((c) => c.wide), [0, 0, 0, 0, 0, 0, 3, 3]);
-  assert.deepEqual(a.map((c) => c.solo), [false, false, false, false, false, true, false, false]);
-  // one sm alone: the whole row; three: a third each (no widening needed, but no gap either)
-  assert.deepEqual(hubLayout(sized(['lg', 'md', 'sm'])).map((c) => c.wide), [0, 0, 6]);
-  assert.deepEqual(hubLayout(sized(['lg', 'md', 'sm', 'sm', 'sm'])).map((c) => c.wide), [0, 0, 0, 0, 0]);
-  // an extra lg leaves a 2×2 hole beside it: the sm cards pack into it, nothing is widened
-  const hole = hubLayout(sized(['lg', 'lg', 'lg', 'md', 'md', 'sm', 'sm']));
-  assert.deepEqual(hole.map((c) => c.wide), [0, 0, 0, 0, 0, 0, 0]);
+/** True when the placements tile a cols-wide rectangle exactly: no hole, no overlap. */
+const tiles = (/** @type {{x:number,y:number,w:number,h:number}[]} */ place, /** @type {number} */ cols) => {
+  const rows = Math.max(0, ...place.map((p) => p.y + p.h));
+  const seen = new Map();
+  for (const p of place) for (let y = p.y; y < p.y + p.h; y++) for (let x = p.x; x < p.x + p.w; x++) {
+    if (x >= cols || seen.has(`${x},${y}`)) return false;
+    seen.set(`${x},${y}`, 1);
+  }
+  return seen.size === rows * cols;
+};
+
+test('hub layout: biggest first, a brick wall at 6 and 12 columns, odd cards span two columns', () => {
+  const shapes = [
+    ['lg', 'lg', 'lg', 'md', 'md', 'md', 'md', 'md'], // today's hub
+    ['lg', 'lg', 'lg', 'md', 'md', 'md', 'sm', 'sm'],
+    ['lg', 'md', 'sm'], ['lg', 'md', 'sm', 'sm', 'sm'], ['lg', 'lg', 'lg', 'md', 'md', 'sm', 'sm'],
+    ['md'], ['sm', 'sm', 'sm'], ['lg'], ['lg', 'md', 'md', 'md', 'md', 'md', 'md', 'md', 'sm'],
+  ];
+  for (const sh of shapes) for (const g of HUB_GRIDS) {
+    const place = brickWall(hubLayout(sized(sh)), g);
+    assert.ok(tiles(place, g.cols), `${sh.join(',')} at ${g.cols} columns leaves a hole: ${JSON.stringify(place)}`);
+  }
+  // today's hub at 12: lg + two md per band, the zig-zag kept, three md end the wall a third each
+  const today = hubLayout(sized(['lg', 'lg', 'lg', 'md', 'md', 'md', 'md', 'md']));
+  const w12 = brickWall(today, HUB_GRIDS[1]);
+  assert.deepEqual(w12.slice(5).map((p) => [p.x, p.w]), [[0, 4], [4, 4], [8, 4]]);
+  assert.equal(w12[1].x, 6, 'the second lg sits on the right');
+  // at 6: the two md cards that end the wall are half each
+  assert.deepEqual(brickWall(today, HUB_GRIDS[0]).slice(6).map((p) => [p.x, p.w]), [[0, 3], [3, 3]]);
+  assert.match(today[0].grid, /^--x6:1;--y6:1;--w6:4;--h6:2;--x12:1;--y12:1;--w12:6;--h12:2$/);
   // an sm dropped in place (a rejected hero) moves below the md cards; odd sm spans at two columns
   const moved = hubLayout(sized(['lg', 'sm', 'md', 'md', 'sm', 'sm']));
   assert.deepEqual(moved.map((c) => c.size), ['lg', 'md', 'md', 'sm', 'sm', 'sm']);
@@ -399,6 +418,7 @@ test('hub CSS: a md hero is a size container and its picture is sized from it, n
   assert.match(css, /\.hub-card--md \.hub-hero__posters \{ --fan-w: min\([^}]*cq/);
   assert.match(css, /\.hub-card--md \.hub-hero--image \.hub-hero__frame \{[^}]*cqh/);
   assert.match(css, /\.hub-hero--spark \.chart__plot,[\s\S]*?grid-template-rows: minmax\(var\(--chart-h\), 1fr\) auto;/);
-  assert.match(css, /\.hub-card--sm\.hub-card--wide3 \{ grid-column: span 3; \}/);
+  assert.match(css, /\.hub-grid \.hub-card \{ grid-column: var\(--x6\) \/ span var\(--w6\); grid-row: var\(--y6\) \/ span var\(--h6\);/);
+  assert.match(css, /@media \(min-width: 1600px\) \{\s*\.hub-grid \{ grid-template-columns: repeat\(12, minmax\(0, 1fr\)\);/);
   assert.doesNotMatch(css, /\.hub-hero__posters \{[^}]*width: min\(100%, 300px\)/, 'the old fixed-size fan is gone');
 });

@@ -31,7 +31,7 @@
          from the export, a slim row when there is no hero. The caption is James's line, as text. -->
     <ol class="hub-grid">
       {{#each lifeHub.hero}}
-      <li class="hub-card hub-card--{{size}}{{#if side}} hub-card--{{side}}{{/if}}{{#if hero}} hub-card--{{hero.type}}{{/if}}{{#if wide}} hub-card--wide{{wide}}{{/if}}{{#if solo}} hub-card--solo{{/if}} life-ink--{{name}}{{#if href}} card-link{{/if}}">
+      <li class="hub-card hub-card--{{size}}{{#if side}} hub-card--{{side}}{{/if}}{{#if hero}} hub-card--{{hero.type}}{{/if}}{{#if solo}} hub-card--solo{{/if}} life-ink--{{name}}{{#if href}} card-link{{/if}}" style="{{grid}}">
         <header class="hub-card__head">
           <h2 class="hub-card__name">{{#if href}}<a class="card-link__target" href="{{href}}">{{title}}</a>{{else}}{{title}}{{/if}}</h2>
           {{#if headline}}

@@ -1204,48 +1204,106 @@ function rankCovers(sec) {
   return wall.length === 4 ? { rankCovers: wall } : {};
 }
 
-/** Grid columns at the wide layout. */
-const HUB_COLS = 6;
+/** The wide layouts: 6 columns from 1001px, 12 from 1600px (James, 2026-11-12: denser on big screens). */
+export const HUB_GRIDS = /** @type {const} */ ([
+  { cols: 6, size: { lg: [4, 2], md: [2, 2], sm: [2, 1] } },
+  { cols: 12, size: { lg: [6, 2], md: [3, 2], sm: [3, 1] } },
+]);
 
 /**
- * Lay the cards out so no card is left beside a hole. Cards go biggest first (the export sends
- * them that way; a rejected hero dropped to sm in place is moved down). Then the wide grid's
- * dense flow is simulated: lg cards are 4×2 at their side, md 2×2, sm 2×1. The slim cards that
- * end the grid share its last row (`wide`: 6, 3 or 2 columns, so two of them are not left with
- * a third of the row empty). At the two-column layout an odd md card and an odd sm card span
- * both columns (`solo`), so a slim card is never the partner of a tall one.
+ * Place the cards on a `cols`-wide grid as a brick wall: no hole anywhere. Cards go in order
+ * (biggest first), each at the first free spot from the top (dense flow; a lg card with side
+ * `right` hugs the right edge). Then every empty cell is taken by a neighbour: the card to its
+ * left widens if it is empty down that card's whole height, else the card to its right, else the
+ * card above grows down. Last, a band of same-size cards sharing exact rows and filling them
+ * alone is evened out (two md cards ending the wall are half each, not a third and two thirds).
+ * @param {any[]} cards @param {{ cols: number, size: Record<string, number[]> }} g
+ * @returns {{ x: number, y: number, w: number, h: number }[]} 0-based cells
+ */
+export function brickWall(cards, { cols, size }) {
+  /** @type {(number|null)[][]} */
+  const grid = [];
+  const row = (/** @type {number} */ y) => (grid[y] ||= Array(cols).fill(null));
+  const free = (/** @type {number} */ y, /** @type {number} */ x, /** @type {number} */ w, /** @type {number} */ h) => {
+    for (let r = y; r < y + h; r++) for (let c = x; c < x + w; c++) if (row(r)[c] != null) return false;
+    return true;
+  };
+  const mark = (/** @type {number} */ i) => {
+    const p = place[i];
+    for (let r = p.y; r < p.y + p.h; r++) for (let c = p.x; c < p.x + p.w; c++) row(r)[c] = i;
+  };
+  /** @type {{ x: number, y: number, w: number, h: number }[]} */
+  const place = [];
+  cards.forEach((card, i) => {
+    const [w, h] = size[card.size] || size.md;
+    const xs = card.side === 'right' ? [cols - w] : Array.from({ length: cols - w + 1 }, (_, k) => k);
+    for (let y = 0; ; y++) {
+      const x = xs.find((c) => free(y, c, w, h));
+      if (x != null) { place[i] = { x, y, w, h }; mark(i); return; }
+    }
+  });
+  const rows = Math.max(0, ...place.map((p) => p.y + p.h));
+  grid.length = rows;
+  const colFree = (/** @type {number} */ x, /** @type {number} */ y0, /** @type {number} */ y1) => {
+    if (x < 0 || x >= cols) return false;
+    for (let r = y0; r < y1; r++) if (row(r)[x] != null) return false;
+    return true;
+  };
+  for (let changed = true; changed;) {
+    changed = false;
+    for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+      if (row(y)[x] != null) continue;
+      const left = x > 0 ? row(y)[x - 1] : null, right = x < cols - 1 ? row(y)[x + 1] : null, up = y > 0 ? row(y - 1)[x] : null;
+      if (left != null && colFree(x, place[left].y, place[left].y + place[left].h)) { place[left].w++; mark(left); changed = true; continue; }
+      if (right != null && colFree(x, place[right].y, place[right].y + place[right].h)) { place[right].x--; place[right].w++; mark(right); changed = true; continue; }
+      if (up != null) {
+        const p = place[up];
+        let ok = true;
+        for (let c = p.x; c < p.x + p.w; c++) if (row(y)[c] != null) ok = false;
+        if (ok && p.y + p.h === y) { p.h++; mark(up); changed = true; }
+      }
+    }
+  }
+  // even out a band of same-size cards that fills its rows alone
+  const bands = new Map();
+  place.forEach((p, i) => { const k = `${p.y}:${p.h}`; bands.set(k, [...(bands.get(k) || []), i]); });
+  for (const idx of bands.values()) {
+    if (idx.length < 2 || new Set(idx.map((i) => cards[i].size)).size > 1) continue;
+    const { y, h } = place[idx[0]];
+    let alone = true;
+    for (let r = y; r < y + h; r++) for (let c = 0; c < cols; c++) if (!idx.includes(row(r)[c])) alone = false;
+    if (!alone) continue;
+    idx.sort((a, b) => place[a].x - place[b].x);
+    let x = 0;
+    idx.forEach((i, k) => {
+      const w = Math.floor(cols / idx.length) + (k < cols % idx.length ? 1 : 0);
+      place[i] = { ...place[i], x, w }; x += w;
+    });
+  }
+  return place;
+}
+
+/**
+ * Lay the cards out so the wall has no holes. Cards go biggest first (the export sends them
+ * that way; a rejected hero dropped to sm in place is moved down). Each wide grid (`HUB_GRIDS`)
+ * gets an explicit brick-wall placement, carried as CSS custom properties (`grid`: one
+ * `--x6/--y6/--w6/--h6` set per grid, 1-based). At the two-column layout an odd md card and an
+ * odd sm card span both columns (`solo`), so a slim card is never the partner of a tall one.
  * @param {any[]} cards
  */
 export function hubLayout(cards) {
   const order = { lg: 0, md: 1, sm: 2 };
   const sorted = [...cards].sort((a, b) => (order[/** @type {'lg'} */ (a.size)] ?? 1) - (order[/** @type {'lg'} */ (b.size)] ?? 1));
-  /** @type {boolean[][]} */
-  const grid = [];
-  const free = (/** @type {number} */ r, /** @type {number} */ c, /** @type {number} */ w, /** @type {number} */ h) => {
-    for (let y = r; y < r + h; y++) for (let x = c; x < c + w; x++) if (grid[y]?.[x]) return false;
-    return true;
-  };
-  const take = (/** @type {number} */ r, /** @type {number} */ c, /** @type {number} */ w, /** @type {number} */ h) => {
-    for (let y = r; y < r + h; y++) { grid[y] ||= Array(HUB_COLS).fill(false); for (let x = c; x < c + w; x++) grid[y][x] = true; }
-  };
-  const placed = sorted.map((card) => {
-    const [w, h] = card.size === 'lg' ? [4, 2] : card.size === 'md' ? [2, 2] : [2, 1];
-    const cols = card.size === 'lg' && card.side === 'right' ? [2] : Array.from({ length: HUB_COLS - w + 1 }, (_, i) => i);
-    for (let r = 0; ; r++) {
-      const c = cols.find((x) => free(r, x, w, h));
-      if (c != null) { take(r, c, w, h); return { card, r, h }; }
-    }
-  });
-  const last = Math.max(-1, ...placed.map((p) => p.r + p.h - 1));
-  const tail = placed.filter((p) => p.r + p.h - 1 === last);
-  const wide = tail.length && tail.length <= 3 && tail.every((p) => p.card.size === 'sm' && p.r === last) && grid[last].includes(false)
-    ? HUB_COLS / tail.length : 0;
+  const walls = HUB_GRIDS.map((g) => ({ cols: g.cols, place: brickWall(sorted, g) }));
   const count = (/** @type {string} */ size) => sorted.filter((c) => c.size === size).length;
   const lastOf = (/** @type {string} */ size) => sorted.filter((c) => c.size === size).at(-1);
   const solo = new Set(['md', 'sm'].filter((s) => count(s) % 2).map(lastOf));
-  return sorted.map((card) => ({
+  return sorted.map((card, i) => ({
     ...card,
-    wide: wide && tail.some((p) => p.card === card) ? wide : 0,
+    grid: walls.map(({ cols, place }) => {
+      const p = place[i];
+      return `--x${cols}:${p.x + 1};--y${cols}:${p.y + 1};--w${cols}:${p.w};--h${cols}:${p.h}`;
+    }).join(';'),
     solo: solo.has(card),
   }));
 }
