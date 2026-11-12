@@ -76,7 +76,7 @@ test('readingView: parts kept apart on a spine, format and re-listens carried, b
   const v = readingView({
     shelf: [{ key: 'a', title: 'Fourth Wing (Part 2 of 2) (Dramatized Adaptation)', hours: 9, finished: '2026-04', again: true }],
     onTheGo: [{ title: 'Carl', progress: 0.85, again: true, heard: '2026-11' }],
-    bookmarks: [{ title: 'Flybot', progress: 0.05, heard: '2025-06' }],
+    bookmarks: [{ title: 'Flybot', progress: 0.05, heard: '2025-06' }, { title: 'Left On Paper', progress: 0.02, paused: true, format: 'print' }],
     heardAgain: [{ title: 'Carl', progress: 0.85, state: 'now' }, { title: 'Games', progress: 1, state: 'twice', heard: '2025-09' },
       { title: 'Bad', state: 'nonsense' }],
     bookStats: { finished: 1, again: 2, againHours: 30 },
@@ -88,6 +88,8 @@ test('readingView: parts kept apart on a spine, format and re-listens carried, b
   assert.equal(v.onTheGo[0].again, true);
   assert.equal(v.onTheGo[0].percent, 85);
   assert.equal(v.bookmarks[0].heard, 'Jun 2025');
+  assert.equal(v.bookmarks[0].paused, false);
+  assert.equal(v.bookmarks[1].paused, true);
   assert.deepEqual(v.heardAgain.map((b) => b.label), ['on it again now, 85% in', 'heard twice, again in Sep 2025']);
   assert.ok(v.numbers.some((n) => n.label === 'gone back to' && n.value === '2'));
 });

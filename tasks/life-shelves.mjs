@@ -192,7 +192,7 @@ export function readingView(sec) {
       { value: group(num(st.owned) ?? 0), label: 'in the library', sub: num(st.unstarted) ? `${group(/** @type {number} */ (num(st.unstarted)))} still waiting` : '' },
     ],
     onTheGo: list(sec.onTheGo).filter((b) => str(b.title)).map((b) => ({ ...face(b), again: b.again === true })),
-    bookmarks: list(sec.bookmarks).filter((b) => str(b.title)).map(face),
+    bookmarks: list(sec.bookmarks).filter((b) => str(b.title)).map((b) => ({ ...face(b), paused: b.paused === true })),
     heardAgain: list(sec.heardAgain).filter((b) => str(b.title) && AGAIN[b.state]).map((b) => {
       const f = face(b);
       return { ...f, state: String(b.state), label: AGAIN[b.state](f) };
