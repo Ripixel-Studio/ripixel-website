@@ -4,7 +4,7 @@
     <div>
       <div class="masthead__name">
         JAMES KING
-        <span class="masthead__page-label">· {{page}} ·</span>
+        <a class="masthead__page-label" href="{{#if pageHref}}{{pageHref}}{{else}}/{{page}}{{/if}}">· {{page}} ·</a>
       </div>
       <div class="masthead__sub">{{year}}</div>
     </div>

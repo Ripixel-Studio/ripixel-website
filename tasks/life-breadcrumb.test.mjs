@@ -24,8 +24,25 @@ test('every life sub-page source links its crumb to /life', () => {
     if (html.includes('{{> life-section-head')) continue; // covered by the partial
     const crumb = html.match(CRUMB)?.[1] ?? html.match(/<nav class="act-crumb"[^>]*>([\s\S]*?)<\/nav>/)?.[1];
     assert.ok(crumb, `${path.basename(f)} has a breadcrumb`);
-    assert.match(crumb, /<a [^>]*href="\/life"/, `${path.basename(f)} crumb links to /life`);
+    // an activity or an event page goes back to the fitness page it belongs to, not the /life hub
+    const home = /templates[\\/](activity|event)\.html$/.test(f) ? '/life/fitness' : '/life';
+    assert.match(crumb, new RegExp(`<a [^>]*href="${home}"`), `${path.basename(f)} crumb links to ${home}`);
   }
+});
+
+test('fitness sub-pages name fitness in their trail and their foot', () => {
+  for (const f of [P('templates', 'roundup.html'), P('templates', 'sessions.html'), P('pages', 'life', 'roundups.html')]) {
+    const html = fs.readFileSync(f, 'utf8');
+    assert.match(html.match(CRUMB)?.[1] ?? '', /<a href="\/life\/fitness">fitness<\/a>/, `${path.basename(f)} crumb has fitness`);
+    assert.doesNotMatch(html, /roundup-foot__back" href="\/life"/, `${path.basename(f)} foot goes back to fitness`);
+  }
+  assert.doesNotMatch(fs.readFileSync(P('partials', 'rl-foot.html'), 'utf8'), /href="\/life">/);
+});
+
+test('the masthead section label is a link to its section', () => {
+  const html = fs.readFileSync(P('partials', 'masthead.html'), 'utf8');
+  assert.match(html, /<a class="masthead__page-label" href=/);
+  assert.ok(html.includes('/{{page}}'), 'it links to /<section>');
 });
 
 test('crumb link is styled as a link with a focus state', () => {
@@ -51,4 +68,11 @@ test('built life sub-pages link their crumb to /life (when built)', (t) => {
     if (!crumb) continue;
     assert.match(crumb, LINK, `${path.relative(dir, f)} crumb links to /life`);
   }
+});
+
+test('the crumb sits above the hero title, which overlaps it (its links stay clickable)', () => {
+  const css = fs.readFileSync(P('assets', 'styles', 'main', 'styles.css'), 'utf8');
+  const rule = css.match(/\.thought-breadcrumb\s*\{([^}]*)\}/)?.[1] ?? '';
+  assert.match(rule, /position:\s*relative/);
+  assert.match(rule, /z-index:\s*[1-9]/);
 });
