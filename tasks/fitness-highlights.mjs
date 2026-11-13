@@ -221,7 +221,7 @@ export function buildMoments({ files, entries, past = [] }) {
       id: `weekend:${ev.slug}`, kind: 'weekend', stamp: 'RACE WEEKEND', title: `Hyrox ${ev.name}`,
       value: String(races.length), unit: races.length === 1 ? 'race' : 'races',
       sub: races.map((r) => `${short(r?.divisionLabel || 'Race')} ${r?.total}${r?.isPB ? ' (PB)' : ''}`).join(' · '),
-      t, date: dayLabel(t), href: eventUrl(ev.slug), photo, ...tagTheme('hyrox'),
+      t, date: dayLabel(t), href: eventUrl(ev.slug), photo, ...tagTheme('hybrid'),
       score: 120 + pbs * 5, slug: '', slugs: [...ev.slugs], tags: [],
     });
     for (const s of ev.slugs) raceSlugs.add(s);

@@ -577,7 +577,7 @@ export function buildPbBoard(prs, hyrox = []) {
     { key: 'run', title: 'on foot', typeClass: 'fit-type--run', tiles: pick('run', RUN_PBS) },
     { key: 'ride', title: 'on the bike', typeClass: 'fit-type--ride', tiles: pick('ride', RIDE_PBS) },
     ...hyrox.filter((h) => h.total || h.stations.length).map((h) => ({
-      key: `hyrox-${h.key}`, title: `hyrox · ${h.label}`, typeClass: 'fit-type--hyrox', tiles: [], hyrox: h,
+      key: `hyrox-${h.key}`, title: `hyrox · ${h.label}`, typeClass: 'fit-type--hybrid', tiles: [], hyrox: h,
     })),
     { key: 'iron', title: 'iron · heaviest lift & est. 1RM', typeClass: 'fit-type--strength', tiles: iron },
   ].filter((g) => g.tiles.length > 0 || g.hyrox);

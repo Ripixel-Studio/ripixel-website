@@ -5,10 +5,10 @@
  * Every activity gets exactly one tag, decided once, and every colour, label, glyph,
  * filter chip and per-type stat on the site comes from it:
  *
- *   run  ride  spin  hyrox  class  strength  pilates  yoga  walk  other
+ *   run  ride  spin  hybrid  class  strength  pilates  yoga  walk  other
  *
  * plus an independent Race marker (`isRace`): a badge on top of the tag, never a tag of
- * its own, so a Hyrox race is a Hyrox-inked Hyrox tag with a Race badge and a parkrun is
+ * its own, so a Hyrox race is a Hybrid tag with a Race badge and a parkrun is
  * a Run with a Race badge.
  *
  * Source of truth: the FitGlue export's top-level `tag` and `isRace` on each activity
@@ -25,7 +25,7 @@
 import { activityKind } from './fitness-activity-kinds.mjs';
 import { tagOfTitle } from './life-clock.mjs';
 
-/** @typedef {'run'|'ride'|'spin'|'hyrox'|'class'|'strength'|'pilates'|'yoga'|'walk'|'other'} Tag */
+/** @typedef {'run'|'ride'|'spin'|'hybrid'|'class'|'strength'|'pilates'|'yoga'|'walk'|'other'} Tag */
 /** @typedef {Tag} TypeKey */
 
 /** Tag → label, glyph and what goes in it, in the order the filter chips and the key show them. */
@@ -33,7 +33,7 @@ export const TAGS = /** @type {Record<Tag, { label: string, glyph: string, note:
   run: { label: 'Run', glyph: 'RUN', note: 'runs, parkruns, the treadmill' },
   ride: { label: 'Ride', glyph: 'RDE', note: 'out on the bike' },
   spin: { label: 'Spin', glyph: 'SPN', note: 'spin classes, the indoor bike' },
-  hyrox: { label: 'Hyrox', glyph: 'HYX', note: 'Hyrox and hybrid classes, PT and races' },
+  hybrid: { label: 'Hybrid', glyph: 'HYB', note: 'Hyrox, DEKA, ATHX and Spartan races, plus hybrid classes, sims and PT' },
   class: { label: 'Class', glyph: 'CLS', note: 'bootcamp, circuits, HIIT and the rest' },
   strength: { label: 'Strength', glyph: 'GYM', note: 'weights, PT and the home workouts' },
   pilates: { label: 'Pilates', glyph: 'PIL', note: 'mat and reformer' },
@@ -45,6 +45,19 @@ export const TAGS = /** @type {Record<Tag, { label: string, glyph: string, note:
 /** @param {unknown} k @returns {k is Tag} */
 export function isTag(k) {
   return typeof k === 'string' && Object.prototype.hasOwnProperty.call(TAGS, k);
+}
+
+/** Tags an older export (or cached data) may still carry, and the tag each became. */
+const LEGACY_TAGS = /** @type {Record<string, Tag>} */ ({ hyrox: 'hybrid' });
+
+/**
+ * A tag as the site knows it: a current tag as is, a legacy one (`hyrox`) as its
+ * successor, anything else undefined.
+ * @param {unknown} k @returns {Tag | undefined}
+ */
+export function normTag(k) {
+  if (isTag(k)) return k;
+  return typeof k === 'string' && Object.prototype.hasOwnProperty.call(LEGACY_TAGS, k) ? LEGACY_TAGS[k] : undefined;
 }
 
 /** `ACTIVITY_TYPE_TRAIL_RUN` → `TRAIL_RUN` @param {unknown} t */
@@ -87,15 +100,15 @@ export function siteTagOf(x) {
 
 /** @param {any} file @param {string} t @param {string} title @returns {Tag} */
 function fallbackTag(file, t, title) {
-  if (file.race) return 'hyrox';
+  if (file.race) return 'hybrid';
   if (RUN_TYPES.has(t)) return 'run';
   if (WALK_TYPES.has(t)) return 'walk';
   if (t === 'PILATES') return 'pilates';
   if (t === 'YOGA') return 'yoga';
   if (RIDE_TYPES.has(t)) return activityKind(file) === 'ride' ? 'ride' : 'spin';
-  // A title names what the type cannot: Hyrox PT filed as weights, a spin class filed as crossfit.
+  // A title names what the type cannot: Hyrox PT filed as weights (hybrid), a spin class filed as crossfit.
   const hint = tagOfTitle(title);
-  if (hint === 'spin' || hint === 'hyrox' || hint === 'pilates' || hint === 'yoga') return hint;
+  if (hint === 'spin' || hint === 'hybrid' || hint === 'pilates' || hint === 'yoga') return hint;
   if (CLASS_TYPES.has(t)) return 'class';
   if (t === 'WORKOUT' || t === 'WEIGHT_TRAINING') {
     if (activityKind(file) === 'run') return 'run'; // a race or long run logged as one running set
@@ -110,26 +123,28 @@ function fallbackTag(file, t, title) {
 
 /**
  * An activity's tag and race marker: the export's `tag` / `isRace` when present and valid
- * (on the file, its `entry` or the index entry), else `siteTagOf`.
+ * (on the file, its `entry` or the index entry; a legacy `hyrox` reads as `hybrid`), else
+ * `siteTagOf`.
  * @param {any} x  an activity file or an index entry
  * @returns {{ tag: Tag, isRace: boolean }}
  */
 export function tagOf(x) {
   for (const src of [x, x?.entry, x?.indexEntry]) {
-    if (src && isTag(src.tag)) {
-      return { tag: src.tag, isRace: typeof src.isRace === 'boolean' ? src.isRace : siteTagOf(x).isRace };
+    const tag = src ? normTag(src.tag) : undefined;
+    if (tag) {
+      return { tag, isRace: typeof src.isRace === 'boolean' ? src.isRace : siteTagOf(x).isRace };
     }
   }
   return siteTagOf(x);
 }
 
 /**
- * Theme for one tag (an unknown key is `other`).
+ * Theme for one tag (a legacy key reads as its successor, an unknown key is `other`).
  * @param {unknown} tag
  * @returns {{ typeKey: Tag, typeClass: string, tagLabel: string, tagGlyph: string }}
  */
 export function tagTheme(tag) {
-  const typeKey = isTag(tag) ? tag : 'other';
+  const typeKey = normTag(tag) ?? 'other';
   return { typeKey, typeClass: `fit-type--${typeKey}`, tagLabel: TAGS[typeKey].label, tagGlyph: TAGS[typeKey].glyph };
 }
 
@@ -168,7 +183,7 @@ export const TYPE_INKS = /** @type {Record<Tag, { type: string, on: string, text
   run: { type: '#C42A72', on: '#FFFFFF', text: '#C42A72' },
   ride: { type: '#18A9C4', on: '#171311', text: '#187384' },
   spin: { type: '#2E5BBA', on: '#FFFFFF', text: '#2E5BBA' },
-  hyrox: { type: '#F2C13C', on: '#171311', text: '#806726' },
+  hybrid: { type: '#F2C13C', on: '#171311', text: '#806726' },
   class: { type: '#00838A', on: '#FFFFFF', text: '#00727A' },
   strength: { type: '#F25B1C', on: '#171311', text: '#B54719' },
   pilates: { type: '#7C3AED', on: '#FFFFFF', text: '#7C3AED' },

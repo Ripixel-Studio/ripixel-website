@@ -49,7 +49,7 @@ describe('pure clock', () => {
   });
 
   test('tagOfTitle: a calendar title guesses one of the ten site tags', () => {
-    assert.equal(tagOfTitle('Hyrox Class'), 'hyrox');
+    assert.equal(tagOfTitle('Hyrox Class'), 'hybrid');
     assert.equal(tagOfTitle('Spin'), 'spin');
     assert.equal(tagOfTitle('Hybrid Spinning Class'), 'spin');
     assert.equal(tagOfTitle('Tower Pilates'), 'pilates');

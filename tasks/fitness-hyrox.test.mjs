@@ -303,7 +303,7 @@ describe('/life PB wall: Hyrox per division (F5.5)', () => {
   test('the wall puts the Hyrox sections between the bike and the iron, in the Hyrox ink', () => {
     const g = buildPbBoard([{ recordType: 'fastest_5k', value: 1302, unit: 'seconds', achievedAt: '2026-04-04T09:00:00Z' }, { recordType: 'deadlift_1rm', value: 170, unit: 'kg', achievedAt: '2026-10-22T10:10:21Z' }], hyroxWall(h));
     assert.deepEqual(g.map((x) => x.key), ['run', 'hyrox-men_open', 'hyrox-men_doubles', 'iron']);
-    assert.equal(g[1].typeClass, 'fit-type--hyrox');
+    assert.equal(g[1].typeClass, 'fit-type--hybrid');
     assert.equal(g[1].title, "hyrox · Open Men's Solo");
   });
 });

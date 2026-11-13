@@ -64,6 +64,18 @@ describe('/life/sessions', () => {
     assert.ok(!none[0].fitnessSessions.filters.some((f) => f.key === 'race'));
   });
 
+  test('Hybrid: a legacy hyrox tag files under /life/sessions/hybrid, and no hyrox page is built', () => {
+    const acts = many(4).map((a, i) => ({ ...a, tag: i === 0 ? 'hyrox' : i === 1 ? 'hybrid' : 'run', isRace: false }));
+    const pages = buildSessionPages({ activities: acts });
+    const hybrid = pages.filter((p) => p.fitnessSessions.filter === 'hybrid');
+    assert.equal(hybrid.length, 1);
+    assert.equal(hybrid[0].fitnessSessions.href, '/life/sessions/hybrid');
+    assert.deepEqual(hybrid[0].fitnessSessions.months.flatMap((m) => m.items).map((c) => c.slug), ['s-0', 's-1']);
+    assert.ok(!pages.some((p) => p.fitnessSessions.filter === 'hyrox'));
+    const chip = hybrid[0].fitnessSessions.filters.find((f) => f.key === 'hybrid');
+    assert.equal(chip.label, 'Hybrid');
+  });
+
   test('a month split across pages carries its full count and its key, so the pages stitch together', () => {
     const pages = buildSessionPages({ activities: many(PAGE_SIZE + 10) });
     const [p1, p2] = pages.filter((p) => p.fitnessSessions.filter === 'all');

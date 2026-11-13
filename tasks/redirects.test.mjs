@@ -17,9 +17,16 @@ test('personal target redirects /profile to /work with a 301', () => {
 test('the old /life/sessions family filters land on their tag (one tag system)', () => {
   const personal = firebase.hosting.find((/** @type {any} */ h) => h.target === 'personal');
   const to = (/** @type {string} */ src) => personal.redirects.find((/** @type {any} */ r) => r.source === src)?.destination;
-  assert.equal(to('/life/sessions/crossfit'), '/life/sessions/hyrox');
+  assert.equal(to('/life/sessions/crossfit'), '/life/sessions/hybrid');
   assert.equal(to('/life/sessions/hiit/:page'), '/life/sessions/class');
   assert.equal(to('/life/sessions/hike'), '/life/sessions/walk');
+});
+
+test('the hyrox filter became hybrid; its numbered pages keep their number', () => {
+  const personal = firebase.hosting.find((/** @type {any} */ h) => h.target === 'personal');
+  const r = (/** @type {string} */ src) => personal.redirects.find((/** @type {any} */ x) => x.source === src);
+  assert.deepEqual(r('/life/sessions/hyrox'), { source: '/life/sessions/hyrox', destination: '/life/sessions/hybrid', type: 301 });
+  assert.deepEqual(r('/life/sessions/hyrox/:page'), { source: '/life/sessions/hyrox/:page', destination: '/life/sessions/hybrid/:page', type: 301 });
 });
 
 test('corporate target has no /profile redirect', () => {

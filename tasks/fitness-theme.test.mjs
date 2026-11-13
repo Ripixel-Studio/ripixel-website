@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { TAGS, TYPE_INKS, isTag, siteTagOf, tagOf, themeOf, stampTag } from './fitness-theme.mjs';
+import { TAGS, TYPE_INKS, isTag, normTag, siteTagOf, tagOf, tagTheme, themeOf, stampTag } from './fitness-theme.mjs';
 import { assemble } from './fitness-fetch.mjs';
 import { buildActivityView } from './fitness-activity-views.mjs';
 import { buildCard, doneEntry, dominantTypes } from './fitness-life.mjs';
@@ -53,12 +53,12 @@ describe('siteTagOf: the one fallback', () => {
     ['RIDE', 'Afternoon workout', {}, 'spin', false],
     ['CROSSFIT', 'Spinning', {}, 'spin', false],
     ['CROSSFIT', 'Hybrid Spinning Class', {}, 'spin', false],
-    ['CROSSFIT', 'Hyrox Class', {}, 'hyrox', false],
-    ['CROSSFIT', 'Hybrid Class', {}, 'hyrox', false],
-    ['CROSSFIT', 'Push Focused Hyrox PT', {}, 'hyrox', false],
-    ['WEIGHT_TRAINING', 'Half Hyrox PT', { sets: [lift('Bench Press', 8, 60)] }, 'hyrox', false],
-    ['CROSSFIT', "Hyrox Birmingham - Open Men's Solo", { race: HYROX_RACE }, 'hyrox', true],
-    ['CROSSFIT', 'Hyrox Sim', { race: { ...HYROX_RACE, isSimulation: true } }, 'hyrox', false],
+    ['CROSSFIT', 'Hyrox Class', {}, 'hybrid', false],
+    ['CROSSFIT', 'Hybrid Class', {}, 'hybrid', false],
+    ['CROSSFIT', 'Push Focused Hyrox PT', {}, 'hybrid', false],
+    ['WEIGHT_TRAINING', 'Half Hyrox PT', { sets: [lift('Bench Press', 8, 60)] }, 'hybrid', false],
+    ['CROSSFIT', "Hyrox Birmingham - Open Men's Solo", { race: HYROX_RACE }, 'hybrid', true],
+    ['CROSSFIT', 'Hyrox Sim', { race: { ...HYROX_RACE, isSimulation: true } }, 'hybrid', false],
     ['CROSSFIT', 'Bootcamp', {}, 'class', false],
     ['HIGH_INTENSITY_INTERVAL_TRAINING', 'Circuit Training', {}, 'class', false],
     ['STAIR_STEPPER', 'Step Class', {}, 'class', false],
@@ -92,7 +92,7 @@ describe('siteTagOf: the one fallback', () => {
 
   test('every answer is one of the ten tags', () => {
     for (const [type, title, extra] of table) assert.ok(isTag(siteTagOf(file('s', type, title, extra)).tag));
-    assert.deepEqual(Object.keys(TAGS), ['run', 'ride', 'spin', 'hyrox', 'class', 'strength', 'pilates', 'yoga', 'walk', 'other']);
+    assert.deepEqual(Object.keys(TAGS), ['run', 'ride', 'spin', 'hybrid', 'class', 'strength', 'pilates', 'yoga', 'walk', 'other']);
   });
 
   test('a calendar title guesses over the same ten keys', () => {
@@ -104,9 +104,30 @@ describe('siteTagOf: the one fallback', () => {
 
 describe('tag and isRace from the export win', () => {
   test('a valid file tag overrides the fallback, and isRace with it', () => {
+    const f = file('s', 'CROSSFIT', 'Bootcamp', { tag: 'hybrid', isRace: true });
+    assert.deepEqual(tagOf(f), { tag: 'hybrid', isRace: true });
+    assert.equal(themeOf(f).typeClass, 'fit-type--hybrid');
+  });
+  test('a legacy hyrox tag (an older export, cached data) reads as hybrid', () => {
     const f = file('s', 'CROSSFIT', 'Bootcamp', { tag: 'hyrox', isRace: true });
-    assert.deepEqual(tagOf(f), { tag: 'hyrox', isRace: true });
-    assert.equal(themeOf(f).typeClass, 'fit-type--hyrox');
+    assert.deepEqual(tagOf(f), { tag: 'hybrid', isRace: true });
+    assert.equal(themeOf(f).typeClass, 'fit-type--hybrid');
+    assert.equal(themeOf(f).tagLabel, 'Hybrid');
+    assert.deepEqual(tagOf(file('s', 'RUN', 'Evening Run', { entryTag: { tag: 'hyrox', isRace: false } })), { tag: 'hybrid', isRace: false });
+    assert.equal(tagTheme('hyrox').typeKey, 'hybrid');
+    assert.equal(normTag('hyrox'), 'hybrid');
+    assert.equal(normTag('crossfit'), undefined);
+    assert.equal(isTag('hyrox'), false);
+    const g = file('g', 'CROSSFIT', 'Bootcamp', { tag: 'hyrox', isRace: false });
+    stampTag(g);
+    assert.equal(g.tag, 'hybrid');
+    assert.equal(g.entry.tag, 'hybrid');
+  });
+  test('hybrid race titles without race data fall back to hybrid', () => {
+    for (const t of ['DEKA Fit', 'ATHX Manchester', 'Spartan Sprint', 'Hybrid Sim', 'Hyrox PT']) {
+      assert.equal(siteTagOf(file('s', 'CROSSFIT', t)).tag, 'hybrid', t);
+      assert.equal(tagOfTitle(t), 'hybrid', t);
+    }
   });
   test('the entry tag counts when the file has none', () => {
     const f = file('s', 'RUN', 'Evening Run', { entryTag: { tag: 'walk', isRace: false } });
