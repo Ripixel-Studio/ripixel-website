@@ -298,7 +298,7 @@ const P = 'ENRICHER_PROVIDER_';
 // ---------------------------------------------------------------------------
 // Personal records (prFormat.ts, copied)
 
-const STRENGTH_SUFFIXES = ['_1rm', '_set_volume', '_volume', '_reps'];
+const STRENGTH_SUFFIXES = ['_1rm', '_heaviest_weight', '_set_volume', '_volume', '_reps'];
 const CARDIO_PRIORITY = [
   'fastest_ultra_marathon', 'longest_run', 'fastest_marathon', 'fastest_40k', 'fastest_30_mile',
   'fastest_half_marathon', 'fastest_20_mile', 'fastest_30k', 'fastest_20k', 'fastest_15_mile', 'fastest_10_mile',
