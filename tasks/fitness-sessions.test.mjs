@@ -47,6 +47,23 @@ describe('/life/sessions', () => {
     ]);
   });
 
+  test('Race: one chip after the tags, every race whatever its tag, no race chip when there are none', () => {
+    const acts = many(10).map((a, i) => ({ ...a, tag: i % 2 === 0 ? 'run' : 'pilates', isRace: i === 0 || i === 3 }));
+    const pages = buildSessionPages({ activities: acts });
+    const race = pages.filter((p) => p.fitnessSessions.filter === 'race');
+    assert.equal(race.length, 1);
+    const s = race[0].fitnessSessions;
+    assert.equal(s.href, '/life/sessions/race');
+    assert.equal(s.shownLabel, '2 races');
+    assert.deepEqual(s.months.flatMap((m) => m.items).map((c) => c.slug), ['s-0', 's-3']);
+    assert.deepEqual(s.filters.map((f) => [f.key, f.count, f.current]).at(-1), ['race', 2, true]);
+    assert.equal(s.filters.at(-1).typeClass, 'ss-filter--race');
+    assert.equal(sessionsOutPath(s.href), 'life/sessions/race.html');
+    const none = buildSessionPages({ activities: many(4) });
+    assert.ok(!none.some((p) => p.fitnessSessions.filter === 'race'));
+    assert.ok(!none[0].fitnessSessions.filters.some((f) => f.key === 'race'));
+  });
+
   test('a month split across pages carries its full count and its key, so the pages stitch together', () => {
     const pages = buildSessionPages({ activities: many(PAGE_SIZE + 10) });
     const [p1, p2] = pages.filter((p) => p.fitnessSessions.filter === 'all');
