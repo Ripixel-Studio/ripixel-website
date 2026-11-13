@@ -77,9 +77,9 @@
     {{> fitness-stats fitnessLife.stats}}
     {{/if}}
 
-    <!-- 4b. Race PBs: by race type, one row per variant (tasks/fitness-race-pbs.mjs) -->
-    {{#if fitnessLife.racePbs}}
-    {{> fitness-race-pbs fitnessLife.racePbs}}
+    <!-- 4b. Personal bests: races (with Hyrox splits + road best efforts) then training (tasks/fitness-life.mjs personalBestsModel) -->
+    {{#if fitnessLife.personalBests}}
+    {{> fitness-race-pbs fitnessLife.personalBests}}
     {{/if}}
 
     <!-- 5. Every route on one sheet (LH3.5 lifeHeatmapView; ends near home already trimmed) -->

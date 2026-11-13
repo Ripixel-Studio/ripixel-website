@@ -12,6 +12,11 @@
  * A row whose attempts differ by more than DISTANCE_SPREAD in distance (a lapped trail
  * event where he chooses how far to go) claims no PB: it lists the attempts instead.
  *
+ * The board also takes what used to sit on the PB wall beside it, so no number shows twice:
+ * a Hyrox division's row carries its best station, Roxzone and run splits (hyroxWall), and
+ * a road distance's row carries the fastest stretch of that distance inside any run
+ * (Strava's best effort), shown second to the race time.
+ *
  * Colours come from each type's tag (`fit-type--<tag>`, tasks/fitness-theme.mjs), read
  * off the race files themselves, so a type has no colour of its own.
  */
@@ -104,9 +109,14 @@ function buildRow(name, attempts) {
 /**
  * The board: one group per race type he has done, in RACE_TYPES order, each with one row
  * per variant. Empty when there are no races (the page then has no section).
+ *
+ * A Hyrox race is filed under its official division label (the ROXFIT `race.division`)
+ * when it has one, so its row lines up with the division's splits.
  * @param {any[]} activities  `fitnessActivities`
+ * @param {{ hyroxSplits?: { label: string, stations: any[], runs: any[] }[], efforts?: { name: string, display: string, date: string }[] }} [extras]
+ *   hyroxSplits: hyroxWall's divisions; efforts: the wall's on-foot tiles (name `5K`, `HALF MARATHON`, ...)
  */
-export function buildRacePbs(activities) {
+export function buildRacePbs(activities, extras = {}) {
   /** @type {Map<string, Map<string, Attempt[]>>} */
   const byType = new Map();
   const known = new Set(RACE_TYPES.map(([k]) => k));
@@ -120,7 +130,8 @@ export function buildRacePbs(activities) {
     const { seconds, official } = raceTime(file, type);
     if (seconds <= 0) continue;
     const metres = num(file.entry?.distanceMeters) || num(file.activity?.distanceMeters);
-    const variant = String(file.raceVariant || '').trim() || (RACE_TYPES.find(([k]) => k === type)?.[1] ?? 'Other');
+    const division = type === 'hyrox' ? String(file.race?.division?.label || '').trim() : '';
+    const variant = division || String(file.raceVariant || '').trim() || (RACE_TYPES.find(([k]) => k === type)?.[1] ?? 'Other');
     const attempt = {
       slug, url: `/life/activity/${slug}`, date: raceDate(start), ts, seconds, time: clock(seconds), official,
       metres, distance: metres > 0 ? `${km(metres)} km` : '', tag: tagOf(file).tag,
@@ -145,7 +156,38 @@ export function buildRacePbs(activities) {
     return {
       key, label, typeClass: tagTheme(tag).typeClass,
       races: count, racesLabel: `${count} race${count === 1 ? '' : 's'}`,
-      rows: variants.map((v) => buildRow(v.name, v.list)),
+      rows: variants.map((v) => withExtras(key, buildRow(v.name, v.list), extras)),
     };
   });
+}
+
+/** @param {string} s */
+const norm = (s) => String(s ?? '').trim().toLowerCase();
+
+/**
+ * Hang a row's extras on it: a Hyrox division's best splits, a road distance's best effort.
+ * @param {string} type @param {any} row
+ * @param {NonNullable<Parameters<typeof buildRacePbs>[1]>} extras
+ */
+function withExtras(type, row, extras) {
+  if (type === 'hyrox') {
+    const d = (extras.hyroxSplits || []).find((h) => norm(h.label) === norm(row.name));
+    const has = !!d && (d.stations.length > 0 || d.runs.length > 0);
+    return { ...row, splits: has ? { stations: d.stations, runs: d.runs, label: d.label } : null };
+  }
+  if (type === 'road') {
+    const e = (extras.efforts || []).find((t) => norm(t.name) === norm(row.name));
+    return { ...row, effort: e ? { time: e.display, date: e.date } : null };
+  }
+  return row;
+}
+
+/**
+ * The on-foot best-effort names a road race row has taken over (so the training half
+ * of the board leaves them out).
+ * @param {ReturnType<typeof buildRacePbs>} groups
+ */
+export function absorbedEfforts(groups) {
+  const road = groups.find((g) => g.key === 'road');
+  return new Set((road?.rows || []).filter((r) => r.effort).map((r) => norm(r.name)));
 }

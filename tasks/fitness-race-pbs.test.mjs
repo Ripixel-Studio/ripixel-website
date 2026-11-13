@@ -3,8 +3,8 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { buildRacePbs, raceTime, RACE_PBS_HREF } from './fitness-race-pbs.mjs';
-import { buildLifeModel, racePbsModel } from './fitness-life.mjs';
+import { buildRacePbs, raceTime, absorbedEfforts, RACE_PBS_HREF } from './fitness-race-pbs.mjs';
+import { buildLifeModel, personalBestsModel } from './fitness-life.mjs';
 
 let n = 0;
 /**
@@ -113,12 +113,40 @@ describe('race PBs', () => {
   test('no races: no groups, and no section on the page', () => {
     assert.deepEqual(buildRacePbs([]), []);
     assert.deepEqual(buildRacePbs(/** @type {any} */ (undefined)), []);
-    assert.equal(racePbsModel([{ slug: 'a-run', isRace: false, entry: { startTime: '2026-01-01T09:00:00Z', durationSeconds: 1800 } }]), null);
+    assert.equal(personalBestsModel([{ slug: 'a-run', isRace: false, entry: { startTime: '2026-01-01T09:00:00Z', durationSeconds: 1800 } }]), null);
     const index = { activities: [{ slug: 'a-run', startTime: '2026-01-01T09:00:00Z', title: 'Run', activityType: 'ACTIVITY_TYPE_RUN', durationSeconds: 1800 }], roundups: [], profile: {}, streaks: { currentWeeks: 0, longestWeeks: 0 } };
-    assert.equal(buildLifeModel({ index, activities: [], now: new Date('2026-01-02T00:00:00Z') }).racePbs, null);
+    assert.equal(buildLifeModel({ index, activities: [], now: new Date('2026-01-02T00:00:00Z') }).personalBests, null);
     const withRace = buildLifeModel({ index, activities: [race({ type: 'road', variant: '5k', date: '2026-01-01', secs: 1500, metres: 5000 })], now: new Date('2026-01-02T00:00:00Z') });
-    assert.equal(withRace.racePbs?.groups.length, 1);
-    assert.equal(withRace.racePbs?.anchor, 'race-pbs');
+    assert.equal(withRace.personalBests?.groups.length, 1);
+    assert.equal(withRace.personalBests?.anchor, 'race-pbs');
     assert.equal(RACE_PBS_HREF, '/life/fitness#race-pbs');
+  });
+
+  test('one section, every number once: road rows take the matching best effort, training keeps the rest', () => {
+    const files = [
+      race({ type: 'road', variant: '5k', date: '2026-06-03', secs: 1427, metres: 5010 }),
+      race({ type: 'road', variant: 'Burghley 7', date: '2026-03-01', secs: 3299, metres: 11200 }),
+    ];
+    const tile = (/** @type {string} */ name, /** @type {string} */ display) => ({ name, metrics: [{ metric: 'FASTEST', display }], single: true, date: '4 APR 2026' });
+    const wall = [
+      { key: 'run', title: 'on foot', typeClass: 'fit-type--run', tiles: [tile('1K', '4:08'), tile('5K', '21:43'), tile('10K', '47:30'), tile('LONGEST RUN', '43.2 km')] },
+      { key: 'iron', title: 'iron', typeClass: 'fit-type--strength', tiles: [tile('Deadlift', '170 kg')] },
+    ];
+    const m = /** @type {any} */ (personalBestsModel(files, /** @type {any} */ (wall)));
+    const road = m.groups.find((/** @type {any} */ g) => g.key === 'road');
+    assert.deepEqual(road.rows.map((/** @type {any} */ r) => [r.name, r.best.time, r.effort?.time ?? null]), [['5k', '23:47', '21:43'], ['Burghley 7', '54:59', null]]);
+    // 10K has no road race, so it stays a training best; 5K moved to the race row.
+    assert.deepEqual(m.training.map((/** @type {any} */ g) => [g.key, g.tiles.map((/** @type {any} */ t) => t.name)]), [['run', ['1K', '10K', 'LONGEST RUN']], ['iron', ['Deadlift']]]);
+    assert.deepEqual([...absorbedEfforts(m.groups)], ['5k']);
+  });
+
+  test('a Hyrox division row is filed under the official division and carries its best splits', () => {
+    const hx = race({ type: 'hyrox', variant: "Open Men's Single (model's word)", date: '2026-03-28', secs: 5043, tag: 'hybrid', extra: hyroxRace(5027) });
+    const splits = [{ label: 'Open Men Single', stations: [{ name: 'SkiErg', display: '4:40' }], runs: [{ name: 'Run 1', display: '5:00' }] }];
+    const [g] = buildRacePbs([hx], { hyroxSplits: splits });
+    assert.equal(g.rows[0].name, 'Open Men Single');
+    assert.deepEqual(/** @type {any} */ (g.rows[0]).splits?.stations.map((/** @type {any} */ s) => s.name), ['SkiErg']);
+    const [bare] = buildRacePbs([hx]);
+    assert.equal(/** @type {any} */ (bare.rows[0]).splits, null, 'no splits known: no drawer');
   });
 });

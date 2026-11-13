@@ -27,7 +27,7 @@ import { resolveOptions } from './fitness-fetch.mjs';
 import { recordLabel, latestRecords } from './fitness-records.mjs';
 import { routePath } from './fitness-activity-views.mjs';
 import { buildHyroxHistory, hyroxWall } from './fitness-hyrox.mjs';
-import { buildRacePbs, RACE_PBS_ANCHOR } from './fitness-race-pbs.mjs';
+import { buildRacePbs, absorbedEfforts, RACE_PBS_ANCHOR } from './fitness-race-pbs.mjs';
 
 export const DEFAULT_EVENTS_FILE = 'personal/items/life/fitness.json';
 export const ACTIVITY_HREF = '/life/activity';
@@ -532,18 +532,17 @@ const IRON_COUNT = 8;
 const IRON_METRICS = ['heaviest', '1rm'];
 
 /**
- * The personal-bests wall, grouped by kind of record, then by exercise:
+ * The training bests, grouped by kind of record, then by exercise:
  *   ON FOOT (fastest standard distances + longest run), ON THE BIKE,
- *   HYROX, one section per division (F5.5: total, stations + Roxzone, runs, each
- *   linked to the race that set it; see hyroxWall), IRON (one tile per exercise
- *   carrying its heaviest lift and est. 1RM together, heaviest exercises first).
- * Volume and rep records stay on the activity and roundup pages. FitGlue's
+ *   IRON (one tile per exercise carrying its heaviest lift and est. 1RM together,
+ *   heaviest exercises first).
+ * Volume and rep records stay on the activity and roundup pages. Hyrox bests live on
+ * the race board (personalBestsModel), per division, with their splits. FitGlue's
  * division-less `hybrid_race_hyrox_*` records mixed doubles with solo, so they are
- * not on the wall; the Hyrox sections come from the race history instead.
+ * not used.
  * @param {any[]} prs  current records (see latestRecords)
- * @param {ReturnType<typeof hyroxWall>} [hyrox]  the Hyrox sections
  */
-export function buildPbBoard(prs, hyrox = []) {
+export function buildPbBoard(prs) {
   const all = (Array.isArray(prs) ? prs : []).map(buildPr);
   /** @param {string} g @param {string[]} keep */
   const pick = (g, keep) => keep
@@ -577,17 +576,14 @@ export function buildPbBoard(prs, hyrox = []) {
   const groups = [
     { key: 'run', title: 'on foot', typeClass: 'fit-type--run', tiles: pick('run', RUN_PBS) },
     { key: 'ride', title: 'on the bike', typeClass: 'fit-type--ride', tiles: pick('ride', RIDE_PBS) },
-    ...hyrox.filter((h) => h.total || h.stations.length).map((h) => ({
-      key: `hyrox-${h.key}`, title: `hyrox · ${h.label}`, typeClass: 'fit-type--hybrid', tiles: [], hyrox: h,
-    })),
     { key: 'iron', title: 'iron · heaviest lift & est. 1RM', typeClass: 'fit-type--strength', tiles: iron },
-  ].filter((g) => g.tiles.length > 0 || g.hyrox);
+  ].filter((g) => g.tiles.length > 0);
   return groups;
 }
 
 /**
  * @param {any} index @param {any[]} [roundupFiles] every roundup file: their prsAchieved fill in the PB wall
- * @param {any[]} [activityFiles] every activity file: the Hyrox races give the wall its per-division PBs
+ * @param {any[]} [activityFiles] every activity file (unused by the stats themselves)
  */
 export function buildStats(index, roundupFiles = [], activityFiles = [], now = new Date()) {
   const p = index?.profile || {};
@@ -632,7 +628,7 @@ export function buildStats(index, roundupFiles = [], activityFiles = [], now = n
   const prGroups = buildPbBoard(latestRecords(
     ...(roundupFiles || []).map((f) => f?.roundup?.prsAchieved),
     p.topPrs,
-  ), hyroxWall(buildHyroxHistory(activityFiles)));
+  ));
 
   return {
     strip,
@@ -776,6 +772,7 @@ export function buildLifeModel({ index, activities = [], roundups = [], events =
 
   const files = filesBySlug(activities);
   const available = !unavailable && entries.length > 0;
+  const stats = available ? buildStats(idx, roundups, activities, now) : null;
   return {
     available,
     hasData: entries.length > 0,
@@ -789,19 +786,35 @@ export function buildLifeModel({ index, activities = [], roundups = [], events =
     roundupsHref: ROUNDUPS_HREF,
     roundupCount: summaries.length,
     hasRoundups: summaries.length > 0,
-    stats: available ? buildStats(idx, roundups, activities, now) : null,
-    racePbs: available ? racePbsModel(activities) : null,
+    stats,
+    personalBests: stats ? personalBestsModel(activities, stats.prGroups) : null,
     calendar: buildCalendar(calendar, events, now, available ? entries : [], eventsUrl),
   };
 }
 
 /**
- * The race PB board (tasks/fitness-race-pbs.mjs), or null when there are no races.
+ * Personal bests, one section in two halves so no number shows twice:
+ *   races: the race board (tasks/fitness-race-pbs.mjs), with each Hyrox division's best
+ *     splits and each road distance's best effort folded into its row;
+ *   training: the wall's remaining tiles (buildPbBoard) minus the on-foot distances a
+ *     road race row has taken over.
+ * Null when neither half has anything.
  * @param {any[]} activities
+ * @param {ReturnType<typeof buildPbBoard>} [wall]
  */
-export function racePbsModel(activities) {
-  const groups = buildRacePbs(activities);
-  return groups.length ? { anchor: RACE_PBS_ANCHOR, racesHref: `${SESSIONS_HREF}/race`, groups } : null;
+export function personalBestsModel(activities, wall = []) {
+  const run = wall.find((g) => g.key === 'run');
+  const efforts = (run?.tiles || []).map((t) => ({ name: t.name, display: t.metrics[0]?.display ?? '', date: t.date }));
+  const groups = buildRacePbs(activities, { hyroxSplits: hyroxWall(buildHyroxHistory(activities)), efforts });
+  const taken = absorbedEfforts(groups);
+  const training = wall
+    .map((g) => (g.key === 'run' ? { ...g, tiles: g.tiles.filter((t) => !taken.has(t.name.toLowerCase())) } : g))
+    .filter((g) => g.tiles.length > 0);
+  if (!groups.length && !training.length) return null;
+  return {
+    anchor: RACE_PBS_ANCHOR, racesHref: `${SESSIONS_HREF}/race`,
+    groups, hasRaces: groups.length > 0, training, hasTraining: training.length > 0,
+  };
 }
 
 /** Activity files by slug. @param {any[]} activities */
