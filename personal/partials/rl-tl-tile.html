@@ -39,8 +39,8 @@
 {{/if}}
 {{#if isWeek}}
 <li class="rl-tl__item rl-tl__item--week {{top.typeClass}}">
-  <a class="rl-tl__card rl-tl__card--week{{#if cover}}{{#if top}} rl-tl__card--photo{{/if}}{{/if}} card-link" href="{{href}}">
-    {{#if top}}{{#if cover}}<span class="rl-tl__wpic"><img src="{{cover}}" alt="" loading="lazy" decoding="async" width="320" height="200"></span>{{/if}}{{/if}}
+  <a class="rl-tl__card rl-tl__card--week{{#if cover}}{{#if top}} rl-tl__card--snap{{/if}}{{/if}} card-link" href="{{href}}">
+    {{#if top}}{{#if cover}}<span class="rl-tl__snap" aria-hidden="true"><img src="{{cover}}" alt="" loading="lazy" decoding="async" width="200" height="200"></span>{{/if}}{{/if}}
     <span class="rl-tl__wk">{{title}}</span>
     <span class="rl-tl__range">{{range}}</span>
     <span class="rl-tl__wnums"><b>{{sessions}}</b> {{sessionsLabel}}{{#if secondary}}<br>{{secondary}}{{/if}}</span>
