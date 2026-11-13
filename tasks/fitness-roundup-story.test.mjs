@@ -68,6 +68,18 @@ describe('roundup story', () => {
     assert.deepEqual(s.coverLines.map((c) => c.title).slice(0, 1), ['Yorkshire Marathon']);
   });
 
+  test('a training day with no photo is filled: its inks by time, its glyph, its figure; rest days stay empty', () => {
+    const s = buildStory(roundupFiles[2], 'month', ctx);
+    const cells = s.calendar.weeks.flatMap((w) => w.cells);
+    const d19 = cells.find((c) => c.num === '19');
+    assert.equal(d19.photo, '');
+    assert.deepEqual(d19.fill?.bands.map((b) => [b.typeClass, b.share]), [['fit-type--strength', '100.0%']]);
+    assert.equal(d19.fill?.glyph, 'GYM');
+    assert.equal(d19.fill?.stat, '3.9 t');
+    assert.equal(cells.find((c) => c.num === '18').fill, null, 'a photo day draws its photo');
+    assert.equal(cells.find((c) => c.num === '1').fill, null, 'a rest day stays empty');
+  });
+
   test('a calendar day shows any session photo, not only a marked moment', () => {
     const es = entries.map((e) => (e.slug === 'pt-2' ? { ...e, photoUrls: ['https://x.test/gym.jpg'] } : e));
     const fs = es.map((e) => ({ slug: e.slug, entry: e, activity: { title: e.title, activityType: e.activityType, startTime: e.startTime, enrichments: {} } }));
