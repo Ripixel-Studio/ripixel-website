@@ -17,7 +17,7 @@
  * period's own facts here: a run of active days, the busiest week/month on record.
  */
 import { buildMoments, dayStreak, momentsIn, pickHighlights } from './fitness-highlights.mjs';
-import { TAGS, tagOf, themeOf } from './fitness-theme.mjs';
+import { TAGS, tagOf, themeOf, tagTheme } from './fitness-theme.mjs';
 import { cardPicture } from './fitness-life.mjs';
 
 const DAY = 864e5;
@@ -192,6 +192,31 @@ function routeOf(slugs, ctx) {
 }
 
 /**
+ * What a calendar day with sessions but no photo draws: its tags' inks stacked by time
+ * (bottom up, in TAGS order, like the consistency strip), with the longest session's
+ * route on top, or its tag's glyph when it has no route, and that session's headline
+ * figure. Null for a rest day.
+ * @param {{ e: any, t: number }[]} here @param {ReturnType<typeof storyContext>} ctx
+ */
+function dayFill(here, ctx) {
+  if (!here.length) return null;
+  /** @type {Map<string, number>} */
+  const byTag = new Map();
+  for (const { e } of here) byTag.set(tagOf(e).tag, (byTag.get(tagOf(e).tag) || 0) + Math.max(60, num(e.durationSeconds)));
+  const total = [...byTag.values()].reduce((a, b) => a + b, 0);
+  const order = Object.keys(TAGS);
+  const main = [...here].sort((a, b) => num(b.e.durationSeconds) - num(a.e.durationSeconds))[0].e;
+  const st = stat(main);
+  return {
+    bands: [...byTag.entries()].sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]))
+      .map(([t, secs]) => ({ typeClass: tagTheme(t).typeClass, share: `${((secs / total) * 100).toFixed(1)}%` })),
+    route: routeOf([main.slug, ...here.map((x) => x.e.slug)], ctx),
+    glyph: tagTheme(tagOf(main).tag).tagGlyph,
+    stat: `${st.value}${st.unit ? ` ${st.unit}` : ''}`,
+  };
+}
+
+/**
  * The lead ticket's own photo when the cover already shows its first: another photo from
  * the same sessions, else none (the cover says it).
  * @param {any} lead @param {any} cover @param {ReturnType<typeof storyContext>} ctx @param {string[]} slugs
@@ -287,6 +312,7 @@ export function buildStory(file, type, ctx) {
         dots: here.map((x) => ({ typeClass: themeOf(x.e).typeClass, title: x.e.title || '' })),
         count: here.length, mark: dayMark.get(isoDay(t0)) || '',
         photo: ctx.showPhotos && pic ? https(pic.e.photoUrls?.[0]) : '',
+        fill: ctx.showPhotos && pic ? null : dayFill(here, ctx),
         href: top ? `/life/activity/${top.e.slug}` : null,
       });
     }

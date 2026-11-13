@@ -367,9 +367,35 @@
 .rl-cal__day--mark { border-width: 3px; box-shadow: 3px 3px 0 var(--ink); }
 .rl-cal__link { position: absolute; inset: 0; overflow: hidden; }
 .rl-cal__pic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
+/* A day with sessions but no photo: its inks stacked by time, the route (or the tag's
+   glyph) on top, and the longest session's figure in the corner. */
+.rl-cal__fill { position: absolute; inset: 0; overflow: hidden; }
+.rl-cal__bands { position: absolute; inset: 0; display: flex; flex-direction: column-reverse; }
+.rl-cal__bands i { display: block; height: var(--s); background: var(--type); }
+.rl-cal__bands i + i { border-bottom: 1.5px solid var(--ink); }
+.rl-cal__bands::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(rgba(23,19,17,0.18) 1px, transparent 1.4px) 0 0 / 5px 5px;
+}
+.rl-cal__route { position: absolute; inset: 22% 14% 24%; color: var(--ink); filter: drop-shadow(1.5px 1.5px 0 var(--paper)); }
+.rl-cal__route .rl-route path { stroke-width: 2.6; }
+.rl-cal__glyph {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: var(--f-disp); font-weight: 400; font-size: clamp(14px, 2.6vw, 38px); letter-spacing: 0.02em;
+  color: var(--paper); -webkit-text-stroke: 1.5px var(--ink); text-shadow: 2px 2px 0 var(--ink);
+  transform: rotate(-8deg);
+}
+.rl-cal__stat {
+  position: absolute; right: 4px; top: 4px; padding: 1px 4px;
+  font: 700 clamp(8px, 0.8vw, 11px) var(--f-mono); letter-spacing: 0.04em; white-space: nowrap;
+  background: var(--paper-4); border: 1.5px solid var(--ink);
+}
+.rl-cal__day--fill .rl-cal__dots { display: none; }
+@media (max-width: 600px) { .rl-cal__stat { display: none; } .rl-cal__glyph { -webkit-text-stroke: 1px var(--ink); text-shadow: 1px 1px 0 var(--ink); } }
 .rl-cal__num { position: absolute; top: 3px; left: 5px; font-family: var(--f-disp); font-size: clamp(13px, 1.6vw, 19px); line-height: 1; }
 .rl-cal__day--mark .rl-cal__num,
-.rl-cal__day--pic .rl-cal__num { padding: 1px 4px; background: var(--paper-4); border: 1.5px solid var(--ink); top: 2px; left: 2px; }
+.rl-cal__day--pic .rl-cal__num,
+.rl-cal__day--fill .rl-cal__num { padding: 1px 4px; background: var(--paper-4); border: 1.5px solid var(--ink); top: 2px; left: 2px; }
 .rl-cal__dots { position: absolute; left: 4px; right: 4px; bottom: 4px; display: flex; flex-wrap: wrap; gap: 3px; }
 .rl-cal__dots i { display: block; width: clamp(8px, 1.1vw, 12px); height: clamp(8px, 1.1vw, 12px); border-radius: 50%; background: var(--type); border: 1.5px solid var(--ink); }
 .rl-cal__mark {

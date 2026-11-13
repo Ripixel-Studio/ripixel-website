@@ -38,9 +38,14 @@
       <ol class="rl-cal__week">
         {{#each cells}}
         {{#if blank}}<li class="rl-cal__day rl-cal__day--blank" aria-hidden="true"></li>{{else}}
-        <li class="rl-cal__day{{#if count}} rl-cal__day--on{{/if}}{{#if mark}} rl-cal__day--mark{{/if}}{{#if photo}} rl-cal__day--pic{{/if}}{{#if href}} card-link card-link--small{{/if}}">
+        <li class="rl-cal__day{{#if count}} rl-cal__day--on{{/if}}{{#if mark}} rl-cal__day--mark{{/if}}{{#if photo}} rl-cal__day--pic{{/if}}{{#if fill}} rl-cal__day--fill{{/if}}{{#if href}} card-link card-link--small{{/if}}">
           {{#if href}}<a class="rl-cal__link card-link__target" href="{{href}}">{{/if}}
           {{#if photo}}<img class="rl-cal__pic" src="{{photo}}" alt="" loading="lazy" decoding="async" width="120" height="120">{{/if}}
+          {{#if fill}}{{#with fill}}<span class="rl-cal__fill" aria-hidden="true">
+            <span class="rl-cal__bands">{{#each bands}}<i class="{{typeClass}}" style="--s: {{share}}"></i>{{/each}}</span>
+            {{#if route}}<span class="rl-cal__route">{{> rl-route route}}</span>{{else}}<b class="rl-cal__glyph">{{glyph}}</b>{{/if}}
+            <span class="rl-cal__stat">{{stat}}</span>
+          </span>{{/with}}{{/if}}
           <span class="rl-cal__num">{{num}}</span>
           <span class="rl-cal__dots">{{#each dots}}<i class="{{typeClass}}" title="{{title}}"></i>{{/each}}</span>
           {{#if mark}}<span class="rl-cal__mark">{{mark}}</span>{{/if}}
