@@ -77,6 +77,11 @@
     {{> fitness-stats fitnessLife.stats}}
     {{/if}}
 
+    <!-- 4b. Race PBs: by race type, one row per variant (tasks/fitness-race-pbs.mjs) -->
+    {{#if fitnessLife.racePbs}}
+    {{> fitness-race-pbs fitnessLife.racePbs}}
+    {{/if}}
+
     <!-- 5. Every route on one sheet (LH3.5 lifeHeatmapView; ends near home already trimmed) -->
     {{#if lifeHeatmapView}}
     <h2 class="fit-header">every <span>route</span>.</h2>

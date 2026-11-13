@@ -27,6 +27,7 @@
 import { buildCard, duration, filesBySlug, km, SESSIONS_HREF, TZ } from './fitness-life.mjs';
 import { buildMoments } from './fitness-highlights.mjs';
 import { TAGS } from './fitness-theme.mjs';
+import { RACE_PBS_HREF } from './fitness-race-pbs.mjs';
 
 export const PAGE_SIZE = 60;
 
@@ -159,6 +160,7 @@ export function buildSessionPages(index, files = [], opts = {}) {
             count: k === 'all' ? cards.length : k === 'race' ? raceCount : counts.get(k), href: sessionsHref(k, 1), current: k === filter,
             typeClass: k === 'all' ? '' : k === 'race' ? 'ss-filter--race' : `fit-type--${k}`,
           })),
+          racePbsHref: filter === 'race' ? RACE_PBS_HREF : null,
           hasFilters: familyKeys.length > 1,
           // The key under the chips: every tag's colour and what goes in it.
           legend: (/** @type {(keyof typeof TAGS)[]} */ (Object.keys(TAGS))).map((k) => ({ key: k, label: TAGS[k].label, note: TAGS[k].note, typeClass: `fit-type--${k}` })),

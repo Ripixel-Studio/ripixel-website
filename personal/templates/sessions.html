@@ -51,7 +51,7 @@
         <li class="ss-key__tag {{typeClass}}"><i aria-hidden="true"></i><b>{{label}}</b> <span>{{note}}</span></li>
         {{/each}}
       </ul>
-      <p class="ss-key__race"><span class="fit-chip fit-race">Race</span> marks the real thing: a race, a parkrun or an event done for time. It keeps its sport's colour.</p>
+      <p class="ss-key__race"><span class="fit-chip fit-race">Race</span> marks the real thing: a race, a parkrun or an event done for time. It keeps its sport's colour.{{#if fitnessSessions.racePbsHref}} <a class="ss-key__pbs" href="{{fitnessSessions.racePbsHref}}">race PBs →</a>{{/if}}</p>
     </aside>
 
     <div class="ss-list" data-fit-sessions>
