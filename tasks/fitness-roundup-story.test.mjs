@@ -68,6 +68,17 @@ describe('roundup story', () => {
     assert.deepEqual(s.coverLines.map((c) => c.title).slice(0, 1), ['Yorkshire Marathon']);
   });
 
+  test('a calendar day shows any session photo, not only a marked moment', () => {
+    const es = entries.map((e) => (e.slug === 'pt-2' ? { ...e, photoUrls: ['https://x.test/gym.jpg'] } : e));
+    const fs = es.map((e) => ({ slug: e.slug, entry: e, activity: { title: e.title, activityType: e.activityType, startTime: e.startTime, enrichments: {} } }));
+    const s = buildStory(roundupFiles[2], 'month', storyContext({ files: fs, entries: es, past, roundupFiles }));
+    const cells = s.calendar.weeks.flatMap((w) => w.cells);
+    const d20 = cells.find((c) => c.num === '20');
+    assert.equal(d20.mark, '', 'an ordinary PT day');
+    assert.equal(d20.photo, 'https://x.test/gym.jpg');
+    assert.equal(cells.find((c) => c.num === '18').photo, 'https://x.test/york.jpg', 'a marked day keeps its own photo');
+  });
+
   test('a year is twelve months, each linking its roundup, stacked by type, plus its races in order', () => {
     const s = buildStory(roundupFiles[4], 'year', ctx);
     assert.equal(s.months.length, 12);

@@ -368,7 +368,8 @@
 .rl-cal__link { position: absolute; inset: 0; overflow: hidden; }
 .rl-cal__pic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
 .rl-cal__num { position: absolute; top: 3px; left: 5px; font-family: var(--f-disp); font-size: clamp(13px, 1.6vw, 19px); line-height: 1; }
-.rl-cal__day--mark .rl-cal__num { padding: 1px 4px; background: var(--paper-4); border: 1.5px solid var(--ink); top: 2px; left: 2px; }
+.rl-cal__day--mark .rl-cal__num,
+.rl-cal__day--pic .rl-cal__num { padding: 1px 4px; background: var(--paper-4); border: 1.5px solid var(--ink); top: 2px; left: 2px; }
 .rl-cal__dots { position: absolute; left: 4px; right: 4px; bottom: 4px; display: flex; flex-wrap: wrap; gap: 3px; }
 .rl-cal__dots i { display: block; width: clamp(8px, 1.1vw, 12px); height: clamp(8px, 1.1vw, 12px); border-radius: 50%; background: var(--type); border: 1.5px solid var(--ink); }
 .rl-cal__mark {
@@ -748,8 +749,34 @@ a.rl-yrmonth__box { --card-lift: 6px 7px 0 var(--ink); }
 
 /* week: number, range, numbers, a 7-day chart; the race weeks get the photo */
 .rl-tl__card--week { display: flex; flex-direction: column; padding: 10px 10px 8px; gap: 2px; }
-.rl-tl__wpic { display: block; margin: -10px -10px 6px; height: 34%; overflow: hidden; border-bottom: 3px solid var(--ink); }
-.rl-tl__wpic img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; }
+/* A week with a photo keeps its 7-day chart (the bars are what make a week card a week
+   card) and pins the photo on as a snapshot in the top corner: a white-bordered print,
+   tilted, with a strip of tape. Months are full-bleed covers, years are black. */
+.rl-tl__card--week { position: relative; }
+.rl-tl__card--snap { --snap: clamp(60px, 8.5cqi, 116px); }
+.rl-tl__snap {
+  position: absolute; z-index: 1; top: 12px; right: 12px;
+  width: var(--snap); height: calc(var(--snap) + 10px);
+  padding: 4px 4px 12px; box-sizing: content-box; background: #fff;
+  border: 1.5px solid var(--ink); box-shadow: 3px 3px 0 rgba(23,19,17,0.25);
+  transform: rotate(3.5deg);
+}
+.rl-tl__item--week:nth-child(even) .rl-tl__snap { transform: rotate(-3deg); }
+.rl-tl__snap::before {
+  content: ''; position: absolute; z-index: 1; top: -7px; left: 50%; width: 46%; height: 14px; margin-left: -23%;
+  background: color-mix(in srgb, var(--type, var(--ink-yellow)) 55%, #fff); opacity: 0.85;
+  transform: rotate(-4deg); border: 1px solid rgba(23,19,17,0.15);
+}
+.rl-tl__snap img { display: block; width: 100%; height: calc(100% - 10px); object-fit: cover; object-position: center 30%; border: 1px solid rgba(23,19,17,0.4); box-sizing: border-box; }
+/* The text column clears the snapshot and is at least as tall, so the chart starts under it. */
+.rl-tl__card--snap .rl-tl__wk, .rl-tl__card--snap .rl-tl__range, .rl-tl__card--snap .rl-tl__wnums { padding-right: calc(var(--snap) + 20px); }
+.rl-tl__card--snap .rl-tl__wnums { min-height: max(0px, calc(var(--snap) - 24px)); }
+/* Two columns (phones): no room for a print beside the text, so the week is just its bars. */
+@container (max-width: 600px) {
+  .rl-tl__snap { display: none; }
+  .rl-tl__card--snap .rl-tl__wk, .rl-tl__card--snap .rl-tl__range, .rl-tl__card--snap .rl-tl__wnums { padding-right: 0; }
+  .rl-tl__card--snap .rl-tl__wnums { min-height: 0; }
+}
 .rl-tl__wk { font-family: var(--f-disp); font-size: clamp(24px, 2.6vw, 34px); line-height: 0.95; }
 .rl-tl__range { font-family: var(--f-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.75; }
 .rl-tl__wnums { margin-top: 4px; font-family: var(--f-mono); font-size: 11px; line-height: 1.3; }
@@ -757,7 +784,6 @@ a.rl-yrmonth__box { --card-lift: 6px 7px 0 var(--ink); }
 .rl-tl__days { flex: 1; min-height: 18px; display: flex; align-items: flex-end; gap: 3px; margin-top: 6px; border-bottom: 2px solid var(--ink); }
 .rl-tl__days i { flex: 1; min-height: 2px; background: var(--type, var(--paper-2)); border: 1.5px solid var(--ink); border-bottom: 0; }
 .rl-tl__days i[style*='height:0%'] { border: 0; }
-.rl-tl__card--photo .rl-tl__days { display: none; }
 .rl-tl__wtop { display: flex; flex-direction: column; gap: 3px; margin-top: 6px; font-family: var(--f-sans); font-weight: 700; font-size: 12.5px; line-height: 1.15; }
 .rl-tl__wtop .rl-stamp { align-self: flex-start; font-size: 9px; padding: 2px 7px 2px 8px; }
 .rl-tl__wtop > span:last-child { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }

@@ -38,7 +38,7 @@
       <ol class="rl-cal__week">
         {{#each cells}}
         {{#if blank}}<li class="rl-cal__day rl-cal__day--blank" aria-hidden="true"></li>{{else}}
-        <li class="rl-cal__day{{#if count}} rl-cal__day--on{{/if}}{{#if mark}} rl-cal__day--mark{{/if}}{{#if href}} card-link card-link--small{{/if}}">
+        <li class="rl-cal__day{{#if count}} rl-cal__day--on{{/if}}{{#if mark}} rl-cal__day--mark{{/if}}{{#if photo}} rl-cal__day--pic{{/if}}{{#if href}} card-link card-link--small{{/if}}">
           {{#if href}}<a class="rl-cal__link card-link__target" href="{{href}}">{{/if}}
           {{#if photo}}<img class="rl-cal__pic" src="{{photo}}" alt="" loading="lazy" decoding="async" width="120" height="120">{{/if}}
           <span class="rl-cal__num">{{num}}</span>

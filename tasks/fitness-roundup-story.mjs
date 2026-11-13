@@ -280,11 +280,13 @@ export function buildStory(file, type, ctx) {
       const t0 = start + i * DAY;
       const here = inPeriod.filter((x) => x.t >= t0 && x.t < t0 + DAY);
       const top = here.find((x) => marks.has(x.e.slug)) || here.find((x) => https(x.e.photoUrls?.[0])) || here[0];
+      // Any session's photo fills the day: the marked one's first, else the day's first photo.
+      const pic = [top, ...here].find((x) => x && https(x.e.photoUrls?.[0]));
       cells.push({
         blank: false, num: String(i + 1), iso: isoDay(t0),
         dots: here.map((x) => ({ typeClass: themeOf(x.e).typeClass, title: x.e.title || '' })),
         count: here.length, mark: dayMark.get(isoDay(t0)) || '',
-        photo: ctx.showPhotos && top && marks.has(top.e.slug) ? https(top.e.photoUrls?.[0]) : '',
+        photo: ctx.showPhotos && pic ? https(pic.e.photoUrls?.[0]) : '',
         href: top ? `/life/activity/${top.e.slug}` : null,
       });
     }
