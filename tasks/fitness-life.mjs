@@ -27,6 +27,7 @@ import { resolveOptions } from './fitness-fetch.mjs';
 import { recordLabel, latestRecords } from './fitness-records.mjs';
 import { routePath } from './fitness-activity-views.mjs';
 import { buildHyroxHistory, hyroxWall } from './fitness-hyrox.mjs';
+import { buildRacePbs, RACE_PBS_ANCHOR } from './fitness-race-pbs.mjs';
 
 export const DEFAULT_EVENTS_FILE = 'personal/items/life/fitness.json';
 export const ACTIVITY_HREF = '/life/activity';
@@ -789,8 +790,18 @@ export function buildLifeModel({ index, activities = [], roundups = [], events =
     roundupCount: summaries.length,
     hasRoundups: summaries.length > 0,
     stats: available ? buildStats(idx, roundups, activities, now) : null,
+    racePbs: available ? racePbsModel(activities) : null,
     calendar: buildCalendar(calendar, events, now, available ? entries : [], eventsUrl),
   };
+}
+
+/**
+ * The race PB board (tasks/fitness-race-pbs.mjs), or null when there are no races.
+ * @param {any[]} activities
+ */
+export function racePbsModel(activities) {
+  const groups = buildRacePbs(activities);
+  return groups.length ? { anchor: RACE_PBS_ANCHOR, racesHref: `${SESSIONS_HREF}/race`, groups } : null;
 }
 
 /** Activity files by slug. @param {any[]} activities */

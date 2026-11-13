@@ -1,0 +1,48 @@
+<!-- Context: fitnessLife.racePbs — race PBs by race type, one row per variant (tasks/fitness-race-pbs.mjs) -->
+<section class="fit-rpb" id="{{anchor}}" aria-label="Race personal bests">
+  <div class="fit-header-row">
+    <h2 class="fit-header">race <span>PBs</span>.</h2>
+    <a class="fit-header-row__meta fit-header-row__link" href="{{racesHref}}">every race →</a>
+  </div>
+  <div class="fit-rpb__types">
+    {{#each groups}}
+    <section class="fit-rpb__type {{typeClass}}">
+      <header class="fit-rpb__head">
+        <h3 class="fit-prs__group-title">{{label}}</h3>
+        <span class="fit-chip fit-race">Race</span>
+        <span class="fit-rpb__count">{{racesLabel}}</span>
+      </header>
+      <ol class="fit-rpb__rows">
+        {{#each rows}}
+        <li class="fit-rpb__row{{#if varies}} fit-rpb__row--varies{{/if}}">
+          <div class="fit-rpb__name">{{name}}<span class="fit-rpb__n">{{attemptsLabel}}</span></div>
+          {{#if varies}}
+          <div class="fit-rpb__vary">
+            <div class="fit-rpb__note">distances vary · no PB</div>
+            <ul class="fit-rpb__list">
+              {{#each list}}<li><a href="{{url}}"><span class="fit-rpb__ld">{{date}}</span><span class="fit-rpb__lk">{{distance}}</span><b class="fit-rpb__lt">{{time}}</b></a></li>{{/each}}
+            </ul>
+          </div>
+          {{else}}
+          {{#with best}}
+          <a class="fit-rpb__best" href="{{url}}" title="PB, {{source}}">
+            <b class="fit-rpb__time">{{time}}</b>
+            <span class="fit-rpb__date">PB · {{date}}</span>
+          </a>
+          {{/with}}
+          {{#if latest}}{{#with latest}}
+          <a class="fit-rpb__latest" href="{{url}}" title="Latest, {{source}}">
+            <span class="fit-rpb__lab">latest {{date}}</span>
+            <span><span class="fit-rpb__lt">{{time}}</span> <b class="fit-rpb__gap">{{gap}}</b></span>
+          </a>
+          {{/with}}{{else}}{{#if latestIsPb}}
+          <span class="fit-rpb__latest fit-rpb__latest--pb">latest is the PB</span>
+          {{/if}}{{/if}}
+          {{/if}}
+        </li>
+        {{/each}}
+      </ol>
+    </section>
+    {{/each}}
+  </div>
+</section>

@@ -629,6 +629,74 @@
 .fit-hx__t { font-family: var(--f-disp); font-weight: 400; font-size: 19px; line-height: 1.1; grid-row: span 2; align-self: center; }
 .fit-hx__w { font: 9px var(--f-mono); letter-spacing: .08em; opacity: .6; text-transform: uppercase; }
 
+/* ─── 4b. Race PBs (tasks/fitness-race-pbs.mjs) ───────────
+   One card per race type in its tag's ink (fit-type--<tag>), with the Race badge;
+   one row per variant: name + goes | the PB (linked) | the latest and its gap.
+   A row whose distances vary lists its attempts instead of a PB. */
+.fit-rpb { margin-top: 8px; }
+.fit-rpb__types {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 460px), 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.fit-rpb__type {
+  background: #fff;
+  border: 2px solid var(--ink);
+  border-left: 6px solid var(--type);
+  box-shadow: 3px 3px 0 rgba(23,19,17,0.13);
+  min-width: 0;
+}
+.fit-rpb__head {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 8px 10px 6px;
+  border-bottom: 1.5px solid var(--ink);
+}
+.fit-rpb__head .fit-prs__group-title { margin: 0; }
+.fit-rpb__count { margin-left: auto; font: 10px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; opacity: .65; }
+.fit-rpb__rows { margin: 0; padding: 0; list-style: none; }
+.fit-rpb__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 4px 12px;
+  align-items: center;
+  padding: 8px 10px;
+}
+.fit-rpb__row + .fit-rpb__row { border-top: 1px dashed rgba(23,19,17,0.2); }
+.fit-rpb__name {
+  font: 700 12px var(--f-mono); letter-spacing: .04em; text-transform: uppercase;
+  line-height: 1.3; overflow-wrap: anywhere;
+}
+.fit-rpb__n { display: block; font-weight: 400; font-size: 10px; letter-spacing: .1em; opacity: .6; margin-top: 2px; }
+.fit-rpb__best, .fit-rpb__latest { color: var(--ink); text-decoration: none; display: flex; flex-direction: column; min-width: 0; }
+.fit-rpb__best:hover .fit-rpb__time { background: var(--type); color: var(--type-on); }
+.fit-rpb__time { font-family: var(--f-disp); font-weight: 400; font-size: 28px; line-height: 1; align-self: flex-start; padding: 0 2px; }
+.fit-rpb__date, .fit-rpb__lab { font: 10px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; opacity: .65; margin-top: 3px; }
+.fit-rpb__latest { font: 13px var(--f-mono); }
+.fit-rpb__latest .fit-rpb__lab { margin: 0 0 2px; order: -1; }
+.fit-rpb__latest:hover .fit-rpb__lt { text-decoration: underline; }
+.fit-rpb__gap { font-size: 11px; color: var(--type-text); }
+.fit-rpb__latest--pb { font: 10px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; opacity: .65; }
+.fit-rpb__vary { grid-column: 2 / -1; min-width: 0; }
+.fit-rpb__note {
+  display: inline-block; font: 700 9px var(--f-mono); letter-spacing: .12em; text-transform: uppercase;
+  padding: 1px 5px; border: 1px dashed var(--ink); margin-bottom: 4px;
+}
+.fit-rpb__list { margin: 0; padding: 0; list-style: none; }
+.fit-rpb__list a {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: baseline;
+  padding: 2px 0; color: var(--ink); text-decoration: none; font: 11px var(--f-mono);
+}
+.fit-rpb__list a:hover { background: var(--paper-2); }
+.fit-rpb__ld { opacity: .7; letter-spacing: .06em; }
+.fit-rpb__lk { opacity: .7; text-align: right; }
+.fit-rpb__lt { font-weight: 700; text-align: right; min-width: 7ch; }
+@media (max-width: 480px) {
+  .fit-rpb__row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .fit-rpb__name { grid-column: 1 / -1; }
+  .fit-rpb__vary { grid-column: 1 / -1; }
+}
+
 /* ─── 5. Events (hand-written) ─────────── */
 .fit-events {
   margin: 0;

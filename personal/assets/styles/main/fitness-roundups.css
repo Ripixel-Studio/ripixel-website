@@ -857,6 +857,7 @@ a.rl-yrmonth__box { --card-lift: 6px 7px 0 var(--ink); }
 .ss-key__tag span { opacity: 0.75; }
 .ss-key__race { margin: 12px 0 0; padding-top: 10px; border-top: 1.5px dashed color-mix(in srgb, var(--ink) 35%, transparent); font-size: 13px; }
 .ss-key__race .fit-chip { margin-right: 6px; }
+.ss-key__pbs { margin-left: 6px; font-family: var(--f-mono); font-size: 12px; font-weight: 700; color: var(--ink); white-space: nowrap; }
 
 .ss-month { margin-bottom: 40px; }
 .ss-month__head {
