@@ -28,6 +28,7 @@ import { recordLabel, latestRecords } from './fitness-records.mjs';
 import { routePath } from './fitness-activity-views.mjs';
 import { buildHyroxHistory, hyroxWall } from './fitness-hyrox.mjs';
 import { buildRacePbs, absorbedEfforts, RACE_PBS_ANCHOR } from './fitness-race-pbs.mjs';
+import { buildConsistency } from './fitness-consistency.mjs';
 
 export const DEFAULT_EVENTS_FILE = 'personal/items/life/fitness.json';
 export const ACTIVITY_HREF = '/life/activity';
@@ -540,10 +541,22 @@ const IRON_METRICS = ['heaviest', '1rm'];
  * the race board (personalBestsModel), per division, with their splits. FitGlue's
  * division-less `hybrid_race_hyrox_*` records mixed doubles with solo, so they are
  * not used.
+ * Each record links to the activity that set it: FitGlue stamps a record's `achievedAt`
+ * with that activity's start time, so `activities` (index entries) find it by start.
  * @param {any[]} prs  current records (see latestRecords)
+ * @param {any[]} [activities]  index entries
  */
-export function buildPbBoard(prs) {
-  const all = (Array.isArray(prs) ? prs : []).map(buildPr);
+export function buildPbBoard(prs, activities = []) {
+  /** @type {Map<number, string>} */
+  const byStart = new Map();
+  for (const e of Array.isArray(activities) ? activities : []) {
+    const t = Date.parse(String(e?.startTime ?? ''));
+    if (!Number.isNaN(t) && e.slug) byStart.set(t, `/life/activity/${e.slug}`);
+  }
+  const all = (Array.isArray(prs) ? prs : []).map((pr) => {
+    const b = buildPr(pr);
+    return { ...b, url: byStart.get(b.ts) || '' };
+  });
   /** @param {string} g @param {string[]} keep */
   const pick = (g, keep) => keep
     .map((name) => all.find((p) => p.group === g && p.name === name))
@@ -552,11 +565,16 @@ export function buildPbBoard(prs) {
   /** @param {string} name @param {any[]} metrics */
   const tile = (name, metrics) => {
     const latest = metrics.reduce((a, b) => (b.ts > a.ts ? b : a));
+    // One link for the tile when every metric came from the same session; else per metric.
+    const whole = new Set(metrics.map((m) => m.url)).size === 1;
     return {
       name,
-      metrics: metrics.map(({ metric, display, delta, improved }) => ({ metric, display, delta, improved })),
+      metrics: metrics.map(({ metric, display, delta, improved, url, date }) => ({
+        metric, display, delta, improved, url: whole ? '' : url, date: whole ? '' : date,
+      })),
       single: metrics.length === 1,
-      date: latest.date,
+      date: whole ? latest.date : '',
+      url: whole ? latest.url : '',
     };
   };
 
@@ -591,7 +609,6 @@ export function buildStats(index, roundupFiles = [], activityFiles = [], now = n
   const sh = p.streakHistory || null;
   const tracked = Number(sh?.weeksTracked) || 0;
   const missed = Number(sh?.missedWeeks) || 0;
-  const weekly = Array.isArray(sh?.weeklyActive) ? sh.weeklyActive.slice(-52) : [];
   const hours = (Number(p.totalDurationSeconds) || 0) / 3600;
 
   const strip = [
@@ -628,17 +645,13 @@ export function buildStats(index, roundupFiles = [], activityFiles = [], now = n
   const prGroups = buildPbBoard(latestRecords(
     ...(roundupFiles || []).map((f) => f?.roundup?.prsAchieved),
     p.topPrs,
-  ));
+  ), index?.activities || []);
 
   return {
     strip,
     stripClass: strip.length === 5 ? 'stat-strip--5' : '',
     consistency: {
-      weeks: weekly.map((a, i) => ({
-        active: Boolean(a),
-        label: `${weekly.length - i} week${weekly.length - i === 1 ? '' : 's'} ago`,
-      })),
-      hasWeeks: weekly.length > 0,
+      ...buildConsistency(index?.activities || [], index?.roundups || [], (k) => `${ROUNDUP_HREF}/${encodeURIComponent(k)}`, now),
       tracked,
       missed,
       label: tracked ? `${tracked - missed} of the last ${tracked} weeks active` : '',
