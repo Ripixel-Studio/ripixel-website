@@ -473,11 +473,12 @@
   margin-top: 2px;
 }
 
-.fit-stats__lower {
+/* Consistency squares beside the notes (the PBs moved to their own section, 4b). */
+.fit-stats__side {
   display: grid;
-  grid-template-columns: 1fr 1.4fr;
-  gap: 24px;
-  align-items: start;
+  grid-template-columns: minmax(0, 780px) minmax(0, 1fr);
+  gap: 8px 32px;
+  align-items: end;
 }
 
 .fit-consistency__label,
@@ -608,11 +609,8 @@
   margin-top: 3px;
 }
 
-/* Hyrox PBs per division (F5.5): the total as a lead tile, then two linked lists
-   (stations + Roxzone, runs) in the Hyrox ink. Lists stack on phones. */
-.fit-hx { display: grid; grid-template-columns: minmax(150px, 0.8fr) 2fr; gap: 8px; align-items: start; }
-.fit-hx__total { color: var(--ink); text-decoration: none; --card-ink: var(--type); --card-ink-fg: var(--type-on, #fff); padding-right: 36px; }
-.fit-hx__total .fit-pr__value { font-size: 40px; margin-top: 4px; }
+/* Hyrox best splits per division (F5.5), opened from the division's race PB row:
+   two linked lists (stations + Roxzone, runs) in the Hyrox ink. Lists stack on phones. */
 .fit-hx__lists { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .fit-hx__list {
   margin: 0; padding: 4px 0; list-style: none; background: #fff;
@@ -633,7 +631,30 @@
    One card per race type in its tag's ink (fit-type--<tag>), with the Race badge;
    one row per variant: name + goes | the PB (linked) | the latest and its gap.
    A row whose distances vary lists its attempts instead of a PB. */
-.fit-rpb { margin-top: 8px; }
+.fit-pbs { margin-top: 8px; }
+.fit-pbs__part { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.fit-pbs__part .fit-prs__label { margin: 0; }
+.fit-pbs__part .fit-header-row__link { margin-left: auto; }
+.fit-rpb { margin: 4px 0 28px; scroll-margin-top: 16px; }
+.fit-rpb__types { margin-top: 10px; }
+.fit-rpb__bests { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.fit-rpb__effort { display: flex; flex-direction: column; font: 13px var(--f-mono); }
+.fit-rpb__et { font-weight: 700; }
+.fit-rpb__effort .fit-rpb__lab { margin-top: 1px; }
+.fit-rpb__splits { grid-column: 1 / -1; margin-top: 2px; }
+.fit-rpb__splits summary {
+  cursor: pointer; font: 700 10px var(--f-mono); letter-spacing: .12em; text-transform: uppercase;
+  display: inline-block; padding: 2px 6px; border: 1px dashed var(--ink); list-style: none;
+}
+.fit-rpb__splits summary::-webkit-details-marker { display: none; }
+.fit-rpb__splits summary::after { content: ' +'; }
+.fit-rpb__splits[open] summary::after { content: ' −'; }
+.fit-rpb__splits summary:hover { background: var(--type); color: var(--type-on); border-style: solid; }
+.fit-rpb__splits .fit-hx__lists { margin-top: 8px; }
+.fit-rpb__splits .fit-hx__list { box-shadow: none; border-width: 1.5px; border-left-width: 4px; }
+/* Training groups share the row in proportion to their tile count (--n). */
+.fit-pbs__training { display: flex; flex-wrap: wrap; gap: 0 20px; align-items: flex-start; }
+.fit-pbs__training > .fit-prs__group { flex: var(--n, 1) 1 0; min-width: min(100%, 300px); }
 .fit-rpb__types {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 460px), 1fr));
@@ -782,7 +803,7 @@
       "summary summary"
       "links links";
   }
-  .fit-stats__lower { grid-template-columns: 1fr; }
+  .fit-stats__side { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 720px) {
@@ -808,7 +829,7 @@
   }
   .fit-consistency__weeks { grid-template-columns: repeat(13, minmax(0, 1fr)); }
   .fit-prs__wall { grid-template-columns: 1fr 1fr; }
-  .fit-hx, .fit-hx__lists { grid-template-columns: 1fr; }
+  .fit-hx__lists { grid-template-columns: 1fr; }
   /* The eight runs fit two to a row on a phone. */
   .fit-hx__list--runs { display: grid; grid-template-columns: 1fr 1fr; }
   .fit-hx__list--runs li + li { border-top: 0; }

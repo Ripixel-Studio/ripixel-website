@@ -1,48 +1,108 @@
-<!-- Context: fitnessLife.racePbs — race PBs by race type, one row per variant (tasks/fitness-race-pbs.mjs) -->
-<section class="fit-rpb" id="{{anchor}}" aria-label="Race personal bests">
-  <div class="fit-header-row">
-    <h2 class="fit-header">race <span>PBs</span>.</h2>
-    <a class="fit-header-row__meta fit-header-row__link" href="{{racesHref}}">every race →</a>
+<!-- Context: fitnessLife.personalBests — every PB once: races (tasks/fitness-race-pbs.mjs, with
+     Hyrox splits and road best efforts folded in) then training (buildPbBoard minus what races took) -->
+<section class="fit-pbs" aria-label="Personal bests">
+  <h2 class="fit-header">personal <span>bests</span>.</h2>
+
+  {{#if hasRaces}}
+  <div class="fit-rpb" id="{{anchor}}">
+    <div class="fit-pbs__part">
+      <div class="fit-prs__label">· RACES ·</div>
+      <a class="fit-header-row__meta fit-header-row__link" href="{{racesHref}}">every race →</a>
+    </div>
+    <div class="fit-rpb__types">
+      {{#each groups}}
+      <section class="fit-rpb__type {{typeClass}}">
+        <header class="fit-rpb__head">
+          <h3 class="fit-prs__group-title">{{label}}</h3>
+          <span class="fit-chip fit-race">Race</span>
+          <span class="fit-rpb__count">{{racesLabel}}</span>
+        </header>
+        <ol class="fit-rpb__rows">
+          {{#each rows}}
+          <li class="fit-rpb__row{{#if varies}} fit-rpb__row--varies{{/if}}">
+            <div class="fit-rpb__name">{{name}}<span class="fit-rpb__n">{{attemptsLabel}}</span></div>
+            {{#if varies}}
+            <div class="fit-rpb__vary">
+              <div class="fit-rpb__note">distances vary · no PB</div>
+              <ul class="fit-rpb__list">
+                {{#each list}}<li><a href="{{url}}"><span class="fit-rpb__ld">{{date}}</span><span class="fit-rpb__lk">{{distance}}</span><b class="fit-rpb__lt">{{time}}</b></a></li>{{/each}}
+              </ul>
+            </div>
+            {{else}}
+            <div class="fit-rpb__bests">
+              {{#with best}}
+              <a class="fit-rpb__best" href="{{url}}" title="PB, {{source}}">
+                <b class="fit-rpb__time">{{time}}</b>
+                <span class="fit-rpb__date">race PB · {{date}}</span>
+              </a>
+              {{/with}}
+              {{#if effort}}{{#with effort}}
+              <span class="fit-rpb__effort" title="Fastest {{../name}} inside any run (Strava best effort)">
+                <span class="fit-rpb__et">{{time}}</span>
+                <span class="fit-rpb__lab">best effort · {{date}}</span>
+              </span>
+              {{/with}}{{/if}}
+            </div>
+            {{#if latest}}{{#with latest}}
+            <a class="fit-rpb__latest" href="{{url}}" title="Latest, {{source}}">
+              <span class="fit-rpb__lab">latest {{date}}</span>
+              <span><span class="fit-rpb__lt">{{time}}</span> <b class="fit-rpb__gap">{{gap}}</b></span>
+            </a>
+            {{/with}}{{else}}{{#if latestIsPb}}
+            <span class="fit-rpb__latest fit-rpb__latest--pb">latest is the PB</span>
+            {{else}}<span></span>{{/if}}{{/if}}
+            {{/if}}
+            {{#if splits}}{{#with splits}}
+            <details class="fit-rpb__splits">
+              <summary>best splits</summary>
+              <div class="fit-hx__lists">
+                {{#if stations.length}}
+                <ul class="fit-hx__list" aria-label="{{label}} station PBs">
+                  {{#each stations}}<li><a href="{{url}}" title="{{title}}"><span class="fit-hx__n">{{name}}</span><b class="fit-hx__t">{{display}}</b><span class="fit-hx__w">{{where}}</span></a></li>{{/each}}
+                </ul>
+                {{/if}}
+                {{#if runs.length}}
+                <ul class="fit-hx__list fit-hx__list--runs" aria-label="{{label}} run PBs">
+                  {{#each runs}}<li><a href="{{url}}" title="{{title}}"><span class="fit-hx__n">{{name}}</span><b class="fit-hx__t">{{display}}</b><span class="fit-hx__w">{{where}}</span></a></li>{{/each}}
+                </ul>
+                {{/if}}
+              </div>
+            </details>
+            {{/with}}{{/if}}
+          </li>
+          {{/each}}
+        </ol>
+      </section>
+      {{/each}}
+    </div>
   </div>
-  <div class="fit-rpb__types">
-    {{#each groups}}
-    <section class="fit-rpb__type {{typeClass}}">
-      <header class="fit-rpb__head">
-        <h3 class="fit-prs__group-title">{{label}}</h3>
-        <span class="fit-chip fit-race">Race</span>
-        <span class="fit-rpb__count">{{racesLabel}}</span>
-      </header>
-      <ol class="fit-rpb__rows">
-        {{#each rows}}
-        <li class="fit-rpb__row{{#if varies}} fit-rpb__row--varies{{/if}}">
-          <div class="fit-rpb__name">{{name}}<span class="fit-rpb__n">{{attemptsLabel}}</span></div>
-          {{#if varies}}
-          <div class="fit-rpb__vary">
-            <div class="fit-rpb__note">distances vary · no PB</div>
-            <ul class="fit-rpb__list">
-              {{#each list}}<li><a href="{{url}}"><span class="fit-rpb__ld">{{date}}</span><span class="fit-rpb__lk">{{distance}}</span><b class="fit-rpb__lt">{{time}}</b></a></li>{{/each}}
-            </ul>
-          </div>
-          {{else}}
-          {{#with best}}
-          <a class="fit-rpb__best" href="{{url}}" title="PB, {{source}}">
-            <b class="fit-rpb__time">{{time}}</b>
-            <span class="fit-rpb__date">PB · {{date}}</span>
-          </a>
-          {{/with}}
-          {{#if latest}}{{#with latest}}
-          <a class="fit-rpb__latest" href="{{url}}" title="Latest, {{source}}">
-            <span class="fit-rpb__lab">latest {{date}}</span>
-            <span><span class="fit-rpb__lt">{{time}}</span> <b class="fit-rpb__gap">{{gap}}</b></span>
-          </a>
-          {{/with}}{{else}}{{#if latestIsPb}}
-          <span class="fit-rpb__latest fit-rpb__latest--pb">latest is the PB</span>
-          {{/if}}{{/if}}
-          {{/if}}
-        </li>
-        {{/each}}
-      </ol>
-    </section>
-    {{/each}}
+  {{/if}}
+
+  {{#if hasTraining}}
+  <div class="fit-prs">
+    <div class="fit-prs__label">· TRAINING · best efforts from any session ·</div>
+    <div class="fit-pbs__training">
+      {{#each training}}
+      <section class="fit-prs__group {{typeClass}}" style="--n: {{tiles.length}}">
+        <h3 class="fit-prs__group-title">{{title}}</h3>
+        <ul class="fit-prs__wall">
+          {{#each tiles}}
+          <li class="fit-pr">
+            <span class="fit-pr__name">{{name}}</span>
+            {{#each metrics}}
+            <span class="fit-pr__row">
+              <span class="fit-pr__metric">{{metric}}</span>
+              <span class="fit-pr__value">{{display}}</span>
+              {{#if delta}}<span class="fit-pr__delta{{#if improved}} fit-pr__delta--up{{/if}}">{{delta}}</span>{{/if}}
+            </span>
+            {{/each}}
+            {{#if date}}<span class="fit-pr__date">{{date}}</span>{{/if}}
+          </li>
+          {{/each}}
+        </ul>
+      </section>
+      {{/each}}
+    </div>
   </div>
+  {{/if}}
 </section>
