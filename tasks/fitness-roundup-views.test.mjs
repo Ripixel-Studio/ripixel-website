@@ -190,6 +190,19 @@ test('buildRecordGroups groups strength PRs per exercise and formats cardio as c
   assert.equal(groups[1].metrics[0].delta, '−14s');
 });
 
+test('buildRecordGroups: heaviest weight joins its exercise card, whatever the key spelling', () => {
+  const groups = buildRecordGroups([
+    { recordType: 'Wall Balls_1rm', value: 39, unit: 'kg', achievedAt: '2026-10-27T12:00:00Z' },
+    { recordType: 'Wall Balls_reps', value: 100, unit: 'reps', achievedAt: '2026-10-27T12:00:00Z' },
+    { recordType: 'wall_balls_heaviest_weight', value: 9, unit: 'kg', achievedAt: '2026-10-27T12:00:00Z' },
+    { recordType: 'romanian_deadlift_heaviest_weight', value: 40, unit: 'kg', achievedAt: '2026-10-13T18:00:00Z' },
+    { recordType: 'Romanian Deadlift_1rm', value: 50.7, unit: 'kg', achievedAt: '2026-10-13T18:00:00Z' },
+  ]);
+  assert.deepEqual(groups.map((g) => g.label), ['Wall Balls', 'Romanian Deadlift']);
+  assert.deepEqual(groups[0].metrics.map((m) => m.metric), ['HEAVIEST', '1RM', 'REPS']);
+  assert.deepEqual(groups[1].metrics.map((m) => m.metric), ['HEAVIEST', '1RM']);
+});
+
 test('buildDeltas follows the contract gates', () => {
   const cur = { totalActivities: 4, totalDurationSeconds: 7200, totalDistanceMeters: 20000, totalCaloriesKcal: 0, prsAchieved: [{}] };
   const prev = { totalActivities: 2, totalDurationSeconds: 7200, totalDistanceMeters: 100, totalCaloriesKcal: 500, prsAchieved: [] };

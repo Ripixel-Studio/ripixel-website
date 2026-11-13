@@ -22,6 +22,7 @@ import path from 'node:path';
 
 import { buildStory, storyContext } from './fitness-roundup-story.mjs';
 import { TAGS, tagOf, tagTheme } from './fitness-theme.mjs';
+import { recordLabel } from './fitness-records.mjs';
 
 export const ROUNDUP_URL_BASE = '/life/roundup';
 export const ROUNDUPS_INDEX_URL = '/life/roundups';
@@ -39,8 +40,9 @@ const MONTHS = [
 const MONTHS_SHORT = MONTHS.map((m) => m.slice(0, 3).toUpperCase());
 const DOW_SHORT = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']; // Mon-first, as periods are
 
-const STRENGTH_SUFFIXES = ['_1rm', '_set_volume', '_volume', '_reps'];
-const PR_METRIC_ORDER = ['1RM', 'SET VOLUME', 'VOLUME', 'REPS'];
+/** A strength record's metric as the records wall words it, by recordLabel's metricKey, in card order. */
+const STRENGTH_METRICS = /** @type {Record<string, string>} */ ({ heaviest: 'HEAVIEST', '1rm': '1RM', set_volume: 'SET VOLUME', volume: 'VOLUME', reps: 'REPS' });
+const PR_METRIC_ORDER = Object.values(STRENGTH_METRICS);
 
 const ELEVATION_LANDMARKS = [
   { name: 'Everest', m: 8849 },
@@ -234,7 +236,6 @@ export function enumLabel(value, prefix) {
 }
 
 /** `upper_back` → `Upper Back` */
-const titleCase = (s) => String(s || '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
 function elevationComparison(m) {
   if (m < 150) return '';
@@ -320,14 +321,17 @@ export function buildEffortStrip(days) {
 // ---------------------------------------------------------------------------
 // Personal records
 
-/** `Bench Press (Barbell)_1rm` → { label: 'Bench Press (Barbell)', metric: '1RM', isStrength: true } */
+/**
+ * `Bench Press (Barbell)_1rm` → { label: 'Bench Press (Barbell)', metric: '1RM', isStrength: true }.
+ * Strength keys go through recordLabel (tasks/fitness-records.mjs, the site's one reading of
+ * FitGlue's key grammar), so every metric of an exercise, `_heaviest_weight` included, lands
+ * on that exercise's card.
+ * @param {unknown} recordType
+ */
 export function parseRecordType(recordType) {
   const rt = String(recordType || '');
-  for (const suffix of STRENGTH_SUFFIXES) {
-    if (rt.endsWith(suffix)) {
-      return { label: titleCase(rt.slice(0, -suffix.length)), metric: suffix.slice(1).toUpperCase().replace(/_/g, ' '), isStrength: true };
-    }
-  }
+  const l = recordLabel(rt);
+  if (l.group === 'strength') return { label: l.name, metric: STRENGTH_METRICS[l.metricKey] || l.metric, isStrength: true };
   return { label: rt.replace(/_/g, ' ').toUpperCase(), metric: '', isStrength: false };
 }
 
