@@ -24,7 +24,7 @@
 
     {{#if roundup.isWeek}}{{> rl-week roundup}}{{/if}}
     {{#if roundup.isMonth}}{{> rl-month roundup}}{{/if}}
-    {{#if roundup.isYear}}{{> rl-year roundup}}{{/if}}
+    {{#if roundup.isYear}}{{#if roundup.review}}{{> yr-review roundup}}{{else}}{{> rl-year roundup}}{{/if}}{{/if}}
 
   </div>
 
