@@ -476,8 +476,8 @@
 /* Consistency squares beside the notes (the PBs moved to their own section, 4b). */
 .fit-stats__side {
   display: grid;
-  grid-template-columns: minmax(0, 780px) minmax(0, 1fr);
-  gap: 8px 32px;
+  grid-template-columns: minmax(0, 3fr) minmax(220px, 1fr);
+  gap: 8px 40px;
   align-items: end;
 }
 
@@ -490,24 +490,67 @@
   margin-bottom: 8px;
 }
 
+/* The consistency strip (tasks/fitness-consistency.mjs): 52 weeks, one column each.
+   Height (--h) is time trained against the biggest week; the column stacks its tags'
+   inks (--s each), bottom up in TAGS order. A missed week is a dashed slot; a race
+   week (other than a parkrun) wears a small black diamond; the current week is hatched as unfinished. */
 .fit-consistency__weeks {
+  --rows: 120px;
   display: grid;
-  grid-template-columns: repeat(26, minmax(0, 1fr));
+  grid-template-columns: repeat(52, minmax(0, 1fr));
   gap: 3px;
-  margin: 0 0 14px;
+  height: var(--rows);
+  margin: 14px 0 0;
   padding: 0;
   list-style: none;
+  align-items: end;
+  border-bottom: 2px solid var(--ink);
 }
-
-.fit-consistency__week {
-  aspect-ratio: 1;
+.fit-consistency__week { height: 100%; display: flex; align-items: flex-end; position: relative; min-width: 0; }
+.fit-consistency__bar {
+  display: flex; flex-direction: column-reverse;
+  width: 100%; height: var(--h, 0%);
+  border: 1.5px solid var(--ink); border-bottom: 0;
   background: var(--paper-2);
-  border: 1px solid rgba(23,19,17,0.33);
+  text-decoration: none;
 }
-
-.fit-consistency__week--on {
-  background: var(--ink);
-  border-color: var(--ink);
+.fit-consistency__seg { display: block; height: var(--s); background: var(--type); }
+.fit-consistency__seg + .fit-consistency__seg { border-bottom: 1px solid rgba(23,19,17,0.35); }
+.fit-consistency__week--on .fit-consistency__bar:hover,
+.fit-consistency__week--on .fit-consistency__bar:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+.fit-consistency__week--off .fit-consistency__bar {
+  height: 14px; border: 1.5px dashed rgba(23,19,17,0.45); border-bottom: 0; background: transparent;
+}
+.fit-consistency__week--now .fit-consistency__bar {
+  background-image: repeating-linear-gradient(-45deg, transparent 0 3px, rgba(255,255,255,0.45) 3px 5px);
+}
+.fit-consistency__week--now .fit-consistency__seg { opacity: 0.8; }
+.fit-consistency__week--race .fit-consistency__bar::before {
+  content: ''; position: absolute; left: 50%; width: 7px; height: 7px; margin-left: -3.5px;
+  bottom: calc(var(--h) + 5px); background: var(--ink); transform: rotate(45deg);
+}
+.fit-consistency__months {
+  display: grid; grid-template-columns: repeat(52, minmax(0, 1fr)); gap: 3px;
+  margin: 4px 0 0; padding: 0; list-style: none;
+  font: 9px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; opacity: .65;
+}
+.fit-consistency__months li { grid-column: var(--c) / span 4; grid-row: 1; white-space: nowrap; border-left: 1px solid rgba(23,19,17,0.4); padding-left: 3px; }
+.fit-consistency__key {
+  display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 12px 0 14px; padding: 0; list-style: none;
+  font: 10px var(--f-mono); letter-spacing: .06em; text-transform: uppercase;
+}
+.fit-consistency__key li { display: inline-flex; align-items: center; gap: 5px; }
+.fit-consistency__key li::before { content: ''; width: 10px; height: 10px; background: var(--type); border: 1.5px solid var(--ink); }
+.fit-consistency__key .fit-consistency__key-race::before { width: 7px; height: 7px; background: var(--ink); transform: rotate(45deg); border: 0; }
+.fit-consistency__key .fit-consistency__key-off::before { background: transparent; border-style: dashed; border-color: rgba(23,19,17,0.5); }
+.fit-consistency__key .fit-consistency__key-peak { opacity: .65; margin-left: auto; }
+.fit-consistency__key .fit-consistency__key-peak::before { display: none; }
+@media (max-width: 600px) {
+  /* Phones get the last half year: 26 columns, the older weeks hidden. */
+  .fit-consistency__weeks, .fit-consistency__months { grid-template-columns: repeat(26, minmax(0, 1fr)); }
+  .fit-consistency__week:nth-child(-n+26) { display: none; }
+  .fit-consistency__months li { grid-column: calc(var(--c) - 26) / span 4; }
+  .fit-consistency__months .fit-consistency__month--old { display: none; }
 }
 
 .fit-stats__notes {
@@ -601,6 +644,13 @@
   opacity: 0.8;
 }
 .fit-pr__delta--up { color: var(--ink-green); opacity: 1; }
+/* A training PB opens the session that set it: the whole tile (card-link, its name the
+   target) when one session set every figure on it, else each figure on its own. */
+.fit-pr.card-link { --card-ink: var(--type); --card-ink-fg: var(--type-on, #fff); padding-right: 30px; }
+.fit-pr__name.card-link__target { color: inherit; text-decoration: none; }
+.fit-pr__row--link { color: var(--ink); text-decoration: none; }
+.fit-pr__row--link .fit-pr__date { flex-basis: 100%; margin-top: 0; }
+.fit-pr__row--link:hover .fit-pr__value { background: var(--type); color: var(--type-on); }
 
 .fit-pr__date {
   font-family: var(--f-mono);
@@ -827,7 +877,6 @@
     grid-template-areas: "period" "stats" "summary" "links";
     padding: 16px 16px 14px;
   }
-  .fit-consistency__weeks { grid-template-columns: repeat(13, minmax(0, 1fr)); }
   .fit-prs__wall { grid-template-columns: 1fr 1fr; }
   .fit-hx__lists { grid-template-columns: 1fr; }
   /* The eight runs fit two to a row on a phone. */

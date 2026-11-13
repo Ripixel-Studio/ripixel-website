@@ -87,16 +87,18 @@
         <h3 class="fit-prs__group-title">{{title}}</h3>
         <ul class="fit-prs__wall">
           {{#each tiles}}
-          <li class="fit-pr">
-            <span class="fit-pr__name">{{name}}</span>
+          <li class="fit-pr{{#if url}} card-link{{/if}}">
+            {{#if url}}<a class="fit-pr__name card-link__target" href="{{url}}" title="The session that set it">{{name}}</a>{{else}}<span class="fit-pr__name">{{name}}</span>{{/if}}
             {{#each metrics}}
-            <span class="fit-pr__row">
+            {{#if url}}<a class="fit-pr__row fit-pr__row--link" href="{{url}}" title="{{metric}}: the session that set it">{{else}}<span class="fit-pr__row">{{/if}}
               <span class="fit-pr__metric">{{metric}}</span>
               <span class="fit-pr__value">{{display}}</span>
               {{#if delta}}<span class="fit-pr__delta{{#if improved}} fit-pr__delta--up{{/if}}">{{delta}}</span>{{/if}}
-            </span>
+              {{#if date}}<span class="fit-pr__date">{{date}}</span>{{/if}}
+            {{#if url}}</a>{{else}}</span>{{/if}}
             {{/each}}
             {{#if date}}<span class="fit-pr__date">{{date}}</span>{{/if}}
+            {{#if url}}{{> card-arrow}}{{/if}}
           </li>
           {{/each}}
         </ul>

@@ -252,8 +252,8 @@ describe('stats and PBs', () => {
     assert.ok(s);
     assert.deepEqual(s.strip.map((x) => `${x.value}${x.unit}`), ['614', '4,812km', '540h', '9wk', '24/26']);
     assert.equal(s.stripClass, 'stat-strip--5');
-    assert.equal(s.consistency.weeks.length, 26);
-    assert.equal(s.consistency.weeks.filter((w) => w.active).length, 24);
+    assert.equal(s.consistency.weeks.length, 52, 'a year of weeks from the entries themselves');
+    assert.equal(s.consistency.label, '24 of the last 26 weeks active', "the headline stays FitGlue's streakHistory");
     assert.equal(s.zone.label, 'Pyramidal');
     assert.equal(s.zone.effortShare, '72%');
     assert.equal(s.strength.moved, '2,432 t');
@@ -289,6 +289,28 @@ describe('stats and PBs', () => {
     assert.ok(!JSON.stringify(g).includes('_'), 'no raw keys reach the page');
   });
 
+  test('PB wall: each record links to the session that set it (achievedAt is its start)', () => {
+    const prs = [
+      { recordType: 'fastest_5k', value: 1302, unit: 'seconds', achievedAt: '2026-04-04T09:00:00Z' },
+      { recordType: 'leg_press_1rm', value: 219.8, unit: 'kg', achievedAt: '2025-07-27T19:35:54Z' },
+      { recordType: 'leg_press_heaviest_weight', value: 120, unit: 'kg', achievedAt: '2026-09-15T18:00:00Z' },
+      { recordType: 'deadlift_1rm', value: 170, unit: 'kg', achievedAt: '2026-10-22T10:10:21Z' },
+    ];
+    const acts = [
+      { slug: 'parkrun-day', startTime: '2026-04-04T09:00:00.000Z' },
+      { slug: 'legs-old', startTime: '2025-07-27T19:35:54Z' },
+      { slug: 'legs-new', startTime: '2026-09-15T18:00:00Z' },
+    ];
+    const g = buildPbBoard(prs, acts);
+    assert.equal(g[0].tiles[0].url, '/life/activity/parkrun-day');
+    const [legs, dead] = g[1].tiles;
+    // Two figures from two sessions: each figure links (and dates) itself, the tile does not.
+    assert.equal(legs.url, '');
+    assert.deepEqual(legs.metrics.map((m) => m.url), ['/life/activity/legs-new', '/life/activity/legs-old']);
+    assert.equal(dead.url, '', 'no session found: no link');
+    assert.equal(dead.date, '22 OCT 2026');
+  });
+
   test('latestRecords: the newest record per key wins across lists', () => {
     const r = latestRecords(
       [{ recordType: 'fastest_5k', value: 1330, unit: 'seconds', achievedAt: '2026-01-01T00:00:00Z' }],
@@ -322,7 +344,7 @@ describe('stats and PBs', () => {
     assert.ok(s);
     assert.equal(s.strip.length, 4);
     assert.equal(s.stripClass, '');
-    assert.equal(s.consistency.hasWeeks, false);
+    assert.equal(s.consistency.label, '');
     assert.equal(s.hasPrs, false);
     assert.equal(s.zone.has, false);
     assert.equal(s.strength.has, false);

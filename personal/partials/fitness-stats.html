@@ -14,11 +14,24 @@
     {{#if consistency.hasWeeks}}
     <div class="fit-consistency">
       <div class="fit-consistency__label">CONSISTENCY · {{consistency.label}}</div>
-      <ol class="fit-consistency__weeks" aria-label="Weekly activity, oldest to newest">
+      <ol class="fit-consistency__weeks" aria-label="The last 52 weeks, oldest first: height is time trained, colour is the kind of session">
         {{#each consistency.weeks}}
-        <li class="fit-consistency__week{{#if active}} fit-consistency__week--on{{/if}}" title="{{label}}"></li>
+        <li class="fit-consistency__week{{#if active}} fit-consistency__week--on{{else}} fit-consistency__week--off{{/if}}{{#if current}} fit-consistency__week--now{{/if}}{{#if race}} fit-consistency__week--race{{/if}}">
+          {{#if href}}<a class="fit-consistency__bar" href="{{href}}" title="{{title}}" style="--h: {{height}}">{{else}}<span class="fit-consistency__bar" title="{{title}}" tabindex="0" style="--h: {{height}}">{{/if}}
+            {{#each segments}}<span class="fit-consistency__seg {{typeClass}}" style="--s: {{share}}"></span>{{/each}}
+          {{#if href}}</a>{{else}}</span>{{/if}}
+        </li>
         {{/each}}
       </ol>
+      <ol class="fit-consistency__months" aria-hidden="true">
+        {{#each consistency.months}}<li{{#if old}} class="fit-consistency__month--old"{{/if}} style="--c: {{col}}">{{label}}</li>{{/each}}
+      </ol>
+      <ul class="fit-consistency__key">
+        {{#each consistency.key}}<li class="{{typeClass}}">{{label}}</li>{{/each}}
+        <li class="fit-consistency__key-race">race (not parkrun)</li>
+        <li class="fit-consistency__key-off">missed</li>
+        <li class="fit-consistency__key-peak">tallest · {{consistency.peak}}</li>
+      </ul>
     </div>
     {{/if}}
     <div class="fit-stats__notes">
