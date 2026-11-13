@@ -99,11 +99,15 @@ export function buildSessionPages(index, files = [], opts = {}) {
   const counts = new Map();
   for (const c of cards) counts.set(c.typeKey, (counts.get(c.typeKey) || 0) + 1);
   const familyKeys = /** @type {(keyof typeof TAGS)[]} */ (Object.keys(TAGS)).filter((k) => counts.has(k));
-  const filterList = ['all', ...familyKeys];
+  // Race: the real things (the isRace marker), across every tag. Not drillable by tag.
+  const raceCount = cards.filter((c) => c.isRace).length;
+  const filterList = ['all', ...familyKeys, ...(raceCount ? ['race'] : [])];
+  /** @param {string} k */
+  const labelOf = (k) => (k === 'all' ? 'All' : k === 'race' ? 'Race' : TAGS[/** @type {keyof typeof TAGS} */ (k)].label);
 
   const pages = [];
   for (const filter of filterList) {
-    const list = filter === 'all' ? cards : cards.filter((c) => c.typeKey === filter);
+    const list = filter === 'all' ? cards : filter === 'race' ? cards.filter((c) => c.isRace) : cards.filter((c) => c.typeKey === filter);
     // Whole-month numbers for this filter, so a month split across pages says the same thing on both.
     /** @type {Map<string, { n: number, dur: number, dist: number, fam: Map<string, number> }>} */
     const monthStats = new Map();
@@ -139,19 +143,21 @@ export function buildSessionPages(index, files = [], opts = {}) {
         m.items.push(card);
       }
       const href = sessionsHref(filter, n);
-      const label = filter === 'all' ? '' : TAGS[/** @type {keyof typeof TAGS} */ (filter)].label;
+      const label = filter === 'all' ? '' : labelOf(filter);
       pages.push({
         href,
         fitnessSessions: {
           filter, filterLabel: label, href,
           total: cards.length,
           totalLabel: `${cards.length.toLocaleString('en-GB')} session${cards.length === 1 ? '' : 's'}`,
-          shownLabel: `${list.length.toLocaleString('en-GB')} ${label ? `${label.toLowerCase()} ` : ''}session${list.length === 1 ? '' : 's'}`,
+          shownLabel: filter === 'race'
+            ? `${list.length.toLocaleString('en-GB')} race${list.length === 1 ? '' : 's'}`
+            : `${list.length.toLocaleString('en-GB')} ${label ? `${label.toLowerCase()} ` : ''}session${list.length === 1 ? '' : 's'}`,
           months,
           filters: filterList.map((k) => ({
-            key: k, label: k === 'all' ? 'All' : TAGS[/** @type {keyof typeof TAGS} */ (k)].label,
-            count: k === 'all' ? cards.length : counts.get(k), href: sessionsHref(k, 1), current: k === filter,
-            typeClass: k === 'all' ? '' : `fit-type--${k}`,
+            key: k, label: labelOf(k),
+            count: k === 'all' ? cards.length : k === 'race' ? raceCount : counts.get(k), href: sessionsHref(k, 1), current: k === filter,
+            typeClass: k === 'all' ? '' : k === 'race' ? 'ss-filter--race' : `fit-type--${k}`,
           })),
           hasFilters: familyKeys.length > 1,
           // The key under the chips: every tag's colour and what goes in it.
@@ -184,7 +190,9 @@ export function fitnessSessionsViewTask() {
       const fitnessSessionsPages = built.map(({ href, fitnessSessions: s }) => ({
         page: 'life',
         subpage: `| sessions${s.filterLabel ? ` | ${s.filterLabel.toLowerCase()}` : ''}${s.page > 1 ? ` | page ${s.page}` : ''}`,
-        description: s.filterLabel
+        description: s.filter === 'race'
+          ? `Every race on the record: the real things, ${s.shownLabel}, newest first.`
+          : s.filterLabel
           ? `Every ${s.filterLabel.toLowerCase()} session on the record — ${s.shownLabel}, newest first.`
           : `Every training session on the record — ${s.totalLabel}, newest first.`,
         canonical: siteUrl ? `${siteUrl}${href}` : '',

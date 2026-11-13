@@ -843,6 +843,9 @@ a.rl-yrmonth__box { --card-lift: 6px 7px 0 var(--ink); }
 .ss-filter[aria-current='page'] { background: var(--type, var(--ink)); color: var(--type-on, var(--paper)); transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
 .ss-filter[aria-current='page'] span { opacity: 0.85; }
 .ss-filter:focus-visible { outline: 3px solid var(--ink-blue); outline-offset: 2px; }
+/* Race: not a tag, the badge across tags. Set apart from the type chips, in the badge's ink. */
+.ss-filter--race { margin-left: auto; border-left-width: 2px; transform: rotate(-1deg); }
+.ss-filter--race[aria-current='page'] { background: var(--ink); color: var(--paper); transform: rotate(-1deg) translate(1px, 1px); }
 
 /* The key: every tag's ink and what goes in it, then the Race badge. A printed legend,
    not a control, so it sits quiet under the chips. */
