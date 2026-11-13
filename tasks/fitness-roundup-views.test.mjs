@@ -276,7 +276,7 @@ test('buildTimeline: one stream, newest first; a year leads its year, a month le
   });
   const views = [
     view('week-41-2026', '2026-10-05T00:00:00Z', '2026-10-12T00:00:00Z'),
-    view('week-44-2026', '2026-10-26T00:00:00Z', '2026-11-02T00:00:00Z', { story: { lead: { stamp: 'RACE WEEKEND', title: 'Hyrox Birmingham', typeClass: 'fit-type--hyrox' }, highlights: [], cover: { url: 'https://x.test/a.jpg' }, coverLines: [], collage: [], days: [{ sessions: [{ typeClass: 'fit-type--hyrox' }] }], months: [] } }),
+    view('week-44-2026', '2026-10-26T00:00:00Z', '2026-11-02T00:00:00Z', { story: { lead: { stamp: 'RACE WEEKEND', title: 'Hyrox Birmingham', typeClass: 'fit-type--hybrid' }, highlights: [], cover: { url: 'https://x.test/a.jpg' }, coverLines: [], collage: [], days: [{ sessions: [{ typeClass: 'fit-type--hybrid' }] }], months: [] } }),
     view('month-10-2026', '2026-10-01T00:00:00Z', '2026-11-01T00:00:00Z'),
     view('week-45-2026', '2026-11-02T00:00:00Z', '2026-11-09T00:00:00Z'),
     view('year-2025', '2025-01-01T00:00:00Z', '2026-01-01T00:00:00Z'),

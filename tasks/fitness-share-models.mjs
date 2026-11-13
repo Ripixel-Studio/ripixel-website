@@ -175,7 +175,8 @@ export function activityShareModel(file, index, opts = {}) {
   if (act.race) {
     const race = act.race;
     const segs = Array.isArray(file?.race?.segments) ? file.race.segments : [];
-    const brand = act.typeLabel || 'HYROX';
+    // The race's own brand (HYROX, ATHX, DEKA), not the tag's label (HYBRID).
+    const brand = String(file?.race?.raceType || '').toUpperCase() || 'HYROX';
     return {
       ...base,
       template: 'race',
@@ -322,7 +323,7 @@ export function eventShareModel(event, history, index, opts = {}) {
     template: 'event',
     watermark: `${ev.raceCount} races`,
     typeKey: ev.typeKey,
-    ink: TYPE_INKS[/** @type {keyof typeof TYPE_INKS} */ (ev.typeKey)] || TYPE_INKS.hyrox,
+    ink: TYPE_INKS[/** @type {keyof typeof TYPE_INKS} */ (ev.typeKey)] || TYPE_INKS.hybrid,
     pill: 'RACE WEEKEND',
     label: 'race weekend',
     isRace: true,

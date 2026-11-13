@@ -488,10 +488,10 @@ describe('calories, the type chip and the type ink (F5.5)', async () => {
     assert.equal(foodComparison(1346), '≈ 4.7 slice of pizza');
     assert.equal(foodComparison(40), '');
   });
-  test('Hyrox races are labelled Hyrox, not CROSSFIT, with the Race marker', () => {
+  test('Hyrox races are tagged Hybrid, not CROSSFIT, with the Race marker', () => {
     const v = buildActivityView({ slug: 'h', activity: { title: "Hyrox Birmingham - Open Men's Solo", activityType: 'ACTIVITY_TYPE_CROSSFIT', startTime: '2026-10-28T08:00:00Z' }, entry: {}, race: { raceType: 'hyrox', isSimulation: false, segments: [] } }, {});
-    assert.equal(v.act.typeLabel, 'HYROX');
-    assert.equal(v.act.typeClass, 'fit-type--hyrox');
+    assert.equal(v.act.typeLabel, 'HYBRID');
+    assert.equal(v.act.typeClass, 'fit-type--hybrid');
     assert.equal(v.act.isRace, true);
   });
   test('a run filed as a workout (one running set in Hevy) is stamped and inked as a run', () => {

@@ -115,12 +115,12 @@ export function weekKicker(start, end, now) {
  * calendar entry with no activity behind it yet, and the title hint the activity fallback
  * uses. Same keys as the activity tags, so a planned class and the class it becomes match.
  * @param {unknown} title
- * @returns {'run'|'ride'|'spin'|'hyrox'|'class'|'strength'|'pilates'|'yoga'|'walk'|'other'}
+ * @returns {'run'|'ride'|'spin'|'hybrid'|'class'|'strength'|'pilates'|'yoga'|'walk'|'other'}
  */
 export function tagOfTitle(title) {
   const t = String(title || '').toLowerCase();
   if (/\bspin(ning)?\b/.test(t)) return 'spin';
-  if (/hyrox|hybrid|\bathx\b|\bdeka\b/.test(t)) return 'hyrox';
+  if (/hyrox|hybrid|\bathx\b|\bdeka\b|spartan/.test(t)) return 'hybrid';
   if (/pilates|reformer/.test(t)) return 'pilates';
   if (/yoga/.test(t)) return 'yoga';
   if (/\brun\b|running|parkrun|park run|\b\d+k\b|marathon/.test(t)) return 'run';

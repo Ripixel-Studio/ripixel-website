@@ -98,9 +98,10 @@ calendar" block. All formatting lives in that task (it is data, not markup); the
 `fitness-*` partials only loop and test.
 
 **Shared by the /life pages: one tag per activity.** `tasks/fitness-theme.mjs` is the site's
-one taxonomy: `run`, `ride`, `spin`, `hyrox`, `class`, `strength`, `pilates`, `yoga`, `walk`,
+one taxonomy: `run`, `ride`, `spin`, `hybrid`, `class`, `strength`, `pilates`, `yoga`, `walk`,
 `other`, plus an independent `isRace` marker (a Race badge on top of the tag; a race keeps its
-sport's ink). The FitGlue export's per-activity `tag` / `isRace` win; without them `siteTagOf`
+sport's ink). The FitGlue export's per-activity `tag` / `isRace` win (an older export's
+`hyrox` reads as `hybrid`); without them `siteTagOf`
 decides from type, title and sets. `assemble` (fitness-fetch) stamps the answer on every
 activity file, its `entry` and its index entry, and every colour, label, glyph, filter chip and
 per-type stat reads it through `tagOf` / `themeOf` (never from the raw `activityType`; calendar

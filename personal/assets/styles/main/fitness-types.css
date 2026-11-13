@@ -9,7 +9,7 @@
                   their section ink
    Riso inks for the cream paper. Families sit together and still part:
    run fluorescent magenta, ride aqua and spin lake blue (both bikes, indoor
-   is the deeper one); hyrox the race-yellow, class teal, strength orange;
+   is the deeper one); hybrid the race-yellow, class teal, strength orange;
    pilates violet and yoga lavender (one hue, two weights); walk moss; other
    warm grey. A race keeps its sport's ink and gets the .fit-race badge.
    Use: put `fit-type--<tag>` on the element, then var(--type) inside it.
@@ -17,7 +17,7 @@
 .fit-type--run      { --type: #C42A72; --type-on: #fff;       --type-text: #C42A72; }
 .fit-type--ride     { --type: #18A9C4; --type-on: var(--ink); --type-text: #187384; }
 .fit-type--spin     { --type: #2E5BBA; --type-on: #fff;       --type-text: #2E5BBA; }
-.fit-type--hyrox    { --type: #F2C13C; --type-on: var(--ink); --type-text: #806726; }
+.fit-type--hybrid   { --type: #F2C13C; --type-on: var(--ink); --type-text: #806726; }
 .fit-type--class    { --type: #00838A; --type-on: #fff;       --type-text: #00727A; }
 .fit-type--strength { --type: #F25B1C; --type-on: var(--ink); --type-text: #B54719; }
 .fit-type--pilates  { --type: #7C3AED; --type-on: #fff;       --type-text: #7C3AED; }

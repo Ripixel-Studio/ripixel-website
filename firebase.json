@@ -66,12 +66,22 @@
         },
         {
           "source": "/life/sessions/crossfit",
-          "destination": "/life/sessions/hyrox",
+          "destination": "/life/sessions/hybrid",
           "type": 301
         },
         {
           "source": "/life/sessions/crossfit/:page",
-          "destination": "/life/sessions/hyrox",
+          "destination": "/life/sessions/hybrid",
+          "type": 301
+        },
+        {
+          "source": "/life/sessions/hyrox",
+          "destination": "/life/sessions/hybrid",
+          "type": 301
+        },
+        {
+          "source": "/life/sessions/hyrox/:page",
+          "destination": "/life/sessions/hybrid/:page",
           "type": 301
         },
         {
