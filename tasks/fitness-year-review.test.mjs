@@ -57,3 +57,23 @@ describe('year in review', () => {
     assert.match(r.letter[0], /4 sessions/);
   });
 });
+
+test('the year review stylesheet nests nothing by accident', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const css = (await readFile(new URL('../personal/assets/styles/main/fitness-year-review.css', import.meta.url), 'utf8'))
+    .replace(/\/\*[\s\S]*?\*\//g, '').replace(/'[^']*'|"[^"]*"/g, '""');
+  let depth = 0;
+  const atDepth = [];
+  for (let i = 0; i < css.length; i++) {
+    if (css[i] === '{') {
+      const head = css.slice(Math.max(css.lastIndexOf('}', i), css.lastIndexOf('{', i - 1), css.lastIndexOf(';', i)) + 1, i).trim();
+      if (head.startsWith('@media') || head.startsWith('@container')) atDepth.push(depth);
+      depth++;
+    } else if (css[i] === '}') {
+      depth--;
+      assert.ok(depth >= 0, `a stray } at offset ${i}`);
+    }
+  }
+  assert.equal(depth, 0, 'an unclosed {');
+  assert.deepEqual(atDepth.filter((d) => d > 0), [], 'a media query inside another block');
+});

@@ -24,6 +24,8 @@ import { cardPicture, km, clock } from './fitness-life.mjs';
 import { recordLabel } from './fitness-records.mjs';
 import { buildRacePbs } from './fitness-race-pbs.mjs';
 import { ymd } from './life-clock.mjs';
+import { buildRaceYear } from './fitness-year-races.mjs';
+import { awardIcon } from './fitness-year-icons.mjs';
 
 const DAY = 86400000;
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -176,6 +178,9 @@ export function buildYearReview(file, ctx, opts = {}) {
     biggest: biggestWeek ? { date: `w/c ${dmIso(biggestWeek.monday)}`, value: hm(biggestWeek.secs), n: biggestWeek.n } : null,
   };
 
+  // ---- races, the tour and the series ----------------------------------------------
+  const raceYear = buildRaceYear(inYear, fileOf, moments, { showPhotos: ctx.showPhotos, start, end });
+
   // ---- months ----------------------------------------------------------------------
   const prByMonth = Array.from({ length: 12 }, () => 0);
   for (const p of prEvents) prByMonth[new Date(p.t).getUTCMonth()] += 1;
@@ -192,6 +197,11 @@ export function buildYearReview(file, ctx, opts = {}) {
     const photos = here.map((x) => photoOf(x.e)).filter(Boolean);
     const photo = (top && ctx.showPhotos && top.photo) || photos[Math.floor(photos.length / 2)] || '';
     const route = photo ? null : routeFor(here, fileOf);
+    const tiles = monthTiles(here, best, fileOf, ctx.showPhotos, hrefOf);
+    const events = raceYear.tour.rows.filter((row) => row.month === MON[m]);
+    const parkrunsHere = here.filter((x) => /park ?run/i.test(x.e.title || '')).length;
+    const monthDays = days.filter((d) => d.day.slice(5, 7) === String(m + 1).padStart(2, '0'))
+      .map((d) => ({ typeClass: d.typeClass, race: d.race, title: d.title, href: d.href, rest: !d.n && !d.future, future: d.future, n: new Date(Date.parse(`${d.day}T12:00:00Z`)).getUTCDate() }));
     /** @type {Map<string, number>} */
     const fam = new Map();
     for (const x of here) fam.set(tagOf(x.e).tag, (fam.get(tagOf(x.e).tag) || 0) + num(x.e.durationSeconds));
@@ -219,7 +229,8 @@ export function buildYearReview(file, ctx, opts = {}) {
     ].filter(Boolean);
     return {
       name, short: MON[m], key, href: ctx.keys.has(key) ? roundupHref(key) : '', n: m + 1,
-      photo, route, typeClass: tagTheme(mainTag).typeClass, tagLabel: tagTheme(mainTag).tagLabel,
+      photo, route, tiles, tileCount: tiles.length, events, hasEvents: events.length > 0, parkruns: parkrunsHere, pkLabel: `${parkrunsHere} parkrun${parkrunsHere === 1 ? '' : 's'}`, monthDays,
+      km: mKm >= 1 ? km(mKm * 1000) : '', days: mDays, typeClass: tagTheme(mainTag).typeClass, tagLabel: tagTheme(mainTag).tagLabel,
       sessions: here.length, hours: hm(mSecs), lines, prs: prByMonth[m],
       rankLabel: rank === 1 ? 'the busiest month' : rank === 12 || here.length === Math.min(...monthsSessions.filter(Boolean)) ? 'the quietest month' : '',
       high: top ? { stamp: top.stamp, title: top.title, value: top.value, unit: top.unit, href: top.href, date: top.date, typeClass: top.typeClass } : null,
@@ -302,19 +313,35 @@ export function buildYearReview(file, ctx, opts = {}) {
   const seen = new Set();
   for (const m of [...highMoments].sort((a, b) => b.score - a.score)) {
     if (m.photo && ctx.showPhotos && !seen.has(m.photo)) { seen.add(m.photo); coverPhotos.push({ url: m.photo, title: m.title, typeClass: m.typeClass }); }
-    if (coverPhotos.length >= 7) break;
+    if (coverPhotos.length >= 10) break;
   }
   for (const x of inYear) {
-    if (coverPhotos.length >= 7) break;
+    if (coverPhotos.length >= 10) break;
     const u = photoOf(x.e);
     if (u && !seen.has(u) && rand(x.e.slug) < 0.15) { seen.add(u); coverPhotos.push({ url: u, title: x.e.title, typeClass: tagTheme(tagOf(x.e).tag).typeClass }); }
   }
   const cover = {
-    photos: coverPhotos.map((p, i) => ({ ...p, i, rot: round((rand(p.url) - 0.5) * 16, 1), x: [6, 38, 66, 18, 52, 80, 30][i % 7], y: [8, 2, 10, 46, 40, 44, 70][i % 7] })),
+    photos: coverPhotos.map((p, i) => ({ ...p, i, rot: round((rand(p.url) - 0.5) * 16, 1), x: [4, 30, 56, 80, 14, 42, 68, 88, 24, 60][i % 10], y: [6, 0, 8, 2, 44, 40, 46, 42, 74, 76][i % 10] })),
     lines: highMoments.filter((m) => ['weekend', 'race', 'pb', 'milestone', 'first'].includes(m.kind)).sort((a, b) => b.score - a.score).slice(0, 5)
       .map((m) => ({ stamp: m.stamp, title: m.title, typeClass: m.typeClass })),
     sticker: { value: thousands(inYear.length), label: 'sessions' },
   };
+  // The cover stars: the three biggest moments with a picture, beside the editor's letter.
+  const stars = [...highMoments].sort((a, b) => b.score - a.score).filter((m) => m.photo && ctx.showPhotos).slice(0, 3)
+    .map((m, i) => ({ stamp: m.stamp, title: m.title, value: m.value, unit: m.unit, date: m.date, href: m.href, photo: m.photo, typeClass: m.typeClass, tilt: [-2.5, 1.8, -1.2][i] }));
+  // The film strip: one frame per photographed session, in order, two reels.
+  const frames = [];
+  const framed = new Set();
+  for (const x of inYear) {
+    const u = photoOf(x.e);
+    if (!u || framed.has(u)) continue;
+    framed.add(u);
+    frames.push({ url: u, title: cleanName(x.e.title), date: dm(x.t), href: hrefOf(x.e.slug), typeClass: tagTheme(tagOf(x.e).tag).typeClass, race: Boolean(x.e.isRace) });
+  }
+  // At most 48, spread evenly through the year.
+  const pickN = 48;
+  const strip = frames.length <= pickN ? frames : Array.from({ length: pickN }, (_, i) => frames[Math.floor((i * frames.length) / pickN)]);
+  const reels = [strip.filter((_, i) => i % 2 === 0), strip.filter((_, i) => i % 2 === 1)].filter((r) => r.length);
 
   // ---- next year -------------------------------------------------------------------
   const upcoming = (opts.upcoming || []).filter((e) => e && e.kind === 'race' && Date.parse(e.start) >= end)
@@ -323,7 +350,8 @@ export function buildYearReview(file, ctx, opts = {}) {
 
   return {
     year, nextYear: year + 1, cover, numbers, arc, days: { cols: dayCols, active: activeDays, legend: legendOf(inYear) },
-    months, races: { tickets: raceTickets, parkrun: parkrunStrip, count: races.length, slower },
+    stars, hasStars: stars.length > 0, film: { reels, count: frames.length, from: frames[0]?.date || '' }, hasFilm: frames.length >= 6,
+    months, races: { tickets: raceTickets, parkrun: parkrunStrip, count: races.length, slower, tour: raceYear.tour }, series: raceYear.series, hasSeries: raceYear.hasSeries,
     pbs, out: { routes, weather, places, countries: countries.size > 1 ? countries.size : 0, placeCount: placeList.length },
     awards, upcoming, hasUpcoming: upcoming.length > 0,
     letter: editorsLetter({ year, sessions: inYear.length, hours, metres, kg, streak, prEvents, races, months, slower, pbs }),
@@ -375,6 +403,51 @@ function routeFor(here, fileOf) {
   return null;
 }
 
+/** A session title without emoji or a trailing result. @param {string} s */
+function cleanName(s) {
+  return String(s || '').replace(/\p{Extended_Pictographic}|\uFE0F/gu, '').replace(/\s*-\s*\d{1,2}:\d{2}(:\d{2})?\s*$/, '').replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * A month's pictures: the best moments' photos first, then the month's other photos spread
+ * through it, then route drawings when there are not enough photos. Up to five.
+ * @param {{ e: any, t: number }[]} here @param {any[]} best @param {(slug: string) => any} fileOf @param {boolean} showPhotos
+ * @param {(slug: string) => string} hrefOf
+ */
+function monthTiles(here, best, fileOf, showPhotos, hrefOf) {
+  const out = [];
+  const seen = new Set();
+  const bySlug = new Map(here.map((x) => [x.e.slug, x]));
+  const add = (/** @type {{ e: any, t: number }} */ x, /** @type {string} */ url, /** @type {string} */ title) => {
+    if (!url || seen.has(url) || out.length >= 5) return;
+    seen.add(url);
+    out.push({ photo: url, route: null, title: cleanName(title || x.e.title), date: dm(x.t), href: hrefOf(x.e.slug), typeClass: tagTheme(tagOf(x.e).tag).typeClass });
+  };
+  if (showPhotos) {
+    for (const m of best) { const x = bySlug.get(m.slug || (m.slugs || [])[0]); if (x && m.photo) add(x, m.photo, m.title); }
+    const rest = here.filter((x) => https(x.e?.photoUrls?.[0]));
+    const want = 5 - out.length;
+    for (let i = 0; i < rest.length && out.length < 5; i++) {
+      const x = rest[Math.floor((i * rest.length) / Math.max(1, Math.min(want, rest.length)))] || rest[i];
+      add(x, https(x.e.photoUrls[0]), '');
+    }
+  }
+  if (out.length < 3) {
+    const routeSeen = new Set();
+    for (const x of [...here].sort((a, b) => num(b.e.distanceMeters) - num(a.e.distanceMeters))) {
+      if (out.length >= 3) break;
+      const f = fileOf(x.e.slug);
+      if (!f || !Array.isArray(f.routePoints) || f.routePoints.length < 10) continue;
+      const sig = `${cleanName(x.e.title)}:${Math.round(num(x.e.distanceMeters) / 500)}`;
+      if (routeSeen.has(sig)) continue;
+      routeSeen.add(sig);
+      const pic = cardPicture({ ...(f.entry || x.e), photoUrls: [], routeThumbnailUrl: '' }, f);
+      if (pic.route) out.push({ photo: '', route: pic.route, title: cleanName(x.e.title), date: dm(x.t), href: hrefOf(x.e.slug), typeClass: tagTheme(tagOf(x.e).tag).typeClass, km: num(x.e.distanceMeters) > 500 ? `${km(num(x.e.distanceMeters))} km` : '' });
+    }
+  }
+  return out.map((t, i) => ({ ...t, i }));
+}
+
 /** The tags of the year, by sessions, for the day grid's key. @param {{ e: any }[]} inYear */
 function legendOf(inYear) {
   /** @type {Map<string, number>} */
@@ -404,6 +477,19 @@ function prEventsOf(inYear, fileOf) {
     }
   }
   return out.sort((a, b) => a.t - b.t);
+}
+
+/**
+ * What a gym exercise works, for the ledger's drawers.
+ * @param {string} name @returns {'legs'|'push'|'pull'|'core'|'engine'}
+ */
+export function familyOf(name) {
+  const n = name.toLowerCase();
+  if (/ski|erg|row machine|rowing|wall ball|burpee|sled|farmer|carry|bike|assault|treadmill|\brun\b|jump|swing|thruster|clean|snatch|sandbag|battle rope|skipping|slam|\bbox\b/.test(n)) return 'engine';
+  if (/plank|crunch|sit[- ]?up|back extension|hyperextension|\babs?\b|ab wheel|ab roll|core|russian|hollow|leg raise|knee raise|v-up|dead bug|hanging|wood ?chop|pallof|oblique|twist|mountain climber|toes to bar/.test(n)) return 'core';
+  if (/squat|lunge|\bleg|deadlift|hip thrust|calf|glute|step ?up|split|rdl|good morning|hack|abduct|adduct|bridge/.test(n)) return 'legs';
+  if (/row|pull|\bchin|curl|\blat\b|lat pull|shrug|bicep|face pull|rear delt|reverse fly/.test(n)) return 'pull';
+  return 'push';
 }
 
 /** A record's value as text. @param {number} v @param {string} unit */
@@ -446,36 +532,55 @@ function buildPbChapter(ev, start, end, byMonth) {
     .sort((a, b) => b.count - a.count || b.last - a.last).slice(0, 6);
   const featured = [...featuredRun, ...featuredLift].map((s) => progression(s, start, end));
 
+  // The ledger, in drawers: the sports, and the gym by what the lift works. Each drawer's
+  // front carries its callouts (the most broken, the biggest jump, the latest) so the
+  // detail can stay folded.
   const groupsDef = [
-    { key: 'run', label: 'On foot' }, { key: 'ride', label: 'On the bike' }, { key: 'hyrox', label: 'Hyrox' }, { key: 'strength', label: 'In the gym' }, { key: 'other', label: 'Everything else' },
+    { key: 'run', label: 'On foot', note: 'distances and paces' }, { key: 'ride', label: 'On the bike', note: '' }, { key: 'hyrox', label: 'Hyrox', note: 'per division' },
+    { key: 'legs', label: 'Legs', note: 'squats, deadlifts, lunges' }, { key: 'push', label: 'Push', note: 'presses and dips' }, { key: 'pull', label: 'Pull', note: 'rows, pull-ups, curls' },
+    { key: 'core', label: 'Core', note: 'planks, crunches, carries of the middle' }, { key: 'engine', label: 'Engine', note: 'ergs, sleds, wall balls, burpees' }, { key: 'other', label: 'Everything else', note: '' },
   ];
-  // The gym: one row per exercise, its metrics folded together.
   /** @type {Map<string, any[]>} */
   const byExercise = new Map();
   for (const s of series.filter((x) => x.group === 'strength')) byExercise.set(s.name, [...(byExercise.get(s.name) || []), s]);
   const metricOrder = ['heaviest', '1rm', 'set_volume', 'volume', 'reps'];
   const metricWord = /** @type {Record<string, string>} */ ({ heaviest: 'heaviest', '1rm': '1RM', set_volume: 'best set', volume: 'volume', reps: 'reps' });
+  const lastT = (/** @type {any[]} */ ss) => Math.max(...ss.map((x) => x.list[x.list.length - 1].t));
+  const gymRows = [...byExercise.entries()].map(([name, ss]) => {
+    const sorted = ss.sort((a, b) => metricOrder.indexOf(a.metricKey) - metricOrder.indexOf(b.metricKey));
+    const head = sorted.filter((s) => s.metricKey === 'heaviest' || s.metricKey === '1rm').sort((a, b) => b.count - a.count)[0] || sorted[0];
+    return {
+      name, family: familyOf(name), count: ss.reduce((n, s) => n + s.count, 0), gain: head.gain, t: lastT(ss),
+      from: show(head.first, head.unit), to: show(head.last, head.unit), what: metricWord[head.metricKey] || head.metric.toLowerCase(),
+      metrics: sorted.map((s) => `${metricWord[s.metricKey] || s.metric.toLowerCase()} ×${s.count}`).join(' · '),
+      href: `/life/activity/${head.list[head.list.length - 1].slug}`,
+    };
+  });
   const ledger = groupsDef.map((g) => {
     let rows;
-    if (g.key === 'strength') {
-      rows = [...byExercise.entries()].map(([name, ss]) => {
-        const sorted = ss.sort((a, b) => metricOrder.indexOf(a.metricKey) - metricOrder.indexOf(b.metricKey));
-        const head = sorted.filter((s) => s.metricKey === 'heaviest' || s.metricKey === '1rm').sort((a, b) => b.count - a.count)[0] || sorted[0];
-        return {
-          name, count: ss.reduce((n, s) => n + s.count, 0),
-          from: show(head.first, head.unit), to: show(head.last, head.unit), what: metricWord[head.metricKey] || head.metric.toLowerCase(),
-          metrics: sorted.map((s) => `${metricWord[s.metricKey] || s.metric.toLowerCase()} ×${s.count}`).join(' · '),
-          href: `/life/activity/${head.list[head.list.length - 1].slug}`,
-        };
-      }).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+    if (['legs', 'push', 'pull', 'core', 'engine'].includes(g.key)) {
+      rows = gymRows.filter((r) => r.family === g.key);
     } else {
-      rows = series.filter((s) => s.group === g.key).sort((a, b) => a.label.order - b.label.order || b.count - a.count).map((s) => ({
-        name: s.name, count: s.count, from: show(s.first, s.unit), to: show(s.last, s.unit), what: s.metric.toLowerCase(), metrics: '',
-        href: `/life/activity/${s.list[s.list.length - 1].slug}`,
+      rows = series.filter((s) => s.group === g.key || (g.key === 'other' && !['run', 'ride', 'hyrox', 'strength'].includes(s.group))).map((s) => ({
+        name: s.name, count: s.count, gain: s.gain, t: lastT([s]), from: show(s.first, s.unit), to: show(s.last, s.unit), what: s.metric.toLowerCase(), metrics: '',
+        href: `/life/activity/${s.list[s.list.length - 1].slug}`, order: s.label.order,
       }));
     }
-    return { ...g, rows, n: rows.reduce((t, x) => t + x.count, 0) };
-  }).filter((g) => g.rows.length);
+    rows.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+    if (!rows.length) return null;
+    const mostBroken = rows[0];
+    const leap = [...rows].filter((r) => r.gain > 0 && r.gain < 4 && r !== mostBroken).sort((a, b) => b.gain - a.gain)[0];
+    const latest = [...rows].filter((r) => r !== mostBroken && r !== leap).sort((a, b) => b.t - a.t)[0];
+    const callouts = [
+      { kind: 'most', label: 'most broken', name: mostBroken.name, value: `×${mostBroken.count}`, href: mostBroken.href },
+      leap && { kind: 'leap', label: 'biggest jump', name: leap.name, value: `${leap.from} → ${leap.to}`, href: leap.href },
+      latest && { kind: 'latest', label: 'latest', name: latest.name, value: `${dm(latest.t)} · ${latest.to}`, href: latest.href },
+    ].filter(Boolean);
+    const n = rows.reduce((t, x) => t + x.count, 0);
+    return { ...g, rows, n, records: rows.length, callouts };
+  }).filter(Boolean);
+  const ledgerMax = Math.max(1, ...ledger.map((/** @type {any} */ g) => g.n));
+  for (const g of /** @type {any[]} */ (ledger)) g.bar = round((g.n / ledgerMax) * 100, 1);
 
   const most = Math.max(1, ...byMonth);
   const months = MON.map((m, i) => ({ label: m, n: byMonth[i], h: round((byMonth[i] / most) * 100, 1), top: byMonth[i] === most }));
@@ -559,7 +664,7 @@ function buildAwards(inYear, byDay, r, fileOf, hrefOf) {
   if (place) out.push({ stamp: 'SECOND HOME', title: place[0], value: String(place[1]), sub: 'sessions there this year', href: '' });
   const far = by((x) => num(x.e.distanceMeters));
   if (num(far.e.distanceMeters) > 1000) out.push({ stamp: 'FURTHEST', title: 'Furthest in one go', value: `${km(num(far.e.distanceMeters))} km`, sub: `${far.e.title} · ${dm(far.t)}`, href: hrefOf(far.e.slug) });
-  return out.map((a, i) => ({ ...a, i, tilt: round((rand(a.title) - 0.5) * 5, 2) }));
+  return out.map((a, i) => ({ ...a, i, icon: awardIcon(a.stamp), tilt: round((rand(a.title) - 0.5) * 5, 2) }));
 }
 
 /**
@@ -587,12 +692,17 @@ function editorsLetter(y) {
  * @returns {(T & { level: number })[]}
  */
 function levels(list, W) {
-  /** @type {number[]} */
-  const lastX = [];
+  // Each label is a span of about a sixth of the chart, to the right of its point, or to
+  // the left when the point sits in the last fifth (the pin flips there).
+  const span = W * 0.17;
+  /** @type {[number, number][][]} */
+  const taken = [];
   return list.map((it) => {
+    const a = it.x > W * 0.8 ? it.x - span : it.x;
+    const b = a + span;
     let level = 0;
-    while (lastX[level] !== undefined && it.x - lastX[level] < W * 0.17) level++;
-    lastX[level] = it.x;
+    while ((taken[level] || []).some(([p, q]) => a < q && p < b)) level++;
+    (taken[level] = taken[level] || []).push([a, b]);
     return { ...it, level };
   });
 }
