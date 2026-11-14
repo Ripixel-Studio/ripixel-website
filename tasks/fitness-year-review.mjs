@@ -104,7 +104,7 @@ export function buildYearReview(file, ctx, opts = {}) {
     kcal > 0 && { key: 'kcal', value: Math.round(kcal / 1000), display: thousands(kcal / 1000), unit: 'k kcal', label: 'burned', quip: `${thousands(kcal / 2000)} large pizzas' worth` },
     climb > 0 && { key: 'climb', value: Math.round(climb), display: thousands(climb), unit: 'm', label: 'climbed', quip: `${round(climb / 8849, 2)} of an Everest` },
     countryCount > 1 && { key: 'countries', value: countryCount, display: String(countryCount), unit: '', label: 'countries', quip: 'passport, trainers, go' },
-    { key: 'days', value: activeDays, display: String(activeDays), unit: '', label: 'days moving', quip: `out of ${Math.round((Math.min(Date.parse(`${lastDataDay}T12:00:00Z`), end) - start) / DAY) + 1}` },
+    { key: 'days', value: activeDays, display: String(activeDays), unit: '', label: 'days moving', quip: `out of ${Math.floor((Math.min(Date.parse(`${lastDataDay}T12:00:00Z`), end) - start) / DAY) + 1}` },
     { key: 'streak', value: streak.days, display: String(streak.days), unit: 'days', label: 'longest streak', quip: streak.days ? `${dmIso(streak.from)} to ${dmIso(streak.to)}, not one day off` : '' },
     { key: 'pbs', value: prEvents.length, display: thousands(prEvents.length), unit: '', label: 'PBs broken', quip: `about ${round(prEvents.length / 52, 0)} a week` },
     races.length > 0 && { key: 'races', value: races.length, display: String(races.length), unit: '', label: 'races', quip: `${races.filter((x) => /parkrun/i.test(x.e.title || '')).length} of them parkruns` },

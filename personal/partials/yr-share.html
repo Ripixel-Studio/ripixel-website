@@ -5,7 +5,6 @@
   Phone: Share all (the Web Share API with every card as a file: Instagram story, WhatsApp,
   Slack), Share the video. Everywhere: a download per card, Download all, the video file.
   /…#share (Jarvis's "your card is ready" push) and the header's share button land here.
-  Also carries the issue's print button (the year review's script un-hides it).
 --}}
 {{#if cards.length}}
 <section class="yr-share" id="yr-share" aria-labelledby="yr-share-title" data-yr-share data-title="{{title}}">
@@ -37,7 +36,6 @@
         {{#if video}}<button type="button" class="yr-share__go yr-share__go--main" data-yr-share-video data-url="{{video.url}}" data-file="{{video.file}}" hidden>Share the video</button>{{/if}}
         <button type="button" class="yr-share__go" data-yr-share-dlall hidden>Download all {{count}}</button>
         {{#if video}}<a class="yr-share__go" href="{{video.url}}" download="{{video.file}}">Download the video</a>{{/if}}
-        <button type="button" class="yr-share__go yr-print" data-print hidden>Print this issue</button>
       </div>
       <p class="yr-share__status" data-yr-share-status role="status" aria-live="polite"></p>
     </div>

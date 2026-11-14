@@ -90,6 +90,3 @@
   .yr-share__go { justify-content: center; padding: 13px 14px; }
 }
 
-@media print {
-  .yr-share { display: none; }
-}
