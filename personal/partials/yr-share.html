@@ -1,0 +1,125 @@
+{{!--
+  Share the year: the year in review's story deck and its video (tasks/fitness-year-share.mjs,
+  rendered at build time by tasks/fitness-og-images.mjs). Context: a YearDeck
+  (fitnessYearDecks[key]: title, link, count, cards[{ n, label, url, file }], video|null).
+  Phone: Share all (the Web Share API with every card as a file: Instagram story, WhatsApp,
+  Slack), Share the video. Everywhere: a download per card, Download all, the video file.
+  /…#share (Jarvis's "your card is ready" push) and the header's share button land here.
+  Also carries the issue's print button (the year review's script un-hides it).
+--}}
+{{#if cards.length}}
+<section class="yr-share" id="yr-share" aria-labelledby="yr-share-title" data-yr-share data-title="{{title}}">
+  <div class="yr-share__head">
+    <p class="yr-share__kicker">for the group chats</p>
+    <h2 class="yr-share__title" id="yr-share-title">Share the year</h2>
+    <p class="yr-share__note">{{count}} story cards, 1080 × 1920, in order. Every one carries the link back here: <b>{{link}}</b></p>
+  </div>
+
+  <div class="yr-share__body">
+    {{#if video}}
+    <figure class="yr-share__video">
+      <video src="{{video.url}}" poster="{{video.poster}}" width="1080" height="1920" muted playsinline loop controls preload="none" aria-label="{{title}}: the video, {{video.seconds}} seconds"></video>
+      <figcaption>the video · {{video.seconds}} s</figcaption>
+    </figure>
+    {{/if}}
+    <div class="yr-share__deck">
+      <ol class="yr-share__strip" tabindex="0" aria-label="The story cards">
+        {{#each cards}}
+        <li class="yr-share__card" data-url="{{url}}" data-file="{{file}}">
+          <img src="{{url}}" alt="Story card {{n}} of {{../count}}: {{label}}" width="1080" height="1920" loading="lazy" decoding="async" />
+          <span class="yr-share__meta"><b>{{n}}</b> {{label}}</span>
+          <a class="yr-share__dl" href="{{url}}" download="{{file}}">download</a>
+        </li>
+        {{/each}}
+      </ol>
+      <div class="yr-share__actions">
+        <button type="button" class="yr-share__go yr-share__go--main" data-yr-share-all hidden>Share all {{count}} cards</button>
+        {{#if video}}<button type="button" class="yr-share__go yr-share__go--main" data-yr-share-video data-url="{{video.url}}" data-file="{{video.file}}" hidden>Share the video</button>{{/if}}
+        <button type="button" class="yr-share__go" data-yr-share-dlall hidden>Download all {{count}}</button>
+        {{#if video}}<a class="yr-share__go" href="{{video.url}}" download="{{video.file}}">Download the video</a>{{/if}}
+        <button type="button" class="yr-share__go yr-print" data-print hidden>Print this issue</button>
+      </div>
+      <p class="yr-share__status" data-yr-share-status role="status" aria-live="polite"></p>
+    </div>
+  </div>
+</section>
+<script>
+(function () {
+  var root = document.querySelector('[data-yr-share]');
+  if (!root) return;
+  var status = root.querySelector('[data-yr-share-status]');
+  var all = root.querySelector('[data-yr-share-all]');
+  var vid = root.querySelector('[data-yr-share-video]');
+  var dlall = root.querySelector('[data-yr-share-dlall]');
+  var cards = [].map.call(root.querySelectorAll('.yr-share__card'), function (li) { return { url: li.dataset.url, file: li.dataset.file }; });
+  var say = function (t) { status.textContent = t; };
+  var canFiles = false;
+  try {
+    // The share sheet is the phone's way out (Instagram story, WhatsApp, Slack); a desktop downloads.
+    canFiles = !!(navigator.canShare && navigator.share && matchMedia('(pointer: coarse)').matches
+      && navigator.canShare({ files: [new File([''], 'card.png', { type: 'image/png' })] }));
+  } catch (e) { canFiles = false; }
+  var files = {};
+  function load(c, type) {
+    if (!files[c.url]) {
+      files[c.url] = fetch(c.url).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.blob();
+      }).then(function (b) { return new File([b], c.file, { type: b.type || type }); });
+      files[c.url].catch(function () { delete files[c.url]; });
+    }
+    return files[c.url];
+  }
+  function share(list, what) {
+    // Fetched ahead (see warm), so the tap that asked still counts as the gesture.
+    return Promise.all(list).then(function (fs) {
+      if (!navigator.canShare({ files: fs })) throw new Error('too many');
+      return navigator.share({ files: fs, title: root.dataset.title });
+    }).then(function () { say('Shared.'); }, function (err) {
+      if (err && err.name === 'AbortError') { say(''); return; }
+      if (err && err.name === 'NotAllowedError') { say('Ready: tap ' + what + ' again.'); return; }
+      say('This phone will not share ' + what + ' in one go; use the downloads instead.');
+    });
+  }
+  var warmed = false;
+  function warm() {
+    if (warmed) return;
+    warmed = true;
+    cards.forEach(function (c) { load(c, 'image/png'); });
+  }
+  if (canFiles) {
+    all.hidden = false;
+    if (vid) vid.hidden = false;
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (es) { if (es.some(function (e) { return e.isIntersecting; })) { warm(); io.disconnect(); } }, { rootMargin: '600px 0px' });
+      io.observe(root);
+    } else warm();
+    all.addEventListener('click', function () {
+      warm();
+      say('Getting the cards ready…');
+      share(cards.map(function (c) { return load(c, 'image/png'); }), 'the cards');
+    });
+    if (vid) vid.addEventListener('click', function () {
+      say('Getting the video ready…');
+      share([load({ url: vid.dataset.url, file: vid.dataset.file }, 'video/mp4')], 'the video');
+    });
+    if (vid) vid.addEventListener('pointerdown', function () { load({ url: vid.dataset.url, file: vid.dataset.file }, 'video/mp4'); });
+  }
+  dlall.hidden = false;
+  dlall.addEventListener('click', function () {
+    // One download at a time, a beat apart, so the browser lets each one through.
+    var i = 0;
+    (function next() {
+      if (i >= cards.length) { say('Downloaded ' + cards.length + ' cards.'); return; }
+      var c = cards[i++];
+      var a = document.createElement('a');
+      a.href = c.url; a.download = c.file; a.rel = 'noopener';
+      document.body.appendChild(a); a.click(); a.remove();
+      say('Downloading ' + i + ' of ' + cards.length + '…');
+      setTimeout(next, 450);
+    })();
+  });
+  if (location.hash === '#share') root.scrollIntoView();
+})();
+</script>
+{{/if}}

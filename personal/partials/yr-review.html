@@ -258,7 +258,7 @@
     <ol class="yr-next__list">{{#each upcoming}}<li style="--tilt: {{tilt}}deg"><span>{{date}}</span><b>{{title}}</b></li>{{/each}}</ol>
     {{/if}}
     <p class="yr-next__sign">See you on the start line.</p>
-    <div class="yr-actions"><button type="button" class="yr-print" data-print hidden>print this issue</button></div>
+    {{> yr-share ../yearShare}}
   </section>
 </article>
 

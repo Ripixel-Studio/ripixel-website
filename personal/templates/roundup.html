@@ -20,7 +20,11 @@
       <a href="/life">life</a> / <a href="/life/fitness">fitness</a> / <a href="{{roundup.indexUrl}}">roundups</a> / {{roundup.short}}
     </nav>
 
+    {{#if roundup.yearShare}}
+    <div class="share"><a class="share__open" href="#yr-share"><span aria-hidden="true">→</span> share the year</a></div>
+    {{else}}
     {{> share-button roundup.share}}
+    {{/if}}
 
     {{#if roundup.isWeek}}{{> rl-week roundup}}{{/if}}
     {{#if roundup.isMonth}}{{> rl-month roundup}}{{/if}}
