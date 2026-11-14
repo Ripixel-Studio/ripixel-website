@@ -428,6 +428,11 @@ export async function readLive(opts) {
   if (!indexRes.ok) throw new Error(`HTTP ${indexRes.status} for index.json`);
   const indexText = await indexRes.text();
   const index = validateIndex(JSON.parse(indexText));
+  // A preview build can ask for roundups the index does not list yet (the year before it
+  // ends): FITNESS_PREVIEW_ROUNDUPS=year-2026[,…]. Never set for a deploy.
+  for (const key of String(process.env.FITNESS_PREVIEW_ROUNDUPS || '').split(',').map((k) => k.trim()).filter(Boolean)) {
+    if (/^(week|month|year)-[\d-]+$/.test(key) && !index.roundups.some((/** @type {any} */ r) => r?.key === key)) index.roundups.push({ key });
+  }
 
   const activityIds = listedIds(index.activities, 'slug', logger);
   const roundupIds = listedIds(index.roundups, 'key', logger);
@@ -453,6 +458,17 @@ export async function readLive(opts) {
   for (const r of results) {
     if (r.data === undefined) continue;
     (r.kind === 'activity' ? activityFiles : roundupFiles).set(r.id, r.data);
+  }
+  // A previewed year FitGlue has not written yet gets a bare file: its dates. The year
+  // review reads everything else from the sessions themselves.
+  for (const key of String(process.env.FITNESS_PREVIEW_ROUNDUPS || '').split(',').map((k) => k.trim())) {
+    const y = key.match(/^year-(\d{4})$/);
+    if (!y || roundupFiles.has(key)) continue;
+    roundupFiles.set(key, {
+      schemaVersion: 1, key, exportedAt: new Date().toISOString(),
+      roundup: { periodType: 'ROUNDUP_PERIOD_TYPE_YEAR', periodKey: key, periodStart: `${y[1]}-01-01T00:00:00Z`, periodEnd: `${Number(y[1]) + 1}-01-01T00:00:00Z`, generatedAt: new Date().toISOString(), prsAchieved: [], dayEntries: [] },
+    });
+    logger.info(`preview: ${key} built from its dates only`);
   }
 
   // Period sidecars: only for keys the index lists (an orphan sidecar is never requested),

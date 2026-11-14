@@ -21,6 +21,7 @@
 import path from 'node:path';
 
 import { buildStory, storyContext } from './fitness-roundup-story.mjs';
+import { buildYearReview } from './fitness-year-review.mjs';
 import { TAGS, tagOf, tagTheme } from './fitness-theme.mjs';
 import { recordLabel } from './fitness-records.mjs';
 
@@ -553,7 +554,7 @@ export function tagBreakdown(r, entries = []) {
 /**
  * Everything `personal/templates/roundup.html` renders, as plain data.
  * @param {{ key: string, previousKey?: string, roundup: any }} file
- * @param {{ byKey: Map<string, any>, neighbours: Map<string, any>, activitySlugs: Set<string>, showPhotoGallery: boolean, lifePeriods?: Record<string, any>, entries?: any[], story?: ReturnType<typeof storyContext> }} ctx
+ * @param {{ byKey: Map<string, any>, neighbours: Map<string, any>, activitySlugs: Set<string>, showPhotoGallery: boolean, lifePeriods?: Record<string, any>, entries?: any[], story?: ReturnType<typeof storyContext>, upcoming?: any[] }} ctx
  *   `story`: the shared highlights context (tasks/fitness-roundup-story.mjs); without it the page has no story blocks
  */
 export function buildRoundupView(file, ctx) {
@@ -678,6 +679,7 @@ export function buildRoundupView(file, ctx) {
     indexUrl: ROUNDUPS_INDEX_URL,
     periodStart: r.periodStart || '', sessionCount: num(r.totalActivities),
     story: ctx.story ? buildStory(file, type, ctx.story) : null,
+    review: ctx.story && type === 'year' ? buildYearReview(file, ctx.story, { upcoming: ctx.upcoming || [] }) : null,
   };
 }
 
@@ -785,6 +787,7 @@ export function fitnessRoundupViewsTask() {
         activitySlugs,
         showPhotoGallery: Boolean(index.profile?.showPhotoGallery),
         lifePeriods: g.lifePeriods || {},
+        upcoming: Array.isArray(g.fitnessEvents?.events) ? g.fitnessEvents.events : [],
         entries: Array.isArray(index.activities) ? index.activities : [],
         // Highlights: every activity file, the index, and the calendar's past Fitness Events (Jarvis).
         story: storyContext({
@@ -806,7 +809,7 @@ export function fitnessRoundupViewsTask() {
           const ogImage = typeof ogCards[file.key] === 'string' && /^https?:\/\//.test(ogCards[file.key]) ? ogCards[file.key] : '';
           pages.push({
             page: 'life', atomFeed: FITNESS_FEED_PATH,
-            subpage: `| ${view.subpage} roundup`, description: view.description, roundup: { ...view, share: g.fitnessShareCards?.roundup?.[file.key] || null },
+            subpage: `| ${view.subpage} roundup`, description: view.description, roundup: { ...view, share: g.fitnessShareCards?.roundup?.[file.key] || null, yearShare: (view.review && g.fitnessYearDecks?.[file.key]) || null },
             ogType: 'article', ogImage, canonical: siteUrl ? `${siteUrl}${view.url}` : '', publishedTime: view.generatedAt,
           });
         } catch (e) {

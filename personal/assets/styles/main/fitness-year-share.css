@@ -1,0 +1,92 @@
+/* =========================================
+   SHARE THE YEAR — the year in review's story deck and video (personal/partials/yr-share.html).
+   A paper panel on the issue's last page: the cards as a scroll-snap strip of tilted prints,
+   the video beside them, chunky ink buttons. Nothing moves on hover.
+   ========================================= */
+.yr-share {
+  position: relative;
+  margin-top: 34px;
+  padding: 22px 22px 18px;
+  color: var(--ink);
+  background: var(--paper-4);
+  border: 3px solid var(--ink);
+  box-shadow: 8px 8px 0 var(--ink-yellow), 11px 11px 0 var(--ink);
+  scroll-margin-top: 24px;
+}
+.yr-share [hidden] { display: none !important; }
+.yr-share__head { border-bottom: 3px solid var(--ink); padding-bottom: 10px; margin-bottom: 18px; }
+.yr-share__kicker {
+  margin: 0 0 4px;
+  font: 700 11px var(--f-mono); letter-spacing: .18em; text-transform: uppercase;
+  color: var(--ink-magenta);
+}
+.yr-share__title { margin: 0; font: 400 clamp(36px, 4.6vw, 64px)/.95 var(--f-disp); text-transform: uppercase; letter-spacing: -.01em; }
+.yr-share__note { margin: 8px 0 0; font: 13px/1.5 var(--f-mono); max-width: 70ch; }
+.yr-share__note b { background: var(--ink-yellow); padding: 0 4px; overflow-wrap: anywhere; }
+
+.yr-share__body { display: flex; gap: 22px; align-items: flex-start; }
+.yr-share__deck { flex: 1 1 auto; min-width: 0; }
+
+.yr-share__video { flex: 0 0 auto; width: 210px; margin: 0; }
+.yr-share__video video {
+  display: block; width: 100%; height: auto; aspect-ratio: 9 / 16;
+  background: var(--ink); border: 3px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--ink-magenta);
+}
+.yr-share__video figcaption,
+.yr-share__meta {
+  font: 700 11px var(--f-mono); letter-spacing: .12em; text-transform: uppercase;
+}
+.yr-share__video figcaption { margin-top: 10px; }
+
+.yr-share__strip {
+  list-style: none; margin: 0; padding: 10px 6px 18px;
+  display: flex; gap: 18px;
+  overflow-x: auto; overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory; scroll-padding: 6px;
+  scrollbar-color: var(--ink) var(--paper-2);
+}
+.yr-share__strip:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.yr-share__card { flex: 0 0 170px; min-width: 0; scroll-snap-align: start; display: flex; flex-direction: column; gap: 6px; }
+.yr-share__card:nth-child(odd) img { rotate: -1.2deg; }
+.yr-share__card:nth-child(even) img { rotate: 1deg; }
+.yr-share__card img {
+  display: block; width: 100%; height: auto; aspect-ratio: 9 / 16;
+  background: var(--paper-2);
+  border: 2.5px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.yr-share__meta { margin-top: 6px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.yr-share__meta b { display: inline-block; min-width: 1.6em; padding: 0 3px; margin-right: 4px; text-align: center; background: var(--ink); color: var(--paper-4); }
+.yr-share__dl {
+  align-self: flex-start;
+  font: 700 11px var(--f-mono); letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px;
+}
+.yr-share__dl:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+.yr-share__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+.yr-share__go {
+  display: inline-flex; align-items: center;
+  font: 700 12px var(--f-mono); letter-spacing: .12em; text-transform: uppercase;
+  padding: 10px 14px;
+  color: var(--ink); background: var(--paper);
+  border: 2.5px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  text-decoration: none;
+}
+.yr-share__go--main { background: var(--ink-yellow); }
+.yr-share__go:active { translate: 2px 2px; box-shadow: 1px 1px 0 var(--ink); }
+.yr-share__go:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.yr-share__status { min-height: 1.4em; margin: 10px 0 0; font: 12px var(--f-mono); }
+
+@media (max-width: 700px) {
+  .yr-share { padding: 16px 14px 14px; box-shadow: 5px 5px 0 var(--ink-yellow), 8px 8px 0 var(--ink); }
+  .yr-share__body { flex-direction: column; align-items: stretch; gap: 18px; }
+  .yr-share__video { width: min(62%, 240px); align-self: center; }
+  .yr-share__card { flex-basis: min(40vw, 170px); }
+  .yr-share__strip { margin: 0 -6px; }
+  .yr-share__actions { flex-direction: column; align-items: stretch; }
+  .yr-share__go { justify-content: center; padding: 13px 14px; }
+}
+

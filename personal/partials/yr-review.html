@@ -1,0 +1,420 @@
+{{!-- The year in review: the zine's annual issue (tasks/fitness-year-review.mjs).
+     Context: roundup view (isYear) with `review`. Chapters reveal and count up as they
+     scroll in (the script at the end; nothing moves under prefers-reduced-motion, and
+     everything is visible without the script). --}}
+{{#with review}}
+<article class="yr" data-yr>
+
+  {{!-- ─── COVER ─────────────────────────────────────────── --}}
+  <header class="yr-cover" data-reveal>
+    <div class="yr-cover__mast">
+      <span class="yr-cover__issue">THE ANNUAL · ISSUE {{year}}</span>
+      <span class="yr-cover__title">THE YEAR IN <em>SWEAT</em></span>
+      <span class="yr-cover__price">FREE · PRICELESS</span>
+    </div>
+    <h1 class="yr-cover__year" aria-label="{{year}}: the year in review"><span>{{year}}</span></h1>
+    {{#if cover.photos.length}}
+    <ol class="yr-cover__photos" aria-hidden="true">
+      {{#each cover.photos}}<li class="yr-polaroid {{typeClass}}" style="--x: {{x}}%; --y: {{y}}%; --r: {{rot}}deg; --i: {{i}}"><img src="{{url}}" alt="" decoding="async" width="400" height="400"></li>{{/each}}
+    </ol>
+    {{/if}}
+    <ul class="yr-cover__lines" aria-label="In this issue">
+      {{#each cover.lines}}<li class="{{typeClass}}"><span class="rl-stamp">{{stamp}}</span><span class="yr-cover__line">{{title}}</span></li>{{/each}}
+    </ul>
+    <div class="yr-sticker" aria-hidden="true"><b>{{cover.sticker.value}}</b><span>{{cover.sticker.label}}</span><i>inside!</i></div>
+    <div class="yr-barcode" aria-hidden="true"><span></span><small>{{year}} · 0 0 4 2 4 · 5 3 4</small></div>
+  </header>
+
+  {{!-- ─── THE YEAR IN PICTURES: two reels of film ──────── --}}
+  {{#if hasFilm}}
+  <section class="yr-film" aria-label="The year in pictures">
+    <div class="yr-film__label"><span>THE YEAR IN PICTURES</span><span>{{film.count}} photographed sessions · from {{film.from}}</span></div>
+    {{#each film.reels}}
+    <div class="yr-reel yr-reel--{{@index}}">
+      <ol class="yr-reel__run">
+        {{#each this}}<li class="yr-frame {{typeClass}}"><a href="{{href}}"><img src="{{url}}" alt="{{title}}, {{date}}" loading="lazy" decoding="async" width="300" height="300"><span class="yr-frame__cap">{{#if race}}<i>RACE</i> {{/if}}{{title}}<small>{{date}}</small></span></a></li>{{/each}}
+        {{#each this}}<li class="yr-frame yr-frame--loop {{typeClass}}" aria-hidden="true"><a href="{{href}}" tabindex="-1"><img src="{{url}}" alt="" loading="lazy" decoding="async" width="300" height="300"><span class="yr-frame__cap">{{#if race}}<i>RACE</i> {{/if}}{{title}}<small>{{date}}</small></span></a></li>{{/each}}
+      </ol>
+    </div>
+    {{/each}}
+  </section>
+  {{/if}}
+
+  {{!-- ─── CONTENTS + LETTER ────────────────────────────── --}}
+  <section class="yr-ch yr-open" data-reveal>
+    <nav class="yr-contents" aria-label="Contents">
+      <div class="yr-kicker">IN THIS ISSUE</div>
+      <ol>
+        <li><a href="#yr-numbers"><span>01</span> The numbers</a></li>
+        <li><a href="#yr-arc"><span>02</span> The shape of the year</a></li>
+        <li><a href="#yr-days"><span>03</span> Every single day</a></li>
+        <li><a href="#yr-months"><span>04</span> Month by month</a></li>
+        <li><a href="#yr-races"><span>05</span> On tour</a></li>
+        {{#if hasSeries}}<li><a href="#yr-series"><span>06</span> The regulars</a></li>{{/if}}
+        <li><a href="#yr-pbs"><span>07</span> Every PB</a></li>
+        <li><a href="#yr-out"><span>08</span> Out there</a></li>
+        <li><a href="#yr-awards"><span>09</span> The awards</a></li>
+        <li><a href="#yr-next"><span>10</span> Next issue</a></li>
+      </ol>
+    </nav>
+    <div class="yr-letter">
+      <div class="yr-kicker">FROM THE EDITOR</div>
+      {{#each letter}}<p>{{this}}</p>{{/each}}
+      <div class="yr-letter__sign">— J.</div>
+    </div>
+    {{#if hasStars}}
+    <aside class="yr-stars" aria-label="Cover stars">
+      <div class="yr-kicker">COVER STARS</div>
+      <ol>
+        {{#each stars}}
+        <li class="yr-star {{typeClass}}" style="--tilt: {{tilt}}deg">
+          <a class="yr-star__in card-link" href="{{href}}">
+            <span class="yr-star__pic"><img src="{{photo}}" alt="" loading="lazy" decoding="async" width="400" height="300"></span>
+            <span class="yr-star__body"><span class="rl-stamp">{{stamp}}</span><b class="card-link__target">{{title}}</b><small>{{date}}{{#if value}} · {{value}}{{#if unit}} {{unit}}{{/if}}{{/if}}</small></span>
+            {{> card-arrow}}
+          </a>
+        </li>
+        {{/each}}
+      </ol>
+    </aside>
+    {{/if}}
+  </section>
+
+  {{!-- ─── 01 NUMBERS ───────────────────────────────────── --}}
+  <section class="yr-ch" id="yr-numbers">
+    <div class="yr-head" data-reveal><span class="yr-head__n">01</span><h2 class="yr-h2">The numbers<span>.</span></h2><span class="yr-head__note">count them</span></div>
+    <ol class="yr-numbers">
+      {{#each numbers}}
+      <li class="yr-num yr-num--{{key}}" data-reveal>
+        <span class="yr-num__value"><b data-count="{{value}}" data-display="{{display}}">{{display}}</b>{{#if unit}}<small>{{unit}}</small>{{/if}}</span>
+        <span class="yr-num__label">{{label}}</span>
+        {{#if quip}}<span class="yr-num__quip">{{quip}}</span>{{/if}}
+      </li>
+      {{/each}}
+    </ol>
+  </section>
+
+  {{!-- ─── 02 ARC ───────────────────────────────────────── --}}
+  <section class="yr-ch" id="yr-arc">
+    <div class="yr-head" data-reveal><span class="yr-head__n">02</span><h2 class="yr-h2">The shape of the year<span>.</span></h2><span class="yr-head__note">hours a week · the highs up top, the lows underneath</span></div>
+    <figure class="yr-arc" data-reveal>
+      <div class="yr-arc__plot">
+        <svg class="yr-arc__svg" viewBox="0 0 {{arc.w}} {{arc.h}}" preserveAspectRatio="none" aria-hidden="true">
+          <defs><pattern id="yr-dots" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r="1.1" /></pattern></defs>
+          <path class="yr-arc__area" d="{{arc.area}}" />
+          <path class="yr-arc__area yr-arc__area--dots" d="{{arc.area}}" />
+          <path class="yr-arc__line" d="{{arc.line}}" pathLength="1" />
+        </svg>
+        {{#each arc.highs}}
+        <a class="yr-pin yr-pin--high {{typeClass}}{{#if flip}} yr-pin--flip{{/if}}" style="left: {{left}}%; top: {{top}}%; --i: {{@index}}; --lv: {{level}}" {{#if href}}href="{{href}}"{{/if}}>
+          <span class="yr-pin__tag"><span class="rl-stamp">{{stamp}}</span><b>{{title}}</b><small>{{date}}{{#if value}} · {{value}}{{#if unit}} {{unit}}{{/if}}{{/if}}</small></span>
+        </a>
+        {{/each}}
+        {{#each arc.lows}}
+        <span class="yr-pin yr-pin--low{{#if flip}} yr-pin--flip{{/if}}" style="left: {{left}}%; top: {{top}}%; --i: {{@index}}; --lv: {{level}}">
+          <span class="yr-pin__tag"><span class="yr-low">LOW</span><b>{{title}}</b><small>{{date}}</small></span>
+        </span>
+        {{/each}}
+      </div>
+      <ol class="yr-arc__months" aria-hidden="true">{{#each arc.months}}<li style="left: {{x}}%">{{label}}</li>{{/each}}</ol>
+      {{#if arc.biggest}}<figcaption class="yr-arc__cap">The biggest week was {{arc.biggest.date}}: <b>{{arc.biggest.value}}</b> over {{arc.biggest.n}} sessions. The top of the chart is {{arc.peak}}.</figcaption>{{/if}}
+    </figure>
+  </section>
+
+  {{!-- ─── 03 DAYS ──────────────────────────────────────── --}}
+  <section class="yr-ch" id="yr-days">
+    <div class="yr-head" data-reveal><span class="yr-head__n">03</span><h2 class="yr-h2">Every single day<span>.</span></h2><span class="yr-head__note">{{days.active}} days moving · one square each, in the day's colours · ★ race day</span></div>
+    <div class="yr-days" data-reveal>
+      <ol class="yr-days__grid">
+        {{#each days.cols}}
+        <li class="yr-days__col">
+          {{#if month}}<span class="yr-days__month">{{month}}</span>{{/if}}
+          {{#each cells}}{{#if blank}}<span class="yr-day yr-day--blank"></span>{{else}}{{#if href}}<a class="yr-day {{typeClass}}{{#if race}} yr-day--race{{/if}}" href="{{href}}" title="{{title}}" style="--i: {{i}}"></a>{{else}}<span class="yr-day{{#if future}} yr-day--future{{else}} yr-day--rest{{/if}}" title="{{title}}" style="--i: {{i}}"></span>{{/if}}{{/if}}{{/each}}
+        </li>
+        {{/each}}
+      </ol>
+      <ul class="yr-key">{{#each days.legend}}<li class="{{typeClass}}"><i></i>{{tagLabel}} <b>{{n}}</b></li>{{/each}}<li class="yr-key__rest"><i></i>rest</li></ul>
+    </div>
+  </section>
+
+  {{!-- ─── 04 MONTHS ────────────────────────────────────── --}}
+  <section class="yr-ch" id="yr-months">
+    <div class="yr-head" data-reveal><span class="yr-head__n">04</span><h2 class="yr-h2">Month by month<span>.</span></h2><span class="yr-head__note">twelve chapters · each opens its own roundup</span></div>
+    <ol class="yr-months">
+      {{#each months}}
+      {{#if empty}}
+      <li class="yr-spread yr-spread--empty" data-reveal>
+        <span class="yr-spread__n">{{n}}</span>
+        <h3 class="yr-spread__name">{{name}}</h3>
+        <p class="yr-spread__soon">{{#if future}}Still being written.{{else}}A month off.{{/if}}</p>
+      </li>
+      {{else}}
+      <li class="yr-spread {{typeClass}}{{#if flip}} yr-spread--flip{{/if}}" data-reveal>
+        <div class="yr-spread__pics yr-spread__pics--{{tileCount}}">
+          {{#each tiles}}
+          <a class="yr-tile {{typeClass}}{{#if photo}} yr-tile--photo{{else}} yr-tile--route{{/if}}" href="{{href}}" style="--i: {{i}}">
+            {{#if photo}}<img src="{{photo}}" alt="" loading="lazy" decoding="async" width="600" height="600">{{else}}<span class="yr-tile__route">{{> rl-route route}}</span>{{/if}}
+            <span class="yr-tile__cap">{{title}}<small>{{date}}{{#if km}} · {{km}}{{/if}}</small></span>
+          </a>
+          {{/each}}
+          <span class="yr-spread__big" aria-hidden="true">{{short}}</span>
+        </div>
+        <div class="yr-spread__body">
+          <div class="yr-spread__top"><span class="yr-spread__n">{{n}}</span><h3 class="yr-spread__name">{{name}}</h3>{{#if rankLabel}}<span class="yr-spread__rank">{{rankLabel}}</span>{{/if}}</div>
+          <ul class="yr-spread__facts">
+            <li><b>{{sessions}}</b> sessions</li><li><b>{{hours}}</b> moving</li>{{#if km}}<li><b>{{km}}</b> km</li>{{/if}}<li><b>{{days}}</b> days</li>{{#if prs}}<li class="is-pb"><b>{{prs}}</b> PBs</li>{{/if}}
+          </ul>
+          <ol class="yr-spread__cal" aria-label="{{name}}, day by day">{{#each monthDays}}{{#if href}}<li><a class="{{typeClass}}{{#if race}} is-race{{/if}}" href="{{href}}" title="{{title}}"></a></li>{{else}}<li><span class="{{#if future}}is-future{{else}}is-rest{{/if}}" title="{{title}}"></span></li>{{/if}}{{/each}}</ol>
+          {{#if high}}{{#with high}}
+          <a class="yr-spread__high {{typeClass}}" {{#if href}}href="{{href}}"{{/if}}>
+            <span class="yr-spread__hl">HIGH</span><span class="rl-stamp">{{stamp}}</span>
+            <b>{{title}}</b>{{#if value}}<span class="yr-spread__hv">{{value}}{{#if unit}} <small>{{unit}}</small>{{/if}}</span>{{/if}}
+          </a>
+          {{/with}}{{/if}}
+          {{#if hasEvents}}
+          <div class="yr-spread__events">
+            <span class="yr-spread__label">ON THE START LINE</span>
+            <ol>{{#each events}}<li class="{{typeClass}}"><a href="{{href}}"><span class="yr-spread__ed">{{date}}</span><b>{{title}}</b><span class="yr-spread__et">{{time}}</span>{{#if pb}}<span class="yr-spread__epb">PB</span>{{/if}}</a></li>{{/each}}</ol>
+            {{#if parkruns}}<span class="yr-spread__pk">+ {{pkLabel}}</span>{{/if}}
+          </div>
+          {{else}}{{#if parkruns}}<p class="yr-spread__pk">{{pkLabel}}, and nothing else with a start line.</p>{{/if}}{{/if}}
+          {{#if more.length}}<ul class="yr-spread__more">{{#each more}}<li class="{{typeClass}}"><span class="rl-stamp">{{stamp}}</span> {{title}}</li>{{/each}}</ul>{{/if}}
+          {{#each lines}}<p class="yr-spread__line">{{this}}</p>{{/each}}
+          {{#if low}}<p class="yr-spread__low"><span class="yr-low">LOW</span> {{low}}</p>{{/if}}
+          <div class="yr-spread__foot">
+            <span class="yr-spread__stack" aria-hidden="true">{{#each stack}}<i class="{{typeClass}}" style="width: {{share}}" title="{{label}}"></i>{{/each}}</span>
+            {{#if href}}<a class="yr-spread__link" href="{{href}}">read {{name}} →</a>{{/if}}
+          </div>
+        </div>
+      </li>
+      {{/if}}
+      {{/each}}
+    </ol>
+  </section>
+
+  {{!-- ─── 05 ON TOUR ───────────────────────────────────── --}}
+  <section class="yr-ch" id="yr-races">
+    <div class="yr-head" data-reveal><span class="yr-head__n">05</span><h2 class="yr-h2">On tour<span>.</span></h2><span class="yr-head__note">{{races.count}} races · {{races.tour.parkruns}} of them parkruns, which get their own page</span></div>
+    {{#with races.tour}}
+    <div class="yr-tour" data-reveal>
+      <div class="yr-tour__head">
+        <span class="yr-tour__kicker">LIVE · ON STAGE · AT A START LINE NEAR YOU</span>
+        <span class="yr-tour__title">THE {{../year}} TOUR</span>
+        <span class="yr-tour__sub"><b>{{count}}</b> dates · <b>{{places}}</b> venues · <b>{{pbs}}</b> PBs</span>
+      </div>
+      <ol class="yr-tour__list">
+        {{#each rows}}
+        <li class="yr-tour__item {{typeClass}}" style="--i: {{@index}}">
+          <a class="yr-tour__row" href="{{href}}">
+            <span class="yr-tour__date"><b>{{day}}</b>{{month}}</span>
+            <span class="yr-tour__name">{{title}}<small>{{#if place}}{{place}} · {{/if}}{{sub}}</small></span>
+            <span class="yr-tour__time">{{time}}{{#if pace}}<small>{{pace}}</small>{{/if}}</span>
+            <span class="yr-tour__pb">{{#if pb}}PB{{/if}}</span>
+          </a>
+        </li>
+        {{/each}}
+      </ol>
+      <div class="yr-tour__foot"><span>ALL DATES SOLD OUT</span><span>NO REFUNDS · NO REGRETS</span></div>
+    </div>
+    {{/with}}
+  </section>
+
+  {{!-- ─── 06 THE REGULARS ──────────────────────────────── --}}
+  {{#if hasSeries}}
+  <section class="yr-ch" id="yr-series">
+    <div class="yr-head" data-reveal><span class="yr-head__n">06</span><h2 class="yr-h2">The regulars<span>.</span></h2><span class="yr-head__note">the races that kept coming back</span></div>
+    {{#each series}}
+    <article class="yr-series yr-series--{{kind}} {{typeClass}}" data-reveal>
+      <header class="yr-series__head"><span class="yr-series__count">×{{count}}</span><h3 class="yr-series__name">{{name}}</h3><p class="yr-series__blurb">{{blurb}}</p></header>
+      {{#if lanes}}
+      <div class="yr-hyrox">
+        <div class="yr-hyrox__key"><span class="yr-hyrox__k yr-hyrox__k--run">run</span><span class="yr-hyrox__k yr-hyrox__k--station">station</span><span class="yr-hyrox__k yr-hyrox__k--rox">roxzone</span></div>
+        <ol class="yr-hyrox__lanes">
+          {{#each lanes}}
+          <li class="yr-hyrox__lane">
+            <a class="yr-hyrox__who" href="{{href}}"><b>{{title}}</b><small>{{sub}} · {{date}}</small></a>
+            <span class="yr-hyrox__track" style="--w: {{width}}%">{{#each segs}}<i class="{{#if isRun}}is-run{{else}}is-station{{/if}}" style="left: {{left}}%; width: {{w}}%; --i: {{@index}}" title="{{label}} · {{time}}"></i>{{/each}}<span class="yr-hyrox__end" style="left: {{width}}%">{{time}}</span></span>
+            <span class="yr-hyrox__split">run {{run}} · stations {{stations}} · roxzone {{rox}}</span>
+          </li>
+          {{/each}}
+        </ol>
+        <ol class="yr-hyrox__ticks" aria-hidden="true">{{#each ticks}}<li style="left: {{left}}%">{{label}}</li>{{/each}}</ol>
+        <div class="yr-kicker">BEST AT EACH STATION</div>
+        <ol class="yr-hyrox__stations">{{#each stations}}<li><span>{{label}}</span><b>{{time}}</b><small>{{where}}</small></li>{{/each}}</ol>
+      </div>
+      {{/if}}
+      {{#if dots}}
+      <div class="yr-pk">
+        <figure class="yr-pk__plot">
+          <div class="yr-pk__area">
+            <span class="yr-pk__axis yr-pk__axis--top">{{best}}</span><span class="yr-pk__axis yr-pk__axis--bottom">{{slow}}</span>
+            <span class="yr-pk__avg" style="bottom: {{avgBottom}}%"><small>average {{avg}}</small></span>
+            {{#each dots}}<a class="yr-pk__dot{{#if best}} yr-pk__dot--best{{/if}}{{#if off}} yr-pk__dot--off{{/if}}{{#if pb}} yr-pk__dot--pb{{/if}}" href="{{href}}" title="{{date}} · {{course}} · {{time}}" style="left: {{left}}%; bottom: {{bottom}}%; --i: {{i}}"></a>{{/each}}
+          </div>
+          <ol class="yr-pk__months" aria-hidden="true">{{#each months}}<li style="left: {{left}}%">{{label}}</li>{{/each}}</ol>
+          <figcaption>Every parkrun of the year, higher is faster. The big yellow one is the best{{#if hasPb}}; blue ones were a PB on the day{{/if}}{{#if hasOff}}; the hollow ones on the floor were run for fun{{/if}}.</figcaption>
+        </figure>
+        <div class="yr-pk__side">
+          <div class="yr-pk__best"><span>best</span><b>{{best}}</b><small>{{bestWhen}}</small></div>
+          <div class="yr-pk__best yr-pk__best--avg"><span>average</span><b>{{avg}}</b></div>
+          <div class="yr-kicker">THE COURSES</div>
+          <ol class="yr-pk__courses">{{#each courses}}<li><span>{{name}}</span><b>×{{n}}</b></li>{{/each}}</ol>
+        </div>
+      </div>
+      {{/if}}
+      {{#if editions}}
+      <ol class="yr-editions">
+        {{#each editions}}
+        <li class="yr-edition {{typeClass}}">
+          <a class="yr-edition__in card-link" href="{{href}}">
+            <span class="yr-edition__pic">{{#if photo}}<img src="{{photo}}" alt="" loading="lazy" decoding="async" width="400" height="300">{{else}}{{#if route}}<span class="yr-edition__route">{{> rl-route route}}</span>{{/if}}{{/if}}{{#if pb}}<span class="yr-edition__pb">PB!</span>{{/if}}</span>
+            <span class="yr-edition__body">
+              <span class="yr-edition__date">{{date}}</span>
+              <b class="yr-edition__name card-link__target">{{edition}}</b>
+              <span class="yr-edition__time">{{time}}</span>
+              <span class="yr-edition__meta">{{dist}}{{#if pace}} · {{pace}}{{/if}}</span>
+              <span class="yr-edition__bar{{#if quickest}} is-quickest{{/if}}" title="pace, against the quickest"><i style="width: {{bar}}%"></i></span>
+            </span>
+            {{> card-arrow}}
+          </a>
+        </li>
+        {{/each}}
+      </ol>
+      {{/if}}
+    </article>
+    {{/each}}
+  </section>
+  {{/if}}
+
+  {{!-- ─── 07 PBS ───────────────────────────────────────── --}}
+  <section class="yr-ch" id="yr-pbs">
+    <div class="yr-head" data-reveal><span class="yr-head__n">07</span><h2 class="yr-h2">Every PB<span>.</span></h2><span class="yr-head__note">{{pbs.total}} personal bests across {{pbs.exercises}} records</span></div>
+    {{#if ticker.length}}
+    <div class="yr-ticker" aria-hidden="true"><div class="yr-ticker__run">{{#each ticker}}<span>★ {{this}}</span>{{/each}}{{#each ticker}}<span>★ {{this}}</span>{{/each}}</div></div>
+    {{/if}}
+    <div class="yr-pbhead" data-reveal>
+      <div class="yr-pbhead__big"><b data-count="{{pbs.total}}" data-display="{{pbs.total}}">{{pbs.total}}</b><span>PBs</span></div>
+      <ol class="yr-pbmonths" aria-label="PBs per month">{{#each pbs.months}}<li class="{{#if top}}is-top{{/if}}"><i style="height: {{h}}%"></i><span>{{label}}</span><b>{{n}}</b></li>{{/each}}</ol>
+      {{#if pbs.biggest}}{{#with pbs.biggest}}<p class="yr-pbhead__note">Biggest leap: <b>{{name}}</b> {{metric}}, {{from}} → {{to}}. {{../pbs.bestMonth}} was the PB month.</p>{{/with}}{{/if}}
+    </div>
+    <ol class="yr-prog">
+      {{#each pbs.featured}}
+      <li class="yr-prog__card {{typeClass}}" data-reveal>
+        <div class="yr-prog__top"><b>{{name}}</b><span>{{metric}}</span></div>
+        <svg class="yr-prog__svg" viewBox="-6 -6 {{w}} {{h}}" preserveAspectRatio="none" aria-hidden="true" style="--vw: {{w}}"><path d="{{d}}" pathLength="1" />{{#each dots}}<circle cx="{{x}}" cy="{{y}}" r="4" style="--i: {{@index}}"><title>{{label}}</title></circle>{{/each}}</svg>
+        <div class="yr-prog__ends"><span>{{from}}</span><span class="yr-prog__arrow">→</span><b>{{to}}</b></div>
+        <div class="yr-prog__foot"><span class="yr-prog__change">{{change}}</span><span>{{countLabel}}</span></div>
+      </li>
+      {{/each}}
+    </ol>
+    <div class="yr-ledger" data-reveal>
+      <div class="yr-kicker">THE LEDGER · every record that went up this year, in drawers · open one</div>
+      <div class="yr-drawers">
+        {{#each pbs.ledger}}
+        <details class="yr-drawer yr-drawer--{{key}}">
+          <summary class="yr-drawer__front">
+            <span class="yr-drawer__top"><span class="yr-drawer__name">{{label}}</span><span class="yr-drawer__n"><b>{{n}}</b> PBs · {{records}} records</span></span>
+            {{#if note}}<span class="yr-drawer__note">{{note}}</span>{{/if}}
+            <span class="yr-drawer__bar" aria-hidden="true"><i style="width: {{bar}}%"></i></span>
+            <span class="yr-drawer__calls">{{#each callouts}}<span class="yr-call yr-call--{{kind}}"><small>{{label}}</small><b>{{name}}</b><span>{{value}}</span></span>{{/each}}</span>
+            <span class="yr-drawer__pull" aria-hidden="true"><span class="yr-drawer__open">open the drawer ↓</span><span class="yr-drawer__close">close it ↑</span></span>
+          </summary>
+          <ol class="yr-ledger__rows">
+            {{#each rows}}<li><a href="{{href}}"><span class="yr-ledger__name">{{name}}</span><span class="yr-ledger__count">×{{count}}</span><span class="yr-ledger__ft">{{from}} → <b>{{to}}</b></span><span class="yr-ledger__what">{{#if metrics}}{{metrics}}{{else}}{{what}}{{/if}}</span></a></li>{{/each}}
+          </ol>
+        </details>
+        {{/each}}
+      </div>
+    </div>
+  </section>
+
+  {{!-- ─── 08 OUT THERE ─────────────────────────────────── --}}
+  <section class="yr-ch" id="yr-out">
+    <div class="yr-head" data-reveal><span class="yr-head__n">08</span><h2 class="yr-h2">Out there<span>.</span></h2><span class="yr-head__note">{{out.routes.length}} different routes · {{out.placeCount}} places{{#if out.countries}} · {{out.countries}} countries{{/if}}</span></div>
+    {{#if out.routes.length}}
+    <ol class="yr-routes" data-reveal>
+      {{#each out.routes}}<li class="{{typeClass}}" style="--i: {{i}}"><a href="{{href}}" title="{{title}}{{#if km}} · {{km}}{{/if}}">{{> rl-route this}}</a></li>{{/each}}
+    </ol>
+    {{/if}}
+    <div class="yr-out">
+      {{#if out.places.length}}
+      <div class="yr-places" data-reveal>
+        <div class="yr-kicker">WHERE IT HAPPENED</div>
+        <ol>{{#each out.places}}<li><span class="yr-places__name">{{name}}</span><span class="yr-places__bar"><i style="width: {{pct}}%"></i></span><b>{{n}}</b></li>{{/each}}</ol>
+      </div>
+      {{/if}}
+      {{#if out.weather.sessions}}
+      <div class="yr-weather" data-reveal>
+        <div class="yr-kicker">WHATEVER THE WEATHER</div>
+        <ul>
+          <li class="yr-weather--hot"><b>{{out.weather.hot}}°</b><span>hottest<small>{{out.weather.hotWhat}}</small></span></li>
+          <li class="yr-weather--cold"><b>{{out.weather.cold}}°</b><span>coldest<small>{{out.weather.coldWhat}}</small></span></li>
+          <li class="yr-weather--rain"><b>{{out.weather.rain}}</b><span>sessions in the rain</span></li>
+        </ul>
+      </div>
+      {{/if}}
+    </div>
+  </section>
+
+  {{!-- ─── 09 AWARDS ────────────────────────────────────── --}}
+  <section class="yr-ch" id="yr-awards">
+    <div class="yr-head" data-reveal><span class="yr-head__n">09</span><h2 class="yr-h2">The awards<span>.</span></h2><span class="yr-head__note">and the winner is… also the only nominee</span></div>
+    <ol class="yr-awards">
+      {{#each awards}}
+      <li class="yr-award" style="--tilt: {{tilt}}deg; --i: {{i}}" data-reveal>
+        {{#if href}}<a class="yr-award__in card-link" href="{{href}}">{{else}}<div class="yr-award__in">{{/if}}
+          <span class="yr-award__stamp">{{stamp}}</span>
+          <span class="yr-award__medal">{{{icon}}}</span>
+          <b class="yr-award__value">{{value}}</b>
+          <span class="yr-award__title">{{title}}</span>
+          <span class="yr-award__sub">{{sub}}</span>
+        {{#if href}}{{> card-arrow}}</a>{{else}}</div>{{/if}}
+      </li>
+      {{/each}}
+    </ol>
+  </section>
+
+  {{!-- ─── 10 NEXT ──────────────────────────────────────── --}}
+  <section class="yr-ch yr-next" id="yr-next" data-reveal>
+    <div class="yr-head"><span class="yr-head__n">10</span><h2 class="yr-h2">Next issue: {{nextYear}}<span>.</span></h2><span class="yr-head__note">already in the diary</span></div>
+    {{#if hasUpcoming}}
+    <ol class="yr-next__list">{{#each upcoming}}<li style="--tilt: {{tilt}}deg"><span>{{date}}</span><b>{{title}}</b></li>{{/each}}</ol>
+    {{/if}}
+    <p class="yr-next__sign">See you on the start line.</p>
+    {{> yr-share ../yearShare}}
+  </section>
+</article>
+
+<script>
+  // Reveal chapters as they scroll in and count the big numbers up. Nothing moves when
+  // reduced motion is asked for; without this script everything is simply there.
+  (function () {
+    var root = document.querySelector('[data-yr]');
+    if (!root) return;
+    var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (still || !('IntersectionObserver' in window)) return;
+    root.classList.add('yr--moving');
+    function count(el) {
+      var to = Number(el.getAttribute('data-count')) || 0, shown = el.getAttribute('data-display') || String(to);
+      if (to < 2) return;
+      var t0 = null, dur = Math.min(1600, 500 + to * 2);
+      function frame(t) {
+        if (t0 === null) t0 = t;
+        var p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+        el.textContent = p < 1 ? Math.round(to * e).toLocaleString('en-GB') : shown;
+        if (p < 1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        en.target.classList.add('is-in');
+        en.target.querySelectorAll('[data-count]').forEach(count);
+        io.unobserve(en.target);
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    root.querySelectorAll('[data-reveal]').forEach(function (el) { io.observe(el); });
+  })();
+</script>
+{{/with}}
