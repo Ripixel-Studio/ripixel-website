@@ -29,6 +29,8 @@
  *   fitnessOgImages    { activity, event, roundup: { [id]: absolute landscape URL } }
  *   fitnessShareCards  { activity, event, roundup: { [id]: ShareEntry } } — the Share
  *                      button's data (personal/partials/share-button.html)
+ *   fitnessYearDecks   { [year key]: YearDeck } — the year in review's story cards and
+ *                      video (tasks/fitness-year-share.mjs; personal/partials/yr-share.html)
  * and public/personal/life/share/index.json: the full-scope cards, for Jarvis's
  * "your card is ready" push (jarvis gateway/domains/sharecards.py).
  */
@@ -41,6 +43,7 @@ import { buildShareSVG, SHAPES, SHAPE_ORDER, PAPER, INK } from '../scripts/share
 import { buildHyroxHistory } from './fitness-hyrox.mjs';
 import { parsePeriodKey, resolveNeighbours } from './fitness-roundup-views.mjs';
 import { activityShareModel, eventShareModel, roundupShareModel, parkrunHistory } from './fitness-share-models.mjs';
+import { yearReviewsFor, withYearReview, renderYearDeck } from './fitness-year-share.mjs';
 
 export const DEFAULT_OUT_DIR = 'public/personal/life/share';
 export const DEFAULT_CACHE_DIR = '.cache/og';
@@ -108,7 +111,9 @@ export function variantsFor(model, full) {
 
 /**
  * Every card job for the data: activities, race weekends, roundups.
- * @param {{ activities?: any[], roundups?: any[], lifePeriods?: Record<string, any>, index?: any, now?: number, photoDims?: any, logger?: any }} opts
+ * A year roundup with a review in `yearReviews` takes the review's numbers (withYearReview):
+ * FitGlue's year file is empty until the year ends.
+ * @param {{ activities?: any[], roundups?: any[], lifePeriods?: Record<string, any>, index?: any, now?: number, photoDims?: any, logger?: any, yearReviews?: Map<string, any> }} opts
  * @returns {Job[]}
  */
 export function cardJobs(opts) {
@@ -145,7 +150,9 @@ export function cardJobs(opts) {
   };
   for (const file of roundups) {
     try {
-      models.push(roundupShareModel(file, ctx));
+      const model = roundupShareModel(file, ctx);
+      const review = opts.yearReviews?.get(file.key);
+      models.push(review ? withYearReview(model, review) : model);
     } catch (e) {
       logger.warn(`share card skipped for roundup ${JSON.stringify(file?.key)}: ${errMsg(e)}`);
     }
@@ -252,7 +259,7 @@ const shapeLabel = (shape) => SHAPES[shape].label;
  * Render every card into `outDir`, reusing `cacheDir` where nothing changed.
  * @param {{ activities?: any[], roundups?: any[], lifePeriods?: Record<string, any>, index?: any, outDir?: string, cacheDir?: string, urlBase?: string,
  *   siteUrl?: string, fontCacheDir?: string, concurrency?: number, logger?: any, now?: number, photoDims?: any,
- *   fetchImpl?: typeof fetch, offline?: boolean, only?: (job: Job) => boolean }} opts
+ *   fetchImpl?: typeof fetch, offline?: boolean, only?: (job: Job) => boolean, yearReviews?: Map<string, any> }} opts
  */
 export async function renderFitnessCards(opts = {}) {
   const started = Date.now();
@@ -404,6 +411,26 @@ export function fitnessOgImagesTask(config = {}) {
         ctx.logger.warn('No fitness activities or roundups — no share cards to render');
         return empty;
       }
+      // The year in review (tasks/fitness-year-review.mjs), for the year cards' numbers and the story deck.
+      /** @type {Map<string, any>} */
+      let yearReviews = new Map();
+      try {
+        yearReviews = yearReviewsFor(g, roundups.filter((f) => /^year-\d{4}$/.test(f?.key || '') && parsePeriodKey(f.key)));
+      } catch (e) {
+        ctx.logger.warn(`Year reviews unavailable for the share cards: ${errMsg(e)}`);
+      }
+      const offline = process.env.FITNESS_DATA_SOURCE === 'fixtures' || process.env.FITNESS_SHARE_PHOTOS === 'off';
+      /** @type {Record<string, any>} */
+      const fitnessYearDecks = {};
+      for (const [key, review] of yearReviews) {
+        try {
+          const d = await renderYearDeck(review, { ...cfg, key, url: `/life/roundup/${key}`, siteUrl: g.siteUrl, offline, logger: ctx.logger });
+          if (d.cards.length) fitnessYearDecks[key] = d;
+          ctx.logger.info(`Year deck ${key}: ${d.cards.length} story cards (${d.rendered} rendered, ${d.cached} from cache)${d.video ? `, a ${d.video.seconds} s video` : ', no video'}`);
+        } catch (e) {
+          ctx.logger.warn(`Year deck ${key} unavailable: ${errMsg(e)}`);
+        }
+      }
       try {
         const r = await renderFitnessCards({
           ...cfg,
@@ -413,14 +440,15 @@ export function fitnessOgImagesTask(config = {}) {
           siteUrl: g.siteUrl,
           photoDims: g.fitnessPhotoDims,
           lifePeriods: g.lifePeriods,
-          offline: process.env.FITNESS_DATA_SOURCE === 'fixtures' || process.env.FITNESS_SHARE_PHOTOS === 'off',
+          offline,
+          yearReviews,
           logger: ctx.logger,
         });
         ctx.logger.info(`Share cards: ${r.images} images for ${r.total} pages (${r.full} in all three shapes) — ${r.rendered} rendered, ${r.cached} from cache, ${r.failed} failed, ${r.dropped} without their photo; ${(r.ms / 1000).toFixed(1)} s`);
-        return { fitnessOgImages: r.urls, fitnessShareCards: r.cards };
+        return { fitnessOgImages: r.urls, fitnessShareCards: r.cards, fitnessYearDecks };
       } catch (e) {
         ctx.logger.warn(`Share cards unavailable, pages fall back to photo/card_life.png: ${errMsg(e)}`);
-        return empty;
+        return { ...empty, fitnessYearDecks };
       }
     },
   };
