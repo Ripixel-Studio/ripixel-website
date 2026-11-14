@@ -62,3 +62,24 @@ test('every award has a drawing, unknown ones a star', () => {
   for (const k of AWARD_ICON_STAMPS) assert.match(awardIcon(k), /^<svg class="yr-award__icon"/);
   assert.match(awardIcon('SOMETHING NEW'), /<path class="f"/);
 });
+
+test('habitSeries: a numbered daily run is a streak, a numbered weekly one a club, unnumbered noise neither', async () => {
+  const { habitSeries, habitName } = await import('./fitness-year-races.mjs');
+  assert.equal(habitName('Bingham Sunday Running Club (#9) - Christmas Edition'), 'Bingham Sunday Running Club');
+  const start = Date.UTC(2026, 0, 1), end = Date.UTC(2027, 0, 1), D = 86400000;
+  const s = [];
+  for (let d = 1; d <= 30; d++) s.push({ t: Date.UTC(2026, 8, d, 12), e: { slug: `pu-${d}`, title: d === 1 ? '100 Press Ups' : `100 Press Ups (#${d})`, totalReps: 100, activityType: 'ACTIVITY_TYPE_WORKOUT' } });
+  for (let w = 0; w < 8; w++) s.push({ t: Date.UTC(2026, 0, 4, 9) + w * 7 * D, e: { slug: `c-${w}`, title: `Bingham Sunday Running Club (#${w + 11})`, distanceMeters: 5000, activityType: 'ACTIVITY_TYPE_RUN' } });
+  for (let w = 0; w < 10; w++) s.push({ t: Date.UTC(2026, 1, 2, 9) + w * D, e: { slug: `m-${w}`, title: 'Morning Run', activityType: 'ACTIVITY_TYPE_RUN' } });
+  const out = habitSeries(s, { start, end }, (slug) => `/x/${slug}`);
+  assert.deepEqual(out.map((x) => [x.kind, x.name, x.count]), [['streak', '100 Press Ups', 30], ['club', 'Bingham Sunday Running Club', 8]]);
+  const pu = out[0];
+  assert.equal(pu.streak.whole, true);
+  assert.match(pu.blurb, /^Every day of September, 3,000 reps\. Not one missed\.$/);
+  assert.equal(pu.months[0].cells.filter((c) => c.done).length, 30);
+  assert.equal(pu.months[0].lead.length, 1); // 1 Sep 2026 is a Tuesday
+  const club = out[1];
+  assert.equal(club.weeks.filter((w) => w.on).length, 8);
+  assert.match(club.blurb, /^8 Sundays this year, 40 km between them, and 8 weeks without missing one\.$/);
+  assert.deepEqual(club.stats.map((x) => x.value), ['No. 11 to 18', '40 km', '8 weeks']);
+});

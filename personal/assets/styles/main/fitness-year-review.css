@@ -402,6 +402,36 @@ a.yr-spread__high:hover { filter: brightness(1.08); }
 .yr-pk__courses li { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; border-bottom: 1px dashed rgba(23,19,17,.3); font: 600 14px var(--f-sans); }
 .yr-pk__courses b { font: 400 18px var(--f-disp); color: #C42A72; }
 /* a named series: one card per edition */
+/* the streak: a calendar per month, every day done ticked in the session's colour */
+.yr-streak { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: clamp(16px, 3vw, 48px); align-items: center; }
+.yr-streak__big { display: grid; justify-items: center; padding: 18px 22px; background: var(--ink-yellow); border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); transform: rotate(-3deg); }
+.yr-streak__big b { font: 400 clamp(56px, 6vw, 104px)/.85 var(--f-disp); white-space: nowrap; }
+.yr-streak__big small { font: 700 11px var(--f-mono); letter-spacing: .12em; text-transform: uppercase; }
+.yr-streak__cals { display: flex; flex-wrap: wrap; gap: 24px; }
+.yr-cal { margin: 0; flex: 1 1 340px; max-width: 760px; }
+.yr-cal figcaption { font: 400 clamp(26px, 2.4vw, 40px)/1 var(--f-disp); text-transform: uppercase; margin-bottom: 8px; }
+.yr-cal__grid { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.yr-cal__dow { font: 700 10px var(--f-mono); text-align: center; opacity: .6; }
+.yr-cal__day a, .yr-cal__day span { display: grid; place-items: center; aspect-ratio: 1; font: 700 clamp(11px, 1.1vw, 18px) var(--f-mono); color: inherit; text-decoration: none; border: 2px solid var(--ink); background: var(--paper-2); }
+.yr-cal__day.is-done a { background: var(--type); color: var(--type-on, #fff); box-shadow: 2px 2px 0 var(--ink); position: relative; }
+.yr-cal__day.is-done a::after { content: ""; position: absolute; inset: 18%; border: 2px solid currentColor; border-radius: 50%; opacity: .55; transform: rotate(-8deg); }
+.yr--moving .yr-series--streak .yr-cal__day.is-done a { opacity: 0; transform: scale(.4); }
+.yr--moving .yr-series--streak.is-in .yr-cal__day.is-done a { animation: yr-pop .4s cubic-bezier(.2,1.5,.4,1) forwards; animation-delay: calc(.15s + var(--i) * 35ms); }
+/* the club: the year as a strip of weeks */
+.yr-club { display: grid; gap: 16px; }
+.yr-club__strip { position: relative; padding-bottom: 20px; }
+.yr-club__weeks { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 3px; }
+.yr-club__weeks a, .yr-club__weeks span { display: block; height: clamp(36px, 4vw, 64px); border: 1.5px solid var(--ink); background: var(--paper-2); }
+.yr-club__weeks a.is-on { background: var(--type); box-shadow: 0 3px 0 var(--ink); }
+.yr-club__months { position: absolute; left: 0; right: 0; bottom: 0; margin: 0; padding: 0; list-style: none; height: 16px; }
+.yr-club__months li { position: absolute; font: 700 10px var(--f-mono); text-transform: uppercase; letter-spacing: .08em; }
+.yr-club__stats { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 10px 28px; }
+.yr-club__stats li { display: grid; }
+.yr-club__stats small { font: 700 10px var(--f-mono); letter-spacing: .12em; text-transform: uppercase; opacity: .7; }
+.yr-club__stats b { font: 400 clamp(26px, 2.4vw, 40px)/1 var(--f-disp); }
+.yr--moving .yr-series--club .yr-club__weeks a.is-on { transform: scaleY(0); transform-origin: bottom; }
+.yr--moving .yr-series--club.is-in .yr-club__weeks a.is-on { animation: yr-grow-y .35s ease-out forwards; animation-delay: calc(.15s + var(--i) * 18ms); }
+@keyframes yr-grow-y { to { transform: scaleY(1); } }
 .yr-editions { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 16px; }
 .yr-edition__in { position: relative; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; text-decoration: none; background: var(--paper-4); border: 2.5px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); }
 .yr-edition__in.card-link { --card-ink: var(--type, var(--ink)); --card-ink-fg: var(--type-on, #fff); }
@@ -595,6 +625,13 @@ a.yr-spread__high:hover { filter: brightness(1.08); }
   .yr-hyrox__stations { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .yr-hyrox__stations b { font-size: 24px; }
   .yr-editions { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .yr-streak { grid-template-columns: 1fr; justify-items: start; }
+  .yr-streak__cals, .yr-cal { width: 100%; }
+  .yr-cal__grid { gap: 3px; }
+  .yr-cal__day.is-done a::after { display: none; }
+  .yr-club__weeks { gap: 1px; }
+  .yr-club__weeks a, .yr-club__weeks span { border-width: 1px; height: 30px; }
+  .yr-club__months li:nth-child(even) { display: none; }
   .yr-edition__body { padding: 8px; }
   .yr-edition__name { font-size: 18px; }
   .yr-edition__time { font-size: 24px; }
