@@ -222,7 +222,7 @@
   {{!-- ─── 06 THE REGULARS ──────────────────────────────── --}}
   {{#if hasSeries}}
   <section class="yr-ch" id="yr-series">
-    <div class="yr-head" data-reveal><span class="yr-head__n">06</span><h2 class="yr-h2">The regulars<span>.</span></h2><span class="yr-head__note">the races that kept coming back</span></div>
+    <div class="yr-head" data-reveal><span class="yr-head__n">06</span><h2 class="yr-h2">The regulars<span>.</span></h2><span class="yr-head__note">the things that kept coming back</span></div>
     {{#each series}}
     <article class="yr-series yr-series--{{kind}} {{typeClass}}" data-reveal>
       <header class="yr-series__head"><span class="yr-series__count">×{{count}}</span><h3 class="yr-series__name">{{name}}</h3><p class="yr-series__blurb">{{blurb}}</p></header>
@@ -260,6 +260,28 @@
           <div class="yr-kicker">THE COURSES</div>
           <ol class="yr-pk__courses">{{#each courses}}<li><span>{{name}}</span><b>×{{n}}</b></li>{{/each}}</ol>
         </div>
+      </div>
+      {{/if}}
+      {{#if streak}}
+      <div class="yr-streak">
+        <div class="yr-streak__big"><b>{{streak.label}}</b><small>{{#if streak.whole}}days, every one{{else}}in a row{{/if}}</small></div>
+        <div class="yr-streak__cals">
+          {{#each months}}
+          <figure class="yr-cal">
+            <figcaption>{{label}}</figcaption>
+            <ol class="yr-cal__grid"><li class="yr-cal__dow">M</li><li class="yr-cal__dow">T</li><li class="yr-cal__dow">W</li><li class="yr-cal__dow">T</li><li class="yr-cal__dow">F</li><li class="yr-cal__dow">S</li><li class="yr-cal__dow">S</li>{{#each lead}}<li></li>{{/each}}{{#each cells}}<li class="yr-cal__day{{#if done}} is-done{{/if}}" style="--i: {{i}}">{{#if done}}<a href="{{href}}" title="{{d}} · No. {{n}}">{{d}}</a>{{else}}<span>{{d}}</span>{{/if}}</li>{{/each}}</ol>
+          </figure>
+          {{/each}}
+        </div>
+      </div>
+      {{/if}}
+      {{#if weeks}}
+      <div class="yr-club">
+        <div class="yr-club__strip">
+          <ol class="yr-club__weeks" style="--n: {{weeks.length}}">{{#each weeks}}<li style="--i: {{i}}">{{#if on}}<a class="is-on" href="{{href}}" title="{{title}}"></a>{{else}}<span></span>{{/if}}</li>{{/each}}</ol>
+          <ol class="yr-club__months" aria-hidden="true">{{#each months}}<li style="left: {{left}}%">{{label}}</li>{{/each}}</ol>
+        </div>
+        {{#if stats.length}}<ol class="yr-club__stats">{{#each stats}}<li><small>{{label}}</small><b>{{value}}</b></li>{{/each}}</ol>{{/if}}
       </div>
       {{/if}}
       {{#if editions}}
