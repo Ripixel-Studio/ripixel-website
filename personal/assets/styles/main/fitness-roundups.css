@@ -687,12 +687,18 @@ a.rl-yrmonth__box { --card-lift: 6px 7px 0 var(--ink); }
   .rl-numbers__item:nth-child(-n+2) { border-bottom: 2px dashed color-mix(in srgb, var(--ink) 35%, transparent); }
   .rl-days { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .rl-ticket--lead { grid-column: auto; }
+  .rl-ticket__title { line-height: 1.08; }
   .rl-ticket--lead.rl-ticket--photo { flex-direction: column; }
   .rl-ticket--lead .rl-ticket__pic { min-height: 0; aspect-ratio: 4 / 3; border-right: 0; border-bottom: 3px solid var(--ink); }
   .rl-mcover { min-height: 420px; padding: 18px 16px; box-shadow: 6px 6px 0 var(--ink); }
   .rl-mcover__title { line-height: 1; margin-top: 4px; }
   .rl-mcover__issue { position: static; justify-self: start; }
   .rl-mcover__lines li:nth-child(n) { transform: none; }
+  /* A title too long to sit beside its stamp drops under it, full width, rather than
+     wrapping tight against the chip; short ones stay on the stamp's line. */
+  .rl-mcover__lines { gap: 10px; }
+  .rl-mcover__lines li { flex-wrap: wrap; gap: 5px 10px; }
+  .rl-mcover__line { max-width: 100%; padding: 4px 10px 5px; line-height: 1.15; overflow-wrap: anywhere; }
   .rl-ycover { min-height: 420px; padding: 18px 16px; box-shadow: 6px 6px 0 var(--ink-section); }
   .rl-yrmonths__cols { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .rl-yrmonth__box { grid-template-rows: 56px 140px auto auto auto; }
@@ -701,7 +707,7 @@ a.rl-yrmonth__box { --card-lift: 6px 7px 0 var(--ink); }
   .rl-races__item::before { left: -29px; }
   .rl-races__row { grid-template-columns: minmax(0, 1fr) auto; }
   .rl-races__date { grid-column: 1 / -1; }
-  .rl-races__title { grid-column: 1 / -1; }
+  .rl-races__title { grid-column: 1 / -1; line-height: 1.1; overflow-wrap: anywhere; }
   .rl-races__sub { grid-column: 1 / -1; }
   .rl-writeup__body { padding: 16px; }
 }
