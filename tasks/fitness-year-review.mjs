@@ -43,7 +43,7 @@ const dm = (t) => { const d = new Date(Date.parse(`${ymd(new Date(t))}T12:00:00Z
 /** Monday of a site-timezone day. @param {string} day */
 const mondayOf = (day) => { const t = Date.parse(`${day}T00:00:00Z`); return new Date(t - ((new Date(t).getUTCDay() + 6) % 7) * DAY).toISOString().slice(0, 10); };
 /** A stable pseudo-random in [0,1) from a string, so the scatter is the same every build. @param {string} s */
-function rand(s) {
+export function rand(s) {
   let h = 2166136261;
   for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
   return ((h >>> 0) % 10000) / 10000;
