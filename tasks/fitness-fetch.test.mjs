@@ -7,7 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { loadFitnessData, fetchFitnessTask, emptyIndex, validatePeriod } from './fitness-fetch.mjs';
+import { loadFitnessData, fetchFitnessTask, emptyIndex, validatePeriod, validateAnnual } from './fitness-fetch.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const FIXTURES = path.join(REPO, 'fixtures', 'fitness');
@@ -376,6 +376,66 @@ describe('period sidecars', () => {
   });
 });
 
+describe('life annuals', () => {
+  const quiet = { info() {}, warn() {}, error() {}, debug() {} };
+  const doc = (/** @type {number} */ year) => ({ schemaVersion: 1, year, through: `${year}-11-30`, final: false, days: {}, moments: [] });
+
+  /** A copy of the fixtures whose index lists a year-2026 roundup, with an annual doc beside it. */
+  async function withAnnual(/** @type {any} */ annual) {
+    const dir = path.join(tmp, 'src');
+    await fs.cp(FIXTURES, dir, { recursive: true });
+    const idx = JSON.parse(await fs.readFile(path.join(dir, 'index.json'), 'utf8'));
+    const rkey = 'year-2026';
+    if (!idx.roundups.some((/** @type {any} */ r) => r.key === rkey)) {
+      idx.roundups.push({ ...idx.roundups[0], key: rkey });
+      await fs.writeFile(path.join(dir, 'index.json'), JSON.stringify(idx));
+      const ru = JSON.parse(await fs.readFile(path.join(dir, 'roundup', `${idx.roundups[0].key}.json`), 'utf8'));
+      await fs.writeFile(path.join(dir, 'roundup', `${rkey}.json`), JSON.stringify({ ...ru, key: rkey }));
+    }
+    await fs.mkdir(path.join(dir, 'life'), { recursive: true });
+    await fs.writeFile(path.join(dir, 'life', 'annual-2026.json'), JSON.stringify(annual));
+    return dir;
+  }
+
+  test('annual validated', async () => {
+    assert.equal(validateAnnual(doc(2026), 2026, quiet).year, 2026);
+    assert.equal(validateAnnual({ ...doc(2026), schemaVersion: 2 }, 2026, quiet), null);
+    assert.equal(validateAnnual({ ...doc(2026), days: null }, 2026, quiet), null);
+    const dir = await withAnnual(doc(2026));
+    const r = await loadFitnessData({ retryDelayMs: 0, env, source: 'fixtures', fixturesDir: dir, cacheDir });
+    assert.deepEqual(Object.keys(r.lifeAnnuals), ['2026']);
+    const { impl, calls } = fakeFetch({ dir });
+    const live = await loadFitnessData({ retryDelayMs: 0, env, baseUrl: BASE, cacheDir, fixturesDir: path.join(tmp, 'nope'), fetchImpl: impl });
+    assert.deepEqual(Object.keys(live.lifeAnnuals), ['2026']);
+    assert.ok(calls.some((c) => c.url.endsWith('/life/annual-2026.json')));
+    const none = await loadFitnessData({ retryDelayMs: 0, env, source: 'fixtures', fixturesDir: FIXTURES, cacheDir });
+    assert.deepEqual(none.lifeAnnuals, {});
+  });
+
+  test('wrong year dropped', async () => {
+    const warns = /** @type {string[]} */ ([]);
+    const dir = await withAnnual(doc(2025));
+    const r = await loadFitnessData({ retryDelayMs: 0, env, source: 'fixtures', fixturesDir: dir, cacheDir, logger: { ...quiet, warn: (m) => warns.push(m) } });
+    assert.deepEqual(r.lifeAnnuals, {});
+    assert.ok(warns.some((m) => m.includes('annual-2026')));
+  });
+
+  test('preview env file wins and is marked preview', async () => {
+    const dir = await withAnnual({ ...doc(2026), final: true });
+    const file = path.join(tmp, 'preview.json');
+    await fs.writeFile(file, JSON.stringify({ ...doc(2026), through: '2026-06-01' }));
+    const saved = process.env.LIFE_ANNUAL_PREVIEW;
+    process.env.LIFE_ANNUAL_PREVIEW = file;
+    try {
+      const r = await loadFitnessData({ retryDelayMs: 0, env, source: 'fixtures', fixturesDir: dir, cacheDir });
+      assert.equal(r.lifeAnnuals['2026'].preview, true);
+      assert.equal(r.lifeAnnuals['2026'].through, '2026-06-01');
+    } finally {
+      if (saved === undefined) delete process.env.LIFE_ANNUAL_PREVIEW; else process.env.LIFE_ANNUAL_PREVIEW = saved;
+    }
+  });
+});
+
 describe('fetchFitnessTask', () => {
   test('a forced source that fails fails the build (2026-11-04: an empty site was deployed)', async () => {
     const task = fetchFitnessTask({ env: { FITNESS_DATA_SOURCE: 'live' }, baseUrl: BASE, cacheDir, fixturesDir: FIXTURES, fetchImpl: fakeFetch({ status: 503 }).impl, retryDelayMs: 0 });
@@ -390,7 +450,7 @@ describe('fetchFitnessTask', () => {
     assert.equal(out.fitnessSource, 'fixtures');
   });
 
-  test('returns exactly the nine globals and logs the source', async () => {
+  test('returns exactly the ten globals and logs the source', async () => {
     const task = fetchFitnessTask({ env: { FITNESS_DATA_SOURCE: 'fixtures' }, fixturesDir: FIXTURES, cacheDir });
     /** @type {string[]} */
     const infos = [];
@@ -398,7 +458,7 @@ describe('fetchFitnessTask', () => {
     const out = await task.run(task.config, ctx);
     assert.deepEqual(Object.keys(out).sort(), [
       'fitnessActivities', 'fitnessEvents', 'fitnessIndex', 'fitnessRoundups', 'fitnessSource', 'fitnessUnavailable',
-      'lifeHeatmap', 'lifeIndex', 'lifePeriods',
+      'lifeAnnuals', 'lifeHeatmap', 'lifeIndex', 'lifePeriods',
     ]);
     assert.ok(out.lifeIndex.sections.watching);
     assert.ok(out.lifeHeatmap.segments.length > 0);

@@ -13,6 +13,7 @@
  *   <base>/life/index.json      (life hub export, plan 2; schema in jarvis docs/domains/lifehub.md)
  *   <base>/life/heatmap.json    (trimmed route segments, plan 3 Task 2)
  *   <base>/life/period/<periodKey>.json  (per-roundup sidecar, plan 4; optional, one per roundup key)
+ *   <base>/life/annual-<year>.json  (the year's scrapbook; optional, one per year-<y> roundup key)
  *
  * Source order is live → cache → fixtures → empty, unless FITNESS_DATA_SOURCE
  * forces one. Live is tried twice (the second time with a longer timeout) before
@@ -33,6 +34,9 @@
  *   lifeIndex           the validated life/index.json or null (optional, like events)
  *   lifeHeatmap         the validated life/heatmap.json or null
  *   lifePeriods         { [roundup key]: validated life/period doc }; {} when there are none
+ *   lifeAnnuals         { ["2026"]: validated life/annual-<year>.json }; {} when there are none. One per
+ *                       `year-<y>` roundup key; env LIFE_ANNUAL_PREVIEW=<abs path> reads a local file
+ *                       instead (its own `year`), marked `preview: true`, and wins over the bucket's doc
  *   fitnessUnavailable  boolean
  *   fitnessSource       'live' | 'cache' | 'fixtures' | 'none'
  */
@@ -79,6 +83,7 @@ const SAFE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,200}$/;
  * @property {any|null} lifeIndex
  * @property {any|null} lifeHeatmap
  * @property {Record<string, any>} lifePeriods
+ * @property {Record<string, any>} lifeAnnuals
  * @property {Source|'none'} source
  * @property {boolean} unavailable
  * @property {string|null} forced  the source FITNESS_DATA_SOURCE / config forced, else null
@@ -203,6 +208,50 @@ export function validatePeriod(doc, key, logger = silentLogger) {
 }
 
 /**
+ * life/annual-<year>.json is optional: schemaVersion 1, the year asked for, and a `days` object.
+ * @param {any} doc @param {number} year @param {Logger} [logger]
+ */
+export function validateAnnual(doc, year, logger = silentLogger) {
+  if (doc && typeof doc === 'object' && doc.schemaVersion === 1 && doc.year === year
+    && doc.days && typeof doc.days === 'object' && !Array.isArray(doc.days)) return doc;
+  logger.warn(`life/annual-${year}.json ignored: expected schemaVersion 1, year ${year} and a days object`);
+  return null;
+}
+
+/** Years with a `year-<y>` roundup key. @param {Iterable<string>} keys */
+function annualYears(keys) {
+  const ys = [];
+  for (const k of keys) {
+    const m = /^year-(\d{4})$/.exec(k);
+    if (m) ys.push(Number(m[1]));
+  }
+  return ys;
+}
+
+/**
+ * LIFE_ANNUAL_PREVIEW=<abs path>: a local annual doc overrides the bucket's for its own year.
+ * @param {Record<string, any>} annuals @param {Logger} logger
+ */
+async function applyAnnualPreview(annuals, logger) {
+  const file = process.env.LIFE_ANNUAL_PREVIEW;
+  if (!file) return annuals;
+  try {
+    const raw = await readJson(file);
+    const year = raw && typeof raw === 'object' ? raw.year : NaN;
+    const doc = Number.isInteger(year) ? validateAnnual(raw, year, logger) : null;
+    if (!doc) {
+      logger.warn('LIFE_ANNUAL_PREVIEW ignored: not a valid annual doc');
+      return annuals;
+    }
+    logger.info(`preview: annual ${year} read from ${file}`);
+    return { ...annuals, [String(year)]: { ...doc, preview: true } };
+  } catch (e) {
+    logger.warn(`LIFE_ANNUAL_PREVIEW unreadable: ${errMsg(e)}`);
+    return annuals;
+  }
+}
+
+/**
  * Ids listed in the index, filtered to ones that are safe to use as paths.
  * @param {any[]} list
  * @param {string} field
@@ -258,7 +307,7 @@ async function pool(items, limit, fn) {
 // Readers. Each returns { index, activityFiles, roundupFiles } or throws when
 // the source is unusable (no index). Missing individual files are skipped.
 
-/** @typedef {{ index: any, activityFiles: Map<string, any>, roundupFiles: Map<string, any>, events: any|null, lifeIndex?: any|null, lifeHeatmap?: any|null, lifePeriods?: Record<string, any> }} RawSet */
+/** @typedef {{ index: any, activityFiles: Map<string, any>, roundupFiles: Map<string, any>, events: any|null, lifeIndex?: any|null, lifeHeatmap?: any|null, lifePeriods?: Record<string, any>, lifeAnnuals?: Record<string, any> }} RawSet */
 
 /**
  * @param {string} dir
@@ -297,7 +346,13 @@ export async function readFromDir(dir, logger = silentLogger) {
     const doc = await readOptional(path.join(dir, 'life', 'period', `${id}.json`), (d, l) => validatePeriod(d, id, l), logger);
     if (doc) lifePeriods[id] = doc;
   }
-  return { index, activityFiles, roundupFiles, events, lifeIndex, lifeHeatmap, lifePeriods };
+  /** @type {Record<string, any>} */
+  const lifeAnnuals = {};
+  for (const y of annualYears(roundupFiles.keys())) {
+    const doc = await readOptional(path.join(dir, 'life', `annual-${y}.json`), (d, l) => validateAnnual(d, y, l), logger);
+    if (doc) lifeAnnuals[String(y)] = doc;
+  }
+  return { index, activityFiles, roundupFiles, events, lifeIndex, lifeHeatmap, lifePeriods, lifeAnnuals };
 }
 
 /**
@@ -485,13 +540,26 @@ export async function readLive(opts) {
     if (doc) lifePeriods[r.id] = doc;
   }
 
+  // Annual scrapbooks: one per year-<y> roundup the index lists; a 404 is normal (not built yet).
+  /** @type {Record<string, any>} */
+  const lifeAnnuals = {};
+  const annualResults = await pool(annualYears(roundupIds), concurrency, async (y) => ({
+    y,
+    data: await getFileLenient(`life/annual-${y}.json`, true),
+  }));
+  for (const r of annualResults) {
+    if (r.data === undefined) continue;
+    const doc = validateAnnual(r.data, r.y, logger);
+    if (doc) lifeAnnuals[String(r.y)] = doc;
+  }
+
   await fs.mkdir(cacheDir, { recursive: true });
   await fs.writeFile(path.join(cacheDir, 'index.json'), indexText);
   await writeJson(path.join(cacheDir, META_FILE), meta);
   logger.debug(
     `live: ${stats.fetched} fetched, ${stats.reused} reused from cache, ${stats.failed} failed`,
   );
-  return { index, activityFiles, roundupFiles, events, lifeIndex, lifeHeatmap, lifePeriods, ...stats };
+  return { index, activityFiles, roundupFiles, events, lifeIndex, lifeHeatmap, lifePeriods, lifeAnnuals, ...stats };
 }
 
 // ---------------------------------------------------------------------------
@@ -509,7 +577,7 @@ function ts(iso) {
  * @param {RawSet} raw
  */
 export function assemble(raw) {
-  const { index, activityFiles, roundupFiles, events = null, lifeIndex = null, lifeHeatmap = null, lifePeriods = {} } = raw;
+  const { index, activityFiles, roundupFiles, events = null, lifeIndex = null, lifeHeatmap = null, lifePeriods = {}, lifeAnnuals = {} } = raw;
   const activities = [];
   for (const entry of index.activities) {
     const file = entry && activityFiles.get(entry.slug);
@@ -537,7 +605,7 @@ export function assemble(raw) {
       ts(b.roundup?.periodStart) - ts(a.roundup?.periodStart),
   );
 
-  return { index, activities, roundups, events, lifeIndex, lifeHeatmap, lifePeriods };
+  return { index, activities, roundups, events, lifeIndex, lifeHeatmap, lifePeriods, lifeAnnuals };
 }
 
 /** @param {unknown} e */
@@ -572,8 +640,8 @@ export async function loadFitnessData(options = {}) {
       }
       else if (source === 'cache') raw = await readFromDir(opts.cacheDir, logger);
       else raw = await readFromDir(opts.fixturesDir, logger);
-      const { index, activities, roundups, events, lifeIndex, lifeHeatmap, lifePeriods } = assemble(raw);
-      return { index, activities, roundups, events, lifeIndex, lifeHeatmap, lifePeriods, source, unavailable: false, forced: opts.source, notes };
+      const { index, activities, roundups, events, lifeIndex, lifeHeatmap, lifePeriods, lifeAnnuals } = assemble(raw);
+      return { index, activities, roundups, events, lifeIndex, lifeHeatmap, lifePeriods, lifeAnnuals: await applyAnnualPreview(lifeAnnuals, logger), source, unavailable: false, forced: opts.source, notes };
     } catch (e) {
       const where =
         source === 'live' ? opts.baseUrl : source === 'cache' ? opts.cacheDir : opts.fixturesDir;
@@ -590,6 +658,7 @@ export async function loadFitnessData(options = {}) {
     lifeIndex: null,
     lifeHeatmap: null,
     lifePeriods: {},
+    lifeAnnuals: {},
     source: 'none',
     unavailable: true,
     forced: opts.source,
@@ -623,6 +692,7 @@ export function fetchFitnessTask(config = {}) {
           lifeIndex: null,
           lifeHeatmap: null,
           lifePeriods: {},
+          lifeAnnuals: {},
           source: 'none',
           unavailable: true,
           notes: [errMsg(e)],
@@ -650,6 +720,7 @@ export function fetchFitnessTask(config = {}) {
         lifeIndex: data.lifeIndex,
         lifeHeatmap: data.lifeHeatmap,
         lifePeriods: data.lifePeriods,
+        lifeAnnuals: data.lifeAnnuals,
         fitnessUnavailable: data.unavailable,
         fitnessSource: data.source,
       };
