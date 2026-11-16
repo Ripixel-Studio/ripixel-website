@@ -26,6 +26,7 @@ import { buildRacePbs } from './fitness-race-pbs.mjs';
 import { ymd } from './life-clock.mjs';
 import { buildRaceYear } from './fitness-year-races.mjs';
 import { awardIcon } from './fitness-year-icons.mjs';
+import { dayGrid } from './year-days.mjs';
 
 const DAY = 86400000;
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -112,25 +113,19 @@ export function buildYearReview(file, ctx, opts = {}) {
 
   // ---- every day -------------------------------------------------------------------
   const order = Object.keys(TAGS);
-  const days = [];
-  for (let t = Date.UTC(year, 0, 1); t < end; t += DAY) {
-    const day = new Date(t).toISOString().slice(0, 10);
+  const grid = dayGrid(year, (day) => {
+    const t = Date.parse(`${day}T00:00:00Z`);
     const here = byDay.get(day) || [];
     const main = [...here].sort((a, b) => num(b.e.durationSeconds) - num(a.e.durationSeconds))[0];
     const tag = main ? tagOf(main.e).tag : '';
-    const dow = (new Date(t).getUTCDay() + 6) % 7;
-    days.push({
-      day, dow, n: here.length, typeClass: tag ? tagTheme(tag).typeClass : '', race: here.some((x) => x.e.isRace),
-      future: day > lastDataDay, href: main ? hrefOf(main.e.slug) : '',
+    return {
+      n: here.length, typeClass: tag ? tagTheme(tag).typeClass : '', race: here.some((x) => x.e.isRace),
+      href: main ? hrefOf(main.e.slug) : '',
       title: here.length ? `${dm(t)} · ${here.map((x) => x.e.title).join(', ')}` : `${dm(t)} · rest`,
-      first: new Date(t).getUTCDate() === 1 ? MON[new Date(t).getUTCMonth()] : '',
-    });
-  }
-  // Columns of weeks for the grid: pad the first week to its Monday.
-  const lead = days[0].dow;
-  const cells = [...Array.from({ length: lead }, () => ({ blank: true })), ...days.map((d, i) => ({ ...d, i }))];
-  const dayCols = [];
-  for (let i = 0; i < cells.length; i += 7) dayCols.push({ cells: cells.slice(i, i + 7), month: cells.slice(i, i + 7).find((c) => /** @type {any} */ (c).first)?.first || '' });
+    };
+  }, lastDataDay);
+  const dayCols = grid.cols;
+  const days = dayCols.flatMap((c) => c.cells).filter((c) => !c.blank);
 
   // ---- the arc: hours per week, highs and lows -------------------------------------
   const W = 1000, H = 260, PAD = 18;
