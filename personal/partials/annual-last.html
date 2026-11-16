@@ -1,0 +1,10 @@
+{{!-- Last year's letter, marked (tasks/life-annual.mjs `lastLetter`): each prediction with a tick or
+     a cross, and what the year came to against what was asked. Context: the annual view. --}}
+{{#with lastLetter}}
+<div class="la-last" aria-label="Last year's predictions, marked">
+  <p class="la-last__head">Last year's letter, marked</p>
+  <ul class="la-last__list">
+    {{#each predictions}}<li class="la-last__item la-last__item--{{#if hit}}hit{{else}}miss{{/if}}"><i class="la-last__mark" role="img" aria-label="{{#if hit}}came true{{else}}not this time{{/if}}"></i><span class="la-last__text">{{text}}</span> <small class="la-last__score"><b>{{actual}}</b> of {{target}}</small></li>{{/each}}
+  </ul>
+</div>
+{{/with}}

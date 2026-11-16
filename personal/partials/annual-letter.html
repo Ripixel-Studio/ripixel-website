@@ -1,8 +1,10 @@
 {{!-- Dear next year (tasks/life-annual.mjs `letter`): a handwritten letter with a few predictions,
      which next year's issue scores. A letter James has not approved yet carries a draft stamp.
-     Context: the annual view. --}}
-{{#with letter}}
+     Last year's letter, marked, sits on top when there is one. Context: the annual view. --}}
+{{#if letter}}
 <section class="la-sec la-letter-wrap" aria-label="A letter to next year" data-reveal>
+  {{> annual-last}}
+  {{#with letter}}
   <div class="la-letter">
     {{#if draft}}<span class="la-letter__draft">draft</span>{{/if}}
     <p class="la-letter__dear">Dear {{to}},</p>
@@ -15,5 +17,10 @@
     {{/if}}
     <p class="la-letter__sign">J.</p>
   </div>
+  {{/with}}
 </section>
-{{/with}}
+{{else if lastLetter}}
+<section class="la-sec la-letter-wrap" aria-label="Last year's letter, marked" data-reveal>
+  {{> annual-last}}
+</section>
+{{/if}}

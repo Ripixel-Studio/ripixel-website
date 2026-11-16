@@ -15,6 +15,9 @@ const entries = [
   entry('mar-walk', '2026-03-12T09:00:00Z', { tag: 'walk' }),
   ...Array.from({ length: 8 }, (_, i) => entry(`apr-${i}`, `2026-04-${String(i + 2).padStart(2, '0')}T09:00:00Z`, { photoUrls: [PIC(`apr-${i}`)] })),
   entry('dec-race', '2026-12-05T09:00:00Z', { title: 'Late 5k', isRace: true }),
+  // parkruns come through FitGlue as races; the annual never treats them as one
+  entry('jun-parkrun', '2026-06-13T08:00:00Z', { title: 'Town parkrun (#31)', isRace: true, photoUrls: [PIC('pk1')] }),
+  entry('jun-parkrun-2', '2026-06-20T08:00:00Z', { title: 'Town parkrun (#32) - Summer Special', isRace: true, photoUrls: [PIC('pk2')] }),
 ];
 const files = entries.map((e) => ({
   slug: e.slug, entry: e, isRace: Boolean(e.isRace),
@@ -126,10 +129,44 @@ describe('life annual view', () => {
     assert.equal(withFile.fitness.photo, PIC('race'));
   });
 
+  test('parkruns are never races on the annual', () => {
+    const doc = annualDoc();
+    doc.moments.push({ id: 'fitness:jun-parkrun', kind: 'fitness', day: '2026-06-13', month: '2026-06', image: PIC('pk1'), href: '/life/activity/jun-parkrun', score: 155, race: true, photo: true });
+    doc.highlights['2026-06'] = { pick: 'fitness:jun-parkrun', by: 'jarvis', alternatives: [] };
+    const w = buildLifeAnnual(doc, ctx);
+    const jun = w.months[5];
+    assert.match(jun.highlight.title, /^Town parkrun/);
+    assert.equal(jun.highlight.race, false, 'a parkrun highlight is not a race');
+    assert.deepEqual(jun.polaroids.map((/** @type {any} */ p) => [p.photo, p.race]), [[PIC('pk2'), false]]);
+    assert.equal(cell(w, '2026-06-13').race, false, 'no race star on a parkrun day');
+    assert.equal(cell(w, '2026-06-13').ink, 'fit-type--run', 'the day keeps its sport ink');
+    const medals = buildLifeAnnual(annualDoc({ through: '2026-12-31' }), ctx);
+    assert.equal(medals.collages.medals, null, 'two real races (the parkruns left out) are under the medal page minimum');
+    assert.deepEqual(w.fitness.numbers.find((/** @type {any} */ n) => n.key === 'races').value, 1, 'races come from doc.totals.races');
+    assert.equal(buildLifeAnnual(annualDoc({ totals: { ...annualDoc().totals, races: 7 } }), ctx).fitness.numbers.find((/** @type {any} */ n) => n.key === 'races').value, 7);
+  });
+
+  test('medals leave parkruns out', () => {
+    const more = [
+      entry('r-a', '2026-07-01T09:00:00Z', { title: 'Race A', isRace: true }),
+      entry('r-b', '2026-08-01T09:00:00Z', { title: 'Race B', isRace: true }),
+    ];
+    const c = storyContext({ files, entries: [...entries, ...more], roundupFiles: [yearFile] });
+    const w = buildLifeAnnual(annualDoc(), c);
+    assert.deepEqual(w.collages.medals.items.map((/** @type {any} */ m) => m.title), ['Town 10k', 'Race A', 'Race B']);
+  });
+
+  test('the cover has no artists number', () => {
+    assert.deepEqual(v.cover.numbers.map((/** @type {any} */ n) => n.key), ['live', 'books', 'films', 'series', 'sessions', 'races', 'commits']);
+  });
+
   test('collage under 3 items dropped', () => {
     assert.equal(v.collages.shelf.items.length, 3);
     assert.equal(v.collages.mixtape, null);
     assert.equal(v.collages.games, null);
+    const oneGame = buildLifeAnnual(annualDoc({ collage: { ...annualDoc().collage, games: [{ title: 'G', hours: 75, cover: '' }] } }), ctx);
+    assert.equal(oneGame.collages.games.items.length, 1, 'game nights need only one game');
+    assert.deepEqual(oneGame.months[9].after.map((/** @type {any} */ x) => x.key), ['games']);
     assert.equal(v.collages.telly.items.length, 3);
     assert.deepEqual(v.placements, [{ after: '2026-03', key: 'shelf' }, { after: '2026-08', key: 'telly' }]);
     assert.deepEqual(v.months[2].after.map((/** @type {any} */ c) => c.key), ['shelf']);
@@ -220,6 +257,21 @@ describe('the annual page', () => {
     assert.ok(band && other, 'both stubs render');
     assert.match(band, /class="la-stub__venue">The Hall</);
     assert.doesNotMatch(other, /la-stub__venue/);
+  });
+
+  test('last year\'s letter is scored at the top of the letter, only when there is one', async () => {
+    const lastLetter = { predictions: [
+      { key: 'books', text: 'Twelve books.', target: 12, actual: 14, hit: true },
+      { key: 'live', text: 'Ten nights out.', target: 10, actual: 6, hit: false },
+    ] };
+    const html = await render(annualDoc({ preview: true, lastLetter }));
+    const sec = html.match(/<div class="la-last"[\s\S]*?<\/div>/)?.[0] || '';
+    assert.ok(sec, 'the scored letter renders');
+    assert.ok(html.indexOf('la-last') < html.indexOf('la-letter__dear'), 'above this year\'s letter');
+    assert.match(sec, /la-last__item--hit[^>]*>[\s\S]*?Twelve books\.[\s\S]*?14[\s\S]*?12/);
+    assert.match(sec, /la-last__item--miss[^>]*>[\s\S]*?Ten nights out\.[\s\S]*?6[\s\S]*?10/);
+    const none = await render(annualDoc({ preview: true }));
+    assert.doesNotMatch(none, /la-last/);
   });
 
   test('draft stamp only when draft', async () => {

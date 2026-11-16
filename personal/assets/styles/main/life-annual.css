@@ -362,6 +362,11 @@ article.la-month--empty:nth-of-type(n) .la-month__name { color: rgba(23, 19, 17,
 /* game nights: box art, the hours on a sticker */
 .la-boxes { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(130px, 11vw, 200px), 1fr)); gap: 40px clamp(18px, 2.4vw, 36px); margin: 0; padding: 12px 0 0; list-style: none; }
 .la-box { position: relative; rotate: var(--tilt, 0deg); min-width: 0; }
+/* one game: the box gets the page to itself, bigger */
+.la-boxes:has(> .la-box:only-child) { grid-template-columns: minmax(0, 300px); padding-left: clamp(0px, 4vw, 60px); }
+.la-box:only-child .la-box__cap { font-size: 24px; }
+.la-box:only-child .la-box__hours { width: 86px; height: 86px; font-size: 14px; }
+.la-box:only-child .la-box__hours b { font-size: 34px; }
 .la-box__art { position: relative; display: block; aspect-ratio: 2 / 3; overflow: hidden; background: var(--ink-magenta); border: 2.5px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); border-radius: 4px; }
 .la-box__art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; color: transparent; }
 .la-box__art--type { display: grid; align-content: end; padding: 12px; color: #fff; background-image: repeating-linear-gradient(-45deg, transparent 0 10px, rgba(255, 252, 239, .14) 10px 20px); }
@@ -461,7 +466,34 @@ article.la-month--empty:nth-of-type(n) .la-month__name { color: rgba(23, 19, 17,
 .la-fit__link:hover, .la-fit__link:focus-visible { background: var(--ink-purple); }
 
 /* ─── dear next year: a letter on lined paper ─── */
-.la-letter-wrap { display: flex; justify-content: center; padding-bottom: 20px; }
+.la-letter-wrap { display: flex; flex-direction: column; align-items: center; gap: clamp(30px, 3vw, 48px); padding-bottom: 20px; }
+
+/* last year's letter, marked in red pen on a scrap of the old page */
+.la-last {
+  position: relative; width: min(100%, 640px); padding: 22px clamp(18px, 3vw, 34px) 20px; rotate: -1.2deg;
+  background: var(--paper-2); border: 2px solid var(--ink); box-shadow: 6px 6px 0 var(--ink);
+}
+.la-last::before {
+  content: ''; position: absolute; z-index: 3; top: -11px; left: 50%; width: 76px; height: 22px; translate: -50% 0; rotate: 3deg;
+  background: var(--la-tape); mix-blend-mode: multiply; pointer-events: none;
+}
+.la-last__head { margin: 0 0 12px; font: 400 clamp(22px, 1.9vw, 30px)/1 var(--f-disp); text-transform: uppercase; }
+.la-last__list { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.la-last__item { display: flex; align-items: baseline; gap: 12px; font: 700 clamp(21px, 1.6vw, 26px)/1.15 var(--f-scrib); color: var(--la-hand); }
+.la-last__text { flex: 1; min-width: 0; }
+.la-last__score { flex: none; font: 12px var(--f-mono); color: var(--ink); }
+.la-last__score b { font: 400 20px var(--f-disp); }
+/* the marks, drawn in red pen: a tick, or a cross */
+.la-last__mark { position: relative; flex: none; width: 22px; height: 22px; translate: 0 3px; }
+.la-last__item--hit .la-last__mark::before {
+  content: ''; position: absolute; left: 6px; top: -2px; width: 8px; height: 18px; rotate: 40deg;
+  border-right: 3.5px solid var(--ink-red); border-bottom: 3.5px solid var(--ink-red); border-bottom-right-radius: 2px;
+}
+.la-last__item--miss .la-last__mark::before,
+.la-last__item--miss .la-last__mark::after {
+  content: ''; position: absolute; left: 9px; top: 0; width: 3.5px; height: 22px; background: var(--ink-red); border-radius: 2px; rotate: 45deg;
+}
+.la-last__item--miss .la-last__mark::after { rotate: -45deg; }
 .la-letter {
   --line: 38px;
   position: relative; width: min(100%, 780px); padding: var(--line) clamp(20px, 4vw, 54px) calc(var(--line) * 1.2) clamp(64px, 7vw, 96px);

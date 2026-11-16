@@ -29,12 +29,16 @@ const LIFE_INKS = /** @type {const} */ ([['live', 'live'], ['book', 'reading'], 
 const INK = Object.fromEntries(LIFE_INKS.map(([k, ink]) => [k, `life-ink--${ink}`]));
 /** Each collage goes after this month (01–12). */
 const PLACEMENT = /** @type {const} */ ([['shelf', 3], ['mixtape', 6], ['telly', 8], ['games', 10], ['medals', 12]]);
+/** A collage needs this many items to get its page; game nights need just one game. */
 const COLLAGE_MIN = 3;
+const COLLAGE_MIN_BY = /** @type {Record<string, number>} */ ({ games: 1 });
+/** A parkrun ("<Place> parkrun (#n)") is never a race on the annual, whatever FitGlue says. */
+const PARKRUN = /^(.+) parkrun \(#\d+\)/i;
 const POLAROIDS = 6;
 const CAPTIONS = 3;
 const CAPTION_CHARS = 140;
 const HOURS = ['reading', 'listening', 'watching', 'playing', 'training'];
-const COVER_NUMBERS = ['live', 'books', 'films', 'series', 'artists', 'gameHours', 'sessions', 'races', 'commits'];
+const COVER_NUMBERS = ['live', 'books', 'films', 'series', 'gameHours', 'sessions', 'races', 'commits'];
 
 const num = (/** @type {unknown} */ v) => (typeof v === 'number' && Number.isFinite(v) ? v : Number(v) || 0);
 const https = (/** @type {unknown} */ u) => (typeof u === 'string' && /^https:\/\//i.test(u) ? u : '');
@@ -48,6 +52,8 @@ const dayLabel = (day) => { const [, m, d] = day.split('-').map(Number); return 
 const longDay = (day) => { const [y, m, d] = day.split('-').map(Number); return y && m && d ? `${d} ${MONTH_NAMES[m - 1]} ${y}` : day; };
 const monthAnchor = (/** @type {string} */ key) => `m-${key}`;
 const hrefOf = (/** @type {string} */ slug) => `/life/activity/${slug}`;
+/** A race on the annual: FitGlue's isRace, never a parkrun. @param {any} e an index entry */
+export const isRace = (e) => Boolean(e?.isRace) && !PARKRUN.test(String(e?.title || ''));
 
 /**
  * Text cut to `max` characters at a word boundary, an ellipsis marking the cut.
@@ -91,7 +97,7 @@ export function buildLifeAnnual(doc, ctx, opts = {}) {
   const days = dayGrid(year, (day) => {
     const here = byDay.get(day) || [];
     const kinds = new Set(arr(doc.days?.[day]));
-    const race = here.find((x) => x.e.isRace);
+    const race = here.find((x) => isRace(x.e));
     const main = [...here].sort((a, b) => num(b.e.durationSeconds) - num(a.e.durationSeconds))[0];
     const life = LIFE_INKS.find(([k]) => kinds.has(k));
     const ink = race ? typeClassOf(race.e)
@@ -126,12 +132,12 @@ export function buildLifeAnnual(doc, ctx, opts = {}) {
     if (!file) {
       const entry = entryBySlug.get(slug);
       if (!entry) return base;
-      return { ...base, title: cleanTitle(entry.title) || base.title, photo: photoOf(entry) || base.photo, href: hrefOf(slug), typeClass: typeClassOf(entry) };
+      return { ...base, title: cleanTitle(entry.title) || base.title, photo: photoOf(entry) || base.photo, href: hrefOf(slug), typeClass: typeClassOf(entry), race: isRace(entry) };
     }
     const e = file.entry || {};
     return {
       ...base, title: cleanTitle(e.title || file.activity?.title) || base.title, photo: photoOf(e) || base.photo,
-      href: hrefOf(slug), caption: captionOf(file), typeClass: typeClassOf(file),
+      href: hrefOf(slug), caption: captionOf(file), typeClass: typeClassOf(file), race: isRace({ ...e, isRace: e.isRace ?? file.isRace, title: e.title || file.activity?.title }),
     };
   };
 
@@ -145,10 +151,10 @@ export function buildLifeAnnual(doc, ctx, opts = {}) {
     const highSlug = picked?.kind === 'fitness' ? String(picked.id).replace(/^fitness:/, '') : '';
     // The month's photos: races and the doc's best moments first, then the rest; shown in day order.
     const withPhoto = inMonth.filter((x) => x.e.slug !== highSlug && photoOf(x.e) && photoOf(x.e) !== highlight?.photo);
-    const chosen = [...withPhoto].sort((a, b) => Number(Boolean(b.e.isRace)) - Number(Boolean(a.e.isRace)) || score(b) - score(a) || a.t - b.t).slice(0, POLAROIDS);
+    const chosen = [...withPhoto].sort((a, b) => Number(isRace(b.e)) - Number(isRace(a.e)) || score(b) - score(a) || a.t - b.t).slice(0, POLAROIDS);
     const polaroids = withPhoto.filter((x) => chosen.includes(x)).map((x) => ({
       photo: photoOf(x.e), title: cleanTitle(x.e.title), href: hrefOf(x.e.slug), day: x.day, dayLabel: dayLabel(x.day),
-      typeClass: typeClassOf(x.e), race: Boolean(x.e.isRace), tilt: tilt(x.e.slug),
+      typeClass: typeClassOf(x.e), race: isRace(x.e), tilt: tilt(x.e.slug),
     }));
     const captions = [...chosen, ...inMonth.filter((x) => !chosen.includes(x)).sort((a, b) => score(b) - score(a))]
       .filter((x) => x.e.slug !== highSlug)
@@ -163,7 +169,7 @@ export function buildLifeAnnual(doc, ctx, opts = {}) {
 
   // ---- collages --------------------------------------------------------------------
   const col = doc.collage || {};
-  const races = sessions.filter((x) => x.e.isRace).map((x) => ({
+  const races = sessions.filter((x) => isRace(x.e)).map((x) => ({
     title: cleanTitle(x.e.title), day: x.day, dayLabel: dayLabel(x.day), href: hrefOf(x.e.slug),
     family: tagOf(x.e).tag, typeClass: typeClassOf(x.e), tilt: tilt(x.e.slug, 8),
   }));
@@ -176,7 +182,7 @@ export function buildLifeAnnual(doc, ctx, opts = {}) {
     games: { items: tilted(arr(col.games)) },
     medals: { items: races },
   };
-  for (const k of Object.keys(collages)) if ((collages[k]?.items.length || 0) < COLLAGE_MIN) collages[k] = null;
+  for (const k of Object.keys(collages)) if ((collages[k]?.items.length || 0) < (COLLAGE_MIN_BY[k] ?? COLLAGE_MIN)) collages[k] = null;
   const placements = [];
   for (const [k, m] of PLACEMENT) {
     if (!collages[k]) continue;
@@ -200,7 +206,7 @@ export function buildLifeAnnual(doc, ctx, opts = {}) {
 
   const fitMoments = moments.filter((m) => m.kind === 'fitness' && str(m.day) <= through).sort((a, b) => num(b.score) - num(a.score));
   const bestPhoto = fitMoments.map((m) => momentView(m).photo).find(Boolean)
-    || sessions.filter((x) => x.e.isRace).map((x) => photoOf(x.e)).find(Boolean)
+    || sessions.filter((x) => isRace(x.e)).map((x) => photoOf(x.e)).find(Boolean)
     || sessions.map((x) => photoOf(x.e)).find(Boolean) || '';
   const trained = Math.round(sessions.reduce((s, x) => s + num(x.e.durationSeconds), 0) / 3600);
   const fitness = sessions.length ? {
@@ -208,14 +214,18 @@ export function buildLifeAnnual(doc, ctx, opts = {}) {
     numbers: [
       { key: 'sessions', value: num(totals.sessions) || sessions.length },
       { key: 'hours', value: num(h.training) || trained },
-      { key: 'races', value: races.length },
+      { key: 'races', value: totals.races === undefined ? races.length : num(totals.races) },
     ],
     href: ctx.keys?.has(`year-${year}`) ? `/life/roundup/year-${year}` : '',
   } : null;
 
   const letter = doc.letter && typeof doc.letter === 'object'
     ? { ...doc.letter, to: year + 1, lines: arr(doc.letter.lines), predictions: arr(doc.letter.predictions), draft: !doc.letter.approved } : null;
-  const lastLetter = doc.lastLetter && typeof doc.lastLetter === 'object' ? { predictions: arr(doc.lastLetter.predictions) } : null;
+  const lastPredictions = doc.lastLetter && typeof doc.lastLetter === 'object'
+    ? arr(doc.lastLetter.predictions).filter((p) => p && str(p.text))
+      .map((p) => ({ key: str(p.key), text: str(p.text), target: num(p.target), actual: num(p.actual), hit: Boolean(p.hit) }))
+    : [];
+  const lastLetter = lastPredictions.length ? { year: year - 1, predictions: lastPredictions } : null;
 
   // ---- the /life cover -------------------------------------------------------------
   const large = Boolean(doc.preview) || ymd(new Date(now)).startsWith(`${year + 1}-01`);
