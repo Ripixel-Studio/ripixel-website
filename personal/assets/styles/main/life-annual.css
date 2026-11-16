@@ -571,3 +571,79 @@ article.la-month--empty:nth-of-type(n) .la-month__name { color: rgba(23, 19, 17,
 @media (prefers-reduced-motion: reduce) {
   .la-tab { transition: none; }
 }
+
+/* ═══ the way in: a scrapbook cover taped into /life, a year-link on the fitness issue and Roundups ═══ */
+.life-cover {
+  --lc-tape: rgba(242, 193, 60, .62); position: relative; display: block; margin: 26px auto 34px; max-width: 1720px;
+  background-color: var(--paper-3);
+  background-image: radial-gradient(rgba(23, 19, 17, .07) 1px, transparent 1.4px), repeating-linear-gradient(83deg, rgba(23, 19, 17, .035) 0 1px, transparent 1px 7px);
+  background-size: 5px 5px, auto; border: 3px solid var(--ink); box-shadow: 8px 8px 0 var(--ink);
+}
+.life-cover--large { rotate: -1.5deg; }
+.life-cover::before {
+  content: ''; position: absolute; z-index: 3; top: -12px; left: 50%; width: 92px; height: 24px; translate: -50% 0; rotate: -4deg;
+  background: var(--lc-tape); mix-blend-mode: multiply; pointer-events: none;
+  clip-path: polygon(3% 0, 97% 0, 100% 20%, 96% 45%, 100% 70%, 97% 100%, 3% 100%, 0 75%, 4% 50%, 0 25%);
+}
+.lc-main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; padding: clamp(18px, 2.6vw, 40px); color: var(--ink); text-decoration: none; }
+.lc-main:hover .lc-title span, .lc-main:focus-visible .lc-title span { background-size: 100% 100%; }
+.lc-main:focus-visible { outline: 3px solid var(--ink); outline-offset: -6px; }
+.lc-title { display: block; font: 400 clamp(38px, 5vw, 84px)/.95 var(--f-disp); letter-spacing: .01em; }
+.lc-title span { padding: 0 .06em; background: linear-gradient(var(--ink-yellow), var(--ink-yellow)) no-repeat 0 88% / 100% 40%; transition: background-size .2s; }
+.lc-line { display: block; margin-top: 8px; font: 700 clamp(20px, 1.8vw, 28px)/1.12 var(--f-scrib); color: var(--ink-blue); }
+.lc-open { font: 700 12px/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; }
+
+/* the 53 x 7 mini: inks only, a plain stamp of the year, never links */
+.lc-grid { display: grid; grid-template-columns: repeat(var(--cols, 53), minmax(0, 1fr)); gap: clamp(1.5px, .25vw, 4px); margin: 0; padding: 8px; list-style: none; background: var(--paper-4); border: 2px solid var(--ink); rotate: .6deg; }
+.lc-grid li { display: grid; grid-template-rows: repeat(7, auto); gap: inherit; }
+.lc-day { display: block; aspect-ratio: 1; background: var(--type, var(--paper-2)); border-radius: 1px; }
+.lc-day--blank { visibility: hidden; }
+.lc-day--race { outline: 1.5px solid var(--ink); }
+.lc-day[class*="life-ink--"] { border-radius: 50%; }
+.life-cover .life-ink--live     { --type: var(--ink-yellow); }
+.life-cover .life-ink--reading  { --type: var(--ink-orange); }
+.life-cover .life-ink--watching { --type: var(--ink-red); }
+.life-cover .life-ink--games    { --type: var(--ink-magenta); }
+.life-cover .life-ink--code     { --type: var(--ink-green); }
+
+@media (min-width: 900px) {
+  .life-cover--large .lc-main { grid-template-columns: auto minmax(0, 1.5fr) auto; align-items: center; column-gap: clamp(20px, 3vw, 52px); }
+  .life-cover--large .lc-grid { order: 2; }
+  .life-cover--large .lc-text { order: 1; }
+  .life-cover--large .lc-open { order: 3; }
+}
+
+/* the slim strip: 64px, the same three things in a row */
+.life-cover--slim { margin: 20px 0 26px; box-shadow: 5px 5px 0 var(--ink); }
+.life-cover--slim::before { width: 60px; height: 18px; top: -9px; }
+.life-cover--slim .lc-main { grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: 16px; height: 64px; padding: 0 16px; box-sizing: border-box; overflow: hidden; }
+.life-cover--slim .lc-grid { width: clamp(140px, 22vw, 330px); padding: 3px; border-width: 1.5px; gap: 1px; rotate: 0deg; align-self: center; }
+.life-cover--slim .lc-title { font-size: 28px; white-space: nowrap; }
+.life-cover--slim .lc-line { margin: 0; font-size: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.life-cover--slim .lc-text { display: flex; align-items: baseline; gap: 6px 16px; min-width: 0; }
+
+/* year tabs along the bottom edge, like the annual's month tabs */
+.lc-tabs { display: flex; gap: 6px; margin: 0; padding: 0 16px; list-style: none; position: absolute; right: 8px; bottom: -2px; translate: 0 100%; }
+.life-cover--large .lc-tabs { position: static; translate: none; padding: 0 clamp(18px, 2.6vw, 40px) 14px; }
+.lc-tab {
+  display: block; padding: 5px 12px 4px; font: 700 12px/1.2 var(--f-mono); letter-spacing: .06em; color: var(--ink); text-decoration: none;
+  background: color-mix(in srgb, var(--ink-section) 30%, var(--paper-4)); border: 2px solid var(--ink); border-top: 0; border-radius: 0 0 8px 8px;
+}
+.lc-tab:hover, .lc-tab:focus-visible, .lc-tab.is-here { background: var(--ink-yellow); }
+.lc-tab:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.life-cover--slim:has(.lc-tabs) { margin-bottom: 44px; }
+
+@media (max-width: 600px) {
+  .life-cover--large { rotate: -.8deg; box-shadow: 5px 5px 0 var(--ink); }
+  .life-cover--slim .lc-line, .life-cover--slim .lc-open { display: none; }
+  .life-cover--slim .lc-grid { width: clamp(110px, 40vw, 180px); }
+  .lc-tabs { right: 4px; padding: 0 8px; }
+}
+@media (prefers-reduced-motion: reduce) { .lc-title span { transition: none; } }
+
+/* the fitness issue's closing chapter and Roundups */
+.yr-next__annual { margin: 22px 0 0; font: 700 14px/1.4 var(--f-mono); }
+.yr-next__annual a { color: var(--paper-4); text-decoration: underline; text-decoration-color: var(--ink-yellow); text-decoration-thickness: 3px; text-underline-offset: 4px; }
+.yr-next__annual a:hover { color: var(--ink-yellow); }
+.roundup-annual { margin: 0 0 18px; font: 700 13px/1.4 var(--f-mono); letter-spacing: .04em; text-transform: uppercase; }
+.roundup-annual a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--ink-yellow); text-decoration-thickness: 3px; text-underline-offset: 3px; }

@@ -402,6 +402,9 @@
     {{#if hasUpcoming}}
     <ol class="yr-next__list">{{#each upcoming}}<li style="--tilt: {{tilt}}deg"><span>{{date}}</span><b>{{title}}</b></li>{{/each}}</ol>
     {{/if}}
+    {{#each @root.lifeAnnualCovers}}{{#if (eq year ../year)}}
+    <p class="yr-next__annual"><a href="{{href}}">Life in {{year}}: the whole year, taped into a scrapbook &rarr;</a></p>
+    {{/if}}{{/each}}
     <p class="yr-next__sign">See you on the start line.</p>
     {{> yr-share ../yearShare}}
   </section>

@@ -1,0 +1,23 @@
+{{!-- The annual's way in (tasks/life-annual.mjs `lifeAnnualCovers`, newest first): a scrapbook cover
+     taped into /life. Large through January and on a preview, a slim strip otherwise; year tabs
+     when there are two or more issues. Nothing renders without a cover.
+     Params: covers. --}}
+{{#if covers.length}}{{#each (first covers) as |cv|}}
+<section class="life-cover life-cover--{{cv.size}}" aria-label="Life in {{cv.year}}">
+  <a class="lc-main" href="{{cv.href}}">
+    <ol class="lc-grid" aria-hidden="true" style="--cols: {{cv.thumbs.length}}">
+      {{#each cv.thumbs}}<li>{{#each this}}<i class="lc-day{{#if blank}} lc-day--blank{{/if}}{{#if race}} lc-day--race{{/if}}{{#if ink}} {{ink}}{{/if}}"></i>{{/each}}</li>{{/each}}
+    </ol>
+    <span class="lc-text">
+      <span class="lc-title">Life in <span>{{cv.year}}</span></span>
+      <span class="lc-line">{{#if (eq cv.size "large")}}The whole year, taped in: every day, month by month.{{else}}The year, taped in.{{/if}}</span>
+    </span>
+    <span class="lc-open" aria-hidden="true">open &rarr;</span>
+  </a>
+  {{#if (more ../covers)}}
+  <ol class="lc-tabs" aria-label="Other years">
+    {{#each ../covers}}<li><a class="lc-tab{{#if @first}} is-here{{/if}}" href="{{href}}"{{#if @first}} aria-current="true"{{/if}}>{{year}}</a></li>{{/each}}
+  </ol>
+  {{/if}}
+</section>
+{{/each}}{{/if}}

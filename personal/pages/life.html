@@ -24,6 +24,8 @@
       <p class="fit-hero__strap life-hub__strap">{{lifeHub.cards.length}} bits of my life, counted by a computer so I don't have to.</p>
     </header>
 
+    {{> life-annual-cover covers=lifeAnnualCovers}}
+
     {{> did-you-know items=(first lifeInsights) rotate=false}}
 
     {{#if lifeHub.hero.length}}

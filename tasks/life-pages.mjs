@@ -35,6 +35,8 @@ export const templateHelpers = {
   eq: (/** @type {unknown} */ a, /** @type {unknown} */ b) => a === b,
   /** `{{> did-you-know items=(first lifeInsights)}}`: the first item as a one-item list. */
   first: (/** @type {unknown} */ a) => (Array.isArray(a) ? a.slice(0, 1) : []),
+  /** `{{#if (more covers)}}`: two or more of something (the /life cover's year tabs). */
+  more: (/** @type {unknown} */ a) => Array.isArray(a) && a.length >= 2,
 };
 
 /**
@@ -67,6 +69,7 @@ export function lifePageTasks({
       template: `${templatesDir}/roundup.html`,
       partialsDir,
       outDir,
+      helpers: templateHelpers,
       outPath: (/** @type {any} */ page) => roundupOutPath(page.roundup.key),
     }),
 

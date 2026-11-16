@@ -37,6 +37,10 @@
     </div>
     {{/if}}
 
+    {{#if lifeAnnualCovers.length}}
+    <p class="roundup-annual">Annual: {{#each lifeAnnualCovers}}<a href="{{href}}">Life in {{year}}</a>{{#unless @last}} · {{/unless}}{{/each}}</p>
+    {{/if}}
+
     {{#if timeline.length}}
     <p class="rl-tl__strap">one stream, newest first: each year opens with its review, each month with its feature, then that month's weeks.</p>
     <div class="rl-tl-wrap">

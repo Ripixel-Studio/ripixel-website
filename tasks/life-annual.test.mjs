@@ -285,3 +285,67 @@ describe('the annual page', () => {
     assert.doesNotMatch(final, /Preview: built as if/, 'the banner is the preview only');
   });
 });
+
+describe('the /life cover', () => {
+  const cover = (/** @type {number} */ year, size = 'large') => ({
+    year, href: `/life/annual/${year}`, size,
+    thumbs: Array.from({ length: 53 }, (_, c) => Array.from({ length: 7 }, (_, r) => ({ ink: (c + r) % 5 === 0 ? 'type-run' : '', race: false, blank: false }))),
+  });
+  /** Renders /life with the real templates and the given covers; returns the HTML. @param {any[]|undefined} covers */
+  const renderLife = async (covers) => {
+    const { default: os } = await import('node:os');
+    const { default: fs } = await import('node:fs/promises');
+    const { default: path } = await import('node:path');
+    const { fileURLToPath } = await import('node:url');
+    const { generatePagesTask } = await import('skier');
+    const { fetchFitnessTask } = await import('./fitness-fetch.mjs');
+    const { workViewTask } = await import('./work-view.mjs');
+    const { lifeHubTask } = await import('./life-hub.mjs');
+    const { templateHelpers } = await import('./life-pages.mjs');
+    const { runSkierTasks } = await import('./skier-test-runner.mjs');
+    const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+    const out = await fs.mkdtemp(path.join(os.tmpdir(), 'life-cover-'));
+    try {
+      /** @type {Record<string, any>} */
+      const globals = { siteUrl: 'https://james.ripixel.co.uk', cacheHash: 'test', year: 2026 };
+      await runSkierTasks([fetchFitnessTask({ source: 'fixtures', fixturesDir: path.join(repo, 'fixtures', 'fitness') })], globals, []);
+      if (covers) globals.lifeAnnualCovers = covers;
+      await runSkierTasks([
+        lifeHubTask(), workViewTask(),
+        generatePagesTask({
+          pagesDir: path.join(repo, 'personal/pages'), partialsDir: path.join(repo, 'personal/partials'), outDir: out, helpers: templateHelpers,
+          additionalVarsFn: ({ currentPage }) => ({ page: currentPage === 'index' ? 'home' : currentPage }),
+        }),
+      ], globals, []);
+      return await fs.readFile(path.join(out, 'life', 'index.html'), 'utf8').catch(() => fs.readFile(path.join(out, 'life.html'), 'utf8'));
+    } finally {
+      await fs.rm(out, { recursive: true, force: true });
+    }
+  };
+
+  test('life page has no cover without annuals', async () => {
+    assert.doesNotMatch(await renderLife(undefined), /life-cover/);
+    assert.doesNotMatch(await renderLife([]), /life-cover/);
+  });
+
+  test('large cover is taped in with a mini day grid and no links in the grid', async () => {
+    const html = await renderLife([cover(2026)]);
+    const sec = html.match(/<section class="life-cover life-cover--large"[\s\S]*?<\/section>/)?.[0] || '';
+    assert.ok(sec, 'large cover renders');
+    assert.match(sec, /href="\/life\/annual\/2026"/);
+    assert.match(sec, /Life in <span>2026<\/span>/);
+    assert.equal((sec.match(/<i class="lc-day/g) || []).length, 53 * 7);
+    assert.doesNotMatch(sec, /lc-grid[\s\S]*<a /, 'grid cells are not links');
+    assert.doesNotMatch(sec, /lc-tabs/, 'one issue has no tabs');
+    assert.ok(html.indexOf('life-cover') > html.indexOf('life-hub__hero'));
+  });
+
+  test('slim strip shows year tabs for two years', async () => {
+    const html = await renderLife([cover(2026, 'slim'), cover(2025, 'slim')]);
+    assert.match(html, /<section class="life-cover life-cover--slim"/);
+    const tabs = [...html.matchAll(/<a class="lc-tab[^"]*" href="(\/life\/annual\/\d{4})"/g)].map((m) => m[1]);
+    assert.deepEqual(tabs, ['/life/annual/2026', '/life/annual/2025']);
+    const one = await renderLife([cover(2026, 'slim')]);
+    assert.doesNotMatch(one, /lc-tab/);
+  });
+});
