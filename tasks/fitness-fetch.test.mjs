@@ -420,6 +420,13 @@ describe('life annuals', () => {
     assert.ok(warns.some((m) => m.includes('annual-2026')));
   });
 
+  test('a bucket doc cannot mark itself preview', async () => {
+    assert.equal('preview' in validateAnnual({ ...doc(2026), preview: true }, 2026, quiet), false);
+    const dir = await withAnnual({ ...doc(2026), preview: true });
+    const r = await loadFitnessData({ retryDelayMs: 0, env, source: 'fixtures', fixturesDir: dir, cacheDir });
+    assert.equal(r.lifeAnnuals['2026'].preview, undefined);
+  });
+
   test('preview env file wins and is marked preview', async () => {
     const dir = await withAnnual({ ...doc(2026), final: true });
     const file = path.join(tmp, 'preview.json');

@@ -209,11 +209,12 @@ export function validatePeriod(doc, key, logger = silentLogger) {
 
 /**
  * life/annual-<year>.json is optional: schemaVersion 1, the year asked for, and a `days` object.
+ * Any `preview` field is dropped: only LIFE_ANNUAL_PREVIEW sets it, so the render gate can trust it.
  * @param {any} doc @param {number} year @param {Logger} [logger]
  */
 export function validateAnnual(doc, year, logger = silentLogger) {
   if (doc && typeof doc === 'object' && doc.schemaVersion === 1 && doc.year === year
-    && doc.days && typeof doc.days === 'object' && !Array.isArray(doc.days)) return doc;
+    && doc.days && typeof doc.days === 'object' && !Array.isArray(doc.days)) { const { preview: _, ...rest } = doc; return rest; }
   logger.warn(`life/annual-${year}.json ignored: expected schemaVersion 1, year ${year} and a days object`);
   return null;
 }
