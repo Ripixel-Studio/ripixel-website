@@ -14,6 +14,7 @@
  *   lifeSections[name]    → life/<name>.html                 (generatePagesTask, one page per section)
  *   fitnessFeedItems      → life/feed.xml                    (generateFeedTask, Atom only)
  *   fitnessEventPages     → life/event/<slug>/index.html     (generateDataPagesTask)
+ *   lifeAnnualPages       → life/annual/<year>/index.html    (generateDataPagesTask, life-annual)
  *
  * Kept apart from skier.personal.tasks.mjs so the tests can run exactly these
  * tasks against the fixtures.
@@ -141,6 +142,17 @@ export function lifePageTasks({
       partialsDir,
       outDir,
       outPath: (/** @type {any} */ page) => sessionsOutPath(page.fitnessSessions.href),
+      helpers: templateHelpers,
+    }),
+
+    // /life/annual/<year>: the year's scrapbook (directory form, slash-less on Firebase)
+    generateDataPagesTask({
+      // @ts-ignore — Skier resolves this `${var}` reference to the global array at runtime
+      items: '${lifeAnnualPages}',
+      template: `${templatesDir}/annual.html`,
+      partialsDir,
+      outDir,
+      outPath: (/** @type {any} */ page) => `life/annual/${page.annual.year}/index.html`,
       helpers: templateHelpers,
     }),
   ];

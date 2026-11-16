@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+{{> head}}
+
+<body class="page-life page-annual" data-page="life">
+  <div class="paper-wash" aria-hidden="true"></div>
+  <div class="paper-dot" aria-hidden="true"></div>
+
+  {{> masthead}}
+
+  <div class="zine-content">
+
+    <svg class="reg-mark" style="position:absolute;top:4px;left:6px" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+      <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <line x1="0" y1="9" x2="18" y2="9" stroke="currentColor" stroke-width="1.2"/>
+      <line x1="9" y1="0" x2="18" y2="18" stroke="currentColor" stroke-width="1.2"/>
+    </svg>
+
+    <nav class="thought-breadcrumb" aria-label="Breadcrumb">
+      <a href="/life">life</a> / life in {{annual.year}}
+    </nav>
+
+    {{!-- The year's scrapbook (tasks/life-annual.mjs). `yr` borrows the fitness issue's reveal,
+         day grid and count-up (fitness-year-review.css); everything else is la-* (life-annual.css). --}}
+    {{#with annual}}
+    <article class="yr la" data-yr>
+      {{#if preview}}<p class="la-preview" role="note">Preview: built as if the year ended on {{throughLabel}}</p>{{/if}}
+
+      {{> annual-cover}}
+
+      <div class="la-book">
+        <nav class="la-tabs" aria-label="Months">
+          <ol>{{#each months}}<li><a class="la-tab{{#if empty}} la-tab--empty{{/if}}" href="#{{anchor}}">{{label}}</a></li>{{/each}}</ol>
+        </nav>
+        <div class="la-pages">
+          {{#each months}}
+          {{> annual-month}}
+          {{#each after}}{{> annual-collage}}{{/each}}
+          {{/each}}
+          {{> annual-firsts}}
+          {{> annual-hours}}
+          {{> annual-fitness}}
+          {{> annual-letter}}
+        </div>
+      </div>
+    </article>
+    {{/with}}
+
+  </div>
+
+  {{> footer}}
+
+  <div class="paper-grain" aria-hidden="true"></div>
+
+  <script>
+    // Reveal pages as they scroll in and count the cover numbers up (the fitness issue's script).
+    // Nothing moves under reduced motion; without the script everything is simply there.
+    (function () {
+      var root = document.querySelector('[data-yr]');
+      if (!root) return;
+      if (!('IntersectionObserver' in window)) return;
+      // the month you are reading lights its tab (not motion: it runs under reduced motion too)
+      var tabs = {};
+      root.querySelectorAll('.la-tab').forEach(function (a) { tabs[a.getAttribute('href').slice(1)] = a; });
+      var spy = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          var t = tabs[en.target.id];
+          if (t) t.classList.toggle('is-here', en.isIntersecting);
+        });
+      }, { rootMargin: '-45% 0px -50% 0px' });
+      root.querySelectorAll('.la-month').forEach(function (m) { spy.observe(m); });
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      root.classList.add('yr--moving');
+      function count(el) {
+        var to = Number(el.getAttribute('data-count')) || 0, shown = el.textContent;
+        if (to < 2) return;
+        var t0 = null, dur = Math.min(1600, 500 + to * 2);
+        function frame(t) {
+          if (t0 === null) t0 = t;
+          var p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+          el.textContent = p < 1 ? Math.round(to * e).toLocaleString('en-GB') : shown;
+          if (p < 1) requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (!en.isIntersecting) return;
+          en.target.classList.add('is-in');
+          en.target.querySelectorAll('[data-count]').forEach(count);
+          io.unobserve(en.target);
+        });
+      }, { threshold: 0.08, rootMargin: '0px 0px -6% 0px' });
+      root.querySelectorAll('[data-reveal]').forEach(function (el) { io.observe(el); });
+    })();
+  </script>
+</body>
+</html>

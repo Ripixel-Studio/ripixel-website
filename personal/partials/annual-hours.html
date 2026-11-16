@@ -1,0 +1,14 @@
+{{!-- Where the hours went (tasks/life-annual.mjs `hours`): one hand-coloured bar of the year's hours,
+     and the commits as a stamp beside it (building has no honest hours). Context: the annual view. --}}
+{{#with hours}}
+<section class="la-sec la-hours" aria-labelledby="la-hours-h" data-reveal>
+  <header class="la-head"><h2 class="la-h2" id="la-hours-h">What filled the year</h2><p class="la-head__note">{{total}} hours, coloured in by hand</p></header>
+  <div class="la-hours__bar" role="img" aria-label="{{#each segments}}{{hours}} hours {{key}}{{#unless @last}}, {{/unless}}{{/each}}">
+    {{#each segments}}<span class="la-seg la-seg--{{key}}" style="width: {{share}}"></span>{{/each}}
+  </div>
+  <ul class="la-hours__key">
+    {{#each segments}}<li class="la-seg--{{key}}"><i></i><b>{{hours}}</b> hours {{key}}</li>{{/each}}
+  </ul>
+  {{#if commits}}<p class="la-hours__stamp"><span>and</span> <b>{{commits}}</b> <span>commits</span></p>{{/if}}
+</section>
+{{/with}}

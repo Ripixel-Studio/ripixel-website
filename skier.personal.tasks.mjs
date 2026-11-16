@@ -28,6 +28,7 @@ import { lifeHubTask } from './tasks/life-hub.mjs';
 import { workViewTask } from './tasks/work-view.mjs';
 import { lifeHeatmapTask } from './tasks/life-heatmap.mjs';
 import { lifePageTasks, templateHelpers } from './tasks/life-pages.mjs';
+import { lifeAnnualTask } from './tasks/life-annual.mjs';
 import { routeMapAssetsTask } from './tasks/route-map.mjs';
 
 const SITE_URL = 'https://james.ripixel.co.uk';
@@ -237,10 +238,11 @@ export const tasks = [
     fitnessEventViewsTask(), // F5.2 `fitnessEventPages`: one view model per race weekend
     fitnessSessionsViewTask(), // F5.3 `fitnessSessionsPage`: every session, by month, with type filters
     fitnessRoundupViewsTask(), // S2.4 `fitnessRoundupPages` + `fitnessRoundupsIndex`
+    lifeAnnualTask(), // `lifeAnnualPages` (/life/annual/<YYYY>) + `lifeAnnualCovers` (the /life cover)
     fitnessFeedItemsTask(), // S2.5 `fitnessFeedItems` + `fitnessFeedUpdated`: 50 entries, newest first
 
     // /life/activity/<slug>, /life/event/<slug>, /life/roundup/<key>, /life/roundups, /life/sessions,
-    // /life/feed.xml — Skier builtins
+    // /life/annual/<YYYY>, /life/feed.xml — Skier builtins
     ...lifePageTasks({ outDir: './public/personal', siteUrl: SITE_URL }),
 
     // Generate individual thought article pages (adds readTime to each item)

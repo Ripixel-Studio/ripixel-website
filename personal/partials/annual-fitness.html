@@ -1,0 +1,14 @@
+{{!-- The fitness page (tasks/life-annual.mjs `fitness`): the year's best photo and three numbers,
+     handing off to the fitness issue. Context: the annual view. --}}
+{{#with fitness}}
+<section class="la-sec la-fit" aria-labelledby="la-fit-h" data-reveal>
+  {{#if photo}}<div class="la-pola la-pola--big la-fit__pola" style="--tilt: -2deg"><span class="la-pola__in"><span class="la-pola__pic"><img src="{{photo}}" alt="" loading="lazy" decoding="async" width="900" height="900"></span></span></div>{{/if}}
+  <div class="la-fit__body">
+    <header class="la-head"><h2 class="la-h2" id="la-fit-h">On the move</h2><p class="la-head__note">the sweaty bits get their own issue</p></header>
+    <ul class="la-fit__nums">
+      {{#each numbers}}<li><b data-count="{{value}}">{{value}}</b><span>{{> annual-label}}</span></li>{{/each}}
+    </ul>
+    {{#if href}}<a class="la-fit__link" href="{{href}}">Read the fitness issue</a>{{/if}}
+  </div>
+</section>
+{{/with}}

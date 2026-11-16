@@ -1,0 +1,541 @@
+/* ═══ Life in <year>: the annual scrapbook (templates/annual.html, partials/annual-*.html) ═══════
+   A scrapbook on the zine's paper: a kraft cover with the year's day grid taped on, month pages
+   with tabs down the right edge, polaroids, ticket stubs and handwriting, collage spreads between
+   the months. The page is also `.yr`, so it borrows the fitness issue's reveal, count-up and day
+   grid (fitness-year-review.css); every colour is a site ink, a tag ink (--type) or a life ink.
+   Tilts come from the view model (--tilt, a stable pseudo-random per item). */
+
+.la { --la-tape: rgba(242, 193, 60, .62); --la-hand: var(--ink-blue); max-width: 1720px; margin-inline: auto; }
+
+/* life kinds on the cover and on cards: the life inks, each a round sticker on the grid */
+.la .life-ink--live     { --type: var(--ink-yellow);  --type-on: var(--ink); --type-text: #806726; }
+.la .life-ink--reading  { --type: var(--ink-orange);  --type-on: var(--ink); --type-text: #B54719; }
+.la .life-ink--watching { --type: var(--ink-red);     --type-on: #fff;       --type-text: var(--ink-red); }
+.la .life-ink--games    { --type: var(--ink-magenta); --type-on: #fff;       --type-text: var(--ink-magenta); }
+.la .life-ink--code     { --type: var(--ink-green);   --type-on: #fff;       --type-text: var(--ink-green); }
+
+/* a strip of yellow washi tape, ends nicked */
+.la-taped { position: relative; }
+.la-taped::before,
+.la-pola::before,
+.la-vol::before,
+.la-poster::before,
+.la-box::before,
+.la-days::before,
+.la-letter::before {
+  content: ''; position: absolute; z-index: 3; top: -11px; left: 50%; width: 76px; height: 22px;
+  background: var(--la-tape); translate: -50% 0; rotate: -4deg; pointer-events: none;
+  clip-path: polygon(3% 0, 97% 0, 100% 20%, 96% 45%, 100% 70%, 97% 100%, 3% 100%, 0 75%, 4% 50%, 0 25%);
+  mix-blend-mode: multiply;
+}
+
+/* ─── preview banner ─── */
+.la-preview {
+  position: absolute; z-index: 6; top: -6px; right: 0; margin: 0; max-width: min(420px, 70%);
+  padding: 8px 16px 7px; background: var(--ink-yellow); color: var(--ink); border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink); font: 700 12px/1.35 var(--f-mono); letter-spacing: .02em; rotate: 2deg;
+}
+
+/* ─── section heads ─── */
+.la-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 18px; border-bottom: 3px solid var(--ink); padding-bottom: 8px; margin-bottom: 26px; }
+.la-h2 { margin: 0; font: 400 clamp(40px, 5vw, 84px)/.9 var(--f-disp); letter-spacing: -.005em; text-transform: uppercase; }
+.la-head__note { margin: 0; font: 700 clamp(20px, 1.7vw, 26px)/1.1 var(--f-scrib); color: var(--la-hand); }
+/* the closing pages: plain paper, no month */
+.la-sec { position: relative; padding: clamp(22px, 3vw, 52px) clamp(18px, 3vw, 52px) clamp(30px, 3.4vw, 56px); background: var(--paper-4); border: 2.5px solid var(--ink); box-shadow: 8px 8px 0 var(--ink); }
+.la-sec.la-letter-wrap { padding: 20px 0 30px; background: none; border: 0; box-shadow: none; }
+
+/* ─── COVER: kraft board, a label, stickers, the day grid taped on ─── */
+.la-cover {
+  position: relative; margin-top: 18px; padding: clamp(22px, 3.4vw, 56px) clamp(16px, 3vw, 52px) clamp(26px, 3vw, 50px);
+  background-color: var(--paper-3);
+  background-image:
+    radial-gradient(rgba(23, 19, 17, .07) 1px, transparent 1.4px),
+    repeating-linear-gradient(83deg, rgba(23, 19, 17, .035) 0 1px, transparent 1px 7px);
+  background-size: 5px 5px, auto;
+  border: 3px solid var(--ink); box-shadow: 10px 10px 0 var(--ink);
+}
+.la-cover__mast {
+  position: relative; display: inline-block; max-width: 100%; margin: 0 0 clamp(18px, 2.4vw, 34px);
+  padding: clamp(14px, 2vw, 26px) clamp(18px, 2.6vw, 36px) clamp(12px, 1.6vw, 20px);
+  background: var(--paper-4); border: 2.5px solid var(--ink); box-shadow: 6px 6px 0 var(--ink-section); rotate: -1.2deg;
+}
+.la-cover__mast::before,
+.la-cover__mast::after {
+  content: ''; position: absolute; width: 64px; height: 20px; background: var(--la-tape); mix-blend-mode: multiply;
+}
+.la-cover__mast::before { top: -8px; left: -22px; rotate: -38deg; }
+.la-cover__mast::after { bottom: -6px; right: -22px; rotate: -38deg; }
+.la-cover__title { margin: 0; font: 400 clamp(64px, 9vw, 176px)/.86 var(--f-disp); letter-spacing: -.01em; text-transform: uppercase; }
+.la-cover__year { display: inline-block; padding: 0 .06em; background: linear-gradient(transparent 52%, var(--ink-yellow) 52% 92%, transparent 92%); }
+@media (min-width: 1400px) {
+  .la-cover { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: clamp(30px, 3vw, 60px); align-items: center; }
+  .la-cover__nums { margin: 0 0 clamp(18px, 2.4vw, 34px); }
+  .la-days { grid-column: 1 / -1; }
+}
+.la-cover__strap { margin: 10px 0 0; max-width: 34ch; font: 700 clamp(21px, 1.9vw, 30px)/1.12 var(--f-scrib); color: var(--la-hand); }
+
+/* the numbers: label-maker tape, punched out letters */
+.la-cover__nums { position: relative; z-index: 2; display: flex; flex-wrap: wrap; gap: 12px 14px; margin: 0 0 clamp(26px, 3vw, 44px); padding: 0; list-style: none; max-width: 1200px; }
+.la-num {
+  display: inline-flex; align-items: baseline; gap: 9px; padding: 6px 14px 5px;
+  background: var(--ink); color: var(--paper-4); border-radius: 3px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), inset 0 -2px 0 rgba(0, 0, 0, .35), 2px 3px 0 rgba(23, 19, 17, .28);
+  font: 700 clamp(12px, .95vw, 15px)/1.2 var(--f-mono); letter-spacing: .16em; text-transform: uppercase;
+}
+.la-num b { font: 400 clamp(26px, 2.4vw, 40px)/1 var(--f-disp); letter-spacing: .02em; color: var(--c, var(--ink-yellow)); font-variant-numeric: tabular-nums; }
+.la-num:nth-child(5n+1) { --c: var(--ink-yellow); rotate: -1.5deg; }
+.la-num:nth-child(5n+2) { --c: #FF7FB8; rotate: 1deg; }
+.la-num:nth-child(5n+3) { --c: #7FD3A6; rotate: -.5deg; }
+.la-num:nth-child(5n+4) { --c: #8FB0FF; rotate: 1.6deg; }
+.la-num:nth-child(5n) { --c: #FF9C6E; rotate: -1deg; }
+
+/* the day grid, taped onto the kraft */
+.la-days { position: relative; overflow: visible; rotate: .4deg; }
+.la-days::before { left: 12%; top: -12px; rotate: -6deg; }
+.la-days::after {
+  content: ''; position: absolute; z-index: 3; top: -10px; right: 9%; width: 76px; height: 22px; rotate: 5deg;
+  background: var(--la-tape); mix-blend-mode: multiply; pointer-events: none;
+}
+@media (max-width: 760px) {
+  .la-days { overflow-x: auto; rotate: none; }
+}
+.la .yr-day[class*="life-ink--"] { border-radius: 50%; }
+.la-key { font-size: 11px; }
+.la-key li[class*="life-ink--"] i { background: var(--type); border-radius: 50%; }
+.la-key__fit i { background: conic-gradient(#C42A72 0 25%, #F25B1C 0 50%, #00838A 0 75%, #7C3AED 0); }
+.la-key__race i { position: relative; background: #C42A72; }
+.la-key__race i::after { content: '★'; position: absolute; inset: 0; display: grid; place-items: center; font-size: 8px; line-height: 1; color: #fff; font-style: normal; }
+
+/* ─── the book: pages on the left, the month tabs down the right edge ─── */
+.la-book { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; margin-top: var(--yr-gap); }
+.la-pages { display: flex; flex-direction: column; gap: clamp(44px, 5vw, 96px); min-width: 0; }
+.la-tabs { grid-column: 2; grid-row: 1; position: sticky; top: 18px; z-index: 4; padding-top: 30px; }
+.la-tabs ol { display: flex; flex-direction: column; gap: 5px; margin: 0; padding: 0; list-style: none; }
+.la-tab {
+  --c: var(--ink-section);
+  display: block; min-width: 118px; padding: 8px 16px 6px 12px; text-decoration: none;
+  background: color-mix(in srgb, var(--c) 30%, var(--paper-4)); color: var(--ink);
+  border: 2px solid var(--ink); border-left: 0; border-radius: 0 10px 10px 0;
+  font: 400 17px/1 var(--f-disp); letter-spacing: .06em; text-transform: uppercase;
+  transition: translate .18s ease, background-color .18s ease;
+}
+.la-tabs li:nth-child(6n+1) .la-tab { --c: var(--ink-magenta); }
+.la-tabs li:nth-child(6n+2) .la-tab { --c: var(--ink-orange); }
+.la-tabs li:nth-child(6n+3) .la-tab { --c: var(--ink-blue); }
+.la-tabs li:nth-child(6n+4) .la-tab { --c: var(--ink-green); }
+.la-tabs li:nth-child(6n+5) .la-tab { --c: var(--ink-yellow); }
+.la-tabs li:nth-child(6n) .la-tab { --c: var(--ink-purple); }
+.la-tab:hover, .la-tab:focus-visible, .la-tab.is-here { background: var(--c); color: var(--paper-4); }
+.la-tab.is-here { translate: 8px 0; }
+.la-tabs li:nth-child(6n+5) .la-tab:is(:hover, :focus-visible, .is-here) { color: var(--ink); }
+.la-tab:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.la-tab--empty { background: var(--paper-2); color: rgba(23, 19, 17, .55); border-style: dashed; }
+
+/* ─── a month ─── */
+.la-month {
+  --c: var(--ink-magenta);
+  position: relative; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(22px, 2.6vw, 48px) clamp(26px, 3.4vw, 64px);
+  align-items: start; padding: clamp(20px, 2.8vw, 48px) clamp(18px, 3vw, 54px) clamp(30px, 3.4vw, 56px);
+  background: var(--paper-4); border: 2.5px solid var(--ink); box-shadow: 8px 8px 0 var(--ink);
+  scroll-margin-top: 20px;
+}
+/* ruled faintly, like a scrapbook page */
+.la-month::after {
+  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: .5;
+  background-image: radial-gradient(color-mix(in srgb, var(--c) 30%, transparent) 1px, transparent 1.5px); background-size: 18px 18px;
+}
+.la-month > * { position: relative; z-index: 1; }
+article.la-month:nth-of-type(6n+2) { --c: var(--ink-orange); }
+article.la-month:nth-of-type(6n+3) { --c: var(--ink-blue); }
+article.la-month:nth-of-type(6n+4) { --c: var(--ink-green); }
+article.la-month:nth-of-type(6n+5) { --c: var(--ink-yellow); }
+article.la-month:nth-of-type(6n) { --c: var(--ink-purple); }
+.la-month__name {
+  grid-column: 1 / -1; justify-self: start; margin: 0 0 4px; padding: 6px 18px 2px;
+  font: 400 clamp(52px, 6.4vw, 118px)/.9 var(--f-disp); letter-spacing: .005em; text-transform: uppercase;
+  background: var(--c); color: var(--paper-4); border: 2.5px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); rotate: -1.6deg;
+}
+article.la-month:nth-of-type(6n+5) .la-month__name { color: var(--ink); }
+.la-hl { grid-column: 1; }
+.la-month__side { grid-column: 2; display: flex; flex-direction: column; gap: clamp(24px, 2.4vw, 40px); min-width: 0; padding-top: 8px; }
+.la-month--nohl .la-month__side { grid-column: 1 / -1; }
+.la-polas { grid-column: 1 / -1; }
+article.la-month:nth-of-type(even) { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
+article.la-month:nth-of-type(even) .la-hl { grid-column: 2; grid-row: 2; }
+article.la-month:nth-of-type(even) .la-month__side { grid-column: 1; grid-row: 2; }
+article.la-month:nth-of-type(even) .la-month__name { justify-self: end; rotate: 1.4deg; }
+article.la-month.la-month--nohl .la-month__side { grid-column: 1 / -1; }
+
+/* a blank month: a torn, empty sheet */
+.la-month--empty {
+  display: block; min-height: 220px; text-align: center; background: var(--paper-2); box-shadow: none; border-style: dashed;
+  clip-path: polygon(0 0, 100% 0, 100% 84%, 97% 90%, 94% 85%, 90% 93%, 86% 86%, 82% 91%, 77% 84%, 73% 92%, 68% 87%, 63% 94%, 58% 86%, 54% 91%, 49% 85%, 45% 93%, 40% 87%, 35% 92%, 31% 85%, 26% 91%, 22% 86%, 17% 94%, 13% 87%, 8% 92%, 4% 86%, 0 91%);
+}
+.la-month--empty::after { display: none; }
+.la-month--empty .la-month__name { display: inline-block; background: transparent; color: rgba(23, 19, 17, .45); border-style: dashed; box-shadow: none; }
+article.la-month--empty:nth-of-type(n) .la-month__name { color: rgba(23, 19, 17, .45); }
+.la-month__none { margin: 22px 0 40px; font: 700 clamp(26px, 2.4vw, 36px)/1.1 var(--f-scrib); color: rgba(23, 19, 17, .6); }
+
+/* ─── polaroids ─── */
+.la-pola { position: relative; rotate: var(--tilt, 0deg); }
+.la-pola__in {
+  display: block; padding: 10px 10px 0; background: #fff; color: var(--ink); text-decoration: none;
+  border: 2px solid var(--ink); box-shadow: 5px 5px 0 var(--type, var(--ink));
+}
+.la-pola__in.card-link { --card-ink: var(--type, var(--ink)); --card-ink-fg: var(--type-on, #fff); --card-lift: 8px 8px 0 var(--type, var(--ink)); }
+.la-pola__pic { position: relative; display: block; aspect-ratio: 1; overflow: hidden; background: var(--type, var(--paper-2)); }
+.la-pola__pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; color: transparent; }
+/* covers and posters are taped onto the polaroid whole, on kraft */
+:is(.la-pola--book, .la-pola--screen) .la-pola__pic { background: var(--paper-3); }
+:is(.la-pola--book, .la-pola--screen) .la-pola__pic img { inset: 7%; width: 86%; height: 86%; object-fit: contain; filter: drop-shadow(4px 4px 0 rgba(23, 19, 17, .55)); }
+/* no picture: the moment's ink, under a halftone, its title knocked out */
+.la-pola__pic--type { display: grid; place-items: center; padding: 10%; text-align: center; color: var(--type-on, #fff); background: var(--type, var(--ink-section)); }
+.la-pola__pic--type::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply;
+  background-image: radial-gradient(rgba(23, 19, 17, .3) 1px, transparent 1.5px); background-size: 6px 6px;
+}
+/* the day, as a rubber date stamp */
+.la-pola__pic--type b {
+  position: relative; z-index: 1; padding: .1em .22em .02em; border: clamp(4px, .4vw, 7px) solid currentColor; border-radius: 10px; rotate: -8deg;
+  font: 400 clamp(56px, 6.6vw, 132px)/.92 var(--f-disp); letter-spacing: .02em; text-transform: uppercase; white-space: nowrap;
+}
+.la-pola__cap { display: flex; flex-direction: column; gap: 3px; padding: 9px 4px 12px; min-width: 0; }
+.la-pola__kind { font: 700 18px/1 var(--f-scrib); color: var(--type-text, var(--la-hand)); }
+.la-pola__title { font: 700 clamp(19px, 1.35vw, 23px)/1.05 var(--f-scrib); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.la-pola__when { font: 11px var(--f-mono); letter-spacing: .04em; opacity: .7; }
+.la-pola--big .la-pola__in { padding: clamp(10px, 1.2vw, 18px) clamp(10px, 1.2vw, 18px) 0; box-shadow: 8px 8px 0 var(--type, var(--ink)); }
+.la-pola--big .la-pola__cap { padding: 14px 6px 18px; gap: 5px; }
+.la-pola--big .la-pola__kind { font-size: clamp(20px, 1.6vw, 26px); }
+.la-pola--big .la-pola__title { font: 400 clamp(26px, 2.6vw, 46px)/.98 var(--f-disp); text-transform: uppercase; -webkit-line-clamp: 3; }
+.la-pola--big .la-pola__when { font-size: 13px; }
+.la-pola--big::before { width: 110px; height: 28px; top: -14px; }
+.la-hl { max-width: 640px; width: 100%; justify-self: center; }
+.la-hl__words {
+  margin: 22px 6% 0 8%; font: 700 clamp(22px, 1.8vw, 29px)/1.18 var(--f-scrib); color: var(--la-hand); rotate: calc(var(--tilt, 0deg) * -.6);
+}
+.la-hl__words::before { content: '\201C'; }
+.la-hl__words::after { content: '\201D'; }
+
+/* the month's other photos, scattered along the foot of the page */
+.la-polas { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px clamp(18px, 2vw, 34px); margin: 14px 0 0; padding: 18px 0 0; list-style: none; border-top: 2px dashed color-mix(in srgb, var(--ink) 30%, transparent); }
+.la-polas .la-pola { width: clamp(150px, 12vw, 220px); }
+.la-polas .la-pola:nth-child(even)::before { rotate: 5deg; }
+
+/* stickers: a first, a race */
+.la-sticker {
+  position: absolute; z-index: 4; top: -16px; right: -14px; display: grid; place-items: center; width: 70px; height: 70px;
+  border: 2.5px solid var(--ink); border-radius: 50%; rotate: 12deg; box-shadow: 3px 3px 0 var(--ink);
+  font: 700 22px/1 var(--f-scrib);
+}
+.la-sticker--first { background: var(--ink-magenta); color: #fff; }
+.la-sticker--race { background: var(--ink-yellow); color: var(--ink); font: 400 15px/1 var(--f-disp); letter-spacing: .08em; text-transform: uppercase; }
+.la-polas .la-sticker { width: 50px; height: 50px; top: -12px; right: -10px; font-size: 12px; }
+.la-pola--big .la-sticker { width: 92px; height: 92px; top: -22px; right: -22px; font-size: 28px; }
+.la-pola--big .la-sticker--race { font-size: 19px; }
+
+/* ─── ticket stubs: the stub and its tear-off, perforated between ─── */
+.la-stubs { display: flex; flex-wrap: wrap; gap: 22px 20px; margin: 0; padding: 0; list-style: none; }
+.la-stub {
+  --stub-ink: var(--ink-magenta); --stub-on: #fff;
+  position: relative; display: flex; flex: 1 1 250px; max-width: 380px; min-width: 0; rotate: var(--tilt, 0deg);
+  filter: drop-shadow(4px 4px 0 var(--ink));
+}
+.la-stub__main {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding: 12px 14px 12px 16px;
+  background: #fff; border: 2px solid var(--ink); border-right: 0; border-left: 9px solid var(--stub-ink);
+}
+.la-stub__kind { font: 700 18px/1 var(--f-scrib); color: var(--ink); opacity: .75; }
+.la-stub__title { font: 400 clamp(21px, 1.6vw, 28px)/1 var(--f-disp); text-transform: uppercase; overflow-wrap: anywhere; }
+.la-stub__venue { font: 12px/1.3 var(--f-mono); letter-spacing: .02em; }
+.la-stub__tear {
+  position: relative; flex: none; width: 64px; display: grid; place-items: center;
+  background: var(--stub-ink); color: var(--stub-on); border: 2px solid var(--ink); border-left: 3px dotted var(--ink);
+}
+/* the notches either side of the perforation, punched in the page's paper */
+.la-stub__tear::before,
+.la-stub__tear::after {
+  content: ''; position: absolute; left: -10px; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--paper-4); border: 2px solid var(--ink);
+}
+.la-stub__tear::before { top: -10px; }
+.la-stub__tear::after { bottom: -10px; }
+.la-stub__date { writing-mode: vertical-rl; rotate: 180deg; font: 400 19px/1 var(--f-disp); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.la-stub .la-sticker { top: -18px; right: 40px; width: 52px; height: 52px; font-size: 16px; }
+.stub--comedy.la-stub, .stub--other.la-stub, .stub--live.la-stub { --stub-on: var(--ink); }
+
+/* ─── his own words, and the margin notes ─── */
+.la-words { display: flex; flex-direction: column; gap: 18px; margin: 0; padding: 0; list-style: none; }
+.la-words__item { padding-left: 16px; border-left: 3px solid var(--c); }
+.la-words__q { display: block; font: 700 clamp(21px, 1.6vw, 27px)/1.18 var(--f-scrib); color: var(--ink); quotes: '\201C' '\201D'; }
+.la-words__src { display: inline-block; margin-top: 4px; font: 11px var(--f-mono); letter-spacing: .04em; color: var(--ink); opacity: .75; }
+.la-words__src:hover { opacity: 1; text-decoration: underline; }
+.la-notes { display: flex; flex-direction: column; gap: 14px; margin: 0; padding: 0; list-style: none; }
+.la-note {
+  position: relative; max-width: 30ch; margin-left: 34px; rotate: var(--tilt, 0deg);
+  font: 700 clamp(22px, 1.75vw, 29px)/1.12 var(--f-scrib); color: var(--la-hand);
+}
+/* a hand-drawn arrow pointing back into the page */
+.la-note::before {
+  content: ''; position: absolute; left: -36px; top: .3em; width: 28px; height: 20px;
+  border-left: 2.5px solid currentColor; border-bottom: 2.5px solid currentColor; border-bottom-left-radius: 16px;
+}
+.la-note::after {
+  content: ''; position: absolute; left: -12px; top: calc(.3em + 13px); width: 9px; height: 9px;
+  border-top: 2.5px solid currentColor; border-right: 2.5px solid currentColor; rotate: 45deg;
+}
+
+/* ─── collage spreads ─── */
+.la-collage {
+  position: relative; padding: clamp(22px, 3vw, 52px) clamp(18px, 3vw, 52px) clamp(30px, 3.4vw, 60px);
+  border: 2.5px solid var(--ink); box-shadow: 8px 8px 0 var(--ink); background: var(--paper-3);
+  background-image: radial-gradient(rgba(23, 19, 17, .07) 1px, transparent 1.4px); background-size: 5px 5px;
+}
+.la-collage .la-head { border-color: var(--ink); }
+
+/* the shelf: covers taped in */
+.la-shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(110px, 9vw, 160px), 1fr)); gap: 34px clamp(16px, 2vw, 30px); margin: 0; padding: 12px 0 0; list-style: none; }
+.la-vol { position: relative; rotate: var(--tilt, 0deg); min-width: 0; }
+.la-vol:nth-child(even)::before { rotate: 5deg; }
+.la-vol__art { position: relative; display: block; aspect-ratio: 2 / 3; overflow: hidden; background: var(--paper-2); border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); }
+.la-vol__art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; color: transparent; }
+.la-vol__art--type { display: flex; flex-direction: column; justify-content: space-between; padding: 12px 10px; background: var(--c, var(--ink-orange)); color: var(--paper-4); }
+.la-vol:nth-child(4n+1) .la-vol__art--type { --c: var(--ink-blue); }
+.la-vol:nth-child(4n+2) .la-vol__art--type { --c: var(--ink-green); }
+.la-vol:nth-child(4n+3) .la-vol__art--type { --c: var(--ink-magenta); }
+.la-vol__art--type b { font: 400 clamp(18px, 1.5vw, 26px)/.95 var(--f-disp); text-transform: uppercase; overflow-wrap: anywhere; }
+.la-vol__art--type small { font: 10px var(--f-mono); letter-spacing: .06em; opacity: .85; }
+.la-vol__cap { display: flex; flex-direction: column; gap: 2px; margin-top: 10px; }
+.la-vol__cap b { font: 700 18px/1.05 var(--f-scrib); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.la-vol__cap small { font: 10px var(--f-mono); opacity: .7; }
+
+/* the mixtape: a cassette and its insert card */
+.la-collage--mixtape { background-color: var(--paper-2); }
+.la-tape { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: clamp(24px, 4vw, 70px); align-items: center; }
+.la-tape__cassette {
+  position: relative; aspect-ratio: 1.6; max-width: 560px; width: 100%; justify-self: center; rotate: -3deg;
+  background: var(--ink); border-radius: 18px; border: 3px solid var(--ink); box-shadow: 8px 8px 0 var(--ink-magenta);
+  padding: 7% 7% 0;
+}
+.la-tape__label {
+  position: relative; display: block; height: 62%; padding: 6% 6% 0; border-radius: 6px;
+  background: linear-gradient(var(--paper-4) 0 30%, var(--ink-magenta) 30% 36%, var(--paper-4) 36% 100%);
+  font: 700 clamp(22px, 2.4vw, 40px)/1 var(--f-scrib); color: var(--la-hand);
+}
+.la-tape__window {
+  position: absolute; left: 24%; right: 24%; top: 42%; height: 22%; display: flex; justify-content: space-between; align-items: center;
+  padding: 0 6%; background: #3b332c; border: 3px solid var(--ink); border-radius: 40px;
+}
+.la-tape__window i {
+  width: 26%; aspect-ratio: 1; border-radius: 50%; background: var(--paper-4); border: 3px solid var(--ink);
+  background-image: repeating-conic-gradient(var(--ink) 0 18deg, transparent 18deg 60deg);
+  -webkit-mask: radial-gradient(circle, #0000 20%, #000 22%); mask: radial-gradient(circle, #0000 20%, #000 22%);
+}
+.yr--moving .la-collage--mixtape.is-in .la-tape__window i { animation: la-spin 6s linear infinite; }
+@keyframes la-spin { to { rotate: 360deg; } }
+.la-tape__foot { position: absolute; left: 22%; right: 22%; bottom: 0; height: 18%; background: #2c2620; clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%); }
+.la-tape__card { position: relative; padding: clamp(18px, 2vw, 30px); background: var(--paper-4); border: 2.5px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); rotate: 1deg;
+  background-image: repeating-linear-gradient(180deg, rgba(33, 72, 192, 0) 0, rgba(33, 72, 192, 0) 33px, rgba(33, 72, 192, .2) 33px, rgba(33, 72, 192, .2) 34px); background-position: 0 8px; }
+.la-tape__list { columns: 2 220px; column-gap: 34px; margin: 0; padding: 0; list-style: none; }
+.la-tape__list li { display: grid; grid-template-columns: 2.4ch minmax(0, 1fr) auto; align-items: baseline; gap: 8px; break-inside: avoid; padding: 3px 0; }
+.la-tape__n { font: 700 12px var(--f-mono); color: var(--ink-magenta); }
+.la-tape__list b { font: 700 clamp(21px, 1.6vw, 26px)/1.15 var(--f-scrib); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.la-tape__list small { font: 11px var(--f-mono); opacity: .7; white-space: nowrap; }
+.la-tape__total { margin: 16px 0 0; font: 12px var(--f-mono); letter-spacing: .04em; }
+.la-tape__total b { font: 400 22px var(--f-disp); }
+
+/* the telly page: posters cut out, stuck in at angles */
+.la-collage--telly { background-color: var(--ink); color: var(--paper-4); background-image: radial-gradient(rgba(255, 252, 239, .08) 1px, transparent 1.4px); }
+.la-collage--telly .la-head { border-color: var(--paper-4); }
+.la-collage--telly .la-head__note { color: var(--ink-yellow); }
+.la-posters { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(120px, 10vw, 180px), 1fr)); gap: 34px clamp(16px, 2vw, 30px); margin: 0; padding: 12px 0 0; list-style: none; }
+.la-poster { position: relative; rotate: var(--tilt, 0deg); min-width: 0; }
+.la-poster::before { left: 8px; top: -8px; width: 42px; translate: none; rotate: -32deg; }
+.la-poster__art { position: relative; display: block; aspect-ratio: 2 / 3; overflow: hidden; background: var(--ink-red); border: 3px solid var(--paper-4); }
+.la-poster__art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; color: transparent; }
+.la-poster__art--type { display: grid; align-content: end; padding: 12px; color: var(--paper-4); background-image: radial-gradient(rgba(23, 19, 17, .3) 1px, transparent 1.5px); background-size: 6px 6px; }
+.la-poster:nth-child(3n+1) .la-poster__art--type { background-color: var(--ink-blue); }
+.la-poster__art--type b { font: 400 clamp(22px, 1.8vw, 32px)/.92 var(--f-disp); text-transform: uppercase; overflow-wrap: anywhere; }
+.la-poster__cap { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 8px; }
+.la-poster__cap b { font: 700 18px/1.05 var(--f-scrib); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.la-poster__cap small { flex: none; font: 10px var(--f-mono); letter-spacing: .06em; text-transform: uppercase; opacity: .7; }
+
+/* game nights: box art, the hours on a sticker */
+.la-boxes { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(130px, 11vw, 200px), 1fr)); gap: 40px clamp(18px, 2.4vw, 36px); margin: 0; padding: 12px 0 0; list-style: none; }
+.la-box { position: relative; rotate: var(--tilt, 0deg); min-width: 0; }
+.la-box__art { position: relative; display: block; aspect-ratio: 2 / 3; overflow: hidden; background: var(--ink-magenta); border: 2.5px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); border-radius: 4px; }
+.la-box__art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; color: transparent; }
+.la-box__art--type { display: grid; align-content: end; padding: 12px; color: #fff; background-image: repeating-linear-gradient(-45deg, transparent 0 10px, rgba(255, 252, 239, .14) 10px 20px); }
+.la-box__art--type b { font: 400 clamp(22px, 1.8vw, 30px)/.92 var(--f-disp); text-transform: uppercase; overflow-wrap: anywhere; }
+.la-box__cap { display: block; margin-top: 10px; font: 700 18px/1.05 var(--f-scrib); }
+.la-box__hours {
+  position: absolute; z-index: 4; top: -14px; right: -12px; display: grid; place-content: center; text-align: center; width: 64px; height: 64px;
+  background: var(--ink-yellow); border: 2.5px solid var(--ink); border-radius: 50%; rotate: 10deg; box-shadow: 3px 3px 0 var(--ink);
+  font: 700 12px/1 var(--f-mono);
+}
+.la-box__hours b { font: 400 24px/.9 var(--f-disp); }
+
+/* the medals, ribbons and all */
+.la-medals { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 30px 24px; margin: 0; padding: 0; list-style: none; }
+.la-medal { rotate: var(--tilt, 0deg); }
+.la-medal__in { display: flex; flex-direction: column; align-items: center; text-align: center; text-decoration: none; color: var(--ink); }
+.la-medal__ribbon {
+  width: 64px; height: 84px; margin-bottom: -16px; border: 2px solid var(--ink); border-bottom: 0;
+  background: linear-gradient(90deg, var(--type, var(--ink-red)) 0 36%, var(--paper-4) 36% 64%, var(--type, var(--ink-red)) 64%);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);
+}
+.la-medal__disc {
+  position: relative; z-index: 1; display: grid; place-items: center; width: 104px; height: 104px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #FFE7A0, var(--ink-yellow) 48%, #B88A1C 100%);
+  border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink), inset 0 0 0 7px rgba(255, 255, 255, .25);
+}
+.la-medal__disc span { max-width: 70px; font: 400 20px/.95 var(--f-disp); text-transform: uppercase; color: var(--ink); }
+.la-medal__title { margin-top: 12px; font: 700 18px/1.08 var(--f-scrib); }
+.la-medal__in:hover .la-medal__title, .la-medal__in:focus-visible .la-medal__title { text-decoration: underline; }
+
+/* ─── firsts ─── */
+.la-firsts__list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 18px 26px; margin: 0; padding: 0; list-style: none; }
+.la-firsts__item a {
+  display: flex; align-items: center; gap: 18px; padding: 14px 18px 14px 14px; text-decoration: none; color: var(--ink);
+  background: var(--paper-4); border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--ink);
+}
+.la-firsts__item:nth-child(odd) a { transform: rotate(-.6deg); }
+.la-firsts__item:nth-child(even) a { transform: rotate(.5deg); }
+.la-firsts__item a.card-link { --card-ink: var(--ink-magenta); --card-lift: 6px 6px 0 var(--ink-magenta); padding-right: 40px; }
+.la-rosette {
+  position: relative; flex: none; display: grid; place-items: center; width: 62px; height: 62px; border-radius: 50%;
+  background: var(--ink-magenta); color: #fff; border: 2.5px solid var(--ink);
+  box-shadow: 0 0 0 4px var(--paper-4), 0 0 0 6.5px var(--ink);
+  font: 400 20px/1 var(--f-disp); letter-spacing: .04em;
+}
+.la-firsts__txt { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.la-firsts__txt b { font: 400 clamp(21px, 1.6vw, 27px)/1.02 var(--f-disp); text-transform: uppercase; }
+.la-firsts__txt small { font: 11px var(--f-mono); opacity: .7; }
+
+/* ─── where the hours went: one bar, coloured in by hand ─── */
+.la-hours { position: relative; }
+.la-seg--reading { --c: var(--ink-orange); }
+.la-seg--listening { --c: var(--ink-blue); }
+.la-seg--watching { --c: var(--ink-red); }
+.la-seg--playing { --c: var(--ink-magenta); }
+.la-seg--training { --c: var(--ink-purple); }
+.la-hours__bar { display: flex; height: clamp(56px, 6vw, 96px); background: var(--paper-4); border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); overflow: hidden; rotate: -.5deg; }
+.la-seg {
+  display: block; height: 100%; background-color: var(--c);
+  /* crayon: strokes a shade off, at an angle, and a paper tooth showing through */
+  background-image:
+    repeating-linear-gradient(-62deg, rgba(255, 252, 239, .22) 0 2px, transparent 2px 7px),
+    repeating-linear-gradient(28deg, rgba(23, 19, 17, .12) 0 1px, transparent 1px 5px);
+}
+.la-seg + .la-seg { border-left: 3px solid var(--ink); }
+.yr--moving .la-hours .la-seg { clip-path: inset(0 100% 0 0); }
+.yr--moving .la-hours.is-in .la-seg { animation: la-colour .9s cubic-bezier(.4, 0, .2, 1) forwards; }
+.yr--moving .la-hours.is-in .la-seg:nth-child(2) { animation-delay: .25s; }
+.yr--moving .la-hours.is-in .la-seg:nth-child(3) { animation-delay: .5s; }
+.yr--moving .la-hours.is-in .la-seg:nth-child(4) { animation-delay: .75s; }
+.yr--moving .la-hours.is-in .la-seg:nth-child(5) { animation-delay: 1s; }
+@keyframes la-colour { to { clip-path: inset(0); } }
+.la-hours__key { display: flex; flex-wrap: wrap; gap: 10px 26px; margin: 22px 0 0; padding: 0; list-style: none; font: 700 clamp(21px, 1.6vw, 26px)/1.1 var(--f-scrib); }
+.la-hours__key li { display: inline-flex; align-items: center; gap: 8px; }
+.la-hours__key i { width: 18px; height: 18px; background: var(--c); border: 2px solid var(--ink); }
+.la-hours__key b { font: 400 1.1em var(--f-disp); }
+.la-hours__stamp {
+  display: inline-flex; align-items: baseline; gap: 8px; margin: 26px 0 0; padding: 8px 16px 6px;
+  border: 3px double var(--ink-green); color: var(--ink-green); rotate: -3deg;
+  font: 700 13px var(--f-mono); letter-spacing: .14em; text-transform: uppercase;
+}
+.la-hours__stamp b { font: 400 32px/1 var(--f-disp); letter-spacing: .02em; }
+
+/* ─── fitness: one page, handing off to the fitness issue ─── */
+.la-fit { display: grid; grid-template-columns: minmax(0, 520px) minmax(0, 1fr); gap: clamp(30px, 5vw, 90px); align-items: center; }
+.la-fit__pola { --type: var(--ink-purple); width: 100%; }
+.la-fit__body { min-width: 0; }
+.la-fit__nums { display: flex; flex-wrap: wrap; gap: 18px clamp(26px, 3.4vw, 60px); margin: 0 0 30px; padding: 0; list-style: none; }
+.la-fit__nums li { display: flex; flex-direction: column; }
+.la-fit__nums b { font: 400 clamp(64px, 7vw, 128px)/.86 var(--f-disp); color: var(--ink-purple); font-variant-numeric: tabular-nums; }
+.la-fit__nums span { font: 700 clamp(21px, 1.6vw, 27px)/1.1 var(--f-scrib); }
+.la-fit__link {
+  display: inline-block; padding: 12px 20px 10px; background: var(--ink); color: var(--paper-4); text-decoration: none;
+  border: 2.5px solid var(--ink); box-shadow: 5px 5px 0 var(--ink-purple); font: 400 22px/1 var(--f-disp); letter-spacing: .04em; text-transform: uppercase;
+}
+.yr .la-fit__link { color: var(--paper-4); }
+.la-fit__link:hover, .la-fit__link:focus-visible { background: var(--ink-purple); }
+
+/* ─── dear next year: a letter on lined paper ─── */
+.la-letter-wrap { display: flex; justify-content: center; padding-bottom: 20px; }
+.la-letter {
+  --line: 38px;
+  position: relative; width: min(100%, 780px); padding: var(--line) clamp(20px, 4vw, 54px) calc(var(--line) * 1.2) clamp(64px, 7vw, 96px);
+  background-color: var(--paper-4);
+  background-image:
+    linear-gradient(90deg, transparent calc(clamp(64px, 7vw, 96px) - 16px), color-mix(in srgb, var(--ink-red) 55%, transparent) calc(clamp(64px, 7vw, 96px) - 16px) calc(clamp(64px, 7vw, 96px) - 14px), transparent 0),
+    repeating-linear-gradient(180deg, rgba(33, 72, 192, 0) 0, rgba(33, 72, 192, 0) 37px, rgba(33, 72, 192, .26) 37px, rgba(33, 72, 192, .26) 38px);
+  background-position: 0 0, 0 calc(var(--line) - 9px);
+  border: 2px solid var(--ink); box-shadow: 8px 8px 0 var(--ink); rotate: .7deg;
+  font: 700 clamp(23px, 1.9vw, 29px)/var(--line) var(--f-scrib); color: var(--la-hand);
+}
+.la-letter p { margin: 0 0 var(--line); }
+.la-letter .la-letter__dear { font-size: 1.4em; }
+.la-letter__bets { margin: 0 0 var(--line); padding: 0; list-style: none; }
+.la-letter__bets li { display: flex; align-items: baseline; gap: 12px; }
+.la-letter__bets i { flex: none; width: 18px; height: 18px; border: 2.5px solid currentColor; border-radius: 2px; translate: 0 2px; }
+.la-letter .la-letter__ps { margin: 0; font-size: .85em; opacity: .75; }
+.la-letter .la-letter__sign { margin: 0; text-align: right; font-size: 2em; }
+.la-letter__draft {
+  position: absolute; z-index: 4; top: 26px; right: 18px; padding: 4px 14px 2px; rotate: -14deg;
+  border: 4px solid var(--ink-red); border-radius: 6px; color: var(--ink-red); opacity: .85;
+  font: 400 34px/1 var(--f-disp); letter-spacing: .14em; text-transform: uppercase;
+  -webkit-mask: radial-gradient(rgba(0, 0, 0, .65) 1px, #000 1.6px) 0 0 / 4px 4px; mask: radial-gradient(rgba(0, 0, 0, .65) 1px, #000 1.6px) 0 0 / 4px 4px;
+}
+
+/* ─── narrower screens ─── */
+@media (max-width: 1100px) {
+  .la-month, article.la-month:nth-of-type(even) { grid-template-columns: minmax(0, 1fr); }
+  .la-hl, article.la-month:nth-of-type(even) .la-hl,
+  .la-month__side, article.la-month:nth-of-type(even) .la-month__side { grid-column: 1; grid-row: auto; }
+  .la-hl { max-width: 620px; }
+  .la-fit { grid-template-columns: minmax(0, 1fr); }
+  .la-fit__pola { max-width: 520px; }
+  .la-tape { grid-template-columns: minmax(0, 1fr); }
+}
+/* the tabs leave the edge and become a strip across the top */
+@media (max-width: 900px) {
+  .la-book { display: block; }
+  .la-tabs {
+    position: sticky; top: 0; z-index: 6; margin: 0 -22px 26px; padding: 8px 22px 0;
+    background: var(--paper); border-bottom: 2px solid var(--ink);
+  }
+  .la-tabs ol { flex-direction: row; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  .la-tabs ol::-webkit-scrollbar { display: none; }
+  .la-tab { min-width: 0; padding: 8px 12px 6px; border: 2px solid var(--ink); border-bottom: 0; border-radius: 9px 9px 0 0; font-size: 15px; white-space: nowrap; }
+  .la-tab.is-here { translate: 0 0; }
+  .la-month { scroll-margin-top: 64px; }
+  .la-preview { position: relative; top: auto; right: auto; display: block; max-width: none; margin: 4px 0 18px; rotate: -1deg; }
+}
+@media (max-width: 600px) {
+  .la-cover { padding: 20px 14px 22px; box-shadow: 6px 6px 0 var(--ink); }
+  .la-cover__mast { rotate: -.8deg; }
+  .la-cover__title { font-size: clamp(54px, 17vw, 80px); }
+  .la-month { padding: 16px 14px 24px; box-shadow: 5px 5px 0 var(--ink); }
+  .la-month__name { font-size: 52px; }
+  .la-polas { gap: 24px 16px; }
+  .la-polas .la-pola { width: calc(50% - 8px); }
+  .la-pola--big .la-sticker { width: 70px; height: 70px; top: -16px; right: -8px; font-size: 22px; }
+  .la-sticker { right: -6px; }
+  .la-stub { flex-basis: 100%; max-width: none; }
+  .la-shelf, .la-posters, .la-boxes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .la-medals { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px 10px; }
+  .la-medal__ribbon { width: 44px; height: 58px; margin-bottom: -12px; }
+  .la-medal__disc { width: 76px; height: 76px; }
+  .la-medal__disc span { max-width: 54px; font-size: 16px; }
+  .la-medal__title { margin-top: 8px; font-size: 15px; }
+  .la-tape__list { columns: 1; }
+  .la-letter { padding-left: 46px; padding-right: 18px; rotate: none; }
+  .la-letter { background-image:
+    linear-gradient(90deg, transparent 32px, color-mix(in srgb, var(--ink-red) 55%, transparent) 32px 34px, transparent 0),
+    repeating-linear-gradient(180deg, rgba(33, 72, 192, 0) 0, rgba(33, 72, 192, 0) 37px, rgba(33, 72, 192, .26) 37px, rgba(33, 72, 192, .26) 38px); }
+  .la-letter__draft { font-size: 24px; top: 14px; right: 10px; }
+  .la-firsts__item a { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .la-tab { transition: none; }
+}

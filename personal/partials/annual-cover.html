@@ -1,0 +1,34 @@
+{{!-- The annual's cover (tasks/life-annual.mjs `cover`): the title, the headline numbers as stickers,
+     and the fitness issue's "every single day" grid (yr-days), each day in what it was mostly about.
+     Context: the annual view. --}}
+<header class="la-cover" data-reveal>
+  <div class="la-cover__mast">
+    <h1 class="la-cover__title">Life in <span class="la-cover__year">{{year}}</span></h1>
+    <p class="la-cover__strap">Every single day, in what it was mostly about. Tap one to find it in the months below.</p>
+  </div>
+  {{#if cover.numbers.length}}
+  <ul class="la-cover__nums">
+    {{#each cover.numbers}}<li class="la-num la-num--{{key}}"><b data-count="{{value}}">{{value}}</b><span>{{> annual-label}}</span></li>{{/each}}
+  </ul>
+  {{/if}}
+  <div class="yr-days la-days" data-reveal>
+    <ol class="yr-days__grid">
+      {{#each cover.days.cols}}
+      <li class="yr-days__col">
+        {{#if month}}<span class="yr-days__month">{{month}}</span>{{/if}}
+        {{#each cells}}{{#if blank}}<span class="yr-day yr-day--blank"></span>{{else}}{{#if ink}}<a class="yr-day {{ink}}{{#if race}} yr-day--race{{/if}}" href="{{href}}" title="{{title}}" style="--i: {{i}}"></a>{{else}}<span class="yr-day{{#if future}} yr-day--future{{else}} yr-day--rest{{/if}}" title="{{title}}" style="--i: {{i}}"></span>{{/if}}{{/if}}{{/each}}
+      </li>
+      {{/each}}
+    </ol>
+    <ul class="yr-key la-key">
+      <li class="la-key__fit"><i></i>training, in its sport's colour</li>
+      <li class="la-key__race"><i></i>race day</li>
+      <li class="life-ink--live"><i></i>a night out</li>
+      <li class="life-ink--reading"><i></i>a book finished</li>
+      <li class="life-ink--watching"><i></i>a film or a finale</li>
+      <li class="life-ink--games"><i></i>a game night</li>
+      <li class="life-ink--code"><i></i>a big coding day</li>
+      <li class="yr-key__rest"><i></i>a quiet one</li>
+    </ul>
+  </div>
+</header>

@@ -1,0 +1,68 @@
+{{!-- A month's spread: the highlight as the big polaroid, the stubs, James's own words and the
+     margin notes beside it, then the month's other photos. Context: a month. --}}
+<article class="la-month{{#unless highlight}} la-month--nohl{{/unless}}" id="{{anchor}}" aria-labelledby="{{anchor}}-h" data-reveal>
+  <h2 class="la-month__name" id="{{anchor}}-h">{{label}}</h2>
+
+  {{#with highlight}}
+  <div class="la-hl la-pola la-pola--big la-pola--{{kind}} {{typeClass}}" style="--tilt: {{tilt}}deg">
+    {{#if href}}<a class="la-pola__in card-link" href="{{href}}">{{else}}<div class="la-pola__in">{{/if}}
+      {{#if photo}}<span class="la-pola__pic"><img src="{{photo}}" alt="" loading="lazy" decoding="async" width="900" height="900"></span>
+      {{else}}<span class="la-pola__pic la-pola__pic--type" aria-hidden="true"><b>{{dayLabel}}</b></span>{{/if}}
+      <span class="la-pola__cap">
+        <span class="la-pola__kind">{{> annual-kind}}</span>
+        <b class="la-pola__title">{{title}}</b>
+        <small class="la-pola__when">{{dayLabel}}{{#if venue}}, {{venue}}{{/if}}{{#if sub}}{{#unless (eq kind "live")}}{{#unless (eq kind "code")}}, {{sub}}{{/unless}}{{/unless}}{{/if}}</small>
+      </span>
+    {{#if href}}{{> card-arrow}}</a>{{else}}</div>{{/if}}
+    {{#if first}}<span class="la-sticker la-sticker--first" aria-label="a first">first!</span>{{else if race}}<span class="la-sticker la-sticker--race" aria-label="race">race</span>{{/if}}
+    {{#if caption}}<p class="la-hl__words">{{caption}}</p>{{/if}}
+  </div>
+  {{/with}}
+
+  <div class="la-month__side">
+  {{#if stubs.length}}
+  <ul class="la-stubs" aria-label="Nights out">
+    {{#each stubs}}
+    <li class="la-stub{{#if sub}} stub--{{sub}}{{/if}}" style="--tilt: {{tilt}}deg">
+      <span class="la-stub__main">
+        <span class="la-stub__kind">{{> annual-kind}}</span>
+        <b class="la-stub__title">{{title}}</b>
+        {{#if venue}}<span class="la-stub__venue">{{venue}}</span>{{/if}}
+      </span>
+      <span class="la-stub__tear"><span class="la-stub__date">{{dayLabel}}</span></span>
+      {{#if first}}<span class="la-sticker la-sticker--first" aria-label="a first">first!</span>{{/if}}
+    </li>
+    {{/each}}
+  </ul>
+  {{/if}}
+
+  {{#if captions.length}}
+  <ul class="la-words" aria-label="In my own words">
+    {{#each captions}}
+    <li class="la-words__item"><q class="la-words__q">{{text}}</q> <a class="la-words__src" href="{{href}}">{{title}}, {{dayLabel}}</a></li>
+    {{/each}}
+  </ul>
+  {{/if}}
+
+  {{#if notes.length}}
+  <ul class="la-notes">
+    {{#each notes}}<li class="la-note" style="--tilt: {{tilt}}deg">{{text}}</li>{{/each}}
+  </ul>
+  {{/if}}
+  </div>
+
+  {{#if polaroids.length}}
+  <ul class="la-polas" aria-label="More from {{label}}">
+    {{#each polaroids}}
+    <li class="la-pola {{typeClass}}" style="--tilt: {{tilt}}deg">
+      <a class="la-pola__in card-link card-link--small" href="{{href}}">
+        <span class="la-pola__pic"><img src="{{photo}}" alt="" loading="lazy" decoding="async" width="400" height="400"></span>
+        <span class="la-pola__cap"><b class="la-pola__title">{{title}}</b><small class="la-pola__when">{{dayLabel}}</small></span>
+        {{> card-arrow}}
+      </a>
+      {{#if race}}<span class="la-sticker la-sticker--race" aria-label="race">race</span>{{/if}}
+    </li>
+    {{/each}}
+  </ul>
+  {{/if}}
+</article>

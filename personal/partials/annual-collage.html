@@ -1,0 +1,71 @@
+{{!-- A collage page between months (tasks/life-annual.mjs `months[].after`): the shelf, the mixtape,
+     the telly page, game nights, the medals. Context: {key, items, minutes?}. --}}
+<section class="la-collage la-collage--{{key}}" aria-labelledby="la-{{key}}-h" data-reveal>
+{{#if (eq key "shelf")}}
+  <header class="la-head"><h2 class="la-h2" id="la-{{key}}-h">The shelf</h2><p class="la-head__note">{{items.length}} books, finished and taped in</p></header>
+  <ol class="la-shelf">
+    {{#each items}}
+    <li class="la-vol" style="--tilt: {{tilt}}deg">
+      {{#if cover}}<span class="la-vol__art"><img src="{{cover}}" alt="" loading="lazy" decoding="async" width="300" height="450"></span>
+      {{else}}<span class="la-vol__art la-vol__art--type" aria-hidden="true"><b>{{title}}</b><small>{{creator}}</small></span>{{/if}}
+      <span class="la-vol__cap"><b>{{title}}</b>{{#if creator}}<small>{{creator}}</small>{{/if}}</span>
+    </li>
+    {{/each}}
+  </ol>
+{{/if}}
+{{#if (eq key "mixtape")}}
+  <header class="la-head"><h2 class="la-h2" id="la-{{key}}-h">The mixtape</h2><p class="la-head__note">the year's top artists, by the minute</p></header>
+  <div class="la-tape">
+    <div class="la-tape__cassette" aria-hidden="true">
+      <span class="la-tape__label">Life in {{@root.annual.year}}</span>
+      <span class="la-tape__window"><i></i><i></i></span>
+      <span class="la-tape__foot"></span>
+    </div>
+    <div class="la-tape__card">
+      <ol class="la-tape__list">
+        {{#each items}}<li><span class="la-tape__n">{{n}}</span><b>{{name}}</b><small>{{minutes}} min</small></li>{{/each}}
+      </ol>
+      {{#if minutes}}<p class="la-tape__total"><b>{{minutes}}</b> minutes of music in all</p>{{/if}}
+    </div>
+  </div>
+{{/if}}
+{{#if (eq key "telly")}}
+  <header class="la-head"><h2 class="la-h2" id="la-{{key}}-h">The telly page</h2><p class="la-head__note">cut out and stuck in</p></header>
+  <ol class="la-posters">
+    {{#each items}}
+    <li class="la-poster" style="--tilt: {{tilt}}deg">
+      {{#if poster}}<span class="la-poster__art"><img src="{{poster}}" alt="" loading="lazy" decoding="async" width="342" height="513"></span>
+      {{else}}<span class="la-poster__art la-poster__art--type" aria-hidden="true"><b>{{title}}</b></span>{{/if}}
+      <span class="la-poster__cap"><b>{{title}}</b>{{#if kind}}<small>{{kind}}</small>{{/if}}</span>
+    </li>
+    {{/each}}
+  </ol>
+{{/if}}
+{{#if (eq key "games")}}
+  <header class="la-head"><h2 class="la-h2" id="la-{{key}}-h">Game nights</h2><p class="la-head__note">the boxes, and the hours in them</p></header>
+  <ol class="la-boxes">
+    {{#each items}}
+    <li class="la-box" style="--tilt: {{tilt}}deg">
+      {{#if cover}}<span class="la-box__art"><img src="{{cover}}" alt="" loading="lazy" decoding="async" width="300" height="450"></span>
+      {{else}}<span class="la-box__art la-box__art--type" aria-hidden="true"><b>{{title}}</b></span>{{/if}}
+      <span class="la-box__cap"><b>{{title}}</b></span>
+      {{#if hours}}<span class="la-box__hours"><b>{{hours}}</b> h</span>{{/if}}
+    </li>
+    {{/each}}
+  </ol>
+{{/if}}
+{{#if (eq key "medals")}}
+  <header class="la-head"><h2 class="la-h2" id="la-{{key}}-h">The medals</h2><p class="la-head__note">{{items.length}} races, laid out flat</p></header>
+  <ol class="la-medals">
+    {{#each items}}
+    <li class="la-medal {{typeClass}}" style="--tilt: {{tilt}}deg">
+      <a class="la-medal__in" href="{{href}}">
+        <span class="la-medal__ribbon" aria-hidden="true"></span>
+        <span class="la-medal__disc" aria-hidden="true"><span>{{dayLabel}}</span></span>
+        <b class="la-medal__title">{{title}}</b>
+      </a>
+    </li>
+    {{/each}}
+  </ol>
+{{/if}}
+</section>

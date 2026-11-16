@@ -44,6 +44,8 @@ const round = (/** @type {number} */ v, d = 1) => Math.round(v * 10 ** d) / 10 *
 const tilt = (/** @type {string} */ s, spread = 5) => round((rand(s) - 0.5) * spread, 2);
 /** `2026-03-09` → `9 Mar` @param {string} day */
 const dayLabel = (day) => { const [, m, d] = day.split('-').map(Number); return m && d ? `${d} ${MON[m - 1]}` : ''; };
+/** `2026-11-30` → `30 November 2026` @param {string} day */
+const longDay = (day) => { const [y, m, d] = day.split('-').map(Number); return y && m && d ? `${d} ${MONTH_NAMES[m - 1]} ${y}` : day; };
 const monthAnchor = (/** @type {string} */ key) => `m-${key}`;
 const hrefOf = (/** @type {string} */ slug) => `/life/activity/${slug}`;
 
@@ -83,6 +85,7 @@ export function buildLifeAnnual(doc, ctx, opts = {}) {
   const byDay = new Map();
   for (const x of sessions) byDay.set(x.day, [...(byDay.get(x.day) || []), x]);
   const typeClassOf = (/** @type {any} */ e) => tagTheme(tagOf(e).tag).typeClass;
+  const entryBySlug = new Map(ctx.list.map((x) => [x.e.slug, x.e]));
 
   // ---- cover -----------------------------------------------------------------------
   const days = dayGrid(year, (day) => {
@@ -119,7 +122,12 @@ export function buildLifeAnnual(doc, ctx, opts = {}) {
     if (m.kind !== 'fitness') return base;
     const slug = String(m.id).replace(/^fitness:/, '');
     const file = ctx.files.get(slug);
-    if (!file) return base;
+    // lifehub's fitness moments carry no title: it comes from the activity file, else the index entry
+    if (!file) {
+      const entry = entryBySlug.get(slug);
+      if (!entry) return base;
+      return { ...base, title: cleanTitle(entry.title) || base.title, photo: photoOf(entry) || base.photo, href: hrefOf(slug), typeClass: typeClassOf(entry) };
+    }
     const e = file.entry || {};
     return {
       ...base, title: cleanTitle(e.title || file.activity?.title) || base.title, photo: photoOf(e) || base.photo,
@@ -206,7 +214,7 @@ export function buildLifeAnnual(doc, ctx, opts = {}) {
   } : null;
 
   const letter = doc.letter && typeof doc.letter === 'object'
-    ? { ...doc.letter, lines: arr(doc.letter.lines), predictions: arr(doc.letter.predictions), draft: !doc.letter.approved } : null;
+    ? { ...doc.letter, to: year + 1, lines: arr(doc.letter.lines), predictions: arr(doc.letter.predictions), draft: !doc.letter.approved } : null;
   const lastLetter = doc.lastLetter && typeof doc.lastLetter === 'object' ? { predictions: arr(doc.lastLetter.predictions) } : null;
 
   // ---- the /life cover -------------------------------------------------------------
@@ -217,7 +225,7 @@ export function buildLifeAnnual(doc, ctx, opts = {}) {
   };
 
   return {
-    year, through, final: Boolean(doc.final), preview: Boolean(doc.preview), url: `/life/annual/${year}`,
+    year, through, throughLabel: longDay(through), final: Boolean(doc.final), preview: Boolean(doc.preview), url: `/life/annual/${year}`,
     cover, months, collages, placements, firsts, hours, fitness, letter, lastLetter, linkCover,
   };
 }
@@ -251,7 +259,10 @@ export function lifeAnnualTask() {
         for (const doc of docs) {
           try {
             const view = buildLifeAnnual(doc, story);
-            lifeAnnualPages.push({ page: 'life', subpage: `| life in ${view.year}`, annual: view, canonical: siteUrl ? `${siteUrl}${view.url}` : '' });
+            lifeAnnualPages.push({
+              page: 'life', subpage: `| life in ${view.year}`, annual: view, canonical: siteUrl ? `${siteUrl}${view.url}` : '',
+              description: `Life in ${view.year}: the year in photos, ticket stubs, books, music, films, games and races, month by month.`,
+            });
           } catch (e) {
             ctx.logger.error(`annual ${doc.year}: ${errMsg(e)}`);
           }

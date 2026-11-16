@@ -44,7 +44,7 @@ const annualDoc = (over = {}) => ({
   connections: [{ month: '2026-03', kind: 'soundtrack', text: 'The race month ran on The Band.', by: 'code' }],
   hours: { reading: 30, listening: 50, watching: 20, playing: 0, training: 100, commits: 900 },
   totals: { live: 2, books: 3, films: 2, series: 1, artists: 2, commits: 900, gameHours: 0, sessions: 11, races: 1 },
-  letter: { lines: ['Dear 2027,'], predictions: [{ key: 'books', text: 'Four books.', target: 4 }], approved: false },
+  letter: { lines: ['A good year to write down.'], predictions: [{ key: 'books', text: 'Four books.', target: 4 }], approved: false },
   ...over,
 });
 
@@ -107,6 +107,25 @@ describe('life annual view', () => {
     assert.equal(v.months[3].polaroids.length, 6);
   });
 
+  test('a fitness moment takes its title and photo from FitGlue (the doc carries none)', () => {
+    // lifehub's fitness moments have no title; one without its activity file falls back to the index entry
+    const untitled = (/** @type {any} */ m) => { const { title, ...rest } = m; return rest; };
+    const doc = annualDoc();
+    doc.moments = doc.moments.map((/** @type {any} */ m) => (m.kind === 'fitness' ? untitled(m) : m));
+    doc.moments.push({ id: 'fitness:mar-gym', kind: 'fitness', day: '2026-03-10', month: '2026-03', image: '', href: '/life/activity/mar-gym', score: 55, race: false, photo: true });
+    doc.highlights['2026-03'] = { pick: 'fitness:mar-gym', by: 'jarvis', alternatives: ['fitness:race-10k'] };
+    const noGymFile = storyContext({ files: files.filter((f) => f.slug !== 'mar-gym'), entries, roundupFiles: [yearFile] });
+    const w = buildLifeAnnual(doc, noGymFile);
+    const h = w.months[2].highlight;
+    assert.equal(h.title, 'mar-gym', 'from the index entry when the activity file is missing');
+    assert.equal(h.photo, PIC('gym'));
+    assert.equal(h.href, '/life/activity/mar-gym');
+    assert.equal(h.typeClass, 'fit-type--strength');
+    const withFile = buildLifeAnnual({ ...doc, highlights: { '2026-03': { pick: 'fitness:race-10k', by: 'jarvis', alternatives: [] } } }, ctx);
+    assert.equal(withFile.months[2].highlight.title, 'Town 10k', 'from the activity file');
+    assert.equal(withFile.fitness.photo, PIC('race'));
+  });
+
   test('collage under 3 items dropped', () => {
     assert.equal(v.collages.shelf.items.length, 3);
     assert.equal(v.collages.mixtape, null);
@@ -124,6 +143,7 @@ describe('life annual view', () => {
     assert.equal(v.fitness.href, '/life/roundup/year-2026');
     assert.equal(v.fitness.numbers.length, 3);
     assert.equal(v.letter.draft, true);
+    assert.equal(v.letter.to, 2027, 'the letter is to next year');
     assert.equal(buildLifeAnnual(annualDoc({ letter: null }), ctx).letter, null);
   });
 
@@ -152,5 +172,64 @@ describe('lifeAnnualTask', () => {
     const r = await run({ 2025: annualDoc({ year: 2025, final: true, through: '2025-12-31' }), 2026: annualDoc({ preview: true }) });
     assert.deepEqual(r.lifeAnnualPages.map((/** @type {any} */ p) => p.annual.year), [2025, 2026]);
     assert.deepEqual(r.lifeAnnualCovers.map((/** @type {any} */ c) => c.year), [2026, 2025]);
+  });
+});
+
+describe('the annual page', () => {
+  /** Renders /life/annual/2026 from `doc` with the real templates; returns the HTML. @param {any} doc */
+  const render = async (doc) => {
+    const { default: os } = await import('node:os');
+    const { default: fs } = await import('node:fs/promises');
+    const { default: path } = await import('node:path');
+    const { lifePageTasks } = await import('./life-pages.mjs');
+    const { runSkierTasks } = await import('./skier-test-runner.mjs');
+    const outDir = await fs.mkdtemp(path.join(os.tmpdir(), 'annual-page-'));
+    try {
+      const pages = lifePageTasks({ outDir, siteUrl: 'https://james.ripixel.co.uk' }).find((t) => /lifeAnnualPages/.test(JSON.stringify(t.config)));
+      assert.ok(pages, 'lifePageTasks renders lifeAnnualPages');
+      const logs = /** @type {string[]} */ ([]);
+      await runSkierTasks([lifeAnnualTask(), pages], {
+        cacheHash: 'test', year: 2026, siteUrl: 'https://james.ripixel.co.uk', lifeAnnuals: { 2026: doc },
+        fitnessIndex: { activities: entries, profile: { showPhotoGallery: true } }, fitnessActivities: files, fitnessRoundups: [yearFile],
+      }, logs);
+      assert.ok(!logs.some((l) => l.startsWith('ERROR')), logs.join('\n'));
+      return await fs.readFile(path.join(outDir, 'life', 'annual', '2026', 'index.html'), 'utf8');
+    } finally {
+      await fs.rm(outDir, { recursive: true, force: true });
+    }
+  };
+
+  test('page renders a month anchor per month', async () => {
+    const html = await render(annualDoc({ preview: true }));
+    const anchors = [...html.matchAll(/<article [^>]*id="(m-2026-\d\d)"/g)].map((m) => m[1]);
+    assert.deepEqual(anchors, Array.from({ length: 12 }, (_, i) => `m-2026-${String(i + 1).padStart(2, '0')}`));
+    const tabs = [...html.matchAll(/class="la-tab[^"]*" href="#(m-2026-\d\d)"/g)].map((m) => m[1]);
+    assert.deepEqual(tabs, anchors, 'a tab per month');
+    assert.match(html, /href="#m-2026-03"/, 'cover days jump to their month');
+    assert.match(html, /Nothing taped in yet\./, 'a blank month is a torn page');
+    assert.match(html, /Preview: built as if the year ended on 30 November 2026/);
+    assert.match(html, /<title>James King \| life \| life in 2026<\/title>/);
+    assert.doesNotMatch(html, /\{\{|\}\}/, 'no unrendered tags');
+  });
+
+  test('stub without venue has no venue line', async () => {
+    const html = await render(annualDoc({ preview: true }));
+    const stubs = [...html.matchAll(/<li class="la-stub[^"]*"[\s\S]*?<\/li>/g)].map((m) => m[0]);
+    const band = stubs.find((s) => s.includes('The Band'));
+    const other = stubs.find((s) => s.includes('Another Act'));
+    assert.ok(band && other, 'both stubs render');
+    assert.match(band, /class="la-stub__venue">The Hall</);
+    assert.doesNotMatch(other, /la-stub__venue/);
+  });
+
+  test('draft stamp only when draft', async () => {
+    const draft = await render(annualDoc({ preview: true }));
+    assert.match(draft, /class="la-letter__draft"/);
+    const approved = await render(annualDoc({ preview: true, letter: { lines: ['A good year to write down.'], predictions: [], approved: true } }));
+    assert.match(approved, /Dear 2027,/);
+    assert.match(approved, /A good year to write down\./);
+    assert.doesNotMatch(approved, /class="la-letter__draft"/);
+    const final = await render(annualDoc({ final: true }));
+    assert.doesNotMatch(final, /Preview: built as if/, 'the banner is the preview only');
   });
 });

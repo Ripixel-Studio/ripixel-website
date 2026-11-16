@@ -1,0 +1,14 @@
+{{!-- Firsts (tasks/life-annual.mjs `firsts`): things done for the first time this year, each one
+     pinned to its month. Context: the annual view. --}}
+{{#if firsts.length}}
+<section class="la-sec la-firsts" aria-labelledby="la-firsts-h" data-reveal>
+  <header class="la-head"><h2 class="la-h2" id="la-firsts-h">Firsts</h2><p class="la-head__note">things done for the very first time</p></header>
+  <ol class="la-firsts__list">
+    {{#each firsts}}
+    <li class="la-firsts__item">
+      <a class="card-link" href="{{href}}"><span class="la-rosette" aria-hidden="true"><span>1st</span></span><span class="la-firsts__txt"><b>{{text}}</b><small>{{dayLabel}}</small></span>{{> card-arrow}}</a>
+    </li>
+    {{/each}}
+  </ol>
+</section>
+{{/if}}

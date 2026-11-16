@@ -1,0 +1,12 @@
+{{!-- One month of the scrapbook (tasks/life-annual.mjs `months[]`). A month with nothing in it is a
+     torn empty page. Context: a month. --}}
+{{#if highlight}}{{> annual-month-page}}
+{{else if polaroids.length}}{{> annual-month-page}}
+{{else if stubs.length}}{{> annual-month-page}}
+{{else if captions.length}}{{> annual-month-page}}
+{{else}}
+<article class="la-month la-month--empty" id="{{anchor}}" aria-labelledby="{{anchor}}-h" data-reveal>
+  <h2 class="la-month__name" id="{{anchor}}-h">{{label}}</h2>
+  <p class="la-month__none">Nothing taped in yet.</p>
+</article>
+{{/if}}
