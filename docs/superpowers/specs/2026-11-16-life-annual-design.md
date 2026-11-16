@@ -1,6 +1,6 @@
 # Life in [year]: the annual scrapbook
 
-Status: design, awaiting James's approval (2026-11-16).
+Status: approved by James (2026-11-16).
 Owner: James. Builder: Jarvis (website + lifehub).
 
 ## Intent
@@ -132,6 +132,14 @@ In page order:
 - The cover is the fitness issue's day grid, reused.
 - Firsts, monthly highlights and happy connections are in.
 - Who was there is left for readers to infer.
+- **How `/life` links to it** (James, 2026-11-16): a scrapbook cover is taped in between
+  the "James, by the numbers" hero and the hub grid. It shows a thumbnail of that year's
+  day grid, "Life in YYYY", and one line, and the whole cover is the link. Through
+  January it is large: full width, slightly tilted, with a strip of tape. From 1 February
+  it shrinks to a slim strip in the same place, so the hub cards lead again. With more
+  than one issue, the strip carries small year tabs ("2026 · 2025") as the back-issue
+  shelf, with no separate archive page. Before an issue publishes, nothing shows on
+  `/life`, and previews show it only on the preview channel.
 - **Exact days on this page only** (James, 2026-11-16). Elsewhere, `/life` publishes
   live events by month only, with no venue on a date, and publishes gaming and coding
   only as totals (life-hub spec §4, `periods.py`). The annual relaxes that rule for
@@ -144,7 +152,7 @@ In page order:
 ## Calls made by Jarvis (James to check)
 
 - **URL**: `/life/annual/YYYY` (for example `/life/annual/2026`), linked from the fitness
-  issue and from `/life`. The fitness issue keeps `/life/roundup/year-YYYY`.
+  issue, the Roundups page and `/life`. The fitness issue keeps `/life/roundup/year-YYYY`.
 - **Where the computation lives**: lifehub builds a public `life/annual-YYYY.json`
   (days, moments, highlight suggestions, collage lists, firsts, connections, hours,
   letter), screened like every other export. The website renders it and merges in the
