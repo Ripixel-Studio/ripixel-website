@@ -29,11 +29,14 @@ import { workViewTask } from './tasks/work-view.mjs';
 import { lifeHeatmapTask } from './tasks/life-heatmap.mjs';
 import { lifePageTasks, templateHelpers } from './tasks/life-pages.mjs';
 import { routeMapAssetsTask } from './tasks/route-map.mjs';
+import { readThoughts, thoughtPageVars, enrichThoughtsListTask } from './tasks/thoughts-index.mjs';
 
 const SITE_URL = 'https://james.ripixel.co.uk';
 
 /** Estimate read time in minutes from raw text (200 wpm)
  * @param {string} text */
+const THOUGHTS_DIR = './personal/items/thoughts';
+
 function estimateReadTime(text) {
     if (!text) return 1;
     const words = text.trim().split(/\s+/).length;
@@ -251,14 +254,20 @@ export const tasks = [
         outputVar: 'thoughtsList',
         excerptFn: (rawMarkdown) => {
             const firstPara = rawMarkdown.split(/\n\s*\n/)[0] ?? '';
-            const stripped = firstPara.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+            const stripped = firstPara
+                .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')       // [text](url) -> text
+                .replace(/(\*\*|__)(.+?)\1/g, '$2')               // **bold**
+                .replace(/(^|[^\w])[*_](\S(?:.*?\S)?)[*_](?!\w)/g, '$1$2') // _em_ / *em*
+                .replace(/`([^`]+)`/g, '$1');                     // `code`
             return stripped.trim();
         },
-        additionalVarsFn: ({ section, title, excerpt, body }) => ({
+        additionalVarsFn: ({ section, title, excerpt, body, itemName, headings }) => ({
             page: section,
             subpage: '| ' + title,
             description: excerpt,
             readTime: String(estimateReadTime(body || excerpt || '')),
+            // issue number, how-to / hot take, contents card, prev/next (tasks/thoughts-index.mjs)
+            ...(section === 'thoughts' ? thoughtPageVars(readThoughts(THOUGHTS_DIR), itemName, headings) : {}),
         }),
     }),
 
@@ -267,6 +276,9 @@ export const tasks = [
         globalVar: 'thoughtsList',
         outFile: './personal/items/thoughts.json',
     }),
+
+    // Issue numbers, kinds, read times and year breaks for the listing
+    enrichThoughtsListTask({ itemsDir: THOUGHTS_DIR, jsonFile: './personal/items/thoughts.json' }),
 
     // Compute thoughts stats (must run after thoughtsList is populated)
     computeThoughtsStatsTask(),

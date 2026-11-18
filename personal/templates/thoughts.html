@@ -17,108 +17,108 @@
     </svg>
 
     <!-- Hero -->
-    <div class="thoughts-hero">
+    <header class="thoughts-hero">
       <div>
-        <div class="page-hero__section-label">· READING ROOM ·</div>
+        <div class="page-hero__section-label">· READING ROOM · BACK ISSUES ·</div>
         <h1 class="thoughts-hero__h1">
-          A PEEK INSIDE<br>
-          <span>MY BRAIN.</span>
+          A peek inside<br>
+          <span class="thoughts-hero__slab">my brain</span>.
         </h1>
         <div class="thoughts-hero__tagline">(reader, beware...)</div>
-        <div class="thoughts-hero__sub">
+        <p class="thoughts-hero__sub">
           Ramblings, how-to guides, &amp; the occasional hot take. Mostly about software, occasionally about running, very occasionally about tea.
-        </div>
+        </p>
       </div>
-    </div>
+      <aside class="postcard thoughts-hero__postcard">
+        <div class="postcard__label">POSTCARD · FROM THE EDITOR</div>
+        posts go back to {{firstThoughtYear}} - i was considerably more excitable then.
+        <div class="postcard__sig">- j.</div>
+      </aside>
+    </header>
 
     <!-- Stat strip -->
-    <div class="stat-strip" style="margin-top:20px">
+    <div class="stat-strip stat-strip--5 thoughts-stats">
       <div class="stat-strip__item">
         <div class="stat-strip__num">{{totalThoughts}}</div>
-        <div class="stat-strip__label">total posts</div>
+        <div class="stat-strip__label">issues printed</div>
+      </div>
+      <div class="stat-strip__item">
+        <div class="stat-strip__num">{{thoughtsHowTos}}</div>
+        <div class="stat-strip__label">how-to guides</div>
+      </div>
+      <div class="stat-strip__item">
+        <div class="stat-strip__num">{{thoughtsHotTakes}}</div>
+        <div class="stat-strip__label">hot takes</div>
+      </div>
+      <div class="stat-strip__item">
+        <div class="stat-strip__num">{{thoughtsWords}}</div>
+        <div class="stat-strip__label">words, give or take</div>
       </div>
       <div class="stat-strip__item">
         <div class="stat-strip__num">{{firstThoughtYear}}</div>
-        <div class="stat-strip__label">since</div>
-      </div>
-      <div class="stat-strip__item">
-        <div class="stat-strip__num">{{avgReadTime}} min</div>
-        <div class="stat-strip__label">avg read</div>
-      </div>
-      <div class="stat-strip__item">
-        <div class="stat-strip__num">{{thoughtsPace}}</div>
-        <div class="stat-strip__label">approx pace</div>
+        <div class="stat-strip__label">in print since</div>
       </div>
     </div>
 
-    <!-- Articles + sidebar -->
-    <div class="thoughts-layout" style="margin-top:20px">
+    {{#each thoughts}}{{#if cover}}
+    <!-- Cover story: the latest issue -->
+    <article class="thoughts-cover card-link card-link--wide">
+      <div class="thoughts-cover__main">
+        <div class="thoughts-cover__meta">
+          <span class="thoughts-cover__latest">★ LATEST ISSUE</span>
+          <span class="thought-kind{{#if isHowTo}} thought-kind--howto{{/if}}">{{kind}}</span>
+          <span>{{dateDisplay}} · {{readTime}} min read</span>
+        </div>
+        <h2 class="thoughts-cover__title"><a class="card-link__target" href="/{{relativePath}}">{{title}}.</a></h2>
+        <p class="thoughts-cover__excerpt">{{excerpt}}</p>
+        <span class="thoughts-cover__cta" aria-hidden="true">start reading →</span>
+      </div>
+      {{#if sections.length}}
+      <div class="thoughts-cover__inside">
+        <div class="thoughts-cover__issue" aria-hidden="true">#{{issue}}</div>
+        <div class="thoughts-cover__inside-label">inside this issue</div>
+        <ol class="thoughts-cover__sections">
+          {{#each sections}}<li>{{this}}</li>{{/each}}
+        </ol>
+      </div>
+      {{/if}}
+      {{> card-arrow}}
+    </article>
+    {{/if}}{{/each}}
 
-      <!-- Main column -->
+    <!-- Back issues, by year -->
+    <ol class="thoughts-grid">
+      {{#each thoughts}}{{#unless cover}}
+      {{#if gapNote}}<li class="thoughts-gap" aria-hidden="true">{{gapNote}}</li>{{/if}}
+      {{#if yearStart}}<li class="thoughts-year" role="presentation"><span>{{year}}</span></li>{{/if}}
+      <li class="thought-tile card-link">
+        <div class="thought-tile__meta">
+          <span class="thought-tile__issue">#{{issue}}</span>
+          <span class="thought-kind{{#if isHowTo}} thought-kind--howto{{/if}}">{{kind}}</span>
+          <span class="thought-tile__date">{{dateDisplay}} · {{readTime}} min</span>
+        </div>
+        <h3 class="thought-tile__title"><a class="card-link__target" href="/{{relativePath}}">{{title}}.</a></h3>
+        <p class="thought-tile__excerpt">{{excerpt}}</p>
+        {{> card-arrow}}
+      </li>
+      {{/unless}}{{/each}}
+    </ol>
+
+    {{> pagination}}
+
+    <!-- Subscribe -->
+    <section class="thoughts-subscribe">
       <div>
-        {{#each thoughts}}
-        {{#if @first}}
-        <!-- Featured (latest) -->
-        <article class="post-row post-row--featured card-link card-link--wide">
-          <div class="post-row__inner">
-            <div class="post-row__meta-row">
-              <div class="post-row__left-meta">
-                <span class="post-row__date">{{dateDisplay}} · {{readTime}} min</span>
-                <span class="post-row__latest">★ LATEST</span>
-              </div>
-            </div>
-            <h2 class="post-row__title"><a class="card-link__target" href="/{{relativePath}}">{{title}}.</a></h2>
-            <div class="post-row__excerpt">{{excerpt}}</div>
-          </div>
-          {{> card-arrow}}
-        </article>
-        {{else}}
-        <!-- Regular post row -->
-        <article class="post-row card-link card-link--wide">
-          <div class="post-row__inner">
-            <div class="post-row__meta-row">
-              <div class="post-row__left-meta">
-                <span class="post-row__date">{{dateDisplay}} · {{readTime}} min</span>
-              </div>
-            </div>
-            <h2 class="post-row__title"><a class="card-link__target" href="/{{relativePath}}">{{title}}.</a></h2>
-            <div class="post-row__excerpt">{{excerpt}}</div>
-          </div>
-          {{> card-arrow}}
-        </article>
-        {{/if}}
-        {{/each}}
-
-        <!-- Pagination -->
-        {{> pagination}}
+        <div class="thoughts-subscribe__kicker">· GET THE NEXT ISSUE ·</div>
+        <h2 class="thoughts-subscribe__title">subscribe via <span>feed</span>.</h2>
+        <p class="thoughts-subscribe__sub">no newsletter, no tracking - just new thoughts in your reader, whenever i get round to it.</p>
       </div>
-
-      <!-- Sidebar -->
-      <aside class="thoughts-sidebar">
-        <div class="sidebar-card">
-          <div class="sidebar-card__inner">
-            <div class="sidebar-card__title">+ ABOUT THIS ARCHIVE</div>
-            <div style="font-family:var(--f-mono);font-size:12px;color:var(--ink);margin-top:6px;line-height:1.7">
-              Software engineering, management, running, and the occasional midnight thought.
-              Posts go back to {{firstThoughtYear}} — I was considerably more excitable then.
-            </div>
-          </div>
-        </div>
-
-        <div style="margin-top:18px;padding:14px 16px;background:var(--ink);color:var(--paper)">
-          <div style="font-family:var(--f-mono);font-size:10px;color:var(--ink-yellow);letter-spacing:0.2em">RSS FEED</div>
-          <div style="font-family:var(--f-disp);font-size:22px;color:var(--paper);margin-top:2px;line-height:1">
-            subscribe via feed.
-          </div>
-          <div style="font-family:var(--f-mono);font-size:11px;color:var(--paper);opacity:.8;margin-top:6px;line-height:1.55">
-            get new thoughts delivered to your reader.
-          </div>
-          <a href="/rss.xml" style="display:inline-block;margin-top:10px;padding:6px 12px;background:var(--ink-yellow);color:var(--ink);font-family:var(--f-mono);font-size:11px">
-            rss / atom / json →
-          </a>
-        </div>
-      </aside>
-    </div>
+      <div class="thoughts-subscribe__links">
+        <a href="/rss.xml">rss</a>
+        <a href="/atom.xml">atom</a>
+        <a href="/json.json">json</a>
+      </div>
+    </section>
 
   </div>
 
