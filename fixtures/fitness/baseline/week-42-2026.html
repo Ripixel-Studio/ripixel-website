@@ -10,6 +10,28 @@
     gtag('config', 'G-MNE4SWQ0L0');
   </script>
 
+  <!-- Owner view: the share buttons and the year's share deck show only on James's own devices.
+       Not security (the cards are public files); it keeps the buttons out of visitors' way.
+       ?me marks this device as his, ?me=off forgets it, and a #share link (Jarvis's "your card
+       is ready" push) marks it too. Runs before paint, so nothing flashes. -->
+  <script>
+    (function () {
+      var K = 'ripixel-me', me = false;
+      try {
+        var q = new URLSearchParams(location.search);
+        if (q.has('me')) {
+          if (q.get('me') === 'off') localStorage.removeItem(K); else localStorage.setItem(K, '1');
+          q.delete('me');
+          var rest = q.toString();
+          history.replaceState(null, '', location.pathname + (rest ? '?' + rest : '') + location.hash);
+        }
+        if (location.hash === '#share' || location.hash === '#yr-share') localStorage.setItem(K, '1');
+        me = localStorage.getItem(K) === '1';
+      } catch (e) { me = location.hash === '#share' || location.hash === '#yr-share'; }
+      if (me) document.documentElement.setAttribute('data-me', '');
+    })();
+  </script>
+
   <!-- Metadata. Generated pages (activity / roundup) override the defaults with
        headTitle, ogImage, ogType, canonical, publishedTime, atomFeed; everything else leaves them unset. -->
   <title>James King | life | week 42 2026 roundup</title>

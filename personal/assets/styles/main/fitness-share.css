@@ -125,3 +125,6 @@
   .share__chip span { padding: 7px 10px; font-size: 12px; }
   .share__actions { position: sticky; bottom: 0; padding: 10px 0 4px; background: var(--paper); }
 }
+
+/* Owner view only: hidden unless head.html marked this device as James's (html[data-me]). */
+html:not([data-me]) .share { display: none !important; }

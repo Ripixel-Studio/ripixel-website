@@ -439,7 +439,9 @@ describe('task', () => {
       assert.match(html, /<li data-shape="story" data-variant="ink" data-url="\/life\/share\/activity\/c\/story-ink\.png" data-file="c-story-ink\.png">/);
       assert.equal((html.match(/type="radio" name="share-shape"/g) || []).length, 2);
       assert.equal((html.match(/type="radio" name="share-variant"/g) || []).length, 2);
-      assert.match(html, /<noscript><a class="share__open" href="\/life\/share\/activity\/c\/story-photo-1\.jpg" download="c-story\.jpg">/);
+      // Owner view only: no fallback link for visitors without JavaScript; head.html marks James's devices.
+      assert.doesNotMatch(html, /<noscript><a class="share__open"/);
+      assert.match(html, /localStorage\.setItem\(K, '1'\)/);
       assert.match(html, /<dialog class="share__dialog" id="share-dialog" aria-labelledby="share-dialog-title">/);
       const ride = await fs.readFile(path.join(tmp, 'life', 'activity', 'evening-ride-to-the-reservoir-2026-10-15', 'index.html'), 'utf8');
       assert.match(ride, /<meta property="og:image" content="https:\/\/james\.ripixel\.co\.uk\/card_[a-z]+\.png"/, 'no card, no photo → the section card');
