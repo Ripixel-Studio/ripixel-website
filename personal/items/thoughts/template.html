@@ -22,21 +22,26 @@
     </div>
 
     <!-- Header -->
-    <div class="thought-header">
+    <header class="thought-header">
       <div>
-        <div class="thought-header__meta">★ {{dateDisplay}}</div>
+        <div class="thought-header__meta">
+          <span class="thought-header__issue">ISSUE #{{issue}}</span>
+          <span class="thought-kind{{#if isHowTo}} thought-kind--howto{{/if}}">{{kind}}</span>
+          <span>★ {{dateDisplay}}</span>
+        </div>
         <h1 class="thought-header__h1">
           <span>{{title}}.</span>
         </h1>
-        <div class="thought-header__sub">{{excerpt}}</div>
         <div class="thought-header__author">
           <div class="thought-header__author-logo">JK</div>
           <span><strong>james king</strong> · words &amp; code</span>
           <span class="thought-header__author-sep">·</span>
+          <span>{{readTime}} min read · {{words}} words</span>
+          <span class="thought-header__author-sep">·</span>
           <span>published in <em>thoughts.zine</em></span>
         </div>
       </div>
-    </div>
+    </header>
 
     <!-- Article body + sidebar -->
     <div class="thought-layout">
@@ -75,50 +80,64 @@
           {{/each}}
         </div>
         {{/if}}
+        <script>
+          // An image whose host has gone (the 2019 post's graphs lived on an old company's S3)
+          // becomes a note instead of an empty frame.
+          (function () {
+            function lose(img) {
+              var note = document.createElement('span');
+              note.className = 'thought-article__lost';
+              note.textContent = '(image lost to the mists of time' + (img.title ? ': ' + img.title : '') + ')';
+              img.replaceWith(note);
+            }
+            document.querySelectorAll('.thought-article img').forEach(function (img) {
+              if (img.complete && img.naturalWidth === 0) lose(img);
+              else img.addEventListener('error', function () { lose(img); });
+            });
+          })();
+        </script>
       </article>
 
       <!-- Sidebar -->
-      <aside class="thoughts-sidebar">
-        <div class="sidebar-card">
-          <div class="sidebar-card__inner">
-            <div class="sidebar-card__title">+ RELATED</div>
-            <div style="font-family:var(--f-mono);font-size:12px;color:var(--ink);margin-top:6px;line-height:1.8">
-              <a href="/thoughts" style="color:var(--ink-section)">← all thoughts</a><br>
-              <a href="/rss.xml" style="color:var(--ink-section)">subscribe via rss</a>
-            </div>
+      <aside class="thought-aside">
+        {{#if toc.length}}
+        <nav class="thought-toc" aria-label="In this thought">
+          <div class="thought-toc__title">in this thought.</div>
+          <ol class="thought-toc__list">
+            {{#each toc}}
+            <li><a href="#{{slug}}"><span class="thought-toc__num">§{{num}}</span>{{text}}</a></li>
+            {{/each}}
+          </ol>
+        </nav>
+        {{/if}}
+        <div class="thought-aside__note">
+          <div class="postcard__label">MARGIN NOTE</div>
+          enjoyed this? there are more where it came from.
+          <div class="thought-aside__links">
+            <a href="/thoughts">← all thoughts</a>
+            <a href="/rss.xml">subscribe via rss</a>
           </div>
         </div>
       </aside>
     </div>
 
-    <!-- Prev / next -->
-    {{#if prevThought}}
-    <div class="thought-prevnext">
+    <!-- Prev / next: older on the left, newer on the right -->
+    <nav class="thought-prevnext" aria-label="More thoughts">
+      {{#if prevThought}}
       <a class="thought-prevnext__item card-link card-link--back" href="/{{prevThought.relativePath}}">
-        <div class="thought-prevnext__dir">← previous thought · {{prevThought.dateDisplay}}</div>
-        <div class="thought-prevnext__title">{{prevThought.title}}</div>
+        <div class="thought-prevnext__dir">← older · issue #{{prevThought.issue}} · {{prevThought.dateDisplay}}</div>
+        <div class="thought-prevnext__title">{{prevThought.title}}.</div>
         {{> card-arrow}}
       </a>
+      {{else}}<div class="thought-prevnext__end">this is where it all began. (issue #01!)</div>{{/if}}
       {{#if nextThought}}
       <a class="thought-prevnext__item thought-prevnext__item--next card-link" href="/{{nextThought.relativePath}}">
-        <div class="thought-prevnext__dir">next thought · {{nextThought.dateDisplay}} →</div>
-        <div class="thought-prevnext__title">{{nextThought.title}}</div>
+        <div class="thought-prevnext__dir">newer · issue #{{nextThought.issue}} · {{nextThought.dateDisplay}} →</div>
+        <div class="thought-prevnext__title">{{nextThought.title}}.</div>
         {{> card-arrow}}
       </a>
-      {{/if}}
-    </div>
-    {{else}}
-    <div class="thought-prevnext">
-      <div></div>
-      {{#if nextThought}}
-      <a class="thought-prevnext__item thought-prevnext__item--next card-link" href="/{{nextThought.relativePath}}">
-        <div class="thought-prevnext__dir">next thought · {{nextThought.dateDisplay}} →</div>
-        <div class="thought-prevnext__title">{{nextThought.title}}</div>
-        {{> card-arrow}}
-      </a>
-      {{/if}}
-    </div>
-    {{/if}}
+      {{else}}<div class="thought-prevnext__end thought-prevnext__end--next">you're all caught up. (for now...)</div>{{/if}}
+    </nav>
 
   </div>
 
