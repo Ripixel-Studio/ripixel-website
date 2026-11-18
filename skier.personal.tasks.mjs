@@ -355,6 +355,8 @@ export const tasks = [
                 rightNow: rightNow || null,
                 atomFeed: page === 'life' ? FITNESS_FEED_PATH : undefined,
                 canonical: page === 'life' ? `${SITE_URL}/life` : vars.canonical,
+                // no card_surprise.png: the joke page shares its own photo
+                ogImage: page === 'surprise' ? `${SITE_URL}/jamie.jpg` : undefined,
             };
         },
     }),

@@ -377,7 +377,7 @@ test('Skier renders one page per roundup plus the index from the views', async (
 
     const idx = await fs.readFile(path.join(outDir, 'life', 'roundups.html'), 'utf8');
     assert.match(idx, /href="\/life\/roundup\/week-42-2026"/);
-    assert.match(idx, /<meta property="og:image" content="https:\/\/james\.ripixel\.co\.uk\/card_life\.png"/, 'index keeps the section card');
+    assert.match(idx, /<meta property="og:image" content="https:\/\/james\.ripixel\.co\.uk\/card_fitness\.png"/, 'index takes the fitness card');
     assert.match(idx, /application\/atom\+xml" href="\/life\/feed\.xml"/);
     assert.match(idx, /1 issue</);
   } finally {
