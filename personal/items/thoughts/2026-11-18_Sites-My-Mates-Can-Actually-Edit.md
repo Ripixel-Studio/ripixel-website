@@ -12,23 +12,23 @@ Turns out, you can get pretty close! The recipe is:
 
 ## "Why not just use Squarespace?"
 
-Honestly? You could, and for loads of people you should.
+Because Squarespace, Wix, and all their companions are **not free** - and they're very good at coercing people into spending money without realising it. SEO this! Shopify integration that! Most people don't need it, don't want it, and it just gets in the way.
 
-**[JAMES: your actual answer. Prompts: monthly cost vs Firebase's free tier, owning the content (it's JSON in a repo, not trapped in someone's editor), speed, no plugin updates, and - let's be honest - it being more fun.]**
+You don't need to boil the ocean when someone just wants a page they can link to from their Instagram profile. Plus, this way their site doesn't end up looking like everyone else's, because nobody's working from the same handful of basic templates.
 
 ## Step one: what should it look like?
 
 I am not a designer. I can make things look _fine_, but "fine" isn't what you want when it's someone's business on the line.
 
-For [DMMich The Coach](https://dmmichthecoach.co.uk) (Dean's personal training business), I gave Claude Design a brief and had it come back with five completely different directions for the homepage: **inclusive**, **macho**, **approachable**, **modern**, and **dense**. Dean and I went through them together, he gave his steer on direction and colours, and then the winner got taken to full desktop and mobile mock-ups.
+For [DMMich The Coach](https://dmmichthecoach.co.uk) (Dean's personal training business), I gave Claude Design a brief and had it come back with five completely different directions for the homepage: **inclusive**, **macho**, **approachable**, **modern**, and **dense**. Dean and I went through them together, and he gave his steer on direction and colours.
 
-**[JAMES: which one won, and why? The repo has `macho-full-desktop` and `macho-mobile`, so I'm guessing macho - true? Any good Dean quote from that session?]**
+In the end we went with one that was quite clean, but pulled in elements of the "macho" version. It needed to be modern and stand out from the crowd, but _not_ be another bland "oh doesn't that look so clean and modern" website. The brutalist fonts and bold colours match Dean's own vibe perfectly.
 
 The bit I really like is that the output isn't a Figma file someone has to painstakingly translate - it's real HTML that lives right there in the repo (in a [`claude-design` folder](https://github.com/Ripixel-Studio/dmmich/tree/main/claude-design)), so when it came to building, I could point Claude at it and say "that, please". The running club site went through the same process.
 
 ## Step two: build the thing
 
-The first real commit on the DMMich repo is titled `feat: implement the whole dang site`, and that's not much of an exaggeration. Design in, site out, on day one.
+The first commit on the DMMich repo went in at half nine at night. Thirty-seven minutes later came `feat: implement the whole dang site` - 24 files, and nearly 1,900 lines. Design in, site out, in one evening.
 
 The rest of that week was the stuff that _always_ takes the time:
 
@@ -37,7 +37,7 @@ The rest of that week was the stuff that _always_ takes the time:
 3. SEO bits, and keeping `/admin` out of the sitemap
 4. Getting the CMS to behave
 
-**[JAMES: one honest story about Claude here - where it saved you a pile of time, and where it was confidently wrong. This is the paragraph that stops the post reading like an advert.]**
+Now, in the interest of honesty - I could probably have built this faster myself. Claude being Claude, it made something _overly_ verbose (1,900 lines, remember?). That said, it's much better today than it was six months ago, and I reckon it'd get far closer to one-shotting it now.
 
 The single most important decision though was that **none of the words live in the templates**. Everything is JSON: a `content/settings/site.json` for the stuff used everywhere (name, email, social links, locations - set once, used everywhere), and one file per page. The templates just render whatever's in there.
 
@@ -82,8 +82,6 @@ A couple of things to note:
 
 A few months later I went back and made every image CMS-controllable too, so Dean can swap his transformation photos in and out himself.
 
-**[JAMES: has Dean actually used it? Has he broken anything? Has the "can you just change..." message ever come anyway?]**
-
 But wait - why does Dean's `base_url` point at the _running club's_ website?
 
 ## "But Decap only works on Netlify!"
@@ -102,7 +100,9 @@ I learned this the hard way. Here's the first day of the running club repo's his
 
 It turns out that Decap's GitHub backend doesn't _need_ Netlify at all. It just needs somebody, somewhere, to do the OAuth handshake with GitHub - and that somebody has to be a server, because your OAuth client secret can't live in the browser.
 
-So: one tiny Firebase Cloud Function, and two rewrites in `firebase.json`:
+So: one tiny Firebase Cloud Function. And the best bit? I didn't even have to write it. It's [decap-cms-oauth-firebase](https://github.com/BTx123/decap-cms-oauth-firebase) by BTx123 (itself a fork of [Herohtar's netlify-cms-oauth-firebase](https://github.com/Herohtar/netlify-cms-oauth-firebase)) - go give them both a star for saving my sanity!
+
+Deploy the function, add two rewrites to `firebase.json`, and you're away:
 
 ```json
 // JSON
@@ -145,11 +145,9 @@ function renderBody(provider: Provider, status: string, content: unknown): strin
 
 The callback page says "I'm authorising!" to the window that opened it, waits for the CMS to say hello back, then passes over the token - only to the origin that replied - and tidies up after itself.
 
-**[JAMES: did you adapt the function from an existing project (the setup doc mentions `decap-cms-oauth-firebase`)? If so, credit them here - you always do!]**
-
 And here's the killer feature: **there is no user database**. Who can log in is simply who's a collaborator on the GitHub repo. Adding an editor is GitHub → Settings → Collaborators → invite, and removing one is the same in reverse. GitHub does the passwords, the 2FA, and the "I forgot my password" emails, and I do... nothing.
 
-It also means one gateway can serve more than one site - which is why Dean's CMS logs in via the running club's domain. One function, one GitHub OAuth app, as many sites as I like.
+It also means one gateway can serve more than one site - which is why Dean's CMS logs in via the running club's domain. One function, one GitHub OAuth app, and I've now got Decap logins for _every site I ever want to build_ - neat!
 
 ## The twist: Decap's login as a free backend
 
@@ -166,17 +164,15 @@ So I didn't. The [race tracker](https://github.com/Ripixel-Studio/bingham-sunday
 
 So the "database" is a folder of JSON in git. Which means I get full history, a diff of every change, and undo for free - and if someone fat-fingers a time, it's one revert away.
 
-**[JAMES: who does the race tracking (happy to name them?), and how has it gone in practice?]**
+I usually do the race tracking myself, but I can hand it to anyone with a GitHub profile (or who's willing to make one) - easy peasy! Even my Dad's done it!
 
-## So, is it actually low-friction?
+## So, what did I learn?
 
-**[JAMES: your verdict - what friction is left? Ideas: editors need a GitHub account (a weird ask for a PT), Decap's config quirks (there are a few `fix: admin not having some config for some fields` commits), Firebase needing billing turned on for Functions, the race tracker being your app to maintain forever.]**
-
-For me, the takeaways are:
+Some takeaways from my adventures in low-friction land:
 
  - Let a designer (even an AI one) pick the direction, and let the _client_ pick from the options - it's way easier for someone to react to five ideas than describe one
  - Keep every word in data, never in templates, from day one
- - You don't need Netlify for Decap, you just need a couple of hundred lines of OAuth
+ - You don't need Netlify for Decap, you just need someone else's open-source OAuth function
  - If GitHub already knows who your users are, let it
 
 The best site you'll ever build for a mate is the one they never have to ask you to update.
