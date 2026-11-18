@@ -740,6 +740,10 @@ a.rl-yrmonth__box { --card-lift: 6px 7px 0 var(--ink); }
 .rl-tl__item--month { grid-column: span 2; grid-row: span 2; }
 .rl-tl__item--year { grid-column: span 4; grid-row: span 2; }
 @container (max-width: 600px) { .rl-tl__item--year { grid-column: span 2; } }
+/* The year card at a month's size, beside the newest month (fitness page, Feb-Mar: recentWall). */
+.rl-tl__item--year.rl-tl__item--side { grid-column: span 2; }
+.rl-tl__item--side .rl-tl__collage { grid-template-columns: repeat(2, 1fr); }
+.rl-tl__item--side .rl-tl__routes { grid-template-columns: repeat(2, 1fr); padding-left: 30%; }
 
 .rl-tl__card {
   height: 100%;

@@ -736,16 +736,55 @@ export function buildTimeline(views) {
 export const WALL_CUT_CELLS = 12;
 
 /**
- * The newest cards of the /life/roundups wall, for the fitness page: the two newest monthly
- * roundups first (2x2 each, they lead), then the newest small cards (this month's "so far" mark
- * and the latest weeks) to fill WALL_CUT_CELLS. Months first is what makes the cut whole rows at
- * every column count; the wall itself keeps strict date order. Year cards stay on the wall.
+ * The year in review's spotlight, which fades back into the wall: through January the year that
+ * just ended is the lead ("lead": the whole cover on /life, the full-width card on the fitness
+ * page); February and March it sits beside the newest month ("side": a band on /life, a month-
+ * sized card on the fitness page); from April it is only on the wall. Null when not in that window
+ * or when that year has no review.
+ * @param {any[]} pages the roundup pages ({ roundup: view })
  * @param {any[]} timeline buildTimeline's result
+ * @param {Date} now
  */
-export function recentWall(timeline) {
-  const months = timeline.filter((t) => t.isMonth).slice(0, 2);
-  const small = timeline.filter((t) => t.isWeek || t.isMonthMark).slice(0, WALL_CUT_CELLS - 4 * months.length);
-  return [...months, ...small];
+export function yearSpotlight(pages, timeline, now) {
+  const month = now.getUTCMonth();
+  const stage = month === 0 ? 'lead' : month <= 2 ? 'side' : null;
+  if (!stage) return null;
+  const key = `year-${now.getUTCFullYear() - 1}`;
+  const view = pages.find((p) => p.roundup?.key === key)?.roundup;
+  const tile = timeline.find((t) => t.isYear && t.key === key);
+  if (!view?.review || !tile) return null;
+  const { year, cover } = view.review;
+  return {
+    stage, isLead: stage === 'lead', key, href: view.url, year, tile,
+    cover: { ...cover, photos: stage === 'lead' ? cover.photos : cover.photos.slice(0, 5), lines: stage === 'lead' ? cover.lines : cover.lines.slice(0, 3) },
+  };
+}
+
+/** The build's clock for the spotlight. FITNESS_SPOTLIGHT_NOW (an ISO date) previews a January or
+ * March on a preview channel; never set for a deploy. */
+export function spotlightNow() {
+  const t = Date.parse(process.env.FITNESS_SPOTLIGHT_NOW || '');
+  return Number.isFinite(t) ? new Date(t) : new Date();
+}
+
+/**
+ * The newest cards of the /life/roundups wall, for the fitness page, always WALL_CUT_CELLS so the
+ * cut is whole rows at every column count (the wall itself keeps strict date order):
+ *   - usually the two newest monthly roundups lead (2x2 each), then the newest small cards (this
+ *     month's "so far" mark and the latest weeks);
+ *   - with a "lead" spotlight the year card (4x2) takes both months' place;
+ *   - with a "side" spotlight the year card shrinks to a month's size beside the newest month.
+ * Year cards are otherwise left on the wall.
+ * @param {any[]} timeline buildTimeline's result
+ * @param {ReturnType<typeof yearSpotlight>} [spot]
+ */
+export function recentWall(timeline, spot = null) {
+  const big = spot?.isLead ? [spot.tile]
+    : spot ? [{ ...spot.tile, side: true }, ...timeline.filter((t) => t.isMonth).slice(0, 1)]
+      : timeline.filter((t) => t.isMonth).slice(0, 2);
+  const cells = big.reduce((n, t) => n + (t.isYear && !t.side ? 8 : 4), 0);
+  const small = timeline.filter((t) => t.isWeek || t.isMonthMark).slice(0, Math.max(0, WALL_CUT_CELLS - cells));
+  return [...big, ...small];
 }
 
 /** One tile's teaser. @param {any} v a buildRoundupView result */
@@ -847,7 +886,8 @@ export function fitnessRoundupViewsTask() {
       };
 
       ctx.logger.info(`Roundup views: ${pages.length} pages + index`);
-      return { fitnessRoundupPages: pages, fitnessRoundupsIndex, fitnessRoundupsRecent: recentWall(timeline) };
+      const fitnessYearSpotlight = yearSpotlight(pages, timeline, spotlightNow());
+      return { fitnessRoundupPages: pages, fitnessRoundupsIndex, fitnessRoundupsRecent: recentWall(timeline, fitnessYearSpotlight), fitnessYearSpotlight };
     },
   };
 }

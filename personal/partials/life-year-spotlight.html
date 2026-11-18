@@ -1,0 +1,46 @@
+{{!-- The year in review on /life, outside the fitness card (fitnessYearSpotlight,
+     tasks/fitness-roundup-views.mjs yearSpotlight): January the whole magazine cover, February
+     and March a band, from April nothing (it lives on the roundups wall). The cover styles are
+     the issue's own (fitness-year-review.css). --}}
+{{#with fitnessYearSpotlight}}
+<section class="life-yr life-yr--{{stage}} card-link" aria-labelledby="life-yr-title">
+  {{#if isLead}}
+  <div class="yr-cover life-yr__cover">
+    <div class="yr-cover__mast">
+      <span class="yr-cover__issue">THE ANNUAL · ISSUE {{year}} · OUT NOW</span>
+      <span class="yr-cover__title">THE YEAR IN <em>SWEAT</em></span>
+      <span class="yr-cover__price">FREE · PRICELESS</span>
+    </div>
+    <h2 class="yr-cover__year" id="life-yr-title"><span>{{year}}</span></h2>
+    {{#if cover.photos.length}}
+    <ol class="yr-cover__photos" aria-hidden="true">
+      {{#each cover.photos}}<li class="yr-polaroid {{typeClass}}" style="--x: {{x}}%; --y: {{y}}%; --r: {{rot}}deg; --i: {{i}}"><img src="{{url}}" alt="" decoding="async" width="400" height="400"></li>{{/each}}
+    </ol>
+    {{/if}}
+    <ul class="yr-cover__lines" aria-label="In this issue">
+      {{#each cover.lines}}<li class="{{typeClass}}"><span class="rl-stamp">{{stamp}}</span><span class="yr-cover__line">{{title}}</span></li>{{/each}}
+    </ul>
+    <div class="yr-sticker" aria-hidden="true"><b>{{cover.sticker.value}}</b><span>{{cover.sticker.label}}</span><i>inside!</i></div>
+    <a class="life-yr__cta card-link__target" href="{{href}}">read the {{year}} issue →</a>
+  </div>
+  {{else}}
+  <div class="life-yr__band">
+    <div class="life-yr__mast">
+      <span class="yr-cover__issue">THE ANNUAL · ISSUE {{year}}</span>
+      <h2 class="life-yr__year" id="life-yr-title">{{year}}</h2>
+      <span class="yr-cover__title">THE YEAR IN <em>SWEAT</em></span>
+    </div>
+    <ul class="life-yr__lines" aria-label="In this issue">
+      {{#each cover.lines}}<li class="{{typeClass}}"><span class="rl-stamp">{{stamp}}</span> <span class="yr-cover__line">{{title}}</span></li>{{/each}}
+    </ul>
+    {{#if cover.photos.length}}
+    <ol class="life-yr__photos" aria-hidden="true">
+      {{#each cover.photos}}<li class="yr-polaroid {{typeClass}}" style="--r: {{rot}}deg"><img src="{{url}}" alt="" decoding="async" width="300" height="300"></li>{{/each}}
+    </ol>
+    {{/if}}
+    <a class="life-yr__cta card-link__target" href="{{href}}">read the {{year}} issue →</a>
+  </div>
+  {{/if}}
+  {{> card-arrow}}
+</section>
+{{/with}}
