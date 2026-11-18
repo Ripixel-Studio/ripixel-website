@@ -25,11 +25,11 @@ Oh, so many questions, so few graphs...
 
 First thing's first - let's have a look at the monitoring that was in place on the service I was calling:
 
-![alt text](https://dvelp-production.s3.amazonaws.com/uploads/image/file/176/x_large_1568038815-tol_service_initial.PNG "Service - Initial")
+![Service CPU over the first five hours after the deploy, sitting comfortably between 20% and 35%](/monitoring-service-initial.svg "Service - Initial (recreated)")
 
 Everything looks fine! Let's check the whole view:
 
-![alt text](https://dvelp-production.s3.amazonaws.com/uploads/image/file/177/x_large_1568038850-tol_service_final.PNG "Service - Final")
+![Service CPU from the deploy to the next morning, creeping up overnight then climbing to 100% at 11:45, when requests start failing](/monitoring-service-final.svg "Service - Final (recreated)")
 
 Oh dear. So, the service was getting warmer and warmer, until it reached 100% usage and any subsequent requests stopped being served, failed, and the site calling it fell over.
 
@@ -39,11 +39,11 @@ Ok, so the service got overloaded. Let's have a look at the number of calls we w
 
 Ok, let's assume we did have that monitoring in place - what is the expected number of calls?
 
-![alt text](https://dvelp-production.s3.amazonaws.com/uploads/image/file/178/x_large_1568038873-tol_site_expected.PNG "Site Expected")
+![Expected calls per minute from the site, peaking around 115 a minute, well under the planned capacity of 200](/monitoring-site-expected.svg "Site Expected (recreated)")
 
 Great - now let's have a look at the actual:
 
-![alt text](https://dvelp-production.s3.amazonaws.com/uploads/image/file/179/x_large_1568038897-tol_site_actual.PNG "Site Actual")
+![Actual calls per minute from the site, peaking near 10,000 a minute - around 50x the planned capacity](/monitoring-site-actual.svg "Site Actual (recreated)")
 
 I think that would do it, yes. Overloading the service with around 50x the expected calls (that's already taking into account the headroom planned).
 
@@ -74,3 +74,5 @@ So, some takeaways from my (traumatic) trip down memory lane about how I took do
 - Give developers time to make "of no immediate value" things like monitoring and alerting, and make it part of any Acceptance into Service checklists
 
 _This thought was first published on the [DVELP blog](https://dvelp.co.uk/articles/monitoring-and-alerting) - but it was still written by me!_
+
+_The original graphs went the way of the DVELP blog, so the ones above are recreations of what they showed._

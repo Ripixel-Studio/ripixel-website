@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 480" width="1200" height="480" role="img" aria-label="tol-service · CPU utilisation">
+<rect width="1200" height="480" fill="#111217"/>
+<rect x="8" y="8" width="1184" height="464" rx="4" fill="#181b1f" stroke="#2c3038"/>
+<text x="26" y="40" fill="#d8d9da" font-size="17" font-weight="600" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">tol-service · CPU utilisation</text>
+<text x="26" y="60" fill="#8e9099" font-size="12" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">last 5 hours · deployed 15:00</text>
+<text x="1174" y="40" fill="#8e9099" font-size="11" text-anchor="end" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">recreated · original lost</text>
+<line x1="86" x2="1170" y1="422.0" y2="422.0" stroke="#2c3038" stroke-width="1"/>
+<text x="76" y="426.0" fill="#8e9099" font-size="11" text-anchor="end" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">0%</text>
+<line x1="86" x2="1170" y1="335.0" y2="335.0" stroke="#2c3038" stroke-width="1"/>
+<text x="76" y="339.0" fill="#8e9099" font-size="11" text-anchor="end" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">25%</text>
+<line x1="86" x2="1170" y1="248.0" y2="248.0" stroke="#2c3038" stroke-width="1"/>
+<text x="76" y="252.0" fill="#8e9099" font-size="11" text-anchor="end" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">50%</text>
+<line x1="86" x2="1170" y1="161.0" y2="161.0" stroke="#2c3038" stroke-width="1"/>
+<text x="76" y="165.0" fill="#8e9099" font-size="11" text-anchor="end" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">75%</text>
+<line x1="86" x2="1170" y1="74.0" y2="74.0" stroke="#2c3038" stroke-width="1"/>
+<text x="76" y="78.0" fill="#8e9099" font-size="11" text-anchor="end" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">100%</text>
+<line x1="86.0" x2="86.0" y1="74" y2="422" stroke="#2c3038" stroke-width="1" stroke-dasharray="2 4"/>
+<text x="86.0" y="442" fill="#8e9099" font-size="11" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">15:00</text>
+<line x1="302.8" x2="302.8" y1="74" y2="422" stroke="#2c3038" stroke-width="1" stroke-dasharray="2 4"/>
+<text x="302.8" y="442" fill="#8e9099" font-size="11" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">16:00</text>
+<line x1="519.6" x2="519.6" y1="74" y2="422" stroke="#2c3038" stroke-width="1" stroke-dasharray="2 4"/>
+<text x="519.6" y="442" fill="#8e9099" font-size="11" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">17:00</text>
+<line x1="736.4" x2="736.4" y1="74" y2="422" stroke="#2c3038" stroke-width="1" stroke-dasharray="2 4"/>
+<text x="736.4" y="442" fill="#8e9099" font-size="11" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">18:00</text>
+<line x1="953.2" x2="953.2" y1="74" y2="422" stroke="#2c3038" stroke-width="1" stroke-dasharray="2 4"/>
+<text x="953.2" y="442" fill="#8e9099" font-size="11" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">19:00</text>
+<line x1="1170.0" x2="1170.0" y1="74" y2="422" stroke="#2c3038" stroke-width="1" stroke-dasharray="2 4"/>
+<text x="1170.0" y="442" fill="#8e9099" font-size="11" text-anchor="middle" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">20:00</text>
+
+<path d="M86.0,341.4 L104.1,339.7 L122.1,347.7 L140.2,340.4 L158.3,349.4 L176.3,342.7 L194.4,345.9 L212.5,341.5 L230.5,350.6 L248.6,349.7 L266.7,351.8 L284.7,351.6 L302.8,347.1 L320.9,341.5 L338.9,344.3 L357.0,348.4 L375.1,346.9 L393.1,341.2 L411.2,346.6 L429.3,347.5 L447.3,338.2 L465.4,338.1 L483.5,346.5 L501.5,342.5 L519.6,335.7 L537.7,335.2 L555.7,332.9 L573.8,332.4 L591.9,337.9 L609.9,332.0 L628.0,333.0 L646.1,327.9 L664.1,324.2 L682.2,330.0 L700.3,325.1 L718.3,327.3 L736.4,326.7 L754.5,319.8 L772.5,317.0 L790.6,314.3 L808.7,316.0 L826.7,309.2 L844.8,315.1 L862.9,314.3 L880.9,305.3 L899.0,308.1 L917.1,305.2 L935.1,306.2 L953.2,305.0 L971.3,301.3 L989.3,304.8 L1007.4,305.5 L1025.5,302.3 L1043.5,297.4 L1061.6,303.5 L1079.7,301.4 L1097.7,300.8 L1115.8,298.7 L1133.9,299.4 L1151.9,304.1 L1170.0,298.0 L1170.0,422 L86,422 Z" fill="#73bf69" fill-opacity="0.14"/>
+<path d="M86.0,341.4 L104.1,339.7 L122.1,347.7 L140.2,340.4 L158.3,349.4 L176.3,342.7 L194.4,345.9 L212.5,341.5 L230.5,350.6 L248.6,349.7 L266.7,351.8 L284.7,351.6 L302.8,347.1 L320.9,341.5 L338.9,344.3 L357.0,348.4 L375.1,346.9 L393.1,341.2 L411.2,346.6 L429.3,347.5 L447.3,338.2 L465.4,338.1 L483.5,346.5 L501.5,342.5 L519.6,335.7 L537.7,335.2 L555.7,332.9 L573.8,332.4 L591.9,337.9 L609.9,332.0 L628.0,333.0 L646.1,327.9 L664.1,324.2 L682.2,330.0 L700.3,325.1 L718.3,327.3 L736.4,326.7 L754.5,319.8 L772.5,317.0 L790.6,314.3 L808.7,316.0 L826.7,309.2 L844.8,315.1 L862.9,314.3 L880.9,305.3 L899.0,308.1 L917.1,305.2 L935.1,306.2 L953.2,305.0 L971.3,301.3 L989.3,304.8 L1007.4,305.5 L1025.5,302.3 L1043.5,297.4 L1061.6,303.5 L1079.7,301.4 L1097.7,300.8 L1115.8,298.7 L1133.9,299.4 L1151.9,304.1 L1170.0,298.0" fill="none" stroke="#73bf69" stroke-width="2" stroke-linejoin="round"/>
+<line x1="26" x2="44" y1="456" y2="456" stroke="#73bf69" stroke-width="3"/>
+<text x="50" y="460" fill="#d8d9da" font-size="11" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">cpu (avg, all instances)</text>
+</svg>
