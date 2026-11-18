@@ -239,16 +239,6 @@
   margin-top: 3px;
 }
 
-.fit-roundup__all {
-  position: relative;
-  display: inline-block;
-  margin-top: 12px;
-  font-family: var(--f-mono);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--ink-section);
-  border-bottom: 1.5px solid var(--ink-section);
-}
 
 /* ─── 2. Activity cards (photo on top, type ink) ─ */
 .fit-cards {
@@ -402,9 +392,7 @@
   position: relative;
   display: grid;
   grid-template-columns: 1.1fr 1fr 1.6fr;
-  grid-template-areas:
-    "period stats summary"
-    "links  links summary";
+  grid-template-areas: "period stats summary";
   gap: 10px 28px;
   padding: 18px 22px 16px;
   align-items: start;
@@ -451,14 +439,61 @@
   color: var(--ink);
 }
 
-.fit-roundup__links {
-  grid-area: links;
-  display: flex;
-  gap: 18px;
-  flex-wrap: wrap;
+
+/* The shelf: the lead month, and the year in review beside it when there is one. */
+.fit-shelf { display: grid; gap: 22px; }
+.fit-shelf--year { grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr); align-items: stretch; }
+.fit-shelf--year .fit-roundup__inner {
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas: "period stats" "summary summary";
 }
 
-.fit-roundup__all { font-weight: 400; }
+/* The year in review: a darker, heavier card than a month, it is the bigger issue. */
+.fit-yr {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 44px 18px 22px;
+  background: var(--ink);
+  color: var(--paper, #f3ead8);
+  border: 2px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink-section);
+  transform: rotate(0.6deg);
+}
+.fit-yr .fit-roundup__kind { color: var(--ink-section); }
+.fit-yr__title { font-family: var(--f-disp); font-weight: 400; font-size: 88px; line-height: 0.85; margin: 6px 0 0; }
+.fit-yr__title a { color: inherit; }
+.fit-yr__line { font-family: var(--f-scrib); font-size: 22px; margin: 0 0 6px; }
+.fit-yr__stats { display: flex; gap: 18px; flex-wrap: wrap; margin: auto 0 0; }
+.fit-yr .fit-roundup__num, .fit-yr .fit-roundup__num small { color: inherit; }
+.fit-yr .fit-roundup__num { font-size: 40px; }
+.fit-yr .fit-roundup__label { color: inherit; opacity: 0.8; }
+
+/* Earlier months: tabs, newest first. */
+.fit-months {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0 0;
+  padding: 0;
+}
+.fit-months__tab {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 2px 8px;
+  padding: 10px 12px;
+  background: #fff;
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  color: var(--ink);
+}
+.fit-months__tab:hover, .fit-months__tab:focus-visible { background: var(--ink); color: var(--paper); }
+.fit-months__m { font-family: var(--f-disp); font-size: 30px; line-height: 0.9; }
+.fit-months__y { font-family: var(--f-mono); font-size: 11px; opacity: 0.7; }
+.fit-months__n { grid-column: 1 / -1; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
 .fit-week.card-link .fit-week__head { position: static; } /* the title's link spans the whole panel */
 .fit-week.card-link { padding-bottom: 36px; }
 .fit-roundup__inner { padding-right: 40px; } /* clear of the arrow tab */
@@ -850,10 +885,12 @@
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
       "period stats"
-      "summary summary"
-      "links links";
+      "summary summary";
   }
   .fit-stats__side { grid-template-columns: 1fr; }
+  .fit-shelf--year { grid-template-columns: 1fr; }
+  .fit-yr { transform: none; }
+  .fit-months { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (max-width: 720px) {
@@ -872,9 +909,12 @@
   .fit-hero__h1  { font-size: 64px; }
   .fit-cards     { grid-template-columns: 1fr; }
   .fit-card__title { font-size: 26px; }
+  .fit-shelf--year .fit-roundup__inner { grid-template-columns: 1fr; grid-template-areas: "period" "stats" "summary"; }
+  .fit-yr__title { font-size: 72px; }
+  .fit-months { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .fit-roundup__inner {
     grid-template-columns: 1fr;
-    grid-template-areas: "period" "stats" "summary" "links";
+    grid-template-areas: "period" "stats" "summary";
     padding: 16px 16px 14px;
   }
   .fit-prs__wall { grid-template-columns: 1fr 1fr; }

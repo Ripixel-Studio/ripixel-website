@@ -1,4 +1,4 @@
-<!-- Context: fitnessLife.roundup — the newest roundup of any period type -->
+<!-- Context: fitnessLife.roundup — the newest monthly roundup (any period type when no month exists) -->
 <section class="fit-roundup card-link card-link--wide" aria-labelledby="fit-roundup-title">
   <div class="fit-roundup__inner">
     <div class="fit-roundup__period">
@@ -25,9 +25,6 @@
     {{#if hasSummary}}
     <blockquote class="fit-roundup__summary">{{summary}}</blockquote>
     {{/if}}
-    <div class="fit-roundup__links">
-      <a class="fit-roundup__all card-link__aside" href="{{roundupsHref}}">every roundup</a>
-    </div>
   </div>
   {{> card-arrow}}
 </section>

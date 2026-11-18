@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 import { loadFitnessData } from './fitness-fetch.mjs';
 import {
-  buildLifeModel, buildWeek, buildCard, buildPr, buildRoundupTeaser, buildCalendar, countdown,
+  buildLifeModel, buildWeek, buildCard, buildPr, buildRoundupTeaser, buildRoundupShelf, buildCalendar, countdown,
   effortLevelOf, fitnessLifeTask, km, clock, duration, rangeLabel, stripDays, buildPbBoard, cardPicture,
   scriptJson, handwrittenEvents,
 } from './fitness-life.mjs';
@@ -221,6 +221,44 @@ describe('roundup teaser', () => {
     assert.equal(y?.kindLabel, 'YEAR IN REVIEW');
     assert.equal(y?.periodLabel, '2026');
     assert.equal(y?.prs, '');
+  });
+});
+
+describe('roundup shelf', () => {
+  const S = (key, start, n = 1) => ({ key, periodStart: start, totalActivities: n });
+  const all = [
+    S('week-46-2026', '2026-11-09T00:00:00Z'),
+    S('month-10-2026', '2026-10-01T00:00:00Z', 30),
+    S('month-09-2026', '2026-09-01T00:00:00Z', 1),
+    S('month-08-2026', '2026-08-01T00:00:00Z'), S('month-07-2026', '2026-07-01T00:00:00Z'),
+    S('month-06-2026', '2026-06-01T00:00:00Z'), S('month-05-2026', '2026-05-01T00:00:00Z'),
+    S('month-04-2026', '2026-04-01T00:00:00Z'),
+    S('year-2025', '2025-01-01T00:00:00Z', 190),
+  ];
+
+  test('the newest month leads even when a week is newer; the year sits beside it; five earlier months', () => {
+    const s = buildRoundupShelf(all, [{ key: 'month-10-2026', roundup: { aiSummary: 'October was big.' } }]);
+    assert.equal(s.lead?.key, 'month-10-2026');
+    assert.equal(s.lead?.summary, 'October was big.');
+    assert.equal(s.year?.key, 'year-2025');
+    assert.equal(s.year?.href, '/life/roundup/year-2025');
+    assert.deepEqual(s.earlier.map((m) => m.key), ['month-09-2026', 'month-08-2026', 'month-07-2026', 'month-06-2026', 'month-05-2026']);
+    assert.deepEqual(s.earlier[0], { key: 'month-09-2026', href: '/life/roundup/month-09-2026', month: 'SEP', year: '2026', sessions: '1 session' });
+  });
+
+  test('no months yet: the newest roundup of any kind leads, and is never also the year card', () => {
+    assert.equal(buildRoundupShelf([S('week-46-2026', '2026-11-09T00:00:00Z')]).lead?.key, 'week-46-2026');
+    const onlyYear = buildRoundupShelf([S('year-2025', '2025-01-01T00:00:00Z')]);
+    assert.equal(onlyYear.lead?.key, 'year-2025');
+    assert.equal(onlyYear.year, null);
+    assert.deepEqual(buildRoundupShelf([]), { lead: null, year: null, earlier: [] });
+  });
+
+  test('the hub names the year only in the January after it', () => {
+    const index = { activities: [{ slug: 'a', startTime: '2026-01-01T00:00:00Z', title: 'a', activityType: 'ACTIVITY_TYPE_RUN' }], roundups: all, profile: {}, streaks: {} };
+    assert.equal(buildLifeModel({ index, now: new Date('2026-01-12T12:00:00Z') }).roundupYearFresh, true);
+    assert.equal(buildLifeModel({ index, now: new Date('2026-02-01T12:00:00Z') }).roundupYearFresh, false);
+    assert.equal(buildLifeModel({ index, now: new Date('2027-01-12T12:00:00Z') }).roundupYearFresh, false);
   });
 });
 
@@ -565,7 +603,7 @@ describe('model + task', () => {
     assert.equal(out.fitnessLife.calendar.nextUp.length, 5);
     assert.match(
       logs.join('\n'),
-      /Life page: 3 cards, week=roundup, roundup=week-42-2026, calendar=calendar \(5 next up, 1 sessions this week, 0 active; page refetches events: no\)/,
+      /Life page: 3 cards, week=roundup, roundup=month-09-2026, calendar=calendar \(5 next up, 1 sessions this week, 0 active; page refetches events: no\)/,
     );
     // S6: the page carries the baked section, its data and the clock script
     const cal = out.fitnessLife.calendar;
