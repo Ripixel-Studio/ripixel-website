@@ -68,8 +68,7 @@
 
 /* ─── Shared bits: ink-stamp label, big numbers ─ */
 .fit-ink-label,
-.fit-week__kicker,
-.fit-roundup__kind {
+.fit-week__kicker {
   display: inline-block;
   font-family: var(--f-mono);
   font-size: 10px;
@@ -192,8 +191,7 @@
 }
 
 .fit-week__stat,
-.fit-card__stat,
-.fit-roundup__stat {
+.fit-card__stat {
   display: flex;
   flex-direction: column-reverse; /* dt (label) is first in the DOM, shown under the dd (value) */
 }
@@ -206,8 +204,7 @@
 .fit-week__stat:last-child { border-right: none; }
 
 .fit-week__num,
-.fit-card__num,
-.fit-roundup__num {
+.fit-card__num {
   font-family: var(--f-disp);
   color: var(--ink);
   line-height: 0.95;
@@ -218,7 +215,6 @@
 
 .fit-week__num small,
 .fit-card__num small,
-.fit-roundup__num small,
 .fit-stats__unit {
   font-family: var(--f-mono);
   font-size: 11px;
@@ -229,8 +225,7 @@
 }
 
 .fit-week__label,
-.fit-card__label,
-.fit-roundup__label {
+.fit-card__label {
   font-family: var(--f-mono);
   font-size: 10px;
   letter-spacing: 0.08em;
@@ -367,136 +362,11 @@
 }
 .fit-more:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
 
-/* ─── 3. Roundup teaser ─────────────────── */
-.fit-roundup {
-  position: relative;
-  background: #fff;
-  border: 2px solid var(--ink);
-  box-shadow: 6px 6px 0 rgba(23,19,17,0.85);
-  overflow: hidden;
-}
+/* ─── 3. Roundups: the newest cards of the /life/roundups wall (fitness-roundups.css .rl-tl) ─── */
+.fit-wall { margin: 0 -4px; }
 
-.fit-roundup::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle, var(--type, var(--ink)) 1px, transparent 1.4px);
-  background-size: 4px 4px;
-  opacity: 0.1;
-  mix-blend-mode: multiply;
-  pointer-events: none;
-  z-index: -1; /* under the text and the card-link overlay */
-}
-
-.fit-roundup__inner {
-  position: relative;
-  display: grid;
-  grid-template-columns: 1.1fr 1fr 1.6fr;
-  grid-template-areas: "period stats summary";
-  gap: 10px 28px;
-  padding: 18px 22px 16px;
-  align-items: start;
-}
-
-.fit-roundup__period { grid-area: period; }
-
-.fit-roundup__title {
-  font-family: var(--f-disp);
-  font-size: 44px;
-  line-height: 0.9;
-  color: var(--ink);
-  font-weight: 400;
-  margin: 8px 0 4px;
-}
-
-.fit-roundup__range {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  opacity: 0.75;
-}
-
-.fit-roundup__stats {
-  grid-area: stats;
-  display: flex;
-  gap: 18px;
-  margin: 0;
-  flex-wrap: wrap;
-}
-
-.fit-roundup__num { font-size: 44px; }
-
-.fit-roundup__num--pr { color: var(--ink-section); }
-
-.fit-roundup__summary {
-  grid-area: summary;
-  margin: 0;
-  padding: 4px 0 0 18px;
-  border-left: 5px solid var(--ink-section);
-  font-family: var(--f-scrib);
-  font-size: 23px;
-  line-height: 1.15;
-  color: var(--ink);
-}
-
-
-/* The shelf: the lead month, and the year in review beside it when there is one. */
-.fit-shelf { display: grid; gap: 22px; }
-.fit-shelf--year { grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr); align-items: stretch; }
-.fit-shelf--year .fit-roundup__inner {
-  grid-template-columns: 1fr 1fr;
-  grid-template-areas: "period stats" "summary summary";
-}
-
-/* The year in review: a darker, heavier card than a month, it is the bigger issue. */
-.fit-yr {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 18px 44px 18px 22px;
-  background: var(--ink);
-  color: var(--paper, #f3ead8);
-  border: 2px solid var(--ink);
-  box-shadow: 6px 6px 0 var(--ink-section);
-  transform: rotate(0.6deg);
-}
-.fit-yr .fit-roundup__kind { color: var(--ink-section); }
-.fit-yr__title { font-family: var(--f-disp); font-weight: 400; font-size: 88px; line-height: 0.85; margin: 6px 0 0; }
-.fit-yr__title a { color: inherit; }
-.fit-yr__line { font-family: var(--f-scrib); font-size: 22px; margin: 0 0 6px; }
-.fit-yr__stats { display: flex; gap: 18px; flex-wrap: wrap; margin: auto 0 0; }
-.fit-yr .fit-roundup__num, .fit-yr .fit-roundup__num small { color: inherit; }
-.fit-yr .fit-roundup__num { font-size: 40px; }
-.fit-yr .fit-roundup__label { color: inherit; opacity: 0.8; }
-
-/* Earlier months: tabs, newest first. */
-.fit-months {
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 12px;
-  margin: 18px 0 0;
-  padding: 0;
-}
-.fit-months__tab {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: baseline;
-  gap: 2px 8px;
-  padding: 10px 12px;
-  background: #fff;
-  border: 2px solid var(--ink);
-  box-shadow: 3px 3px 0 var(--ink);
-  color: var(--ink);
-}
-.fit-months__tab:hover, .fit-months__tab:focus-visible { background: var(--ink); color: var(--paper); }
-.fit-months__m { font-family: var(--f-disp); font-size: 30px; line-height: 0.9; }
-.fit-months__y { font-family: var(--f-mono); font-size: 11px; opacity: 0.7; }
-.fit-months__n { grid-column: 1 / -1; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
 .fit-week.card-link .fit-week__head { position: static; } /* the title's link spans the whole panel */
 .fit-week.card-link { padding-bottom: 36px; }
-.fit-roundup__inner { padding-right: 40px; } /* clear of the arrow tab */
 
 /* ─── 4. Stats (reuses .stat-strip) ─────── */
 .fit-stats__strip { margin-bottom: 18px; }
@@ -881,16 +751,7 @@
 @media (max-width: 880px) {
   .fit-hero__h1  { font-size: 110px; }
   .fit-cards     { grid-template-columns: 1fr 1fr; }
-  .fit-roundup__inner {
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-      "period stats"
-      "summary summary";
-  }
   .fit-stats__side { grid-template-columns: 1fr; }
-  .fit-shelf--year { grid-template-columns: 1fr; }
-  .fit-yr { transform: none; }
-  .fit-months { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (max-width: 720px) {
@@ -909,14 +770,6 @@
   .fit-hero__h1  { font-size: 64px; }
   .fit-cards     { grid-template-columns: 1fr; }
   .fit-card__title { font-size: 26px; }
-  .fit-shelf--year .fit-roundup__inner { grid-template-columns: 1fr; grid-template-areas: "period" "stats" "summary"; }
-  .fit-yr__title { font-size: 72px; }
-  .fit-months { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .fit-roundup__inner {
-    grid-template-columns: 1fr;
-    grid-template-areas: "period" "stats" "summary";
-    padding: 16px 16px 14px;
-  }
   .fit-prs__wall { grid-template-columns: 1fr 1fr; }
   .fit-hx__lists { grid-template-columns: 1fr; }
   /* The eight runs fit two to a row on a phone. */

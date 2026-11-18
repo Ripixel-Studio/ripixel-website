@@ -52,7 +52,7 @@
         <footer class="hub-card__foot">
           {{#if staleLabel}}<p class="life-stale">{{staleLabel}}</p>{{/if}}
           {{#if (eq name "fitness")}}{{#if @root.fitnessLife.roundup}}
-          <p class="hub-card__note">{{#if @root.fitnessLife.roundupYearFresh}}The <a class="card-link__aside" href="{{@root.fitnessLife.roundupYear.href}}">{{@root.fitnessLife.roundupYear.periodLabel}} year in review</a>, latest month <a class="card-link__aside" href="{{@root.fitnessLife.roundup.href}}">{{@root.fitnessLife.roundup.periodLabel}}</a>{{else}}Latest month <a class="card-link__aside" href="{{@root.fitnessLife.roundup.href}}">{{@root.fitnessLife.roundup.periodLabel}}</a>{{/if}}, or <a class="card-link__aside" href="{{@root.fitnessLife.roundupsHref}}">every roundup</a></p>
+          <p class="hub-card__note">Latest month <a class="card-link__aside" href="{{@root.fitnessLife.roundup.href}}">{{@root.fitnessLife.roundup.periodLabel}}</a>, or <a class="card-link__aside" href="{{@root.fitnessLife.roundupsHref}}">every roundup</a></p>
           {{/if}}{{/if}}
         </footer>
         {{#if href}}{{> card-arrow}}{{/if}}
@@ -77,7 +77,7 @@
           <p class="life-index__note"><span class="life-index__note-label">{{note.label}}</span> {{#if note.href}}<a href="{{note.href}}">{{note.value}}</a>{{else}}{{note.value}}{{/if}}</p>
           {{/if}}
           {{#if (eq name "fitness")}}{{#if @root.fitnessLife.roundup}}
-          <p class="life-index__note">{{#if @root.fitnessLife.roundupYearFresh}}<span class="life-index__note-label">Year in review</span> <a href="{{@root.fitnessLife.roundupYear.href}}">{{@root.fitnessLife.roundupYear.periodLabel}}</a>, latest month <a href="{{@root.fitnessLife.roundup.href}}">{{@root.fitnessLife.roundup.periodLabel}}</a>{{else}}<span class="life-index__note-label">Latest month</span> <a href="{{@root.fitnessLife.roundup.href}}">{{@root.fitnessLife.roundup.periodLabel}}</a>{{/if}}, or <a href="{{@root.fitnessLife.roundupsHref}}">every roundup</a></p>
+          <p class="life-index__note"><span class="life-index__note-label">Latest month</span> <a href="{{@root.fitnessLife.roundup.href}}">{{@root.fitnessLife.roundup.periodLabel}}</a>, or <a href="{{@root.fitnessLife.roundupsHref}}">every roundup</a></p>
           {{/if}}{{/if}}
           {{#if staleLabel}}<p class="life-stale">{{staleLabel}}</p>{{/if}}
         </div>
