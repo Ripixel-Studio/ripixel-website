@@ -731,6 +731,23 @@ export function buildTimeline(views) {
   return out;
 }
 
+/** Cells in the fitness page's cut: two rows of the 6-column wall, three of the 4-column one,
+ * six of the 2-column one. */
+export const WALL_CUT_CELLS = 12;
+
+/**
+ * The newest cards of the /life/roundups wall, for the fitness page: the two newest monthly
+ * roundups first (2x2 each, they lead), then the newest small cards (this month's "so far" mark
+ * and the latest weeks) to fill WALL_CUT_CELLS. Months first is what makes the cut whole rows at
+ * every column count; the wall itself keeps strict date order. Year cards stay on the wall.
+ * @param {any[]} timeline buildTimeline's result
+ */
+export function recentWall(timeline) {
+  const months = timeline.filter((t) => t.isMonth).slice(0, 2);
+  const small = timeline.filter((t) => t.isWeek || t.isMonthMark).slice(0, WALL_CUT_CELLS - 4 * months.length);
+  return [...months, ...small];
+}
+
 /** One tile's teaser. @param {any} v a buildRoundupView result */
 function tile(v) {
   const st = v.story || {};
@@ -830,7 +847,7 @@ export function fitnessRoundupViewsTask() {
       };
 
       ctx.logger.info(`Roundup views: ${pages.length} pages + index`);
-      return { fitnessRoundupPages: pages, fitnessRoundupsIndex };
+      return { fitnessRoundupPages: pages, fitnessRoundupsIndex, fitnessRoundupsRecent: recentWall(timeline) };
     },
   };
 }

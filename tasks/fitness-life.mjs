@@ -486,37 +486,18 @@ export function buildRoundupTeaser(summary, file) {
   };
 }
 
-/** How many earlier months sit in the strip under the lead month. */
-export const MONTH_STRIP = 5;
-
 /**
- * The roundups section: months lead, the year in review sits beside them, and weeks are left to
- * "the week that was". `lead` is the newest monthly roundup (the newest of any kind only when
- * there is no month yet), `year` the newest year in review, `earlier` the months before the lead.
+ * The roundup the /life hub card names: the newest monthly roundup, or the newest of any kind
+ * when there is no month yet. Weeks are "the week that was"; the fitness page shows the wall.
  * @param {any[]} summaries index.roundups
  * @param {any[]} files the roundup files (for the AI summary)
  */
-export function buildRoundupShelf(summaries, files = []) {
-  const newest = (/** @type {RegExp} */ re) => summaries
-    .filter((s) => re.test(s.key))
+export function leadRoundup(summaries, files = []) {
+  const months = summaries
+    .filter((s) => /^month-/.test(s.key))
     .sort((a, b) => (parse(b.periodStart)?.getTime() || 0) - (parse(a.periodStart)?.getTime() || 0));
-  const months = newest(/^month-/);
-  const years = newest(/^year-/);
-  const teaser = (/** @type {any} */ s) => (s ? buildRoundupTeaser(s, files.find((f) => f?.key === s.key)) : null);
-  const earlier = months.slice(1, 1 + MONTH_STRIP).map((s) => {
-    const start = parse(s.periodStart);
-    const sessions = Number(s.totalActivities) || 0;
-    return {
-      key: s.key,
-      href: `${ROUNDUP_HREF}/${encodeURIComponent(s.key)}`,
-      month: start ? fmt(start, { month: 'short' }).toUpperCase() : s.key,
-      year: start ? fmt(start, { year: 'numeric' }) : '',
-      sessions: `${sessions} ${sessions === 1 ? 'session' : 'sessions'}`,
-    };
-  });
-  const lead = teaser(months[0] || summaries[0]);
-  const year = teaser(years[0]);
-  return { lead, year: year && year.key !== lead?.key ? year : null, earlier };
+  const lead = months[0] || summaries[0];
+  return lead ? buildRoundupTeaser(lead, files.find((f) => f?.key === lead.key)) : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -813,7 +794,6 @@ export function buildLifeModel({ index, activities = [], roundups = [], events =
     (a, b) => (parse(b.startTime)?.getTime() || 0) - (parse(a.startTime)?.getTime() || 0),
   );
   const summaries = Array.isArray(idx.roundups) ? idx.roundups.filter((r) => r && typeof r.key === 'string') : [];
-  const shelf = buildRoundupShelf(summaries, roundups);
 
   const files = filesBySlug(activities);
   const available = !unavailable && entries.length > 0;
@@ -827,11 +807,7 @@ export function buildLifeModel({ index, activities = [], roundups = [], events =
     hasActivities: sorted.length > 0,
     activityCount: entries.length,
     moreActivities: Math.max(0, entries.length - CARD_COUNT),
-    roundup: available ? shelf.lead : null,
-    roundupYear: available ? shelf.year : null,
-    roundupMonths: available ? shelf.earlier : [],
-    // In January the year that just ended is news: the /life hub card names it beside the month.
-    roundupYearFresh: Boolean(available && shelf.year && now.getUTCMonth() === 0 && shelf.year.key === `year-${now.getUTCFullYear() - 1}`),
+    roundup: available ? leadRoundup(summaries, roundups) : null,
     roundupsHref: ROUNDUPS_HREF,
     roundupCount: summaries.length,
     hasRoundups: summaries.length > 0,

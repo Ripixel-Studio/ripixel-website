@@ -24,6 +24,7 @@ import {
   buildRoundupLife,
   lifeHeading,
   totalsLine,
+  recentWall,
 } from './fitness-roundup-views.mjs';
 import { lifePageTasks } from './life-pages.mjs';
 import { runSkierTasks } from './skier-test-runner.mjs';
@@ -547,4 +548,19 @@ test('a week sidecar without outings renders the other blocks', async () => {
   assert.equal('outings' in doc, false);
   const life = buildRoundupLife(doc, periodLabels('week-42-2026'));
   assert.deepEqual(life.blocks.map((b) => b.name), ['watching', 'listening']);
+});
+
+test('recentWall: the two newest months lead, then the newest small cards, 12 cells; no year cards', () => {
+  const W = (k) => ({ isWeek: true, key: k });
+  const M = (k) => ({ isMonth: true, key: k });
+  const tl = [
+    { isYearMark: true }, { isMonthMark: true, key: 'nov' }, W('w46'), W('w45'),
+    M('oct'), W('w44'), W('w43'), M('sep'), W('w39'), { isYear: true, key: 'y2025' }, M('dec25'),
+  ];
+  assert.deepEqual(recentWall(tl).map((t) => t.key), ['oct', 'sep', 'nov', 'w46', 'w45', 'w44']);
+  // one month: it leads with eight small cards; none: twelve small cards
+  assert.deepEqual(recentWall([M('a'), W('b'), W('c')]).map((t) => t.key), ['a', 'b', 'c']);
+  assert.equal(recentWall(Array.from({ length: 20 }, (_, i) => W(`w${i}`))).length, 12);
+  assert.equal(recentWall([M('a'), ...Array.from({ length: 20 }, (_, i) => W(`w${i}`))]).length, 9);
+  assert.deepEqual(recentWall([{ isYear: true }]), []);
 });

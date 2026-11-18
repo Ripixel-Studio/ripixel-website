@@ -65,24 +65,20 @@
     </div>
     <a class="fit-more" href="{{fitnessLife.sessionsHref}}">every session on the record, filterable by type →</a>
 
-    <!-- 3. Roundups: the newest month leads, the year in review beside it, earlier months under
-         (tasks/fitness-life.mjs buildRoundupShelf). Weeks live in "the week that was" above. -->
-    {{#if fitnessLife.roundup}}
+    <!-- 3. Roundups: the newest cards cut from the /life/roundups wall (tasks/fitness-roundup-views.mjs
+         recentWall), so the latest month features lead and weeks sit beside them. -->
+    {{#if fitnessRoundupsRecent.length}}
     <div class="fit-header-row">
       <h2 class="fit-header">the <span>roundups</span>.</h2>
       <a class="fit-header-row__meta fit-header-row__link" href="{{fitnessLife.roundupsHref}}">all {{fitnessLife.roundupCount}} roundups →</a>
     </div>
-    <div class="fit-shelf{{#if fitnessLife.roundupYear}} fit-shelf--year{{/if}}">
-      {{> fitness-roundup-teaser fitnessLife.roundup}}
-      {{#if fitnessLife.roundupYear}}{{> fitness-year-teaser fitnessLife.roundupYear}}{{/if}}
+    <div class="rl-tl-wrap fit-wall">
+      <ol class="rl-tl" aria-label="The newest roundups">
+        {{#each fitnessRoundupsRecent}}
+        {{> rl-tl-tile this}}
+        {{/each}}
+      </ol>
     </div>
-    {{#if fitnessLife.roundupMonths.length}}
-    <ol class="fit-months" aria-label="earlier monthly roundups">
-      {{#each fitnessLife.roundupMonths}}
-      <li><a class="fit-months__tab" href="{{href}}"><span class="fit-months__m">{{month}}</span> <span class="fit-months__y">{{year}}</span> <span class="fit-months__n">{{sessions}}</span></a></li>
-      {{/each}}
-    </ol>
-    {{/if}}
     <a class="fit-more" href="{{fitnessLife.roundupsHref}}">every roundup, by week, month and year →</a>
     {{/if}}
 
