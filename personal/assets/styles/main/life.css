@@ -2149,3 +2149,42 @@ a.hub-hero__route:hover .hub-hero__route-cta { background: var(--life-ink); colo
   text-align: center;
 }
 
+
+/* ─── The year in review on /life (partials/life-year-spotlight.html) ───
+   January: the issue's own cover, full width. February-March: an ink band. The link's overlay
+   sits above the cover's photos and lines. */
+.life-yr { margin: 28px 0 40px; }
+.life-yr .card-link__target::before { z-index: 5; }
+.life-yr__cta {
+  display: inline-block; position: relative; z-index: 4;
+  font: 700 13px var(--f-mono); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink); background: var(--ink-yellow); border: 2px solid var(--ink);
+  padding: 8px 14px; box-shadow: 4px 4px 0 var(--ink-magenta);
+}
+.life-yr--lead .life-yr__cta { margin-top: 6px; }
+
+.life-yr__band {
+  position: relative; display: grid; align-items: center; gap: 14px 28px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "mast lines photos" "mast cta photos";
+  padding: 18px 26px; background: var(--ink); color: var(--paper-4); border: 3px solid var(--ink);
+  box-shadow: 7px 7px 0 var(--ink-section), 10px 10px 0 var(--ink);
+}
+.life-yr__mast { grid-area: mast; display: flex; flex-direction: column; gap: 4px; }
+.life-yr__year {
+  margin: 10px 0 4px; font: 400 clamp(84px, 9vw, 150px)/.82 var(--f-disp); color: var(--ink-yellow);
+  text-shadow: 4px 4px 0 var(--ink-magenta), 8px 8px 0 var(--ink-blue); transform: rotate(-3deg); transform-origin: left bottom;
+}
+.life-yr__band .yr-cover__title { font-size: clamp(18px, 1.8vw, 28px); }
+.life-yr__lines { grid-area: lines; margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px 14px; }
+.life-yr__lines li { display: flex; align-items: center; gap: 8px; }
+.life-yr__band .yr-cover__line { font-size: clamp(16px, 1.4vw, 22px); }
+.life-yr__band .life-yr__cta { grid-area: cta; justify-self: start; }
+.life-yr__photos { grid-area: photos; display: flex; margin: 0; padding: 0 0 0 20px; list-style: none; }
+.life-yr__photos .yr-polaroid { position: relative; left: auto; top: auto; width: clamp(90px, 8vw, 150px); margin-left: -20px; padding: 5px 5px 18px; }
+
+@media (max-width: 900px) {
+  .life-yr__band { grid-template-columns: 1fr; grid-template-areas: "mast" "lines" "photos" "cta"; }
+  .life-yr__photos { padding-left: 20px; }
+  .life-yr__photos .yr-polaroid:nth-child(n+4) { display: none; }
+}

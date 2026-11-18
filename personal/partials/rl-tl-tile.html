@@ -8,7 +8,7 @@
 <li class="rl-tl__month-mark"><span>{{label}}</span><small>{{year}} · so far</small></li>
 {{/if}}
 {{#if isYear}}
-<li class="rl-tl__item rl-tl__item--year">
+<li class="rl-tl__item rl-tl__item--year{{#if side}} rl-tl__item--side{{/if}}">
   <a class="rl-tl__card rl-tl__card--year card-link" href="{{href}}">
     {{#if collage.length}}<span class="rl-tl__collage" aria-hidden="true">{{#each collage}}<img src="{{this}}" alt="" loading="lazy" decoding="async" width="300" height="300">{{/each}}</span>{{else}}{{#if routes.length}}<span class="rl-tl__routes" aria-hidden="true">{{#each routes}}{{> rl-route this}}{{/each}}</span>{{/if}}{{/if}}
     <span class="rl-tl__kicker">YEAR IN REVIEW</span>

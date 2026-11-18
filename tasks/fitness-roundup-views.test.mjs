@@ -25,6 +25,7 @@ import {
   lifeHeading,
   totalsLine,
   recentWall,
+  yearSpotlight,
 } from './fitness-roundup-views.mjs';
 import { lifePageTasks } from './life-pages.mjs';
 import { runSkierTasks } from './skier-test-runner.mjs';
@@ -563,4 +564,33 @@ test('recentWall: the two newest months lead, then the newest small cards, 12 ce
   assert.equal(recentWall(Array.from({ length: 20 }, (_, i) => W(`w${i}`))).length, 12);
   assert.equal(recentWall([M('a'), ...Array.from({ length: 20 }, (_, i) => W(`w${i}`))]).length, 9);
   assert.deepEqual(recentWall([{ isYear: true }]), []);
+});
+
+test('yearSpotlight: lead in January, side February-March, gone from April; needs that year\'s review', () => {
+  const review = { year: 2026, cover: { photos: Array.from({ length: 8 }, (_, i) => ({ url: `p${i}` })), lines: Array.from({ length: 5 }, (_, i) => ({ title: `l${i}` })), sticker: { value: '300', label: 'sessions' } } };
+  const pages = [{ roundup: { key: 'year-2026', url: '/life/roundup/year-2026', review } }, { roundup: { key: 'year-2025', url: '/life/roundup/year-2025', review: { ...review, year: 2025 } } }];
+  const timeline = [{ isYear: true, key: 'year-2026' }, { isYear: true, key: 'year-2025' }];
+  const jan = yearSpotlight(pages, timeline, new Date('2027-01-31T23:00:00Z'));
+  assert.equal(jan?.stage, 'lead');
+  assert.equal(jan?.href, '/life/roundup/year-2026');
+  assert.equal(jan?.cover.photos.length, 8);
+  const mar = yearSpotlight(pages, timeline, new Date('2027-03-31T12:00:00Z'));
+  assert.equal(mar?.stage, 'side');
+  assert.equal(mar?.cover.photos.length, 5);
+  assert.equal(mar?.cover.lines.length, 3);
+  assert.equal(yearSpotlight(pages, timeline, new Date('2027-04-01T00:00:00Z')), null);
+  assert.equal(yearSpotlight(pages, timeline, new Date('2026-11-18T12:00:00Z')), null, 'a year is never spotlit the year after next');
+  assert.equal(yearSpotlight([], timeline, new Date('2027-01-05T00:00:00Z')), null, 'no review, no spotlight');
+});
+
+test('recentWall with a spotlight: the year card takes the months\' place (lead) or one month\'s (side)', () => {
+  const W = (k) => ({ isWeek: true, key: k });
+  const M = (k) => ({ isMonth: true, key: k });
+  const year = { isYear: true, key: 'year-2026' };
+  const tl = [year, { isMonthMark: true, key: 'jan' }, W('w2'), W('w1'), M('dec'), W('w52'), M('nov'), W('w47')];
+  assert.deepEqual(recentWall(tl, { isLead: true, tile: year }).map((t) => t.key), ['year-2026', 'jan', 'w2', 'w1', 'w52']);
+  const side = recentWall(tl, { isLead: false, tile: year });
+  assert.deepEqual(side.map((t) => t.key), ['year-2026', 'dec', 'jan', 'w2', 'w1', 'w52']);
+  assert.equal(side[0].side, true);
+  assert.equal(year.side, undefined, 'the wall\'s own tile is not changed');
 });
