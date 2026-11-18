@@ -126,9 +126,11 @@ export function buildYearReview(file, ctx, opts = {}) {
       first: new Date(t).getUTCDate() === 1 ? MON[new Date(t).getUTCMonth()] : '',
     });
   }
-  // Columns of weeks for the grid: pad the first week to its Monday.
+  // Columns of weeks for the grid: pad the first week back to its Monday and the last
+  // forward to its Sunday, so every column is a full stack of seven.
   const lead = days[0].dow;
   const cells = [...Array.from({ length: lead }, () => ({ blank: true })), ...days.map((d, i) => ({ ...d, i }))];
+  while (cells.length % 7) cells.push({ blank: true });
   const dayCols = [];
   for (let i = 0; i < cells.length; i += 7) dayCols.push({ cells: cells.slice(i, i + 7), month: cells.slice(i, i + 7).find((c) => /** @type {any} */ (c).first)?.first || '' });
 
