@@ -5,8 +5,8 @@
  * Skier builtins render them.
  *
  * Sets `lifeHeatmapView`: `{viewBox, paths, count, json}`, or `null` without a heatmap doc.
- * `paths` is the static sheet (home turf only; the no-JS fallback); `json` feeds the
- * tiled map (every published segment, fitted to the same home turf; tasks/route-map.mjs).
+ * `paths` is the static sheet (where most routes are; the no-JS fallback); `json` feeds the
+ * tiled map (every published segment, fitted to the same area; tasks/route-map.mjs).
  */
 import { heatmapMapData, scriptJson } from './route-map.mjs';
 
@@ -65,9 +65,9 @@ export function projectSegments(segments, bounds, width = 1000) {
 
 /**
  * The sheet is fitted to where the routes mostly are, not to the export's whole
- * extent: a weekend in Rome or Poland would otherwise shrink home turf to a speck.
+ * extent: a weekend in Rome or Poland would otherwise shrink the usual routes to a speck.
  * Centre = median point; a segment whose middle point lies within RADIUS_DEG
- * (about 65 km: the home counties of the routes) of it is kept, and the
+ * (about 65 km) of it is kept, and the
  * bounds are those of the kept segments' points, padded 5%. Far trips are left
  * off the sheet. Too few points: no change.
  * @param {number[][][]} segments @param {any} bounds
