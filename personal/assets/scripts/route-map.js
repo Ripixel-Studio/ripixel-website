@@ -96,7 +96,7 @@
         L.polyline(seg, { renderer: r, interactive: false, className: 'route-map__heat', weight: 3, opacity: 1 }).addTo(map);
       });
       buttons(map, [
-        { label: 'home', title: 'Fit the map to home turf', run: function () { fit(map, data.fit); } },
+        { label: 'fit most', title: 'Fit the map to where most routes are', run: function () { fit(map, data.fit); } },
         { label: 'fit all', title: 'Fit the map to every route', run: function () { fit(map, data.all); } },
       ]);
     } else {

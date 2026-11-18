@@ -93,7 +93,7 @@ export function activityMapData(routePoints) {
 }
 
 /**
- * The heatmap's data: every published segment (far trips too), `fit` = home turf (the
+ * The heatmap's data: every published segment (far trips too), `fit` = where most routes are (the
  * bounds the static sheet already uses), `all` = every segment's extent for "fit all".
  * @param {any} segments  the export's segments
  * @param {any} coreBounds  `coreOfSegments(...).bounds` (`[minLat, minLng, maxLat, maxLng]` or nested)

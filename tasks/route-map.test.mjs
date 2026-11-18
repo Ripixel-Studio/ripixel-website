@@ -42,7 +42,7 @@ test('activity map JSON: the published line and its own bounds, nothing else', (
   assert.deepEqual(JSON.parse(scriptJson(d)), d);
 });
 
-test('heatmap JSON: every segment, fit = home turf, all = every segment', () => {
+test('heatmap JSON: every segment, fit = where most routes are, all = every segment', () => {
   const segs = [line, [[48.85, 2.35], [48.86, 2.36]], [[51, -1]]];
   const d = heatmapMapData(segs, [51.0, -0.6, 51.2, -0.4]);
   assert.deepEqual(Object.keys(d).sort(), ['all', 'fit', 'kind', 'segments']);
