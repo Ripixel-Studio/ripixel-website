@@ -1,6 +1,6 @@
 # Life in [year]: the annual scrapbook
 
-Status: approved by James (2026-11-16).
+Status: SHELVED by James (2026-11-18): "it's very fitness-heavy... Fitness will always dominate." The fitness year in review stays the one year-end page. Code on this branch (PR #581, closed) and in jarvis (removed in 71be4a7) is kept for reference only.
 Owner: James. Builder: Jarvis (website + lifehub).
 
 ## Intent

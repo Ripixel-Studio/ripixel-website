@@ -1,5 +1,7 @@
 # Life in [year] (the annual scrapbook) Implementation Plan
 
+> **SHELVED 2026-11-18** (James): fitness dominated the preview. See the spec status line.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** A generated once-a-year scrapbook page, `/life/annual/YYYY`, covering everything on `/life`. Lifehub computes a public `life/annual-YYYY.json`, and the website renders it merged with the FitGlue fitness data. First milestone: a 2026 preview built as if the year had ended on 30 November (December blank), on a Firebase preview channel.
