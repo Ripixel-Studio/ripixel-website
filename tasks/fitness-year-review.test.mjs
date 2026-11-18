@@ -37,6 +37,10 @@ describe('year in review', () => {
     assert.equal(days.length, 365);
     assert.equal(days.find((d) => d.day === '2026-03-08').race, true);
   });
+  test('every week column is a full stack of seven, the last one padded to its Sunday', () => {
+    for (const c of r.days.cols) assert.equal(c.cells.length, 7);
+    assert.equal(r.days.cols.at(-1).cells.filter((c) => !c.blank).at(-1).day, '2026-12-31');
+  });
   test('twelve months; a month with nothing yet is still being written', () => {
     assert.equal(r.months.length, 12);
     assert.equal(r.months[0].sessions, 2);
