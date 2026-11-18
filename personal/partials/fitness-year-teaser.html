@@ -1,0 +1,17 @@
+<!-- Context: fitnessLife.roundupYear — the newest year in review, beside the lead month -->
+<section class="fit-yr card-link" aria-labelledby="fit-yr-title">
+  <span class="fit-roundup__kind">{{kindLabel}}</span>
+  <h2 class="fit-yr__title" id="fit-yr-title"><a class="card-link__target" href="{{href}}">{{periodLabel}}</a></h2>
+  <p class="fit-yr__line">the whole year, in one issue</p>
+  <dl class="fit-yr__stats">
+    <div class="fit-roundup__stat">
+      <dt class="fit-roundup__label">{{sessionsLabel}}</dt>
+      <dd class="fit-roundup__num">{{sessions}}</dd>
+    </div>
+    <div class="fit-roundup__stat">
+      <dt class="fit-roundup__label">{{secondary.label}}</dt>
+      <dd class="fit-roundup__num">{{secondary.value}}{{#if secondary.unit}}<small>{{secondary.unit}}</small>{{/if}}</dd>
+    </div>
+  </dl>
+  {{> card-arrow}}
+</section>
