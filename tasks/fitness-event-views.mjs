@@ -15,6 +15,7 @@
  *   fitnessEventPages[i]  →  public/personal/life/event/<slug>/index.html
  */
 import path from 'node:path';
+import { FITNESS_CARD } from './og-cards.mjs';
 
 import { buildActivityView, fmtDateShort, isSafeSlug } from './fitness-activity-views.mjs';
 import { buildHyroxHistory, pbChase, eventUrl, clock } from './fitness-hyrox.mjs';
@@ -105,7 +106,7 @@ export function buildEventView(event, history, index, opts = {}) {
   const range = dateRange(event.start, event.end);
   const canonical = siteUrl ? `${siteUrl}${eventUrl(event.slug)}` : '';
   const description = `${races.length} races in ${range}: ${cards.map((c) => `${c.division} ${c.total}${c.isPB ? ' (PB)' : ''}`).join(', ')}.`;
-  const ogImage = (opts.ogCard && /^https?:\/\//.test(opts.ogCard) ? opts.ogCard : '') || heroPhoto;
+  const ogImage = (opts.ogCard && /^https?:\/\//.test(opts.ogCard) ? opts.ogCard : '') || heroPhoto || FITNESS_CARD;
 
   return {
     page: 'life',

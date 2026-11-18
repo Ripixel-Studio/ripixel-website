@@ -25,6 +25,7 @@ import { keyToPath as roundupOutPath } from './fitness-roundup-views.mjs';
 import { FEED_PATH, FEED_TITLE, FEED_SUBTITLE } from './fitness-feed-items.mjs';
 import { eventOutPath } from './fitness-event-views.mjs';
 import { sessionsOutPath } from './fitness-sessions.mjs';
+import { FITNESS_CARD, sectionCard } from './og-cards.mjs';
 
 /**
  * Handlebars helpers the activity and event partials use (`{{#unless (eq sets 1)}}` in
@@ -83,6 +84,7 @@ export function lifePageTasks({
             subpage: '| fitness',
             description: 'Running, riding and lifting: every session, the roundups, the records and the routes.',
             canonical: `${site}/life/fitness`,
+            ogImage: FITNESS_CARD,
             atomFeed: FEED_PATH,
           };
         }
@@ -94,6 +96,7 @@ export function lifePageTasks({
             subpage: `| ${title}`,
             description: `James King, by the numbers: ${title}.`,
             canonical: `${site}/life/${currentPage}`,
+            ogImage: sectionCard(currentPage),
             section,
           };
         }

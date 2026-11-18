@@ -292,7 +292,7 @@ describe('view model from the fixtures', () => {
     const ride = await fixture('evening-ride-to-the-reservoir-2026-10-15');
     const card = 'https://james.ripixel.co.uk/life/og/activity/evening-ride-to-the-reservoir-2026-10-15.png';
     assert.equal(buildActivityView(ride, index, { ogCard: card }).ogImage, card);
-    assert.equal(buildActivityView(ride, index, { ogCard: 'life/og/x.png' }).ogImage, '');
+    assert.equal(buildActivityView(ride, index, { ogCard: 'life/og/x.png' }).ogImage, 'https://james.ripixel.co.uk/card_fitness.png', 'no card, no photo: the fitness card');
   });
   test('photos are gated by profile.showPhotoGallery', async () => {
     const index = await fixtureIndex();

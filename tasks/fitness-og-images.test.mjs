@@ -237,7 +237,7 @@ describe('drawing', () => {
     assert.match(watermark(th, '2 races', 0, 0, 900, 600), />2 RACES<|>2<\/text>/);
   });
   test('buildSectionSVG keeps the committed cards\' treatment', () => {
-    const svg = buildSectionSVG(PAGES.find((p) => p.id === 'life'));
+    const svg = buildSectionSVG(PAGES.find((p) => p.id === 'fitness'));
     assert.match(svg, />FITNESS\.</);
     assert.match(svg, /font-size="280" fill="#7C3AED" opacity="0.09">△</);
   });

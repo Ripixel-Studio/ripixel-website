@@ -19,6 +19,7 @@
  * jarvis-memory/specs/ripixel-website/fitness-zine.md §6 and §8.
  */
 import path from 'node:path';
+import { FITNESS_CARD } from './og-cards.mjs';
 
 import { buildStory, storyContext } from './fitness-roundup-story.mjs';
 import { buildYearReview } from './fitness-year-review.mjs';
@@ -862,7 +863,7 @@ export function fitnessRoundupViewsTask() {
       for (const file of files) {
         try {
           const view = buildRoundupView(file, viewCtx);
-          const ogImage = typeof ogCards[file.key] === 'string' && /^https?:\/\//.test(ogCards[file.key]) ? ogCards[file.key] : '';
+          const ogImage = typeof ogCards[file.key] === 'string' && /^https?:\/\//.test(ogCards[file.key]) ? ogCards[file.key] : FITNESS_CARD;
           pages.push({
             page: 'life', atomFeed: FITNESS_FEED_PATH,
             subpage: `| ${view.subpage} roundup`, description: view.description, roundup: { ...view, share: g.fitnessShareCards?.roundup?.[file.key] || null, yearShare: (view.review && g.fitnessYearDecks?.[file.key]) || null },
@@ -877,7 +878,7 @@ export function fitnessRoundupViewsTask() {
       /** Template variables for /life/roundups, rendered by Skier's generatePagesTask. */
       const fitnessRoundupsIndex = {
         page: 'life', atomFeed: FITNESS_FEED_PATH,
-        subpage: '| roundups',
+        subpage: '| roundups', ogImage: FITNESS_CARD,
         description: 'Weekly, monthly and yearly training roundups — every session, summed up.',
         timeline,
         roundupCount: pages.length,

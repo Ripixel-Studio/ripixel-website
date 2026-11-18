@@ -20,6 +20,7 @@
  * tasks/fitness-activity-views.test.mjs covers.
  */
 import path from 'node:path';
+import { FITNESS_CARD } from './og-cards.mjs';
 import { athleteWords } from './fitness-words.mjs';
 import { lineChart, niceTicks, formatTick } from './chart-axes.mjs';
 import { buildHyroxHistory, buildRaceView, pbChase, eventUrl } from './fitness-hyrox.mjs';
@@ -857,7 +858,7 @@ export function buildActivityView(file, index, opts = {}) {
     // head.html overrides (shared partial): title, article OG, canonical, the fitness feed.
     headTitle: `${title} — James King`,
     ogType: 'article',
-    ogImage,
+    ogImage: ogImage || FITNESS_CARD,
     canonical,
     publishedTime: startTime,
     atomFeed: FITNESS_FEED_PATH,

@@ -49,7 +49,16 @@ export const PAGES = [
   { id: 'projects',  label: 'PROJECTS.',   glyph: '◆', ink: '#D32E84', desc: 'things built, shipped, and occasionally abandoned.' },
   { id: 'thoughts',  label: 'THOUGHTS.',   glyph: '◇', ink: '#0F8A56', desc: 'ramblings, how-to guides & the occasional hot take.' },
   { id: 'work',      label: 'WORK.',       glyph: '◉', ink: '#2148C0', desc: 'where I have worked, what I built, and what I use now.' },
-  { id: 'life',      label: 'FITNESS.',    glyph: '△', ink: FITNESS_INK, desc: 'running, riding & generally trying to stay alive.' },
+  { id: 'life',      label: 'LIFE.',       glyph: '✱', ink: FITNESS_INK, desc: 'by the numbers: fitness, body, games, code, media & more.' },
+  { id: 'fitness',   label: 'FITNESS.',    glyph: '△', ink: FITNESS_INK, desc: 'running, riding & generally trying to stay alive.' },
+  // The /life sections: ink from personal/assets/styles/main/life.css (.life-ink--<name>)
+  { id: 'body',      label: 'BODY.',       glyph: '♡', ink: '#B7261F', desc: 'sleep, food, movement & the measurements.' },
+  { id: 'games',     label: 'GAMES.',      glyph: '▲', ink: '#D32E84', desc: 'what I have been playing, and how badly.' },
+  { id: 'code',      label: 'CODE.',       glyph: '#', ink: '#0F8A56', desc: 'commits, projects & the spare-time code.' },
+  { id: 'watching',  label: 'WATCHING.',   glyph: '▷', ink: '#B7261F', desc: 'films, shows & the channels I keep going back to.' },
+  { id: 'listening', label: 'LISTENING.',  glyph: '♪', ink: '#2148C0', desc: 'what has been in my ears.' },
+  { id: 'reading',   label: 'READING.',    glyph: '¶', ink: '#F25B1C', desc: 'books read, being read & abandoned.' },
+  { id: 'live',      label: 'LIVE.',       glyph: '★', ink: '#D32E84', desc: 'gigs, shows & days out: the ticket stubs.' },
   { id: 'changelog', label: 'CHANGELOG.',  glyph: '◎', ink: '#F25B1C', desc: "what's changed on this site." },
   { id: '404',       label: '404.',        glyph: '×', ink: '#B7261F', desc: '(oh bollocks.)' },
 ];
@@ -125,7 +134,7 @@ export function cardShell({ ink, pill, bigGlyph = '', inner }) {
   ${inner}
 
   <!-- "JAMES KING" byline (top right) -->
-  <text x="1148" y="58" text-anchor="end"
+  <text x="1090" y="58" text-anchor="end"
     font-family="${DISPLAY}"
     font-size="26" font-weight="400" fill="${INK}" opacity="0.55" letter-spacing="1">JAMES KING</text>
 

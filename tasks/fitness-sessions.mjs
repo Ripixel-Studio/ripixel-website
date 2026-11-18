@@ -25,6 +25,7 @@
 
 
 import { buildCard, duration, filesBySlug, km, SESSIONS_HREF, TZ } from './fitness-life.mjs';
+import { FITNESS_CARD } from './og-cards.mjs';
 import { buildMoments } from './fitness-highlights.mjs';
 import { TAGS } from './fitness-theme.mjs';
 import { RACE_PBS_HREF } from './fitness-race-pbs.mjs';
@@ -198,6 +199,7 @@ export function fitnessSessionsViewTask() {
           ? `Every ${s.filterLabel.toLowerCase()} session on the record — ${s.shownLabel}, newest first.`
           : `Every training session on the record — ${s.totalLabel}, newest first.`,
         canonical: siteUrl ? `${siteUrl}${href}` : '',
+        ogImage: FITNESS_CARD,
         fitnessSessions: s,
         fitnessUnavailable: Boolean(g.fitnessUnavailable),
       }));
