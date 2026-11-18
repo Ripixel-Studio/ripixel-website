@@ -4,13 +4,13 @@
   Every card is pre-rendered; this only picks one. Phone: the Web Share API with the image
   file (the share sheet: Instagram Story, WhatsApp…), else a download. Desktop: a download.
   /…#share opens the picker on load (Jarvis's "your card is ready" push links there).
+  Shown only on James's devices (html[data-me], set in head.html; fitness-share.css).
 --}}
 {{#if shapes.length}}
 <div class="share" data-share data-title="{{title}}">
   <button type="button" class="share__open" data-share-open aria-haspopup="dialog" aria-controls="share-dialog" hidden>
     <span aria-hidden="true">→</span> share card
   </button>
-  <noscript>{{#each shapes}}{{#if @first}}<a class="share__open" href="{{variants.[0].url}}" download="{{variants.[0].file}}">↓ {{label}} card</a>{{/if}}{{/each}}</noscript>
   <ul class="share__files" hidden>
     {{#each shapes}}{{#each variants}}<li data-shape="{{../shape}}" data-variant="{{id}}" data-url="{{url}}" data-file="{{file}}"></li>{{/each}}{{/each}}
   </ul>
