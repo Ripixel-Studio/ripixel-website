@@ -596,6 +596,8 @@
 .fit-rpb__effort { display: flex; flex-direction: column; font: 13px var(--f-mono); }
 .fit-rpb__et { font-weight: 700; }
 .fit-rpb__effort .fit-rpb__lab { margin-top: 1px; }
+a.fit-rpb__effort { color: var(--ink); text-decoration: none; }
+a.fit-rpb__effort:hover .fit-rpb__et { text-decoration: underline; }
 .fit-rpb__splits { grid-column: 1 / -1; margin-top: 2px; }
 .fit-rpb__splits summary {
   cursor: pointer; font: 700 10px var(--f-mono); letter-spacing: .12em; text-transform: uppercase;
