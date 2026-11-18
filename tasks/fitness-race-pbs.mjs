@@ -14,8 +14,14 @@
  *
  * The board also takes what used to sit on the PB wall beside it, so no number shows twice:
  * a Hyrox division's row carries its best station, Roxzone and run splits (hyroxWall), and
- * a road distance's row carries the fastest stretch of that distance inside any run
- * (Strava's best effort), shown second to the race time.
+ * a road distance's row weighs the fastest stretch of that distance inside any run
+ * (Strava's best effort) and, for the 5k, his best parkrun against the race PB.
+ *
+ * Road rows are standard distances only (ROAD_ORDER): a road race of any other length
+ * (a "Burghley 7") stays on the races list but claims no PB. A road row's headline is
+ * the fastest of race, parkrun and best effort, labelled with where it came from, and
+ * the others sit underneath it: a road race's time is elapsed time, not chip time, so
+ * the best effort inside the same run is often quicker.
  *
  * Colours come from each type's tag (`fit-type--<tag>`, tasks/fitness-theme.mjs), read
  * off the race files themselves, so a type has no colour of its own.
@@ -36,11 +42,27 @@ export const RACE_TYPES = /** @type {[string, string][]} */ ([
   ['trail', 'Trail'], ['parkrun', 'parkrun'], ['triathlon', 'Triathlon'], ['other', 'Other'],
 ]);
 
-/** Road variants in distance order; any other road variant follows these. */
+/** The road distances that get a PB row, in distance order. */
 export const ROAD_ORDER = ['5k', '10k', '10 miles', 'half marathon', 'marathon'];
+
+/** The classifier's other spellings of a road distance. */
+const ROAD_ALIASES = /** @type {Record<string, string>} */ ({
+  '5km': '5k', '10km': '10k', '10 mile': '10 miles', '10mi': '10 miles', half: 'half marathon',
+  'half-marathon': 'half marathon', 'half mara': 'half marathon', '21.1k': 'half marathon', '42.2k': 'marathon',
+});
+
+/** A road variant's standard distance (lower case), or '' when it is not one. @param {string} v */
+export function roadDistance(v) {
+  const k = String(v ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
+  const d = ROAD_ALIASES[k] || k;
+  return ROAD_ORDER.includes(d) ? d : '';
+}
 
 /** Attempts further apart than this (as a share of the shortest) are not one course. */
 export const DISTANCE_SPREAD = 0.1;
+
+/** How each road distance is written on its row. */
+const ROAD_LABEL = /** @type {Record<string, string>} */ ({ '5k': '5k', '10k': '10k', '10 miles': '10 miles', 'half marathon': 'Half marathon', marathon: 'Marathon' });
 
 /** @param {unknown} v */
 const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : 0);
@@ -83,11 +105,26 @@ function distancesVary(attempts) {
 }
 
 /**
- * One row: the variant, its best (earliest on a tie), the attempts, and the latest
- * attempt's gap to the best when the latest is not the PB.
- * @param {string} name @param {Attempt[]} attempts  oldest first
+ * @typedef {{ kind: 'race' | 'parkrun' | 'effort', seconds: number, time: string, date: string, url: string, official?: boolean, where?: string }} Candidate
  */
-function buildRow(name, attempts) {
+
+/** The headline's label and an also-ran's label for each kind. */
+const KIND_LABEL = { race: ['race PB', 'race PB'], parkrun: ['PB · parkrun', 'parkrun PB'], effort: ['PB · best effort', 'best effort'] };
+
+/** @param {Candidate} c @param {boolean} lead */
+function labelOf(c, lead) {
+  const base = KIND_LABEL[c.kind][lead ? 0 : 1];
+  return c.where ? `${base} · ${c.where}` : base;
+}
+
+/**
+ * One row: the variant, its best (earliest on a tie), the attempts, and the latest
+ * attempt's gap to the best when the latest is not the PB. `others` (a road row's parkrun
+ * and best effort) compete for the headline; whichever is fastest leads (the race on a
+ * tie), the rest are listed under it in `also`.
+ * @param {string} name @param {Attempt[]} attempts  oldest first @param {Candidate[]} [others]
+ */
+function buildRow(name, attempts, others = []) {
   const latest = attempts[attempts.length - 1];
   const count = attempts.length;
   const base = { name, attempts: count, attemptsLabel: `${count} ${count === 1 ? 'go' : 'goes'}` };
@@ -97,12 +134,24 @@ function buildRow(name, attempts) {
       list: [...attempts].reverse().map((a) => ({ url: a.url, date: a.date, distance: a.distance, time: a.time })),
     };
   }
-  const best = attempts.reduce((b, a) => (a.seconds < b.seconds ? a : b));
-  const show = (/** @type {Attempt} */ a) => ({ url: a.url, date: a.date, time: a.time, official: a.official, source: a.official ? 'official time' : 'elapsed time' });
+  const raceBest = attempts.reduce((b, a) => (a.seconds < b.seconds ? a : b));
+  const source = (/** @type {{ official?: boolean }} */ a) => (a.official ? 'official time' : 'elapsed time');
+  /** @type {Candidate} */
+  const race = { kind: 'race', seconds: raceBest.seconds, time: raceBest.time, date: raceBest.date, url: raceBest.url, official: raceBest.official };
+  const ranked = [race, ...others.filter((c) => c.seconds > 0)]
+    .sort((a, b) => a.seconds - b.seconds || (a.kind === 'race' ? -1 : b.kind === 'race' ? 1 : 0));
+  const lead = ranked[0];
+  const show = (/** @type {Candidate} */ c, /** @type {boolean} */ first) => ({
+    kind: c.kind, url: c.url, date: c.date, time: c.time, official: !!c.official, label: labelOf(c, first),
+    source: c.kind === 'effort' ? 'fastest stretch inside any run (Strava best effort)' : source(c),
+  });
+  // The latest race is already on the row when it is the race PB (headline or not).
+  const shown = latest === raceBest;
   return {
     ...base, varies: false, list: [],
-    best: show(best), latestIsPb: count > 1 && latest === best,
-    latest: latest === best ? null : { ...show(latest), gap: deltaClock(latest.seconds - best.seconds) },
+    best: show(lead, true), also: ranked.slice(1).map((c) => show(c, false)),
+    latestIsPb: count > 1 && shown && lead.kind === 'race',
+    latest: shown ? null : { url: latest.url, date: latest.date, time: latest.time, official: latest.official, source: source(latest), gap: deltaClock(latest.seconds - lead.seconds) },
   };
 }
 
@@ -113,7 +162,7 @@ function buildRow(name, attempts) {
  * A Hyrox race is filed under its official division label (the ROXFIT `race.division`)
  * when it has one, so its row lines up with the division's splits.
  * @param {any[]} activities  `fitnessActivities`
- * @param {{ hyroxSplits?: { label: string, stations: any[], runs: any[] }[], efforts?: { name: string, display: string, date: string }[] }} [extras]
+ * @param {{ hyroxSplits?: { label: string, stations: any[], runs: any[] }[], efforts?: { name: string, display: string, date: string, url?: string }[] }} [extras]
  *   hyroxSplits: hyroxWall's divisions; efforts: the wall's on-foot tiles (name `5K`, `HALF MARATHON`, ...)
  */
 export function buildRacePbs(activities, extras = {}) {
@@ -131,7 +180,12 @@ export function buildRacePbs(activities, extras = {}) {
     if (seconds <= 0) continue;
     const metres = num(file.entry?.distanceMeters) || num(file.activity?.distanceMeters);
     const division = type === 'hyrox' ? String(file.race?.division?.label || '').trim() : '';
-    const variant = division || String(file.raceVariant || '').trim() || (RACE_TYPES.find(([k]) => k === type)?.[1] ?? 'Other');
+    let variant = division || String(file.raceVariant || '').trim() || (RACE_TYPES.find(([k]) => k === type)?.[1] ?? 'Other');
+    if (type === 'road') {
+      const d = roadDistance(variant);
+      if (!d) continue; // not a standard distance: on the races list, not the PB board
+      variant = ROAD_LABEL[d];
+    }
     const attempt = {
       slug, url: `/life/activity/${slug}`, date: raceDate(start), ts, seconds, time: clock(seconds), official,
       metres, distance: metres > 0 ? `${km(metres)} km` : '', tag: tagOf(file).tag,
@@ -148,6 +202,7 @@ export function buildRacePbs(activities, extras = {}) {
     const roadRank = (n) => { const i = ROAD_ORDER.indexOf(n.toLowerCase()); return i < 0 ? ROAD_ORDER.length : i; };
     variants.sort((a, b) => (key === 'road' ? roadRank(a.name) - roadRank(b.name) : 0)
       || b.list.length - a.list.length || a.name.localeCompare(b.name));
+    const parkrunBest = key === 'road' ? bestParkrun(byType.get('parkrun')) : null;
     // The type's ink: the tag most of its races carry.
     const tags = new Map();
     for (const v of variants) for (const a of v.list) tags.set(a.tag, (tags.get(a.tag) || 0) + 1);
@@ -156,7 +211,7 @@ export function buildRacePbs(activities, extras = {}) {
     return {
       key, label, typeClass: tagTheme(tag).typeClass,
       races: count, racesLabel: `${count} race${count === 1 ? '' : 's'}`,
-      rows: variants.map((v) => withExtras(key, buildRow(v.name, v.list), extras)),
+      rows: variants.map((v) => withExtras(key, v.name, v.list, extras, parkrunBest)),
     };
   });
 }
@@ -165,19 +220,41 @@ export function buildRacePbs(activities, extras = {}) {
 const norm = (s) => String(s ?? '').trim().toLowerCase();
 
 /**
- * Hang a row's extras on it: a Hyrox division's best splits, a road distance's best effort.
- * @param {string} type @param {any} row
- * @param {NonNullable<Parameters<typeof buildRacePbs>[1]>} extras
+ * His fastest parkrun on any course, as a 5k road row's candidate.
+ * @param {Map<string, Attempt[]> | undefined} courses
+ * @returns {Candidate | null}
  */
-function withExtras(type, row, extras) {
+function bestParkrun(courses) {
+  /** @type {(Attempt & { course: string }) | null} */
+  let best = null;
+  for (const [course, list] of courses || []) {
+    for (const a of list) if (!best || a.seconds < best.seconds) best = { ...a, course };
+  }
+  return best && { kind: 'parkrun', seconds: best.seconds, time: best.time, date: best.date, url: best.url, official: best.official, where: best.course };
+}
+
+/**
+ * Build a row with its extras: a Hyrox division's best splits; a road distance's best
+ * effort (and, for the 5k, best parkrun) competing for its headline.
+ * @param {string} type @param {string} name @param {Attempt[]} list
+ * @param {NonNullable<Parameters<typeof buildRacePbs>[1]>} extras
+ * @param {Candidate | null} parkrunBest
+ */
+function withExtras(type, name, list, extras, parkrunBest) {
+  if (type === 'road') {
+    const e = (extras.efforts || []).find((t) => norm(t.name) === norm(name));
+    /** @type {Candidate[]} */
+    const others = [];
+    if (e) others.push({ kind: 'effort', seconds: parseClock(e.display), time: e.display, date: e.date, url: e.url || '' });
+    if (parkrunBest && norm(name) === '5k') others.push(parkrunBest);
+    const row = buildRow(name, list, others);
+    return { ...row, effort: e ? { time: e.display, date: e.date } : null };
+  }
+  const row = buildRow(name, list);
   if (type === 'hyrox') {
     const d = (extras.hyroxSplits || []).find((h) => norm(h.label) === norm(row.name));
     const has = !!d && (d.stations.length > 0 || d.runs.length > 0);
     return { ...row, splits: has ? { stations: d.stations, runs: d.runs, label: d.label } : null };
-  }
-  if (type === 'road') {
-    const e = (extras.efforts || []).find((t) => norm(t.name) === norm(row.name));
-    return { ...row, effort: e ? { time: e.display, date: e.date } : null };
   }
   return row;
 }

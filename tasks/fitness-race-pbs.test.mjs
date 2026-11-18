@@ -45,7 +45,7 @@ describe('race PBs', () => {
     ];
     const groups = buildRacePbs(files);
     assert.deepEqual(groups.map((g) => g.key), ['hyrox', 'spartan', 'road', 'parkrun', 'other']);
-    assert.deepEqual(groups.find((g) => g.key === 'road')?.rows.map((r) => r.name), ['5k', '10k', 'Half marathon', 'Marathon', 'Town 7']);
+    assert.deepEqual(groups.find((g) => g.key === 'road')?.rows.map((r) => r.name), ['5k', '10k', 'Half marathon', 'Marathon']);
     assert.deepEqual(groups.find((g) => g.key === 'parkrun')?.rows.map((r) => r.name), ['Riverside', 'Abbey', 'Hilltop']);
     // Colour from the races' own tag, never a per-type map.
     assert.equal(groups[0].typeClass, 'fit-type--hybrid');
@@ -134,7 +134,8 @@ describe('race PBs', () => {
     ];
     const m = /** @type {any} */ (personalBestsModel(files, /** @type {any} */ (wall)));
     const road = m.groups.find((/** @type {any} */ g) => g.key === 'road');
-    assert.deepEqual(road.rows.map((/** @type {any} */ r) => [r.name, r.best.time, r.effort?.time ?? null]), [['5k', '23:47', '21:43'], ['Burghley 7', '54:59', null]]);
+    // The best effort beats the race's elapsed time, so it leads; Burghley 7 is no standard distance.
+    assert.deepEqual(road.rows.map((/** @type {any} */ r) => [r.name, r.best.time, r.best.label, r.also.map((/** @type {any} */ a) => a.label)]), [['5k', '21:43', 'PB · best effort', ['race PB']]]);
     // 10K has no road race, so it stays a training best; 5K moved to the race row.
     assert.deepEqual(m.training.map((/** @type {any} */ g) => [g.key, g.tiles.map((/** @type {any} */ t) => t.name)]), [['run', ['1K', '10K', 'LONGEST RUN']], ['iron', ['Deadlift']]]);
     assert.deepEqual([...absorbedEfforts(m.groups)], ['5k']);
@@ -148,5 +149,47 @@ describe('race PBs', () => {
     assert.deepEqual(/** @type {any} */ (g.rows[0]).splits?.stations.map((/** @type {any} */ s) => s.name), ['SkiErg']);
     const [bare] = buildRacePbs([hx]);
     assert.equal(/** @type {any} */ (bare.rows[0]).splits, null, 'no splits known: no drawer');
+  });
+
+  test('road rows are standard distances only: an event-named road race claims no PB', () => {
+    const files = [
+      race({ type: 'road', variant: 'Burghley 7', date: '2026-03-01', secs: 3299, metres: 11200 }),
+      race({ type: 'road', variant: 'half', date: '2026-08-16', secs: 6842, metres: 21100 }),
+      race({ type: 'road', variant: '10km', date: '2026-03-08', secs: 2865, metres: 10000 }),
+    ];
+    const [road] = buildRacePbs(files);
+    assert.deepEqual(road.rows.map((r) => r.name), ['10k', 'Half marathon']);
+    assert.equal(road.races, 2);
+    assert.deepEqual(buildRacePbs([files[0]]), []);
+  });
+
+  test('a road row leads with its fastest time: race, best parkrun (5k only) or best effort', () => {
+    const files = [
+      race({ type: 'road', variant: '5k', date: '2026-06-03', secs: 1427, metres: 5010 }),
+      race({ type: 'road', variant: '5k', date: '2026-07-17', secs: 1496, metres: 5000 }),
+      race({ type: 'parkrun', variant: 'Newark', date: '2026-04-04', secs: 1330, metres: 5000 }),
+      race({ type: 'parkrun', variant: 'Doddington Hall', date: '2026-03-21', secs: 1363, metres: 5000 }),
+      race({ type: 'road', variant: '10k', date: '2026-03-08', secs: 2865, metres: 10000 }),
+      race({ type: 'road', variant: '10k', date: '2026-11-07', secs: 3075, metres: 10000 }),
+    ];
+    const efforts = [{ name: '5K', display: '21:43', date: '4 APR 2026', url: '/life/activity/x' }, { name: '10K', display: '47:30', date: '8 MAR 2026' }];
+    const road = /** @type {any} */ (buildRacePbs(files, { efforts }).find((g) => g.key === 'road'));
+    const five = road.rows.find((/** @type {any} */ r) => r.name === '5k');
+    assert.deepEqual([five.best.time, five.best.label, five.best.url], ['21:43', 'PB · best effort', '/life/activity/x']);
+    assert.deepEqual(five.also.map((/** @type {any} */ a) => [a.time, a.label]), [['22:10', 'parkrun PB · Newark'], ['23:47', 'race PB']]);
+    assert.equal(five.latest.gap, '+3:13'); // 24:56 against the 21:43 headline
+    assert.equal(five.latestIsPb, false);
+    const ten = road.rows.find((/** @type {any} */ r) => r.name === '10k');
+    assert.deepEqual([ten.best.time, ten.best.label, ten.best.url], ['47:30', 'PB · best effort', '']);
+    assert.deepEqual(ten.also.map((/** @type {any} */ a) => a.time), ['47:45']); // parkrun is for the 5k only
+
+    // A latest race that is the race PB is on the row already: no latest line, no "latest is the PB".
+    const [half] = buildRacePbs([race({ type: 'road', variant: 'Half marathon', date: '2026-08-16', secs: 6842, metres: 21100 })], { efforts: [{ name: 'HALF MARATHON', display: '1:53:36', date: '16 AUG 2026' }] });
+    assert.deepEqual([half.rows[0].best.time, half.rows[0].latest, half.rows[0].latestIsPb], ['1:53:36', null, false]);
+
+    // With no quicker effort or parkrun, the race leads as before.
+    const [solo] = buildRacePbs([files[0], files[1]], { efforts: [{ name: '5K', display: '24:30', date: '1 JAN 2026' }] });
+    assert.deepEqual([solo.rows[0].best.time, solo.rows[0].best.label, solo.rows[0].also[0].label], ['23:47', 'race PB', 'best effort']);
+    assert.equal(solo.rows[0].latest.gap, '+1:09');
   });
 });

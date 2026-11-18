@@ -1,5 +1,5 @@
 <!-- Context: fitnessLife.personalBests — every PB once: races (tasks/fitness-race-pbs.mjs, with
-     Hyrox splits and road best efforts folded in) then training (buildPbBoard minus what races took) -->
+     Hyrox splits folded in; a road row leads with its fastest of race / parkrun / best effort) then training (buildPbBoard minus what races took) -->
 <section class="fit-pbs" aria-label="Personal bests">
   <h2 class="fit-header">personal <span>bests</span>.</h2>
 
@@ -31,17 +31,17 @@
             {{else}}
             <div class="fit-rpb__bests">
               {{#with best}}
-              <a class="fit-rpb__best" href="{{url}}" title="PB, {{source}}">
+              {{#if url}}<a class="fit-rpb__best" href="{{url}}" title="PB, {{source}}">{{else}}<span class="fit-rpb__best" title="PB, {{source}}">{{/if}}
                 <b class="fit-rpb__time">{{time}}</b>
-                <span class="fit-rpb__date">race PB · {{date}}</span>
-              </a>
+                <span class="fit-rpb__date">{{label}} · {{date}}</span>
+              {{#if url}}</a>{{else}}</span>{{/if}}
               {{/with}}
-              {{#if effort}}{{#with effort}}
-              <span class="fit-rpb__effort" title="Fastest {{../name}} inside any run (Strava best effort)">
+              {{#each also}}
+              {{#if url}}<a class="fit-rpb__effort" href="{{url}}" title="{{source}}">{{else}}<span class="fit-rpb__effort" title="{{source}}">{{/if}}
                 <span class="fit-rpb__et">{{time}}</span>
-                <span class="fit-rpb__lab">best effort · {{date}}</span>
-              </span>
-              {{/with}}{{/if}}
+                <span class="fit-rpb__lab">{{label}} · {{date}}</span>
+              {{#if url}}</a>{{else}}</span>{{/if}}
+              {{/each}}
             </div>
             {{#if latest}}{{#with latest}}
             <a class="fit-rpb__latest" href="{{url}}" title="Latest, {{source}}">

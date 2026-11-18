@@ -820,7 +820,8 @@ export function buildLifeModel({ index, activities = [], roundups = [], events =
 /**
  * Personal bests, one section in two halves so no number shows twice:
  *   races: the race board (tasks/fitness-race-pbs.mjs), with each Hyrox division's best
- *     splits and each road distance's best effort folded into its row;
+ *     splits folded into its row, and each road distance's best effort (and the 5k's best
+ *     parkrun) competing for its headline;
  *   training: the wall's remaining tiles (buildPbBoard) minus the on-foot distances a
  *     road race row has taken over.
  * Null when neither half has anything.
@@ -829,7 +830,7 @@ export function buildLifeModel({ index, activities = [], roundups = [], events =
  */
 export function personalBestsModel(activities, wall = []) {
   const run = wall.find((g) => g.key === 'run');
-  const efforts = (run?.tiles || []).map((t) => ({ name: t.name, display: t.metrics[0]?.display ?? '', date: t.date }));
+  const efforts = (run?.tiles || []).map((t) => ({ name: t.name, display: t.metrics[0]?.display ?? '', date: t.date, url: t.url || t.metrics[0]?.url || '' }));
   const groups = buildRacePbs(activities, { hyroxSplits: hyroxWall(buildHyroxHistory(activities)), efforts });
   const taken = absorbedEfforts(groups);
   const training = wall
