@@ -31,8 +31,8 @@
  *                      button's data (personal/partials/share-button.html)
  *   fitnessYearDecks   { [year key]: YearDeck } — the year in review's story cards and
  *                      video (tasks/fitness-year-share.mjs; personal/partials/yr-share.html)
- * and public/personal/life/share/index.json: the full-scope cards, for Jarvis's
- * "your card is ready" push (jarvis gateway/domains/sharecards.py) and Insta Post Maker.
+ * and public/personal/life/share/index.json: the full-scope cards and their overlays, for
+ * Insta Post Maker's Activities panel.
  *
  * Overlays (scripts/share-overlays.mjs): transparent PNGs of the same numbers and charts
  * to lay over his own photos, in two tones, for pages in overlay scope (the last
