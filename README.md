@@ -216,9 +216,9 @@ cards. The picker lists them under **Overlay**, with a Tone choice in place of B
 `/life/share/index.json` lists the full-scope cards (`id`, `kind`, `template`, `title`,
 `label`, `date`, `page` with `#share`, `image`, `race`, `pb` — a PB session, never a roundup — `hash`, newest first),
 each with its `overlays` (`piece`, `label`, `tone`, `url`, `w`, `h`). `/life/share/**` is
-served with `Access-Control-Allow-Origin: *` so Insta Post Maker can draw them on its canvas. The box
-copies it after each deploy and Jarvis pushes "Your Hyrox card is ready" for new race and
-PB cards (`jarvis/gateway/domains/sharecards.py`).
+served with `Access-Control-Allow-Origin: *` so Insta Post Maker can draw them on its canvas;
+its Activities panel reads this manifest. (Jarvis no longer pushes "your card is ready":
+James did not find it useful, decision 84.)
 
 - Re-render the section cards: `node scripts/generate-og-images.mjs`
 - Preview the share cards without a full build: `node scripts/generate-og-images.mjs --fitness [outDir]`
