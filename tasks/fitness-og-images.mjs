@@ -32,7 +32,13 @@
  *   fitnessYearDecks   { [year key]: YearDeck } — the year in review's story cards and
  *                      video (tasks/fitness-year-share.mjs; personal/partials/yr-share.html)
  * and public/personal/life/share/index.json: the full-scope cards, for Jarvis's
- * "your card is ready" push (jarvis gateway/domains/sharecards.py).
+ * "your card is ready" push (jarvis gateway/domains/sharecards.py) and Insta Post Maker.
+ *
+ * Overlays (scripts/share-overlays.mjs): transparent PNGs of the same numbers and charts
+ * to lay over his own photos, in two tones, for pages in overlay scope (the last
+ * OVERLAY_DAYS days, every race and race weekend): <kind>/<id>/overlay/<piece>-<tone>.png,
+ * pieces trimmed to their ink, layouts at the shape's size. Listed on the page's share
+ * entry (`overlays`) and in the manifest.
  */
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -40,6 +46,7 @@ import crypto from 'node:crypto';
 
 import { getSharp } from '../scripts/generate-og-images.mjs';
 import { buildShareSVG, SHAPES, SHAPE_ORDER, PAPER, INK } from '../scripts/share-cards.mjs';
+import { buildOverlaySVGs, TONES, TONE_LABELS } from '../scripts/share-overlays.mjs';
 import { buildHyroxHistory } from './fitness-hyrox.mjs';
 import { parsePeriodKey, resolveNeighbours } from './fitness-roundup-views.mjs';
 import { activityShareModel, eventShareModel, roundupShareModel, parkrunHistory } from './fitness-share-models.mjs';
@@ -50,6 +57,10 @@ export const DEFAULT_CACHE_DIR = '.cache/og';
 export const DEFAULT_URL_BASE = '/life/share';
 export const DEFAULT_CONCURRENCY = 6;
 export const FULL_DAYS = 90;
+/** Overlays are for posting now: recent pages, plus every race and race weekend. */
+export const OVERLAY_DAYS = 30;
+/** Transparent margin left round a trimmed overlay piece. */
+const OVERLAY_MARGIN = 12;
 /** Bump when the drawing changes in a way the SVG hash would not see (compositing, encoders). */
 export const RENDER_VERSION = 'lh4.1';
 const PHOTO_TIMEOUT_MS = 20_000;
@@ -67,11 +78,14 @@ const sha = (s) => crypto.createHash('sha1').update(s).digest('hex');
 /**
  * @typedef {'story'|'square'|'landscape'} Shape
  * @typedef {{ id: string, label: string, mode: 'photo'|'ink', bg: string[] }} Variant
- * @typedef {{ model: any, full: boolean, variants: Variant[], shapes: Shape[] }} Job
+ * @typedef {{ model: any, full: boolean, overlay: boolean, variants: Variant[], shapes: Shape[] }} Job
+ * @typedef {{ tone: string, label: string, url: string, file: string, w: number, h: number }} RenderedOverlay
+ * @typedef {{ id: string, label: string, tones: RenderedOverlay[] }} OverlayEntry
  * @typedef {{ id: string, label: string, url: string, file: string }} RenderedVariant
  * @typedef {{ kind: string, id: string, title: string, label: string, template: string, date: string, page: string,
  *   isRace: boolean, isPB: boolean, full: boolean, hash: string,
- *   shapes: { shape: Shape, label: string, w: number, h: number, variants: RenderedVariant[] }[] }} ShareEntry
+ *   shapes: { shape: Shape, label: string, w: number, h: number, variants: RenderedVariant[] }[],
+ *   overlays: OverlayEntry[] }} ShareEntry
  */
 
 // ---------------------------------------------------------------------------
@@ -87,6 +101,17 @@ export function isFullScope(model, now) {
   if (model.kind === 'roundup' && /^year-/.test(model.id)) return true;
   const t = Date.parse(model.date || '');
   return Number.isFinite(t) && now - t <= FULL_DAYS * 86_400_000;
+}
+
+/**
+ * Whether a page gets transparent overlays: race weekends and races always, else only
+ * when recent (overlays are for posting now, and every one is a file to deploy).
+ * @param {any} model @param {number} now ms
+ */
+export function isOverlayScope(model, now) {
+  if (model.kind === 'event' || model.template === 'race' || model.isRace) return true;
+  const t = Date.parse(model.date || '');
+  return Number.isFinite(t) && now - t <= OVERLAY_DAYS * 86_400_000 && t - now <= 86_400_000;
 }
 
 /**
@@ -159,7 +184,7 @@ export function cardJobs(opts) {
   }
   return models.map((model) => {
     const full = isFullScope(model, now);
-    return { model, full, variants: variantsFor(model, full), shapes: full ? [...SHAPE_ORDER] : ['landscape'] };
+    return { model, full, overlay: full && isOverlayScope(model, now), variants: variantsFor(model, full), shapes: full ? [...SHAPE_ORDER] : ['landscape'] };
   });
 }
 
@@ -249,6 +274,25 @@ export async function rasteriseCard(svg, shape, photos, outPath) {
   }
 }
 
+/**
+ * Rasterise one overlay as a transparent PNG: trimmed to its ink plus a margin (pieces),
+ * or at its own size (layouts). Returns the PNG's size.
+ * @param {string} svg @param {boolean} trim @param {string} outPath
+ * @returns {Promise<{ w: number, h: number }>}
+ */
+export async function rasteriseOverlay(svg, trim, outPath) {
+  const sharp = await getSharp();
+  await fs.mkdir(path.dirname(outPath), { recursive: true });
+  let img = sharp(Buffer.from(svg));
+  if (trim) {
+    const clear = { r: 0, g: 0, b: 0, alpha: 0 };
+    const trimmed = await img.trim({ threshold: 0 }).png().toBuffer();
+    img = sharp(trimmed).extend({ top: OVERLAY_MARGIN, bottom: OVERLAY_MARGIN, left: OVERLAY_MARGIN, right: OVERLAY_MARGIN, background: clear });
+  }
+  const info = await img.png({ compressionLevel: 9, palette: true, quality: 95, effort: 8 }).toFile(outPath);
+  return { w: info.width, h: info.height };
+}
+
 // ---------------------------------------------------------------------------
 // Rendering with a cache
 
@@ -259,7 +303,7 @@ const shapeLabel = (shape) => SHAPES[shape].label;
  * Render every card into `outDir`, reusing `cacheDir` where nothing changed.
  * @param {{ activities?: any[], roundups?: any[], lifePeriods?: Record<string, any>, index?: any, outDir?: string, cacheDir?: string, urlBase?: string,
  *   siteUrl?: string, fontCacheDir?: string, concurrency?: number, logger?: any, now?: number, photoDims?: any,
- *   fetchImpl?: typeof fetch, offline?: boolean, only?: (job: Job) => boolean, yearReviews?: Map<string, any> }} opts
+ *   fetchImpl?: typeof fetch, offline?: boolean, only?: (job: Job) => boolean, yearReviews?: Map<string, any>, overlays?: boolean }} opts
  */
 export async function renderFitnessCards(opts = {}) {
   const started = Date.now();
@@ -345,6 +389,69 @@ export async function renderFitnessCards(opts = {}) {
     for (const shape of job.shapes) await one({ job, shape, variant: job.variants.find((v) => v.id === 'ink') || ink });
   }
 
+  // Overlays: every piece and layout in every tone, for jobs in overlay scope.
+  /** @type {Map<Job, Map<string, OverlayEntry>>} */
+  const overlaysDone = new Map();
+  let overlayCount = 0;
+  /** @type {(() => Promise<void>)[]} */
+  const overlayWork = [];
+  for (const job of opts.overlays === false ? [] : jobs.filter((j) => j.overlay)) {
+    const m = job.model;
+    /** @type {Map<string, OverlayEntry>} */
+    const byPiece = new Map();
+    overlaysDone.set(job, byPiece);
+    for (const tone of TONES) {
+      let svgs;
+      try {
+        svgs = buildOverlaySVGs(m, tone);
+      } catch (e) {
+        failed++;
+        logger.warn(`overlays failed for ${m.kind}/${m.id}: ${errMsg(e)}`);
+        continue;
+      }
+      for (const o of svgs) {
+        if (!byPiece.has(o.id)) byPiece.set(o.id, { id: o.id, label: o.label, tones: [] });
+        overlayWork.push(async () => {
+          const rel = path.posix.join(m.kind, m.id, 'overlay', `${o.id}-${tone}.png`);
+          const outPath = path.join(outDir, rel);
+          const cachePath = path.join(cacheDir, rel);
+          try {
+            const hash = sha([RENDER_VERSION, 'overlay', tone, String(o.trim), o.svg].join('\n'));
+            let dims = null;
+            if (await exists(cachePath)) {
+              try {
+                const [h, w, hh] = (await fs.readFile(`${cachePath}.sha1`, 'utf8')).trim().split(/\s+/);
+                if (h === hash && Number(w) > 0 && Number(hh) > 0) dims = { w: Number(w), h: Number(hh) };
+              } catch { dims = null; }
+            }
+            await fs.mkdir(path.dirname(outPath), { recursive: true });
+            if (dims) {
+              await fs.copyFile(cachePath, outPath);
+              cached++;
+            } else {
+              dims = await rasteriseOverlay(o.svg, o.trim, outPath);
+              await fs.mkdir(path.dirname(cachePath), { recursive: true });
+              await fs.copyFile(outPath, cachePath);
+              await fs.writeFile(`${cachePath}.sha1`, `${hash} ${dims.w} ${dims.h}`);
+              rendered++;
+            }
+            overlayCount++;
+            /** @type {OverlayEntry} */ (byPiece.get(o.id)).tones.push({
+              tone, label: TONE_LABELS[tone], url: `${urlBase}/${rel}`, file: `${m.id}-overlay-${o.id}-${tone}.png`, w: dims.w, h: dims.h,
+            });
+          } catch (e) {
+            failed++;
+            logger.warn(`overlay failed for ${rel}: ${errMsg(e)}`);
+          }
+        });
+      }
+    }
+  }
+  let nextOverlay = 0;
+  await Promise.all(Array.from({ length: Math.min(concurrency, overlayWork.length) }, async () => {
+    while (nextOverlay < overlayWork.length) await overlayWork[nextOverlay++]();
+  }));
+
   /** @type {{ activity: Record<string, string>, event: Record<string, string>, roundup: Record<string, string> }} */
   const urls = { activity: {}, event: {}, roundup: {} };
   /** @type {{ activity: Record<string, ShareEntry>, event: Record<string, ShareEntry>, roundup: Record<string, ShareEntry> }} */
@@ -363,9 +470,13 @@ export async function renderFitnessCards(opts = {}) {
     const kind = /** @type {'activity'|'event'|'roundup'} */ (m.kind);
     const landscape = shapes.find((s) => s.shape === 'landscape');
     if (landscape) urls[kind][m.id] = `${siteUrl}${landscape.variants[0].url}`;
+    const toneOrder = /** @type {string[]} */ (TONES);
+    const overlays = [...(overlaysDone.get(job)?.values() || [])]
+      .filter((o) => o.tones.length)
+      .map((o) => ({ ...o, tones: o.tones.sort((a, b) => toneOrder.indexOf(a.tone) - toneOrder.indexOf(b.tone)) }));
     const entry = {
       kind, id: m.id, title: m.pageTitle, label: m.label, template: m.template, date: m.date, page: m.url,
-      isRace: !!m.isRace, isPB: !!m.isPB, full: job.full, hash: hashes.get(`${kind}:${m.id}`) || '', shapes,
+      isRace: !!m.isRace, isPB: !!m.isPB, full: job.full, hash: hashes.get(`${kind}:${m.id}`) || '', shapes, overlays,
     };
     cards[kind][m.id] = entry;
     if (job.full) {
@@ -374,6 +485,8 @@ export async function renderFitnessCards(opts = {}) {
         id: `${kind}:${m.id}`, kind, slug: m.id, template: m.template, title: m.pageTitle, label: m.label, date: m.date,
         // `pb` means a PB *session* (Jarvis pushes those by default); a roundup's PRs are not one.
         page: `${siteUrl}${m.url}#share`, image: `${siteUrl}${lead.variants[0].url}`, race: !!m.isRace, pb: !!m.isPB && kind === 'activity', hash: entry.hash,
+        // Transparent overlays (Insta Post Maker lays these over his photos): one row per piece and tone.
+        overlays: overlays.flatMap((o) => o.tones.map((t) => ({ piece: o.id, label: o.label, tone: t.tone, url: `${siteUrl}${t.url}`, w: t.w, h: t.h }))),
       });
     }
   }
@@ -384,7 +497,7 @@ export async function renderFitnessCards(opts = {}) {
   const images = rendered + cached;
   return {
     urls, cards, manifest,
-    rendered, cached, failed, dropped,
+    rendered, cached, failed, dropped, overlays: overlayCount,
     total: jobs.length, full: jobs.filter((j) => j.full).length, images,
     ms: Date.now() - started,
   };
@@ -444,7 +557,7 @@ export function fitnessOgImagesTask(config = {}) {
           yearReviews,
           logger: ctx.logger,
         });
-        ctx.logger.info(`Share cards: ${r.images} images for ${r.total} pages (${r.full} in all three shapes) — ${r.rendered} rendered, ${r.cached} from cache, ${r.failed} failed, ${r.dropped} without their photo; ${(r.ms / 1000).toFixed(1)} s`);
+        ctx.logger.info(`Share cards: ${r.images} images for ${r.total} pages (${r.full} in all three shapes, ${r.overlays} overlays) — ${r.rendered} rendered, ${r.cached} from cache, ${r.failed} failed, ${r.dropped} without their photo; ${(r.ms / 1000).toFixed(1)} s`);
         return { fitnessOgImages: r.urls, fitnessShareCards: r.cards, fitnessYearDecks };
       } catch (e) {
         ctx.logger.warn(`Share cards unavailable, pages fall back to photo/card_life.png: ${errMsg(e)}`);

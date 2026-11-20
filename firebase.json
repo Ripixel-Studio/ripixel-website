@@ -151,6 +151,15 @@
               "value": "public, max-age=3600, stale-while-revalidate=86400"
             }
           ]
+        },
+        {
+          "source": "/life/share/**",
+          "headers": [
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ]
         }
       ],
       "trailingSlash": false
