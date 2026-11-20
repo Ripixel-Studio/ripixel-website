@@ -4,6 +4,9 @@
   Every card is pre-rendered; this only picks one. Phone: the Web Share API with the image
   file (the share sheet: Instagram Story, WhatsApp…), else a download. Desktop: a download.
   /…#share opens the picker on load (Jarvis's "your card is ready" push links there).
+  Overlays (recent pages, races): transparent PNGs of the numbers and charts to lay over
+  his own photos — picked like a shape (value "overlay:<piece>"), with a Light/Dark tone
+  in place of the background (overlays[{ id, label, tones[{ tone, url, file, w, h }] }]).
   Shown only on James's devices (html[data-me], set in head.html; fitness-share.css).
 --}}
 {{#if shapes.length}}
@@ -13,6 +16,7 @@
   </button>
   <ul class="share__files" hidden>
     {{#each shapes}}{{#each variants}}<li data-shape="{{../shape}}" data-variant="{{id}}" data-url="{{url}}" data-file="{{file}}"></li>{{/each}}{{/each}}
+    {{#each overlays}}{{#each tones}}<li data-shape="overlay:{{../id}}" data-variant="{{tone}}" data-url="{{url}}" data-file="{{file}}" data-w="{{w}}" data-h="{{h}}"></li>{{/each}}{{/each}}
   </ul>
   <dialog class="share__dialog" id="share-dialog" aria-labelledby="share-dialog-title">
     <form method="dialog" class="share__form">
@@ -32,13 +36,26 @@
             {{/each}}
           </fieldset>
           {{#each shapes}}{{#if @first}}{{#if variants.[1]}}
-          <fieldset class="share__group">
+          <fieldset class="share__group" data-share-bg>
             <legend>Background</legend>
             {{#each variants}}
             <label class="share__chip"><input type="radio" name="share-variant" value="{{id}}"{{#if @first}} checked{{/if}} /> <span>{{label}}</span></label>
             {{/each}}
           </fieldset>
           {{/if}}{{/if}}{{/each}}
+          {{#if overlays.length}}
+          <fieldset class="share__group">
+            <legend>Overlay <small>transparent, to lay over a photo</small></legend>
+            {{#each overlays}}
+            <label class="share__chip"><input type="radio" name="share-shape" value="overlay:{{id}}" /> <span>{{label}}</span></label>
+            {{/each}}
+          </fieldset>
+          <fieldset class="share__group" data-share-tones hidden>
+            <legend>Tone</legend>
+            <label class="share__chip"><input type="radio" name="share-tone" value="light" checked /> <span>Light <small>for most photos</small></span></label>
+            <label class="share__chip"><input type="radio" name="share-tone" value="dark" /> <span>Dark <small>for bright ones</small></span></label>
+          </fieldset>
+          {{/if}}
           <div class="share__actions">
             <button type="button" class="share__go" data-share-native hidden>Share…</button>
             <a class="share__go" data-share-download href="#" download>Download</a>
@@ -60,10 +77,13 @@
   var dl = root.querySelector('[data-share-download]');
   var native = root.querySelector('[data-share-native]');
   var status = root.querySelector('[data-share-status]');
+  var bgGroup = root.querySelector('[data-share-bg]');
+  var toneGroup = root.querySelector('[data-share-tones]');
   var files = {};
   root.querySelectorAll('.share__files li').forEach(function (li) {
-    files[li.dataset.shape + '|' + li.dataset.variant] = { url: li.dataset.url, file: li.dataset.file };
+    files[li.dataset.shape + '|' + li.dataset.variant] = { url: li.dataset.url, file: li.dataset.file, w: +li.dataset.w, h: +li.dataset.h };
   });
+  var isOverlay = function (shape) { return shape.indexOf('overlay:') === 0; };
   var blobs = {};
   var canFiles = false;
   try {
@@ -74,7 +94,7 @@
   var pick = function (name) { var el = root.querySelector('input[name="' + name + '"]:checked'); return el ? el.value : ''; };
   function current() {
     var shape = pick('share-shape');
-    var variant = pick('share-variant');
+    var variant = isOverlay(shape) ? pick('share-tone') : pick('share-variant');
     var hit = files[shape + '|' + variant];
     if (!hit) {
       // Older pages carry the Landscape card only, and a photo can drop out of one shape.
@@ -100,10 +120,17 @@
     root.querySelectorAll('input[name="share-variant"]').forEach(function (v) {
       v.disabled = !files[shape + '|' + v.value];
     });
+    var overlay = isOverlay(shape);
+    if (bgGroup) bgGroup.hidden = overlay;
+    if (toneGroup) toneGroup.hidden = !overlay;
+    if (overlay) frame.dataset.overlay = pick('share-tone'); else delete frame.dataset.overlay;
     var card = current();
     if (!card) return;
     img.src = card.url;
-    if (shapeEl) { img.width = +shapeEl.dataset.w; img.height = +shapeEl.dataset.h; frame.dataset.shape = shape; }
+    // Card sizes come from the Shape radio; an overlay's from its own file (pieces are trimmed).
+    if (card.w && card.h) { img.width = card.w; img.height = card.h; }
+    else if (shapeEl) { img.width = +shapeEl.dataset.w; img.height = +shapeEl.dataset.h; }
+    if (shapeEl) frame.dataset.shape = shape;
     img.alt = root.dataset.title + ' — ' + (shapeEl ? shapeEl.parentNode.textContent.trim() : '') + ' share card';
     dl.href = card.url;
     dl.setAttribute('download', card.file);

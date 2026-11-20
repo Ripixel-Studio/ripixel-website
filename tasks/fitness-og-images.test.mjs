@@ -277,7 +277,8 @@ describe('rendering', () => {
     try {
       const data = await fixtures();
       const host = await photoHost();
-      const opts = { ...data, now: NOW, outDir: path.join(tmp, 'out'), cacheDir: path.join(tmp, 'cache'), siteUrl: 'https://james.ripixel.co.uk/', fetchImpl: host.fetchImpl };
+      // Overlays have their own test (fitness-share-overlays.test.mjs); this one counts cards.
+      const opts = { ...data, now: NOW, outDir: path.join(tmp, 'out'), cacheDir: path.join(tmp, 'cache'), siteUrl: 'https://james.ripixel.co.uk/', fetchImpl: host.fetchImpl, overlays: false };
       const first = await renderFitnessCards(opts);
       // parkrun, roundup: its photo + colour; ride: colour only; push day: colour only — × 3 shapes
       assert.deepEqual({ rendered: first.rendered, cached: first.cached, failed: first.failed, images: first.images }, { rendered: 24, cached: 0, failed: 0, images: 24 });
@@ -308,7 +309,7 @@ describe('rendering', () => {
         title: 'Colwick parkrun #87', label: 'parkrun', date: '2026-10-17T08:00:00Z',
         page: 'https://james.ripixel.co.uk/life/activity/colwick-parkrun-2026-10-17#share',
         image: 'https://james.ripixel.co.uk/life/share/activity/colwick-parkrun-2026-10-17/story-photo-1.jpg',
-        race: false, pb: true, hash: 'string',
+        race: false, pb: true, hash: 'string', overlays: [],
       });
       assert.equal(manifest.cards.find((/** @type {any} */ c) => c.id === 'roundup:week-42-2026')?.pb, false, 'a roundup with PRs is not a PB session');
       assert.deepEqual(manifest.cards.map((/** @type {any} */ c) => c.date), [...manifest.cards.map((/** @type {any} */ c) => c.date)].sort().reverse(), 'newest first');

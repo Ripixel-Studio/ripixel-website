@@ -80,6 +80,17 @@
   width: auto; height: auto;
   box-shadow: 4px 4px 0 var(--ink);
 }
+/* An overlay is transparent: show it on a checkerboard, dark for the light tone, pale for the dark one. */
+.share__preview[data-overlay] {
+  --check: rgba(0, 0, 0, .06);
+  background: repeating-conic-gradient(var(--check) 0 25%, transparent 0 50%) 0 0 / 20px 20px, #fff;
+}
+.share__preview[data-overlay="light"] {
+  --check: rgba(255, 255, 255, .08);
+  background: repeating-conic-gradient(var(--check) 0 25%, transparent 0 50%) 0 0 / 20px 20px, #4a5a52;
+}
+.share__preview[data-overlay] img { box-shadow: none; }
+.share__group legend small { font-weight: 500; opacity: .6; letter-spacing: 0; text-transform: none; }
 .share__controls { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .share__group { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .share__group legend {

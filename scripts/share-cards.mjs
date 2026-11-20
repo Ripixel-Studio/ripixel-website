@@ -30,7 +30,7 @@ const MONO_EM = 0.6;
 
 /**
  * @typedef {'story'|'square'|'landscape'} Shape
- * @typedef {'photo'|'ink'} Mode
+ * @typedef {'photo'|'ink'|'overlay-light'|'overlay-dark'} Mode
  */
 
 /** Card sizes, margins and the band the content stacks into. */
@@ -58,8 +58,13 @@ export function lighten(hex, t) {
 /**
  * @typedef {{ type: string, on: string, text: string, accent?: string }} Ink
  * @typedef {{ mode: Mode, bg: string, fg: string, soft: number, accent: string, fill: string, onFill: string,
- *   run: string, station: string, track: string, trackOp: number, gain: string, loss: string, dot: string, dotOp: number }} Theme
+ *   run: string, station: string, track: string, trackOp: number, gain: string, loss: string, dot: string, dotOp: number,
+ *   shade: string }} Theme
+ *   `shade` is the colour that sits behind the type where there is no ground of its own:
+ *   ink on the photo cards, the halo colour on an overlay.
  */
+
+export const OVERLAY_WHITE = '#FFFFFF';
 
 /**
  * Colours for one card. Photo: paper type on the scrim, the family ink lightened for
@@ -73,13 +78,31 @@ export function cardTheme(mode, ink) {
   if (mode === 'photo') {
     return {
       mode, bg: INK, fg: PAPER, soft: 0.74, accent: lighten(ink.type, 0.3), fill: ink.type, onFill: ink.on === '#FFFFFF' ? PAPER : ink.on,
-      run: ink.type, station: PAPER, track: PAPER, trackOp: 0.16, gain: '#7BE3AE', loss: '#FF9A8F', dot: PAPER, dotOp: 0.09,
+      run: ink.type, station: PAPER, track: PAPER, trackOp: 0.16, gain: '#7BE3AE', loss: '#FF9A8F', dot: PAPER, dotOp: 0.09, shade: INK,
+    };
+  }
+  // Overlays (transparent PNGs to lay over his own photos, Strava/ROXFIT style): no ground
+  // at all. Light = white type with an ink shadow, for most photos; dark = ink type with a
+  // white halo, for bright ones (snow, a white wall). The family ink stays the accent.
+  // A roundup's "ink" is paper (ROUNDUP_INK): on an overlay its accent stands in.
+  const hue = ink.accent || ink.type;
+  const onHue = ink.accent || ink.on === '#FFFFFF' ? OVERLAY_WHITE : ink.on;
+  if (mode === 'overlay-light') {
+    return {
+      mode, bg: INK, fg: OVERLAY_WHITE, soft: 0.86, accent: lighten(hue, 0.35), fill: hue, onFill: onHue,
+      run: lighten(hue, 0.15), station: OVERLAY_WHITE, track: OVERLAY_WHITE, trackOp: 0.24, gain: '#7BE3AE', loss: '#FF9A8F', dot: OVERLAY_WHITE, dotOp: 0, shade: INK,
+    };
+  }
+  if (mode === 'overlay-dark') {
+    return {
+      mode, bg: OVERLAY_WHITE, fg: INK, soft: 0.8, accent: ink.accent || ink.text || ink.type, fill: hue, onFill: onHue,
+      run: hue, station: INK, track: INK, trackOp: 0.2, gain: '#0B7A45', loss: '#B42318', dot: INK, dotOp: 0, shade: OVERLAY_WHITE,
     };
   }
   const fg = ink.on === '#FFFFFF' ? PAPER : INK;
   return {
     mode, bg: ink.type, fg, soft: 0.76, accent: ink.accent || fg, fill: fg, onFill: ink.type,
-    run: fg, station: fg, track: fg, trackOp: 0.16, gain: fg, loss: fg, dot: INK, dotOp: 0.13,
+    run: fg, station: fg, track: fg, trackOp: 0.16, gain: fg, loss: fg, dot: INK, dotOp: 0.13, shade: INK,
   };
 }
 
@@ -265,9 +288,9 @@ function stamp(th, text, x, y, size, o = {}) {
   const left = o.anchor === 'end' ? x - w : x;
   const col = o.tone === 'gain' ? th.gain : o.tone === 'loss' ? th.loss : th.accent;
   const box = o.solid
-    ? `<rect x="${left}" y="${y}" width="${w}" height="${h}" fill="${th.mode === 'photo' ? th.fill : th.fg}"/>`
+    ? `<rect x="${left}" y="${y}" width="${w}" height="${h}" fill="${th.mode !== 'ink' ? th.fill : th.fg}"/>`
     : `<rect x="${left + 1.5}" y="${y + 1.5}" width="${w - 3}" height="${h - 3}" fill="none" stroke="${col}" stroke-width="3"/>`;
-  const fill = o.solid ? (th.mode === 'photo' ? th.onFill : th.bg) : col;
+  const fill = o.solid ? (th.mode !== 'ink' ? th.onFill : th.bg) : col;
   return { svg: box + T(left + w / 2, y + h / 2 + size * 0.36, s, { size, fill, bold: true, ls, anchor: 'middle' }), w, h };
 }
 
@@ -315,12 +338,12 @@ function hyroxRows(th, rows, x, w, rowH) {
       const bh = Math.round(rowH * 0.62);
       const by = cy + (rowH - bh) / 2;
       const col = r.isRun ? th.run : th.station;
-      const op = r.isRun ? 1 : th.mode === 'photo' ? 0.88 : 0.5;
+      const op = r.isRun ? 1 : th.mode !== 'ink' ? 0.88 : 0.5;
       const label = r.isRun ? r.label.toUpperCase() : clipMono(ROW_LABEL[r.key] || String(r.label).toUpperCase(), labelW - 14, size);
       let out = T(x, cy + rowH / 2 + size * 0.36, label, { size, fill: th.fg, op: r.isRun ? th.soft : 1, bold: !r.isRun });
       out += `<rect x="${r1(barX)}" y="${r1(by)}" width="${r1(barW)}" height="${bh}" fill="${th.track}" fill-opacity="${th.trackOp}"/>`;
       out += `<rect x="${r1(barX)}" y="${r1(by)}" width="${r1(bw)}" height="${bh}" fill="${col}" fill-opacity="${op}"/>`;
-      if (r.isPB) out += T(barX + bw - 10, by + bh / 2 + size * 0.3, 'PB', { size: size * 0.8, fill: th.mode === 'photo' ? (r.isRun ? th.onFill : INK) : th.bg, bold: true, anchor: 'end' });
+      if (r.isPB) out += T(barX + bw - 10, by + bh / 2 + size * 0.3, 'PB', { size: size * 0.8, fill: th.mode !== 'ink' ? (r.isRun ? th.onFill : th.shade) : th.bg, bold: true, anchor: 'end' });
       const tx = barX + barW + timeW;
       out += T(tx, cy + rowH / 2 + size * 0.36, r.duration, { size, fill: th.fg, bold: true, anchor: 'end' });
       if (hasHr && r.avgHr) out += T(tx + hrW, cy + rowH / 2 + size * 0.32, `${r.avgHr}♡`, { size: size * 0.86, fill: th.fg, op: th.soft, anchor: 'end' });
@@ -360,7 +383,7 @@ function hyroxCols(th, rows, x, w, h) {
         const bh = Math.max(4, (r.seconds / max) * (chartH * 0.72));
         const by = y + chartH - bh;
         const col = r.isRun ? th.run : th.station;
-        const op = r.isRun ? 1 : th.mode === 'photo' ? 0.88 : 0.5;
+        const op = r.isRun ? 1 : th.mode !== 'ink' ? 0.88 : 0.5;
         out += `<rect x="${r1(cx)}" y="${r1(by)}" width="${r1(bw)}" height="${r1(bh)}" fill="${col}" fill-opacity="${op}"/>`;
         if (r.isPB) out += T(cx + bw / 2, by - 8, 'PB', { size: labelSize, fill: th.accent, bold: true, anchor: 'middle' });
         out += T(cx + bw / 2, y + chartH + labelSize + 6, shortSegment(r), { size: labelSize, fill: th.fg, op: r.isRun ? th.soft : 1, bold: !r.isRun, anchor: 'middle' });
@@ -372,7 +395,7 @@ function hyroxCols(th, rows, x, w, h) {
       });
       if (pts.length > 1) {
         out += `<polyline points="${pts.join(' ')}" fill="none" stroke="${th.fg}" stroke-width="3" stroke-linejoin="round"/>`;
-        out += pts.map((p) => { const [px, py] = p.split(','); return `<circle cx="${px}" cy="${py}" r="5" fill="${th.mode === 'photo' ? th.accent : th.bg}" stroke="${th.fg}" stroke-width="2"/>`; }).join('');
+        out += pts.map((p) => { const [px, py] = p.split(','); return `<circle cx="${px}" cy="${py}" r="5" fill="${th.mode !== 'ink' ? th.accent : th.bg}" stroke="${th.fg}" stroke-width="2"/>`; }).join('');
         out += T(x + w, y - 6, `AVG HR ${Math.min(...hrs)}–${Math.max(...hrs)} BPM`, { size: labelSize, fill: th.fg, op: th.soft, bold: true, anchor: 'end', ls: 1 });
       }
       return out;
@@ -389,7 +412,8 @@ function hyroxCols(th, rows, x, w, h) {
 function splitCols(th, splits, x, w, h) {
   const n = splits.length;
   const slot = w / n;
-  const bw = Math.max(3, slot * 0.72);
+  // An overlay floats on a photo: a short run's few columns stay bars, not blocks.
+  const bw = Math.max(3, th.mode.startsWith('overlay') ? Math.min(slot * 0.72, 110) : slot * 0.72);
   const fastest = Math.min(...splits.map((s) => s.seconds));
   const slowest = Math.max(...splits.map((s) => s.seconds));
   const labelSize = Math.max(12, Math.min(20, Math.floor((slot - 4) / (MONO_EM * 4.4))));
@@ -402,7 +426,7 @@ function splitCols(th, splits, x, w, h) {
       const bh = chartH * (0.35 + 0.65 * t);
       const cx = x + i * slot + (slot - bw) / 2;
       const best = s.seconds === fastest;
-      let out = `<rect x="${r1(cx)}" y="${r1(y + chartH - bh)}" width="${r1(bw)}" height="${r1(bh)}" fill="${best ? th.run : th.station}" fill-opacity="${best ? 1 : th.mode === 'photo' ? 0.8 : 0.5}"/>`;
+      let out = `<rect x="${r1(cx)}" y="${r1(y + chartH - bh)}" width="${r1(bw)}" height="${r1(bh)}" fill="${best ? th.run : th.station}" fill-opacity="${best ? 1 : th.mode !== 'ink' ? 0.8 : 0.5}"/>`;
       if (i % every === 0 || best) {
         out += T(cx + bw / 2, y + chartH + labelSize + 4, s.pace, { size: labelSize, fill: th.fg, bold: best, op: best ? 1 : th.soft, anchor: 'middle' });
         out += T(cx + bw / 2, y + chartH + labelSize * 2.2 + 4, `KM ${s.km}`, { size: labelSize * 0.75, fill: th.fg, op: th.soft, anchor: 'middle' });
@@ -433,9 +457,9 @@ export function routeSvg(th, points, x, y, w, h, stroke = 8) {
   const d = xy.map((p, i) => `${i ? 'L' : 'M'}${p[0]},${p[1]}`).join(' ');
   const [sx, sy] = xy[0];
   const [ex, ey] = xy[xy.length - 1];
-  const shadow = th.mode === 'photo' ? INK : th.bg;
+  const shadow = th.mode !== 'ink' ? th.shade : th.bg;
   return `<path d="${d}" fill="none" stroke="${shadow}" stroke-opacity="0.5" stroke-width="${stroke + 8}" stroke-linejoin="round" stroke-linecap="round"/>`
-    + `<path d="${d}" fill="none" stroke="${th.mode === 'photo' ? th.accent : th.fg}" stroke-width="${stroke}" stroke-linejoin="round" stroke-linecap="round"/>`
+    + `<path d="${d}" fill="none" stroke="${th.mode !== 'ink' ? th.accent : th.fg}" stroke-width="${stroke}" stroke-linejoin="round" stroke-linecap="round"/>`
     + `<circle cx="${sx}" cy="${sy}" r="${stroke * 1.4}" fill="${th.fg}" stroke="${shadow}" stroke-width="3"/>`
     + `<rect x="${ex - stroke * 1.3}" y="${ey - stroke * 1.3}" width="${stroke * 2.6}" height="${stroke * 2.6}" fill="${shadow}" stroke="${th.fg}" stroke-width="3"/>`;
 }
@@ -459,8 +483,8 @@ function sparkBlock(th, values, x, w, h, label) {
       const d = xy.map((p, i) => `${i ? 'L' : 'M'}${p[0]},${p[1]}`).join(' ');
       return T(x, y + labelSize, label, { size: labelSize, fill: th.fg, op: th.soft, bold: true, ls: 2 })
         + T(x + w, y + labelSize, `${Math.round(min)} → ${Math.round(max)}`, { size: labelSize, fill: th.accent, bold: true, anchor: 'end' })
-        + `<path d="${d} L${x + w},${y + h} L${x},${y + h} Z" fill="${th.mode === 'photo' ? th.fill : th.fg}" fill-opacity="${th.mode === 'photo' ? 0.35 : 0.18}"/>`
-        + `<path d="${d}" fill="none" stroke="${th.mode === 'photo' ? th.accent : th.fg}" stroke-width="4" stroke-linejoin="round"/>`;
+        + `<path d="${d} L${x + w},${y + h} L${x},${y + h} Z" fill="${th.mode !== 'ink' ? th.fill : th.fg}" fill-opacity="${th.mode !== 'ink' ? 0.35 : 0.18}"/>`
+        + `<path d="${d}" fill="none" stroke="${th.mode !== 'ink' ? th.accent : th.fg}" stroke-width="4" stroke-linejoin="round"/>`;
     },
   };
 }
@@ -484,7 +508,7 @@ function donut(th, slices, cx, cy, r, total) {
       out += `<path d="M${r1(x1)},${r1(y1)} A${r},${r} 0 ${da > Math.PI ? 1 : 0} 1 ${r1(x2)},${r1(y2)}" fill="none" stroke="${s.ink}" stroke-width="${sw}"/>`;
     }
     // A thin gap in the ground colour between slices.
-    out += `<line x1="${r1(cx + (r - sw / 2) * Math.cos(a))}" y1="${r1(cy + (r - sw / 2) * Math.sin(a))}" x2="${r1(cx + (r + sw / 2) * Math.cos(a))}" y2="${r1(cy + (r + sw / 2) * Math.sin(a))}" stroke="${th.mode === 'photo' ? INK : th.bg}" stroke-width="4"/>`;
+    out += `<line x1="${r1(cx + (r - sw / 2) * Math.cos(a))}" y1="${r1(cy + (r - sw / 2) * Math.sin(a))}" x2="${r1(cx + (r + sw / 2) * Math.cos(a))}" y2="${r1(cy + (r + sw / 2) * Math.sin(a))}" stroke="${th.mode !== 'ink' ? th.shade : th.bg}" stroke-width="4"/>`;
     a += da;
   }
   const n = String(total);
@@ -532,7 +556,7 @@ function donutBlock(th, model, x, w, h, maxRows) {
 function heatmap(th, cal, x, w, h) {
   const days = cal?.days || [];
   if (!days.length) return gap(0);
-  const fill = th.mode === 'photo' ? th.fill : th.fg;
+  const fill = th.mode !== 'ink' ? th.fill : th.fg;
   const ops = [0, 0.35, 0.58, 0.8, 1];
   const cellRect = (/** @type {number} */ cx, /** @type {number} */ cy, /** @type {number} */ s, /** @type {number} */ sh, /** @type {number} */ lvl) => lvl > 0
     ? `<rect x="${r1(cx)}" y="${r1(cy)}" width="${r1(s)}" height="${r1(sh)}" fill="${fill}" fill-opacity="${ops[lvl]}"/>`
@@ -589,7 +613,7 @@ function prWall(th, prs, x, w, o) {
       const cy = y + Math.floor(i / o.cols) * (ch + g);
       const pad = o.size * 0.6;
       const vs = fitAnton(p.value, cw * 0.5, o.size * 1.6, o.size * 0.8);
-      let out = `<rect x="${r1(cx + 1.5)}" y="${r1(cy + 1.5)}" width="${r1(cw - 3)}" height="${ch - 3}" fill="${th.mode === 'photo' ? INK : th.fg}" fill-opacity="${th.mode === 'photo' ? 0.35 : 0.08}" stroke="${th.accent}" stroke-width="3"/>`;
+      let out = `<rect x="${r1(cx + 1.5)}" y="${r1(cy + 1.5)}" width="${r1(cw - 3)}" height="${ch - 3}" fill="${th.mode !== 'ink' ? th.shade : th.fg}" fill-opacity="${th.mode !== 'ink' ? 0.35 : 0.08}" stroke="${th.accent}" stroke-width="3"/>`;
       out += T(cx + pad, cy + pad + o.size * 0.8, clipMono(p.name.toUpperCase(), cw - pad * 2, o.size * 0.8, 1), { size: o.size * 0.8, fill: th.fg, bold: true, ls: 1 });
       out += T(cx + pad, cy + pad + o.size * 1.75, clipMono(p.metric.toUpperCase(), cw - pad * 2, o.size * 0.62, 1), { size: o.size * 0.62, fill: th.fg, op: th.soft, bold: true, ls: 1 });
       const vx = cx + cw - pad - (p.unit ? monoW(p.unit, o.size * 0.6) + 6 : 0);
@@ -921,7 +945,7 @@ function drawRun(model, shape, th) {
   const x = S.m, w = S.w - S.m * 2;
   const splits = model.splits || [];
   const pk = model.parkrun;
-  const routeArea = th.mode === 'ink' && model.route?.length >= 10;
+  const routeArea = th.mode !== 'photo' && model.route?.length >= 10;
   if (shape === 'landscape') {
     const lw = routeArea || splits.length > 1 ? 560 : w;
     const left = stack([
@@ -1004,7 +1028,7 @@ function drawStrength(model, shape, th) {
 function drawOther(model, shape, th) {
   const S = SHAPES[shape];
   const x = S.m, w = S.w - S.m * 2;
-  const routeArea = th.mode === 'ink' && model.route?.length >= 10;
+  const routeArea = th.mode !== 'photo' && model.route?.length >= 10;
   const spark = model.hr?.length >= 4 ? model.hr : null;
   if (shape === 'landscape') {
     const lw = routeArea ? 560 : w;
@@ -1113,7 +1137,7 @@ function beside(a, b) {
   return { h: Math.max(a.h, b.h), draw: (y) => a.draw(y) + b.draw(y) };
 }
 
-const DRAW = /** @type {Record<string, (model: any, shape: Shape, th: Theme) => { svg: string, top: number, filled?: boolean }>} */ ({
+export const DRAW = /** @type {Record<string, (model: any, shape: Shape, th: Theme) => { svg: string, top: number, filled?: boolean }>} */ ({
   race: drawRace, event: drawEvent, run: drawRun, parkrun: drawRun, strength: drawStrength, other: drawOther, roundup: drawRoundup,
 });
 
@@ -1136,3 +1160,12 @@ export function buildShareSVG(model, shape, mode) {
   const fr = frame(shape, th, { pill: model.pill || 'FITNESS', right: model.headRight || '', scrimFrom: body.top });
   return svgDoc(shape, `${fr.under}\n${body.svg}\n${fr.over}`);
 }
+
+/**
+ * The drawing blocks, for scripts/share-overlays.mjs (the transparent overlays lay the
+ * same blocks out one per image instead of on a card).
+ */
+export const BLOCKS = {
+  gap, stack, kicker, line, title, rule, statGrid, stamp, hyroxRows, hyroxCols, splitCols, routeSvg, sparkBlock,
+  donutBlock, heatmap, prWall, listRows, sectionHead, badgeBlock, deltaRow, headline, raceLines, parkrunStats, T,
+};

@@ -146,7 +146,7 @@ globals (and draw the share cards). The render configuration is `tasks/life-page
 
 | data task (custom) | global | rendered by (Skier) | output |
 |---|---|---|---|
-| `tasks/fitness-og-images.mjs` | `fitnessOgImages`, `fitnessShareCards` | — (sharp, see below) | `/life/share/<kind>/<id>/<shape>-<background>.(jpg\|png)` — the share cards (the landscape one is the page's OG image) and `/life/share/index.json`, their manifest |
+| `tasks/fitness-og-images.mjs` | `fitnessOgImages`, `fitnessShareCards` | — (sharp, see below) | `/life/share/<kind>/<id>/<shape>-<background>.(jpg\|png)` — the share cards (the landscape one is the page's OG image), `…/overlay/<piece>-<tone>.png` — the transparent overlays, and `/life/share/index.json`, their manifest |
 | `tasks/fitness-activity-views.mjs` | `fitnessActivityPages` | `generateDataPagesTask` + `personal/templates/activity.html` | `/life/activity/<slug>` |
 | `tasks/fitness-event-views.mjs` | `fitnessEventPages` | `generateDataPagesTask` + `personal/templates/event.html` | `/life/event/<slug>` — one page per race weekend (several races at one event within a few days) |
 | `tasks/fitness-roundup-views.mjs` | `fitnessRoundupPages` | `generateDataPagesTask` + `personal/templates/roundup.html` (`rl-week`, `rl-month`, `rl-year` partials) | `/life/roundup/<key>` — a week, a month and a year are three layouts, each led by its highlights |
@@ -202,8 +202,21 @@ there is a choice) over the pre-rendered files; on a phone **Share…** hands th
 to the share sheet (Web Share API level 2: Instagram Story, WhatsApp…), elsewhere — and as
 the fallback — it downloads. `…#share` opens the picker on load.
 
+**Overlays.** Pages from the last 30 days, and every race and race weekend, also get
+transparent PNGs to lay over his own photos (Strava/ROXFIT style): the same models and
+drawing blocks with no ground, scrim or frame, in a **light** tone (white, ink shadow) and a
+**dark** one (ink, white halo). `scripts/share-overlays.mjs` draws them: a Story and a Square
+**layout** (the card's content at full size, untrimmed) plus one **piece** per element —
+title, big numbers, PB / vs-PB stamp (solid, so it reads on a photo), route, km splits,
+parkrun line, Hyrox splits list and chart, top sets, PBs, HR trace, sport donut, calendar,
+records, vs last. Pieces are trimmed to their ink (plus a 12 px margin). Files:
+`/life/share/<kind>/<id>/overlay/<piece>-<tone>.png`; ~500 for the live data, cached like the
+cards. The picker lists them under **Overlay**, with a Tone choice in place of Background.
+
 `/life/share/index.json` lists the full-scope cards (`id`, `kind`, `template`, `title`,
-`label`, `date`, `page` with `#share`, `image`, `race`, `pb` — a PB session, never a roundup — `hash`, newest first). The box
+`label`, `date`, `page` with `#share`, `image`, `race`, `pb` — a PB session, never a roundup — `hash`, newest first),
+each with its `overlays` (`piece`, `label`, `tone`, `url`, `w`, `h`). `/life/share/**` is
+served with `Access-Control-Allow-Origin: *` so Insta Post Maker can draw them on its canvas. The box
 copies it after each deploy and Jarvis pushes "Your Hyrox card is ready" for new race and
 PB cards (`jarvis/gateway/domains/sharecards.py`).
 
