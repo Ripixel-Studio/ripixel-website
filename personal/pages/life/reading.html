@@ -47,8 +47,8 @@
 
     {{#if shelf.length}}
     <h2 class="fit-header">the <span>shelf</span>.</h2>
-    <p class="watch-note">Every book I have finished, newest first, a bookend where each year starts. A fatter spine is a longer book. Point at one for the cover.</p>
-    <p class="book-legend" aria-hidden="true"><span class="book-legend__k book-legend__k--audio"><svg viewBox="0 0 16 16" width="14" height="14"><use href="#fmt-audio"/></svg> audiobook</span><span class="book-legend__k book-legend__k--print"><svg viewBox="0 0 16 16" width="14" height="14"><use href="#fmt-print"/></svg> on paper</span><span class="book-legend__k book-legend__k--again"><b>2&times;</b> finished more than once</span></p>
+    <p class="watch-note">Every book I have finished, newest first, a bookend where each year starts, and a book I went back to is on the shelf once for every time. A fatter spine is a longer book. Point at one for the cover.</p>
+    <p class="book-legend" aria-hidden="true"><span class="book-legend__k book-legend__k--audio"><svg viewBox="0 0 16 16" width="14" height="14"><use href="#fmt-audio"/></svg> audiobook</span><span class="book-legend__k book-legend__k--print"><svg viewBox="0 0 16 16" width="14" height="14"><use href="#fmt-print"/></svg> on paper</span><span class="book-legend__k book-legend__k--again"><b>2nd</b> a spine for every time I finished it</span></p>
     <svg width="0" height="0" style="position:absolute" aria-hidden="true">
       <symbol id="fmt-audio" viewBox="0 0 16 16"><path d="M2.5 10V8a5.5 5.5 0 0 1 11 0v2" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="1.5" y="9" width="3.5" height="5.5" rx="1" fill="currentColor"/><rect x="11" y="9" width="3.5" height="5.5" rx="1" fill="currentColor"/></symbol>
       <symbol id="fmt-print" viewBox="0 0 16 16"><path d="M8 4C6 2.6 3.5 2.3 1.5 2.6v10C3.5 12.3 6 12.6 8 14c2-1.4 4.5-1.7 6.5-1.4v-10C12.5 2.3 10 2.6 8 4zM8 4v10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
@@ -60,7 +60,7 @@
         <li class="bookend"><span class="bookend__y">{{year}}</span><span class="bookend__n">{{count}}{{#if hours}}<br>{{hours}}{{/if}}</span></li>
         {{else}}
         <li class="book-spine book-spine--{{format}} book-spine--ink{{ink}}{{#if lean}} book-spine--lean{{/if}}{{#if again}} book-spine--again{{/if}}" style="--w: {{width}}px; --h: {{height}}; --fs: {{font}}; --lean: {{lean}}deg; --pos: {{pos}}%;{{#if cover}} --cover: url('{{cover}}');{{/if}}" tabindex="0">
-          {{#if again}}<span class="book-spine__again" aria-hidden="true">{{times}}&times;</span>{{/if}}
+          {{#if again}}<span class="book-spine__again" aria-hidden="true">{{mark}}</span>{{/if}}
           <span class="book-spine__title">{{spineTitle}}</span>
           <span class="book-spine__by">{{by}}</span>
           <svg class="book-spine__fmt" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><use href="#fmt-{{format}}"/></svg>

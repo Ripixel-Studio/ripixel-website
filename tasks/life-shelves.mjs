@@ -59,6 +59,66 @@ const lengthLabel = (b) => (formatOf(b) === 'print' ? pagesLabel(b.pages) || hou
 /** How many times a book was finished, when it was more than once. @param {any} b */
 const timesOf = (b) => Math.max(2, num(b.reads) ?? 2);
 
+/** "1st", "2nd", "3rd", "4th". @param {number} n */
+const ORDINAL = (n) => `${n}${n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th'}`;
+/** A finish as a sortable month: "2018" (known to the year) is filed as its January. @param {unknown} f */
+const finishKey = (f) => (/^\d{4}$/.test(String(f)) ? `${f}-01` : String(f || ''));
+/** One book however it was had: the same title (less its edition marks) by the same author. @param {any} b */
+const bookId = (b) => `${spineTitle(str(b.title)).toLowerCase()}|${str(b.by).toLowerCase()}`;
+
+/**
+ * A spine for every time through (2026-11-21). Paper rereads already come as a row each
+ * (Hardcover keeps every read), but Audible keeps no listen history: a re-listen moves the
+ * book's one row to whichever finish the export could date. When the book was heard to the
+ * end again ("twice" in heardAgain) the other listen gets its own spine:
+ *  - the row sits after a later book in its series was finished: the row is the re-listen,
+ *    and the first listen was finished by the earliest of those (an estimate: "by Nov 2025");
+ *  - else the row is the first listen and the re-listen is the month it was last heard.
+ * A re-listen with neither stays one spine with its "2×". Then every book on more than one
+ * spine is numbered through in date order: 1st, 2nd, 3rd.
+ * @param {any[]} rows the export's shelf, newest first @param {any[]} heardAgain
+ */
+export function everyTime(rows, heardAgain) {
+  const twice = new Map(heardAgain.filter((h) => h.state === 'twice' && /^\d{4}-\d{2}$/.test(String(h.heard || ''))).map((h) => [str(h.key), String(h.heard)]));
+  const seqOf = (/** @type {any} */ b) => (str(b.seq) && Number.isFinite(+b.seq) ? +b.seq : null);
+  /** @type {any[]} */
+  const extra = [];
+  for (const b of rows) {
+    const heard = twice.get(str(b.key));
+    const f = String(b.finished || '');
+    if (!heard || formatOf(b) !== 'audio' || num(b.reads) != null || !/^\d{4}-\d{2}$/.test(f)) continue;
+    const seq = seqOf(b);
+    const later = str(b.series) && seq != null
+      ? rows.filter((o) => o !== b && str(o.series) === str(b.series) && (seqOf(o) ?? -1) > seq && /^\d{4}-\d{2}$/.test(String(o.finished || '')))
+        .map((o) => String(o.finished)).sort()[0]
+      : undefined;
+    if (later && later < f) extra.push({ ...b, key: `${str(b.key)}:first`, finished: later, estimated: true });
+    else if (heard > f) extra.push({ ...b, key: `${str(b.key)}:again`, finished: heard });
+  }
+  const all = [...rows, ...extra].map((b, i) => ({ b, i }))
+    .sort((x, y) => (finishKey(y.b.finished) < finishKey(x.b.finished) ? -1 : finishKey(y.b.finished) > finishKey(x.b.finished) ? 1 : x.i - y.i))
+    .map((x) => ({ ...x.b }));
+  /** @type {Map<string, any[]>} */
+  const byBook = new Map();
+  for (const b of all) {
+    if (b.again !== true) continue;
+    const id = bookId(b);
+    if (!byBook.has(id)) byBook.set(id, []);
+    /** @type {any[]} */ (byBook.get(id)).push(b);
+  }
+  for (const copies of byBook.values()) {
+    if (copies.length < 2) continue;
+    const asc = [...copies].reverse();
+    const when = (/** @type {any} */ c) => `${c.estimated ? 'by ' : ''}${finishedLabel(c.finished)}`;
+    asc.forEach((c, n) => {
+      c.nth = n + 1;
+      const others = asc.filter((o) => o !== c).map(when).filter(Boolean);
+      c.nthLabel = `${ORDINAL(n + 1)} time through${others.length ? ` · also finished ${others.join(', ')}` : ''}`;
+    });
+  }
+  return { rows: all, extra };
+}
+
 // The spine's type has to carry the whole title: Anton is condensed, about this wide a
 // character for its size, and the spine gives it SPINE_TEXT of its height (the rest is the
 // author and the format mark). Checked against the rendered page (scrollHeight per spine).
@@ -109,8 +169,9 @@ function spine(b, i) {
   const format = formatOf(b);
   return {
     key: str(b.key), title, spineTitle: set, by: str(b.by), cover: shelfArt(b.cover),
-    series: seriesLabel(b), monthLabel: finishedLabel(b.finished), hours: lengthLabel(b), genre: str(b.genre),
-    times: timesOf(b), againLabel: num(b.reads) && /** @type {number} */ (num(b.reads)) >= 2 ? `finished ${timesOf(b)} times` : 'heard more than once',
+    series: seriesLabel(b), monthLabel: `${b.estimated ? 'by ' : ''}${finishedLabel(b.finished)}`, hours: lengthLabel(b), genre: str(b.genre),
+    times: timesOf(b), againLabel: b.nthLabel || (num(b.reads) && /** @type {number} */ (num(b.reads)) >= 2 ? `finished ${timesOf(b)} times` : 'heard more than once'),
+    mark: b.nth ? ORDINAL(b.nth) : `${timesOf(b)}×`,
     printed: num(b.printed) ? String(b.printed) : '',
     width: fit.width, font: fit.font, height, format, audio: format === 'audio', again: b.again === true,
     lean: i % 9 === 4 ? (h % 2 ? 4 : -4) : 0,
@@ -135,7 +196,7 @@ const AGAIN = /** @type {Record<string, (b: any) => string>} */ ({
 /** @param {any} sec */
 export function readingView(sec) {
   const st = sec.bookStats && typeof sec.bookStats === 'object' ? sec.bookStats : {};
-  const books = list(sec.shelf).filter((b) => str(b.title));
+  const { rows: books, extra } = everyTime(list(sec.shelf).filter((b) => str(b.title)), list(sec.heardAgain));
   /** @type {Map<string, any[]>} */
   const byYear = new Map();
   books.forEach((b, i) => {
@@ -144,7 +205,15 @@ export function readingView(sec) {
     if (!byYear.has(y)) byYear.set(y, []);
     /** @type {any[]} */ (byYear.get(y)).push(spine(b, i));
   });
-  const years = list(sec.byYear);
+  // the export counts each year's finishes; a listen it had no day for is one more in its year
+  const years = list(sec.byYear).map((r) => ({ ...r }));
+  for (const b of extra) {
+    const y = String(b.finished).slice(0, 4);
+    let r = years.find((x) => String(x.year) === y);
+    if (!r) { r = { year: y, books: 0, hours: 0 }; years.push(r); years.sort((a, c) => String(a.year).localeCompare(String(c.year))); }
+    r.books = (num(r.books) ?? 0) + 1;
+    if (num(b.hours)) r.hours = (num(r.hours) ?? 0) + /** @type {number} */ (num(b.hours));
+  }
   const yearOf = (/** @type {string} */ y) => years.find((r) => String(r.year) === y) || {};
   // one bookcase: the spines run on from shelf to shelf, a bookend card where each year begins
   const shelf = [...byYear.entries()].flatMap(([year, spines]) => [

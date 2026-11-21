@@ -203,3 +203,42 @@ test('reading: read it, heard it', () => {
   assert.deepEqual(v.bothWays[0].times.map((t) => [t.when, t.how]),
     [['2018', 'on paper'], ['Jun 2021', 'read by Voice One'], ['Apr 2025', 'audiobook']]);
 });
+
+test('reading: a spine for every time through (an audiobook heard to the end again)', () => {
+  const v = readingView({
+    shelf: [
+      // re-listened in Nov 2026, after book 2 was finished: the first listen was before that
+      { key: 'c1', title: 'Crawler', by: 'M D', series: 'Crawler', seq: '1', hours: 13.5, finished: '2026-11', again: true },
+      { key: 'c2', title: 'Crawler Two', by: 'M D', series: 'Crawler', seq: '2', hours: 11, finished: '2025-11' },
+      // the export dated the first listen; the second was heard in Aug 2025
+      { key: 'p', title: 'Player', by: 'I B', hours: 11, finished: '2024-03', again: true },
+      // heard again but left part-way: still one spine
+      { key: 'u', title: 'Weapons', by: 'I B', hours: 13, finished: '2019-11', again: true },
+      // a book on paper read twice comes as two rows already: numbered, not added to
+      { key: 'd1', title: 'Sand', by: 'F H', format: 'print', pages: 500, finished: '2018', reads: 2, again: true },
+      { key: 'd2', title: 'Sand', by: 'F H', format: 'print', pages: 500, finished: '2010', reads: 2, again: true, repeat: true },
+    ],
+    heardAgain: [
+      { key: 'c1', title: 'Crawler', state: 'twice', heard: '2026-11' },
+      { key: 'p', title: 'Player', state: 'twice', heard: '2025-08' },
+      { key: 'u', title: 'Weapons', state: 'paused', heard: '2024-07' },
+    ],
+    byYear: [{ year: '2010', books: 1, pages: 500 }, { year: '2018', books: 1, pages: 500 }, { year: '2019', books: 1, hours: 13 },
+      { year: '2024', books: 1, hours: 11 }, { year: '2025', books: 1, hours: 11 }, { year: '2026', books: 1, hours: 13.5 }],
+  });
+  const row = v.shelf.map((s) => (s.bookend ? `[${s.year} ${s.count}]` : `${s.title} ${s.monthLabel} ${s.again ? s.mark : '-'}`));
+  assert.deepEqual(row, [
+    '[2026 1 book]', 'Crawler Nov 2026 2nd',
+    '[2025 3 books]', 'Crawler Two Nov 2025 -', 'Crawler by Nov 2025 1st', 'Player Aug 2025 2nd',
+    '[2024 1 book]', 'Player Mar 2024 1st',
+    '[2019 1 book]', 'Weapons Nov 2019 2×',
+    '[2018 1 book]', 'Sand 2018 2nd',
+    '[2010 1 book]', 'Sand 2010 1st',
+  ]);
+  const crawler = v.shelf.filter((s) => s.title === 'Crawler');
+  assert.deepEqual(crawler.map((s) => s.againLabel), ['2nd time through · also finished by Nov 2025', '1st time through · also finished Nov 2026']);
+  assert.notEqual(crawler[0].key, crawler[1].key);
+  assert.equal(v.shelf.find((s) => s.title === 'Weapons').againLabel, 'heard more than once');
+  assert.equal(v.yearBars.find((y) => y.year === '2025').books, 3);
+  assert.equal(v.yearBars.find((y) => y.year === '2025').hours, '36 h');
+});
