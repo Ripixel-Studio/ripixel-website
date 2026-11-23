@@ -1,6 +1,6 @@
 <!-- Context: lifeSections.games.league {rankLabel, queueLabel, record, seasonWinRate, mains[{champion, level,
      points, art}], recent{games, winRate, kda, pool[{champion, games, winRate}]}, lifetime{allHours, games, hours,
-     sinceLabel}} (allHours: the whole account; games/hours: the match history since sinceLabel) — League of Legends, the biggest block on the page. Champions only: never a player. -->
+     sinceLabel}}, since: the quiet footnote on how far back the numbers reach} (allHours: the whole account; games/hours: the match history since sinceLabel) — League of Legends, the biggest block on the page. Champions only: never a player. -->
 <section class="games-league" aria-labelledby="games-league-title">
   <div class="games-league__top">
     <div class="games-league__rank">
@@ -50,4 +50,5 @@
     {{/if}}
   </div>
   {{/if}}
+  {{#if since}}<p class="games-since games-src--league"><b>since</b> {{since}}</p>{{/if}}
 </section>

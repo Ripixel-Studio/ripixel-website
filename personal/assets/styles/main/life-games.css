@@ -652,6 +652,13 @@
 .life-charts.games-src--league .chart__line { stroke: var(--src); }
 .life-charts.games-src--league .chart__area { fill: var(--src); }
 
+/* the quiet "since" footnote: how far back each source's numbers reach (the APIs only go so far) */
+.games-since { max-width: 80ch; margin: 14px 0 26px; padding-left: 10px; border-left: 3px solid var(--src); font-family: var(--f-mono); font-size: 11px; line-height: 1.5; color: color-mix(in srgb, var(--ink) 60%, #fff); }
+.games-since b { margin-right: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--src); }
+/* inside the dark League block: the block's own light ink and yellow labels */
+.games-league .games-since { max-width: 80ch; margin-bottom: 0; border-left-color: var(--ink-yellow); color: rgba(255, 255, 255, .62); }
+.games-league .games-since b { color: var(--ink-yellow); }
+
 @media (max-width: 640px) {
   .games-split__bar { height: 44px; }
   .games-split__seg { font-size: 20px; padding: 0 8px; }
