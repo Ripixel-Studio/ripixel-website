@@ -48,7 +48,7 @@
     {{/if}}
 
     {{#if league}}
-    {{> games-league league}}
+    {{> games-league league since=since.league}}
     {{/if}}
     {{#if leagueYear}}
     <div class="stat-strip life-stats">
@@ -115,6 +115,7 @@
     <h2 class="fit-header" id="steam">on <span>Steam</span>.</h2>
     <p class="games-note">Everything else I play, by Steam's own clock.</p>
     {{> life-stats steam}}
+    {{#if since.steam}}<p class="games-since games-src--steam"><b>since</b> {{since.steam}}</p>{{/if}}
     {{/if}}
     {{#if monitor}}{{> games-monitor monitor}}{{/if}}
     {{#unless monitor}}{{#if recent.length}}

@@ -596,6 +596,20 @@ test('games League lifetime: the whole account beside the match history', () => 
   assert.deepEqual(g.league.lifetime, { allHours: '2,773', games: '591', hours: '283', sinceLabel: 'Nov 2024' });
 });
 
+test('games since notes: how far back League and Steam reach', () => {
+  const lg = fixture.sections.games.league;
+  const g = buildSection('games', { ...fixture.sections.games, league: { ...lg, lifetime: { games: 591, hours: 282.5, since: '2024-11', allHours: 2773 } } }, now);
+  assert.match(g.since.league, /^The 2,773h is the whole account since it began, counted by wol\.gg/);
+  assert.match(g.since.league, /match history, since Nov 2024\.$/);
+  assert.match(g.since.steam, /starts 20 Oct 2026, when I began keeping track\.$/);
+  // no whole-account figure: just how far the match history reaches
+  const plain = buildSection('games', fixture.sections.games, now);
+  assert.equal(plain.since.league, "Riot's match history reaches back to Mar 2019: every League number here starts there.");
+  // nothing dated: no notes at all
+  const bare = buildSection('games', { ...fixture.sections.games, league: { ...lg, lifetime: null }, allTime: { ...fixture.sections.games.allTime, leagueSince: null }, year: { ...fixture.sections.games.year, steamSince: null }, clock: null }, now);
+  assert.equal(bare.since, null);
+});
+
 test('games time of day: weekday daytime is one block, shared scale', () => {
   const g = buildSection('games', fixture.sections.games, now);
   const [wd, we] = g.clock.charts;

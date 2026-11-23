@@ -465,7 +465,30 @@ function gamesNumbers(sec) {
       ? { ...row('Since tracking', hours(tracked), 'h'), sub: `sampled hourly since ${since}` } : false,
     stat('Backlog', sec.backlog, group, 'games'),
   ].filter(Boolean);
-  return { split, overview, leagueYear, steam };
+  return { split, overview, leagueYear, steam, since: sinceNotes(sec) };
+}
+
+/**
+ * The quiet "since" footnotes under League and Steam: what reach each source's numbers have, since the APIs
+ * only go so far back. League's big figure is the whole account (wol.gg, no API serves it) while Riot's match
+ * history starts later; Steam's own counters are lifetime and two weeks, with no history before the box began
+ * keeping track. Each is '' when there is nothing dated to say. @param {any} sec
+ */
+function sinceNotes(sec) {
+  const lg = sec.league && typeof sec.league === 'object' ? sec.league : {};
+  const life = lg.lifetime && typeof lg.lifetime === 'object' ? lg.lifetime : {};
+  const at = sec.allTime && typeof sec.allTime === 'object' ? sec.allTime : {};
+  const y = sec.year && typeof sec.year === 'object' ? sec.year : {};
+  const history = monthLabel(life.since) || monthLabel(at.leagueSince);
+  const whole = num(life.allHours);
+  const league = whole && history
+    ? `The ${group(whole)}h is the whole account since it began, counted by wol.gg: Riot's API doesn't go back that far. Everything else here is Riot's match history, since ${history}.`
+    : history ? `Riot's match history reaches back to ${history}: every League number here starts there.` : '';
+  const tracked = dayLabel(y.steamSince) || dayLabel(sec.clock?.steamSince);
+  const steam = tracked
+    ? `All time and the last two weeks are Steam's own counts. Steam keeps no history beyond those, so anything by the day or hour starts ${tracked}, when I began keeping track.`
+    : '';
+  return league || steam ? { league, steam } : null;
 }
 
 /** The export's most-played claim, worded for the tile's ribbon; anything else is no ribbon. */
