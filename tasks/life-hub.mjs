@@ -394,7 +394,7 @@ function yearChart(weeks) {
   const rows = (Array.isArray(weeks) ? weeks : []).filter((w) => w && typeof w === 'object' && /^\d{4}-\d{2}-\d{2}$/.test(String(w.week)));
   const chart = lineChart(rows.map((w) => num(w.league) ?? num(w.total)), { label: 'League this year, cumulative', unit: 'hours', x: { kind: 'weeks', weeks: rows.map((w) => String(w.week)) } });
   if (!chart) return null;
-  return { chart, note: 'Every League match this year, added up week by week, and nothing else.' };
+  return { chart, note: 'Every League match this year, added up week by week.' };
 }
 
 /** The fun numbers, each a row; null without any. @param {any} f */

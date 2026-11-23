@@ -16,52 +16,38 @@
       <line x1="9" y1="0" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/>
     </svg>
 
-    {{!-- Games (C6, lifeSections.games), in four chapters so no number mixes its sources:
-          1 the whole picture (all time, League against Steam; online; when I play),
-          2 League of Legends (Riot's numbers only: rank, mains, this year, the year line, the League numbers),
-          3 Steam (Steam's numbers only: its totals, the monitor of recently played, trophies, completion),
-          4 the shelf (every game, League one box among Steam's: shelf, bins, labels, studios, critics, prizes).
+    {{!-- Games (C6, lifeSections.games), in the order no number mixes its sources:
+          where the hours went (all time, League against Steam; online; when I play),
+          League of Legends (Riot's numbers only: rank, mains, this year, the year line, the League numbers),
+          on Steam (Steam's numbers only: its totals, the monitor of recently played, trophies, completion),
+          the shelf (every game, League one box among Steam's: shelf, bins, labels, studios, critics, prizes).
+          Headers and notes are the site's own fit-header + note, like every other /life page.
           League and Steam keep one ink each (games-src--league / --steam) wherever they appear. --}}
     {{#with section}}
     {{> life-section-head snapTop="BUTTON" snapAccent="MASHING"}}
     {{#if empty}}
     {{> life-empty}}
     {{else}}
-    <nav class="games-toc" aria-label="On this page">
-      <a href="#whole" class="games-toc__item">The whole picture</a>
-      {{#if league}}<a href="#league" class="games-toc__item games-src--league">League</a>{{/if}}
-      {{#if steam.length}}<a href="#steam" class="games-toc__item games-src--steam">Steam</a>{{/if}}
-      {{#if boxes.length}}<a href="#shelf" class="games-toc__item">The shelf</a>{{/if}}
-    </nav>
-
-    <header class="games-chapter" id="whole">
-      <p class="games-chapter__no">01</p>
-      <h2 class="games-chapter__title">The whole picture</h2>
-      <p class="games-chapter__what">Every hour, wherever it was played. After this, League and Steam each get a chapter of their own, and their numbers never mix.</p>
-    </header>
     {{#if split}}
+    <h2 class="fit-header" id="whole">where the <span>hours went</span>.</h2>
+    <p class="games-note">Every hour I have played, all time: League of Legends on one side, every game on Steam on the other.</p>
     <figure class="games-split" aria-label="{{split.total}} hours all time: {{#each split.parts}}{{label}} {{hours}} hours, {{pct}}%{{#unless @last}}; {{/unless}}{{/each}}">
-      <figcaption class="games-split__label">Where <b>{{split.total}}h</b> went</figcaption>
+      <figcaption class="games-split__label"><b>{{split.total}}h</b> in all</figcaption>
       <div class="games-split__bar" aria-hidden="true">{{#each split.parts}}<span class="games-split__seg games-src--{{key}}" style="flex-grow: {{pct}}"><b>{{pct}}%</b></span>{{/each}}</div>
       <ol class="games-split__key">
         {{#each split.parts}}<li class="games-split__part games-src--{{key}}"><span class="games-split__swatch" aria-hidden="true"></span><b>{{label}}</b> {{hours}}h <small>{{sub}}</small></li>{{/each}}
       </ol>
-      {{#if split.idle}}<p class="games-note">Idle games left running don't count anywhere on this page: another {{split.idle}}h.</p>{{/if}}
+      {{#if split.idle}}<p class="games-note">Idle games left running don't count: another {{split.idle}}h.</p>{{/if}}
     </figure>
     {{/if}}
     {{#if overview.length}}{{> life-stats overview}}{{/if}}
     {{#if clock}}
     <h2 class="fit-header">when I <span>play</span>.</h2>
     <div class="life-charts">{{#each clock.charts}}{{> chart-bars}}{{/each}}</div>
-    {{#if clock.note}}<p class="games-note">League and Steam together: {{clock.note}}. Weekday 9am–5pm is one block.</p>{{/if}}
+    {{#if clock.note}}<p class="games-note">{{clock.note}}. Weekday 9am–5pm is one block.</p>{{/if}}
     {{/if}}
 
     {{#if league}}
-    <header class="games-chapter games-src--league" id="league">
-      <p class="games-chapter__no">02</p>
-      <h2 class="games-chapter__title">League of Legends</h2>
-      <p class="games-chapter__what">The most played game by far, from Riot's own records: the rank, the mains, every match. Nothing from Steam in this chapter.</p>
-    </header>
     {{> games-league league}}
     {{/if}}
     {{#if leagueYear}}
@@ -74,7 +60,7 @@
     {{else}}{{#if fun.facts.length}}{{> life-stats fun.facts}}{{/if}}
     {{/if}}
     {{#if yearChart}}
-    <h2 class="fit-header">League, <span>the year so far</span>.</h2>
+    <h2 class="fit-header">the year <span>so far</span>.</h2>
     <div class="life-charts life-charts--wide games-src--league">{{> chart-line yearChart.chart}}</div>
     <p class="games-note">{{yearChart.note}}</p>
     {{/if}}
@@ -126,11 +112,8 @@
     </div>
     {{/if}}
     {{#if steam.length}}
-    <header class="games-chapter games-src--steam" id="steam">
-      <p class="games-chapter__no">03</p>
-      <h2 class="games-chapter__title">Steam</h2>
-      <p class="games-chapter__what">Everything else I play, from Steam's own numbers. No League in this chapter.</p>
-    </header>
+    <h2 class="fit-header" id="steam">on <span>Steam</span>.</h2>
+    <p class="games-note">Everything else I play, by Steam's own clock.</p>
     {{> life-stats steam}}
     {{/if}}
     {{#if monitor}}{{> games-monitor monitor}}{{/if}}
@@ -171,15 +154,8 @@
     </ol>
     {{/if}}
     {{#if boxes.length}}
-    <header class="games-chapter" id="shelf">
-      <p class="games-chapter__no">04</p>
-      <h2 class="games-chapter__title">The shelf</h2>
-      <p class="games-chapter__what">Every game I own, Steam's and League together, sorted and stickered. League is one box among them (the biggest).</p>
-    </header>
-    {{/if}}
-    {{#if boxes.length}}
-    <h2 class="fit-header">the <span>games shelf</span>.</h2>
-    <p class="games-note">The most played get the big boxes, the dabbles get jewel cases. The starburst says how many achievements are done, the corner sticker is the Metacritic score (gold for a must-play), the foil is a big prize won. Point at one to turn the box round.</p>
+    <h2 class="fit-header" id="shelf">the <span>games shelf</span>.</h2>
+    <p class="games-note">Every game I own, League included. The most played get the big boxes, the dabbles get jewel cases. The starburst says how many achievements are done, the corner sticker is the Metacritic score (gold for a must-play), the foil is a big prize won. Point at one to turn the box round.</p>
     {{> games-boxes shelves}}
     {{/if}}
     {{#if bins}}
