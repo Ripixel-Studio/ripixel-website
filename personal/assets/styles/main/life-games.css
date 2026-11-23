@@ -627,33 +627,9 @@
   .gfoil--box { font-size: calc(5px * var(--s)); }
 }
 
-/* ── the page's hierarchy: four chapters, and one ink per source (League blue, Steam green) wherever it shows ── */
+/* ── one ink per source (League blue, Steam green) wherever it shows ── */
 .games-src--league { --src: var(--ink-blue); }
 .games-src--steam { --src: var(--ink-green); }
-
-.games-toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 28px; }
-.games-toc__item {
-  --src: var(--ink);
-  font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase;
-  padding: 6px 12px; border: 2px solid var(--ink); background: #fff; color: var(--ink);
-  box-shadow: 3px 3px 0 var(--src); text-decoration: none;
-}
-.games-toc__item:hover, .games-toc__item:focus-visible { background: var(--src); color: #fff; }
-
-.games-chapter:not([class*="games-src--"]) { --src: var(--ink-magenta); }
-.games-chapter {
-  display: grid; grid-template-columns: auto 1fr; column-gap: 18px; align-items: end;
-  margin: 64px 0 26px; padding: 0 0 14px;
-  border-bottom: 4px solid var(--src);
-  scroll-margin-top: 16px;
-}
-#whole.games-chapter { margin-top: 8px; }
-.games-chapter__no {
-  grid-row: span 2; margin: 0;
-  font-family: var(--f-disp); font-size: 84px; line-height: 0.8; color: var(--src);
-}
-.games-chapter__title { margin: 0; font-family: var(--f-disp); font-weight: 400; font-size: clamp(34px, 6vw, 56px); line-height: 1; text-transform: uppercase; color: var(--ink); }
-.games-chapter__what { margin: 6px 0 0; font-family: var(--f-sans); font-size: 15px; max-width: 62ch; }
 
 .games-split { margin: 0 0 30px; }
 .games-split__label { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; margin: 0 0 8px; }
@@ -677,8 +653,6 @@
 .life-charts.games-src--league .chart__area { fill: var(--src); }
 
 @media (max-width: 640px) {
-  .games-chapter__no { font-size: 60px; }
-  .games-chapter { margin-top: 48px; column-gap: 12px; }
   .games-split__bar { height: 44px; }
   .games-split__seg { font-size: 20px; padding: 0 8px; }
 }

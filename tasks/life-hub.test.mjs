@@ -382,14 +382,16 @@ test('no league', async () => {
     assert.match(full, /gbox__badge">most played, by far</);
     assert.match(full, /gbox__badge gbox__badge--idle">left running</);
     assert.equal((full.match(/class="gbox__badge/g) || []).length, 2);
-    assert.match(full, /Idle games left running don(&#x27;|')t count anywhere on this page: another 816h\./);
-    // the hierarchy: the whole picture, then League, then Steam, then the shelf, each once
+    assert.match(full, /Idle games left running don(&#x27;|')t count: another 816h\./);
+    // the order: where the hours went, then League, then Steam, then the shelf, each once, under the site's own headers
     const at = (/** @type {string} */ id) => full.indexOf(`id="${id}"`);
-    assert.ok(at('whole') > 0 && at('whole') < at('league') && at('league') < at('steam') && at('steam') < at('shelf'), 'chapters in order');
-    assert.ok(at('league') < full.indexOf('class="games-league"') && full.indexOf('class="games-league"') < at('steam'), 'the League block sits in its chapter');
+    const lg = full.indexOf('class="games-league"');
+    assert.ok(at('whole') > 0 && at('whole') < lg && lg < at('steam') && at('steam') < at('shelf'), 'in order');
+    for (const id of ['whole', 'steam', 'shelf']) assert.match(full, new RegExp(`<h2 class="fit-header" id="${id}">`), id);
     assert.ok(at('steam') < full.indexOf('class="games-trophies"') && full.indexOf('class="games-trophies"') < at('shelf'), 'achievements sit with Steam');
-    const league = full.slice(at('league'), full.lastIndexOf('<header', at('steam')));
-    assert.doesNotMatch(league.replace(/Nothing from Steam in this chapter/, ''), /Steam/, 'no Steam number in the League chapter');
+    assert.doesNotMatch(full.slice(lg, at('steam')), /Steam/, 'no Steam number among League\'s');
+    // no chapter banners or contents bar: the page talks like the rest of /life
+    assert.doesNotMatch(full, /games-chapter|games-toc|this chapter/);
     assert.match(full, /<img class="games-months__icon" src="https:\/\/ddragon\.leagueoflegends\.com\/cdn\/16\.22\.1\/img\/champion\/Jinx\.png" alt="" loading="lazy" decoding="async" width="40" height="40">/);
     assert.match(full, /games-months__icon games-months__icon--none/);
     // and with no claim on any tile, no ribbon: it is never assumed for League
