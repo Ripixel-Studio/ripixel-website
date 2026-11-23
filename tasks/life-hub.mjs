@@ -350,7 +350,11 @@ function leagueView(lg) {
       pool: (Array.isArray(rec.pool) ? rec.pool : []).filter((p) => p && p.champion)
         .map((p) => ({ champion: championName(p.champion), games: num(p.games) ?? 0, winRate: num(p.winRate) })),
     } : null,
-    lifetime: num(life.games) ? { games: group(life.games), hours: num(life.hours) != null ? group(life.hours) : '', sinceLabel: monthLabel(life.since) } : null,
+    // allHours is the whole account (every game since it began); games/hours are the reachable match history
+    lifetime: num(life.games) || num(life.allHours) ? {
+      allHours: num(life.allHours) ? group(life.allHours) : '',
+      games: num(life.games) ? group(life.games) : '', hours: num(life.hours) != null ? group(life.hours) : '', sinceLabel: monthLabel(life.since),
+    } : null,
   };
 }
 
@@ -381,13 +385,16 @@ function clockView(c) {
   return { charts: [weekday, weekend].filter(Boolean), note: parts.join('; ') };
 }
 
-/** Cumulative hours this year, week by week (League + Steam since tracking). @param {any[]} weeks @param {any} year */
-function yearChart(weeks, year) {
+/**
+ * League's hours this year, cumulative week by week. League only: Steam's day-by-day hours only
+ * exist from when tracking began, so adding them would bend a League line with a few Steam hours.
+ * @param {any[]} weeks
+ */
+function yearChart(weeks) {
   const rows = (Array.isArray(weeks) ? weeks : []).filter((w) => w && typeof w === 'object' && /^\d{4}-\d{2}-\d{2}$/.test(String(w.week)));
-  const chart = lineChart(rows.map((w) => num(w.total)), { label: 'This year, cumulative', unit: 'hours', x: { kind: 'weeks', weeks: rows.map((w) => String(w.week)) } });
+  const chart = lineChart(rows.map((w) => num(w.league) ?? num(w.total)), { label: 'League this year, cumulative', unit: 'hours', x: { kind: 'weeks', weeks: rows.map((w) => String(w.week)) } });
   if (!chart) return null;
-  const since = dayLabel(year?.steamSince);
-  return { chart, note: since ? `League from every match; Steam counted from ${since}, when tracking began` : 'League from every match; Steam not counted (no day-by-day history yet)' };
+  return { chart, note: 'Every League match this year, added up week by week, and nothing else.' };
 }
 
 /** The fun numbers, each a row; null without any. @param {any} f */
@@ -421,27 +428,44 @@ function funView(f) {
   return facts.length || view.modes.length || champs.length || bands.length ? view : null;
 }
 
-/** The headline numbers: League this year, Steam's fortnight, all time (with what it covers). @param {any} sec */
-function gamesStats(sec) {
+/**
+ * The page's hierarchy of numbers, each source on its own (never a Steam hour inside a League figure):
+ * `split` (all time, League against Steam, idle games out), `overview` (the totals across both),
+ * `leagueYear` (League this year, League only) and `steam` (Steam's own numbers). @param {any} sec
+ */
+function gamesNumbers(sec) {
   const y = sec.year && typeof sec.year === 'object' ? sec.year : {};
   const at = sec.allTime && typeof sec.allTime === 'object' ? sec.allTime : null;
   const lgSince = monthLabel(at?.leagueSince);
-  const all = num(sec.hoursTotal) != null ? {
-    ...row('All time', group(/** @type {number} */ (num(sec.hoursTotal))), 'h'),
-    sub: at ? `Steam lifetime ${group(num(at.steam) ?? 0)}h + League ${group(num(at.league) ?? 0)}h${lgSince ? ` since ${lgSince}` : ''}` : '',
-  } : false;
-  // Steam's tracked hours join the line only once they amount to something (a 0h reads as a glitch).
-  const tracked = num(y.steamSinceTracking);
-  const since = dayLabel(y.steamSince).replace(/ \d{4}$/, '');
-  const steamYear = tracked != null && tracked >= 1 && since ? `+ ${group(tracked)}h Steam since ${since}` : '';
-  return [
-    num(y.league) != null ? { ...row('League this year', group(y.league), 'h'), sub: [num(y.leagueGames) != null ? `${group(y.leagueGames)} games` : '', steamYear].filter(Boolean).join(' · ') } : false,
-    num(sec.steam2Weeks) != null ? { ...row('Steam, last 2 weeks', hours(sec.steam2Weeks), 'h'), sub: "Steam's own two-week figure" } : false,
-    all,
+  const lg = num(at?.league), st = num(at?.steam), idle = num(at?.idle);
+  const total = num(sec.hoursTotal) ?? (lg != null && st != null ? lg + st : null);
+  const both = lg != null && st != null && lg + st > 0;
+  const split = both ? {
+    total: group(/** @type {number} */ (total ?? lg + st)),
+    parts: [
+      { key: 'league', label: 'League of Legends', hours: group(lg), pct: Math.round((lg / (lg + st)) * 100), sub: lgSince ? `since ${lgSince}` : 'the whole account' },
+      { key: 'steam', label: 'Steam', hours: group(st), pct: 100 - Math.round((lg / (lg + st)) * 100), sub: 'every other game' },
+    ],
+    idle: idle ? group(idle) : '',
+  } : null;
+  const overview = [
+    total != null ? { ...row('All time', group(total), 'h'), sub: both ? 'League and Steam together' : '' } : false,
     // 0 means not counted yet (no multiplayer flags collected), not "never online"
-    num(sec.multiplayerHours) ? row('Multiplayer', group(sec.multiplayerHours), 'h') : false,
+    num(sec.multiplayerHours) ? { ...row('Online', group(sec.multiplayerHours), 'h'), sub: 'League plus Steam games played with others' } : false,
+  ].filter(Boolean);
+  const leagueYear = num(y.league) != null
+    ? { ...row('This year', group(y.league), 'h'), sub: num(y.leagueGames) != null ? `${group(y.leagueGames)} games` : '' } : null;
+  const tracked = num(y.steamSinceTracking), two = num(sec.steam2Weeks);
+  const since = dayLabel(y.steamSince);
+  const steam = [
+    st != null ? { ...row('All time', group(st), 'h'), sub: "Steam's own playtime, every game" } : false,
+    two != null ? { ...row('Last 2 weeks', hours(two), 'h'), sub: "Steam's own two-week figure" } : false,
+    // the tracked hours only once they say something the fortnight doesn't
+    tracked != null && since && tracked >= 1 && (two == null || Math.abs(tracked - two) >= 0.1)
+      ? { ...row('Since tracking', hours(tracked), 'h'), sub: `sampled hourly since ${since}` } : false,
     stat('Backlog', sec.backlog, group, 'games'),
   ].filter(Boolean);
+  return { split, overview, leagueYear, steam };
 }
 
 /** The export's most-played claim, worded for the tile's ribbon; anything else is no ribbon. */
@@ -468,10 +492,9 @@ function gamesView(sec) {
   const arts = new Map([...list(sec.recent), ...list(sec.wall)].filter((g) => g.name && safeArt(g.art)).map((g) => [String(g.name), safeArt(g.art)]));
   const artOf = (/** @type {unknown} */ name) => arts.get(String(name)) || '';
   return {
-    stats: gamesStats(sec),
-    idleNote: num(sec.allTime?.idle) ? `Idle games left running don't count: another ${group(/** @type {number} */ (num(sec.allTime.idle)))}h.` : '',
+    ...gamesNumbers(sec),
     clock: clockView(sec.clock),
-    yearChart: yearChart(sec.yearWeeks, sec.year),
+    yearChart: yearChart(sec.yearWeeks),
     fun: funView(sec.fun),
     wall,
     league: leagueView(sec.league),

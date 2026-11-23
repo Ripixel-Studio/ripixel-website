@@ -106,7 +106,10 @@ test('section views from the fixture', () => {
   assert.equal(buildSection('body', fixture.sections.body, now).measures.stats[0].value, '80.1');
   assert.equal(buildSection('body', fixture.sections.body, now).sleep.stats[0].value, '7h 24m');
   assert.equal(buildSection('code', fixture.sections.code, now).active[1].url, '');
-  assert.deepEqual(buildSection('games', fixture.sections.games, now).stats.map((r) => r.label), ['League this year', 'Steam, last 2 weeks', 'All time', 'Multiplayer', 'Backlog']);
+  const gv = buildSection('games', fixture.sections.games, now);
+  assert.deepEqual(gv.overview.map((r) => r.label), ['All time', 'Online']);
+  assert.deepEqual(gv.steam.map((r) => r.label), ['All time', 'Last 2 weeks', 'Since tracking', 'Backlog']);
+  assert.equal(gv.leagueYear.label, 'This year');
   assert.equal(buildSection('reading', fixture.sections.reading, now).current[0].percent, 40);
 });
 
@@ -379,7 +382,14 @@ test('no league', async () => {
     assert.match(full, /gbox__badge">most played, by far</);
     assert.match(full, /gbox__badge gbox__badge--idle">left running</);
     assert.equal((full.match(/class="gbox__badge/g) || []).length, 2);
-    assert.match(full, /Idle games left running don&#x27;t count: another 816h\./);
+    assert.match(full, /Idle games left running don(&#x27;|')t count anywhere on this page: another 816h\./);
+    // the hierarchy: the whole picture, then League, then Steam, then the shelf, each once
+    const at = (/** @type {string} */ id) => full.indexOf(`id="${id}"`);
+    assert.ok(at('whole') > 0 && at('whole') < at('league') && at('league') < at('steam') && at('steam') < at('shelf'), 'chapters in order');
+    assert.ok(at('league') < full.indexOf('class="games-league"') && full.indexOf('class="games-league"') < at('steam'), 'the League block sits in its chapter');
+    assert.ok(at('steam') < full.indexOf('class="games-trophies"') && full.indexOf('class="games-trophies"') < at('shelf'), 'achievements sit with Steam');
+    const league = full.slice(at('league'), full.lastIndexOf('<header', at('steam')));
+    assert.doesNotMatch(league.replace(/Nothing from Steam in this chapter/, ''), /Steam/, 'no Steam number in the League chapter');
     assert.match(full, /<img class="games-months__icon" src="https:\/\/ddragon\.leagueoflegends\.com\/cdn\/16\.22\.1\/img\/champion\/Jinx\.png" alt="" loading="lazy" decoding="async" width="40" height="40">/);
     assert.match(full, /games-months__icon games-months__icon--none/);
     // and with no claim on any tile, no ribbon: it is never assumed for League
@@ -412,18 +422,18 @@ test('games: idle games make no claim', () => {
   const last = g.wall[g.wall.length - 1];
   assert.deepEqual([last.name, last.idle, last.badge], ['Placeholder Idler', true, 'left running']);
   assert.ok(g.wall.slice(1, -1).every((t) => t.badge === '' && t.idle === false));
-  assert.equal(g.idleNote, "Idle games left running don't count: another 816h.");
+  assert.equal(g.split.idle, '816');
   const sec = structuredClone(fixture.sections.games);
   sec.wall[0].claim = null;
   sec.wall[1].claim = 'most';
   sec.allTime.idle = 0;
   const h = buildSection('games', sec, now);
   assert.deepEqual([h.wall[0].badge, h.wall[1].badge], ['', 'most played']);
-  assert.equal(h.idleNote, '');
+  assert.equal(h.split.idle, '');
   sec.wall[1].claim = 'biggest ever';
   assert.equal(buildSection('games', sec, now).wall[1].badge, '');
   delete sec.allTime;
-  assert.equal(buildSection('games', sec, now).idleNote, '');
+  assert.equal(buildSection('games', sec, now).split, null);
 });
 
 test('champion of the month carries its icon', () => {
@@ -553,17 +563,35 @@ test('old export: projects without status are active, and the page renders', asy
 
 // ─── games: honest year, time of day, the year by week, the League numbers ───
 
-test('games stats say what each number covers', () => {
+test('games numbers keep League and Steam apart', () => {
   const g = buildSection('games', fixture.sections.games, now);
-  const by = Object.fromEntries(g.stats.map((r) => [r.label, r]));
-  assert.equal(by['League this year'].value, '148');
-  assert.match(by['League this year'].sub, /231 games/);
-  assert.equal(by['League this year'].sub, '231 games · + 10h Steam since 20 Oct');
+  // League this year is League only: no Steam hours on its line
+  assert.equal(g.leagueYear.value, '148');
+  assert.equal(g.leagueYear.sub, '231 games');
+  assert.doesNotMatch(JSON.stringify(g.leagueYear), /Steam/);
+  // the split: all time, League against Steam, idle games out
+  assert.equal(g.split.total, '1,840');
+  assert.deepEqual(g.split.parts.map((p) => [p.key, p.hours, p.pct]), [['league', '612', 33], ['steam', '1,228', 67]]);
+  assert.equal(g.split.parts[0].sub, 'since Mar 2019');
+  assert.equal(g.split.idle, '816');
+  // Steam's own numbers, none of League's
+  const st = Object.fromEntries(g.steam.map((r) => [r.label, r]));
+  assert.equal(st['All time'].value, '1,228');
+  assert.equal(st['Last 2 weeks'].value, '6.5');
+  assert.equal(st['Since tracking'].value, '9.5');
+  assert.equal(st['Since tracking'].sub, 'sampled hourly since 20 Oct 2026');
+  // tracked hours equal to the fortnight say nothing new
+  const same = buildSection('games', { ...fixture.sections.games, year: { ...fixture.sections.games.year, steamSinceTracking: 6.5 } }, now);
+  assert.ok(!same.steam.some((r) => r.label === 'Since tracking'));
   const early = buildSection('games', { ...fixture.sections.games, year: { ...fixture.sections.games.year, steamSinceTracking: 0.4 } }, now);
-  assert.equal(early.stats[0].sub, '231 games', 'under 1h of tracked Steam is not shown');
-  assert.equal(by['All time'].sub, 'Steam lifetime 1,228h + League 612h since Mar 2019');
-  assert.equal(by['Steam, last 2 weeks'].value, '6.5');
-  assert.ok(!('This year' in by), 'no blended year total');
+  assert.ok(!early.steam.some((r) => r.label === 'Since tracking'), 'under 1h of tracked Steam is not shown');
+  assert.ok(!('stats' in g), 'no blended stat row');
+});
+
+test('games League lifetime: the whole account beside the match history', () => {
+  const lg = fixture.sections.games.league;
+  const g = buildSection('games', { ...fixture.sections.games, league: { ...lg, lifetime: { games: 591, hours: 282.5, since: '2024-11', allHours: 2773 } } }, now);
+  assert.deepEqual(g.league.lifetime, { allHours: '2,773', games: '591', hours: '283', sinceLabel: 'Nov 2024' });
 });
 
 test('games time of day: weekday daytime is one block, shared scale', () => {
@@ -586,7 +614,12 @@ test('games year chart is cumulative and labelled', () => {
   const g = buildSection('games', fixture.sections.games, now);
   assert.ok(g.yearChart.chart.d.startsWith('M'));
   assert.equal(g.yearChart.chart.xTicks[0].label, '1 Jan');
-  assert.match(g.yearChart.note, /Steam counted from 20 Oct 2026/);
+  assert.equal(g.yearChart.chart.label, 'League this year, cumulative');
+  assert.match(g.yearChart.note, /Every League match/);
+  // League's line: the week's league figure, never the League + Steam total
+  const weeks = [{ week: '2026-11-12', league: 76.6, steam: 0, total: 76.6 }, { week: '2026-11-19', league: 76.6, steam: 1.8, total: 78.4 }];
+  const y = buildSection('games', { ...fixture.sections.games, yearWeeks: weeks }, now).yearChart.chart;
+  assert.equal(y.end.label, '77', 'League alone (the total would be 78)');
 });
 
 test('games fun numbers', () => {

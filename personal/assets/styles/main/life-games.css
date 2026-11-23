@@ -626,3 +626,59 @@
   .gface__box .gmc { width: 22px; height: 20px; font-size: 12px; }
   .gfoil--box { font-size: calc(5px * var(--s)); }
 }
+
+/* ── the page's hierarchy: four chapters, and one ink per source (League blue, Steam green) wherever it shows ── */
+.games-src--league { --src: var(--ink-blue); }
+.games-src--steam { --src: var(--ink-green); }
+
+.games-toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 28px; }
+.games-toc__item {
+  --src: var(--ink);
+  font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 6px 12px; border: 2px solid var(--ink); background: #fff; color: var(--ink);
+  box-shadow: 3px 3px 0 var(--src); text-decoration: none;
+}
+.games-toc__item:hover, .games-toc__item:focus-visible { background: var(--src); color: #fff; }
+
+.games-chapter:not([class*="games-src--"]) { --src: var(--ink-magenta); }
+.games-chapter {
+  display: grid; grid-template-columns: auto 1fr; column-gap: 18px; align-items: end;
+  margin: 64px 0 26px; padding: 0 0 14px;
+  border-bottom: 4px solid var(--src);
+  scroll-margin-top: 16px;
+}
+#whole.games-chapter { margin-top: 8px; }
+.games-chapter__no {
+  grid-row: span 2; margin: 0;
+  font-family: var(--f-disp); font-size: 84px; line-height: 0.8; color: var(--src);
+}
+.games-chapter__title { margin: 0; font-family: var(--f-disp); font-weight: 400; font-size: clamp(34px, 6vw, 56px); line-height: 1; text-transform: uppercase; color: var(--ink); }
+.games-chapter__what { margin: 6px 0 0; font-family: var(--f-sans); font-size: 15px; max-width: 62ch; }
+
+.games-split { margin: 0 0 30px; }
+.games-split__label { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; margin: 0 0 8px; }
+.games-split__label b { font-family: var(--f-disp); font-weight: 400; font-size: 30px; letter-spacing: 0; vertical-align: -4px; color: var(--ink-magenta); }
+.games-split__bar { display: flex; height: 54px; border: 2px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); background: #fff; }
+.games-split__seg {
+  display: flex; align-items: center; padding: 0 12px; min-width: 0;
+  background: var(--src); color: #fff;
+  font-family: var(--f-disp); font-size: 26px;
+}
+.games-split__seg + .games-split__seg { border-left: 2px solid var(--ink); }
+.games-split__seg b { font-weight: 400; }
+.games-split__key { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 28px; font-family: var(--f-sans); font-size: 15px; }
+.games-split__part { display: flex; align-items: baseline; gap: 6px; }
+.games-split__swatch { width: 14px; height: 14px; align-self: center; background: var(--src); border: 2px solid var(--ink); }
+.games-split__part small { font-family: var(--f-mono); font-size: 11px; opacity: 0.7; }
+.games-split .games-note { margin-top: 10px; }
+
+/* the League year line in League's ink */
+.life-charts.games-src--league .chart__line { stroke: var(--src); }
+.life-charts.games-src--league .chart__area { fill: var(--src); }
+
+@media (max-width: 640px) {
+  .games-chapter__no { font-size: 60px; }
+  .games-chapter { margin-top: 48px; column-gap: 12px; }
+  .games-split__bar { height: 44px; }
+  .games-split__seg { font-size: 20px; padding: 0 8px; }
+}
