@@ -1,6 +1,6 @@
 <!-- Context: lifeSections.games.league {rankLabel, queueLabel, record, seasonWinRate, mains[{champion, level,
-     points, art}], recent{games, winRate, kda, pool[{champion, games, winRate}]}, lifetime{games, hours,
-     sinceLabel}} — League of Legends, the biggest block on the page. Champions only: never a player. -->
+     points, art}], recent{games, winRate, kda, pool[{champion, games, winRate}]}, lifetime{allHours, games, hours,
+     sinceLabel}} (allHours: the whole account; games/hours: the match history since sinceLabel) — League of Legends, the biggest block on the page. Champions only: never a player. -->
 <section class="games-league" aria-labelledby="games-league-title">
   <div class="games-league__top">
     <div class="games-league__rank">
@@ -14,9 +14,13 @@
     </div>
     {{#if lifetime}}
     <p class="games-league__lifetime">
+      {{#if lifetime.allHours}}<span class="games-league__big">{{lifetime.allHours}}<small>h</small></span> all time
+      {{#if lifetime.games}}<span class="games-league__since">{{lifetime.games}} games{{#if lifetime.hours}}, {{lifetime.hours}}h{{/if}} in the match history{{#if lifetime.sinceLabel}} since {{lifetime.sinceLabel}}{{/if}}</span>{{/if}}
+      {{else}}
       <span class="games-league__big">{{lifetime.games}}</span> games
       {{#if lifetime.hours}}<span class="games-league__big">{{lifetime.hours}}<small>h</small></span>{{/if}}
       {{#if lifetime.sinceLabel}}<span class="games-league__since">since {{lifetime.sinceLabel}}</span>{{/if}}
+      {{/if}}
     </p>
     {{/if}}
   </div>

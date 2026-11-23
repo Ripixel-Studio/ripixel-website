@@ -16,35 +16,70 @@
       <line x1="9" y1="0" x2="9" y2="18" stroke="currentColor" stroke-width="1.2"/>
     </svg>
 
-    {{!-- Games (C6, lifeSections.games): the monitor (the launcher's recently played), League first and biggest, the headline numbers, the year by
-          week, time of day (weekday daytime blurred to one block), the League numbers, the big-box shelf (tasks/media-view.mjs),
-          then recently played, the rarest achievements and completion. --}}
+    {{!-- Games (C6, lifeSections.games), in four chapters so no number mixes its sources:
+          1 the whole picture (all time, League against Steam; online; when I play),
+          2 League of Legends (Riot's numbers only: rank, mains, this year, the year line, the League numbers),
+          3 Steam (Steam's numbers only: its totals, the monitor of recently played, trophies, completion),
+          4 the shelf (every game, League one box among Steam's: shelf, bins, labels, studios, critics, prizes).
+          League and Steam keep one ink each (games-src--league / --steam) wherever they appear. --}}
     {{#with section}}
     {{> life-section-head snapTop="BUTTON" snapAccent="MASHING"}}
     {{#if empty}}
     {{> life-empty}}
     {{else}}
-    {{#if monitor}}{{> games-monitor monitor}}{{/if}}
-    {{#if league}}
-    {{> games-league league}}
+    <nav class="games-toc" aria-label="On this page">
+      <a href="#whole" class="games-toc__item">The whole picture</a>
+      {{#if league}}<a href="#league" class="games-toc__item games-src--league">League</a>{{/if}}
+      {{#if steam.length}}<a href="#steam" class="games-toc__item games-src--steam">Steam</a>{{/if}}
+      {{#if boxes.length}}<a href="#shelf" class="games-toc__item">The shelf</a>{{/if}}
+    </nav>
+
+    <header class="games-chapter" id="whole">
+      <p class="games-chapter__no">01</p>
+      <h2 class="games-chapter__title">The whole picture</h2>
+      <p class="games-chapter__what">Every hour, wherever it was played. After this, League and Steam each get a chapter of their own, and their numbers never mix.</p>
+    </header>
+    {{#if split}}
+    <figure class="games-split" aria-label="{{split.total}} hours all time: {{#each split.parts}}{{label}} {{hours}} hours, {{pct}}%{{#unless @last}}; {{/unless}}{{/each}}">
+      <figcaption class="games-split__label">Where <b>{{split.total}}h</b> went</figcaption>
+      <div class="games-split__bar" aria-hidden="true">{{#each split.parts}}<span class="games-split__seg games-src--{{key}}" style="flex-grow: {{pct}}"><b>{{pct}}%</b></span>{{/each}}</div>
+      <ol class="games-split__key">
+        {{#each split.parts}}<li class="games-split__part games-src--{{key}}"><span class="games-split__swatch" aria-hidden="true"></span><b>{{label}}</b> {{hours}}h <small>{{sub}}</small></li>{{/each}}
+      </ol>
+      {{#if split.idle}}<p class="games-note">Idle games left running don't count anywhere on this page: another {{split.idle}}h.</p>{{/if}}
+    </figure>
     {{/if}}
-    {{#if stats.length}}
-    {{> life-stats stats}}
-    {{/if}}
-    {{#if idleNote}}<p class="games-note">{{idleNote}}</p>{{/if}}
-    {{#if yearChart}}
-    <h2 class="fit-header">the <span>year so far</span>.</h2>
-    <div class="life-charts life-charts--wide">{{> chart-line yearChart.chart}}</div>
-    <p class="games-note">{{yearChart.note}}</p>
-    {{/if}}
+    {{#if overview.length}}{{> life-stats overview}}{{/if}}
     {{#if clock}}
     <h2 class="fit-header">when I <span>play</span>.</h2>
     <div class="life-charts">{{#each clock.charts}}{{> chart-bars}}{{/each}}</div>
-    {{#if clock.note}}<p class="games-note">{{clock.note}}. Weekday 9am–5pm is one block.</p>{{/if}}
+    {{#if clock.note}}<p class="games-note">League and Steam together: {{clock.note}}. Weekday 9am–5pm is one block.</p>{{/if}}
+    {{/if}}
+
+    {{#if league}}
+    <header class="games-chapter games-src--league" id="league">
+      <p class="games-chapter__no">02</p>
+      <h2 class="games-chapter__title">League of Legends</h2>
+      <p class="games-chapter__what">The most played game by far, from Riot's own records: the rank, the mains, every match. Nothing from Steam in this chapter.</p>
+    </header>
+    {{> games-league league}}
+    {{/if}}
+    {{#if leagueYear}}
+    <div class="stat-strip life-stats">
+      <div class="stat-strip__item"><div class="stat-strip__num">{{leagueYear.value}}<small class="fit-stats__unit">{{leagueYear.unit}}</small></div><div class="stat-strip__label">League this year</div>{{#if leagueYear.sub}}<div class="fit-stats__sub">{{leagueYear.sub}}</div>{{/if}}</div>
+      {{#each fun.facts}}
+      <div class="stat-strip__item"><div class="stat-strip__num">{{value}}</div><div class="stat-strip__label">{{label}}</div>{{#if sub}}<div class="fit-stats__sub">{{sub}}</div>{{/if}}</div>
+      {{/each}}
+    </div>
+    {{else}}{{#if fun.facts.length}}{{> life-stats fun.facts}}{{/if}}
+    {{/if}}
+    {{#if yearChart}}
+    <h2 class="fit-header">League, <span>the year so far</span>.</h2>
+    <div class="life-charts life-charts--wide games-src--league">{{> chart-line yearChart.chart}}</div>
+    <p class="games-note">{{yearChart.note}}</p>
     {{/if}}
     {{#if fun}}
     <h2 class="fit-header">the <span>League numbers</span>.</h2>
-    {{#if fun.facts.length}}{{> life-stats fun.facts}}{{/if}}
     <div class="life-columns games-fun">
       {{#if fun.bands.length}}
       <section class="life-list-block">
@@ -90,6 +125,58 @@
       {{/if}}
     </div>
     {{/if}}
+    {{#if steam.length}}
+    <header class="games-chapter games-src--steam" id="steam">
+      <p class="games-chapter__no">03</p>
+      <h2 class="games-chapter__title">Steam</h2>
+      <p class="games-chapter__what">Everything else I play, from Steam's own numbers. No League in this chapter.</p>
+    </header>
+    {{> life-stats steam}}
+    {{/if}}
+    {{#if monitor}}{{> games-monitor monitor}}{{/if}}
+    {{#unless monitor}}{{#if recent.length}}
+    <div class="life-columns games-rest">
+    {{> life-list title="Recently played on Steam" items=recent}}
+    </div>
+    {{/if}}{{/unless}}
+    {{#if rarest.length}}
+    <h2 class="fit-header">the <span>trophy cabinet</span>.</h2>
+    <p class="games-note">The rarest things I've unlocked, by the share of players who have too.</p>
+    <ol class="games-trophies">
+      {{#each rarest}}
+      <li class="games-trophy games-trophy--{{tier}}">
+        <span class="games-trophy__art"{{#if art}} style="background-image:url('{{art}}')"{{/if}}></span>
+        <span class="games-trophy__medal" aria-hidden="true"><svg viewBox="0 0 40 52"><path class="games-trophy__ribbon" d="M8 0h10l6 18H14zM22 0h10l-6 18h-10z"/><circle cx="20" cy="33" r="16"/><text x="20" y="38" text-anchor="middle">{{rank}}</text></svg></span>
+        <span class="games-trophy__odds"><small>1 in</small> <b>{{oneIn}}</b> <small>players</small></span>
+        <span class="games-trophy__name">{{name}}</span>
+        <span class="games-trophy__game">{{game}} · {{pct}}%</span>
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+    {{#if completion.length}}
+    <h2 class="fit-header">how <span>finished</span>.</h2>
+    <p class="games-note">The cover fills as the achievements do{{#if achieved}}: {{achieved}} unlocked across the library{{/if}}.</p>
+    <ol class="games-fill">
+      {{#each completion}}
+      <li class="games-fill__item">
+        <span class="games-fill__cover"{{#if art}} style="--art:url('{{art}}')"{{/if}} role="img" aria-label="{{game}}: {{pct}}% of achievements">
+          <span class="games-fill__todo" style="height:{{todo}}%"></span>
+          <b class="games-fill__pct">{{pct}}<small>%</small></b>
+        </span>
+        <span class="games-fill__game">{{game}}</span>
+        {{#if count}}<span class="games-fill__count">{{count}}</span>{{/if}}
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+    {{#if boxes.length}}
+    <header class="games-chapter" id="shelf">
+      <p class="games-chapter__no">04</p>
+      <h2 class="games-chapter__title">The shelf</h2>
+      <p class="games-chapter__what">Every game I own, Steam's and League together, sorted and stickered. League is one box among them (the biggest).</p>
+    </header>
+    {{/if}}
     {{#if boxes.length}}
     <h2 class="fit-header">the <span>games shelf</span>.</h2>
     <p class="games-note">The most played get the big boxes, the dabbles get jewel cases. The starburst says how many achievements are done, the corner sticker is the Metacritic score (gold for a must-play), the foil is a big prize won. Point at one to turn the box round.</p>
@@ -123,42 +210,6 @@
     <h2 class="fit-header">the <span>prize endcap</span>.</h2>
     <p class="games-note">{{endcap.winners}} of the {{endcap.games}} games on my shelf have won a big games prize, and {{endcap.nominated}} were up for one{{#if endcap.most}}. The most decorated is {{endcap.most.name}}, with {{endcap.most.won}}{{/if}}. Counted from Wikidata, so a prize nobody has entered there is missing.</p>
     {{> games-endcap endcap}}
-    {{/if}}
-    {{#if recent.length}}
-    <div class="life-columns games-rest">
-    {{> life-list title="Recently played" items=recent}}
-    </div>
-    {{/if}}
-    {{#if rarest.length}}
-    <h2 class="fit-header">the <span>trophy cabinet</span>.</h2>
-    <p class="games-note">The rarest things I've unlocked, by the share of players who have too.</p>
-    <ol class="games-trophies">
-      {{#each rarest}}
-      <li class="games-trophy games-trophy--{{tier}}">
-        <span class="games-trophy__art"{{#if art}} style="background-image:url('{{art}}')"{{/if}}></span>
-        <span class="games-trophy__medal" aria-hidden="true"><svg viewBox="0 0 40 52"><path class="games-trophy__ribbon" d="M8 0h10l6 18H14zM22 0h10l-6 18h-10z"/><circle cx="20" cy="33" r="16"/><text x="20" y="38" text-anchor="middle">{{rank}}</text></svg></span>
-        <span class="games-trophy__odds"><small>1 in</small> <b>{{oneIn}}</b> <small>players</small></span>
-        <span class="games-trophy__name">{{name}}</span>
-        <span class="games-trophy__game">{{game}} · {{pct}}%</span>
-      </li>
-      {{/each}}
-    </ol>
-    {{/if}}
-    {{#if completion.length}}
-    <h2 class="fit-header">how <span>finished</span>.</h2>
-    <p class="games-note">The cover fills as the achievements do{{#if achieved}}: {{achieved}} unlocked across the library{{/if}}.</p>
-    <ol class="games-fill">
-      {{#each completion}}
-      <li class="games-fill__item">
-        <span class="games-fill__cover"{{#if art}} style="--art:url('{{art}}')"{{/if}} role="img" aria-label="{{game}}: {{pct}}% of achievements">
-          <span class="games-fill__todo" style="height:{{todo}}%"></span>
-          <b class="games-fill__pct">{{pct}}<small>%</small></b>
-        </span>
-        <span class="games-fill__game">{{game}}</span>
-        {{#if count}}<span class="games-fill__count">{{count}}</span>{{/if}}
-      </li>
-      {{/each}}
-    </ol>
     {{/if}}
     {{/if}}
     {{/with}}
