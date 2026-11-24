@@ -123,6 +123,25 @@ describe('pictures', () => {
     if (hilly) assert.ok(hilly.route?.d, 'a photo-less moment carries its route');
     assert.ok(s.routes.length >= 1 && s.routes[0].d);
   });
+
+  test('a week puts every photo of every session on film, uncapped; a month keeps one per session', () => {
+    const many = (slug, n) => Array.from({ length: n }, (_, i) => `https://x.test/${slug}-${i}.jpg`);
+    const wk = [
+      entry('ride', '2026-11-02T08:00:00Z', 'CYCLING', { title: 'Ride', distanceMeters: 40000, photoUrls: many('ride', 6) }),
+      entry('swim', '2026-11-04T08:00:00Z', 'SWIMMING', { title: 'Swim', distanceMeters: 1500, photoUrls: many('swim', 5) }),
+      entry('walk', '2026-11-06T08:00:00Z', 'WALKING', { title: 'Walk', distanceMeters: 4000, photoUrls: [...many('walk', 1), 'http://x.test/insecure.jpg'] }),
+    ];
+    const fsw = wk.map((e) => ({ slug: e.slug, entry: e, activity: { title: e.title, activityType: e.activityType, startTime: e.startTime, enrichments: {} } }));
+    const c = storyContext({ files: fsw, entries: wk, past: [], roundupFiles: [] });
+    const week = buildStory({ key: 'week-45-2026', roundup: { periodStart: '2026-11-02T00:00:00Z', periodEnd: '2026-11-09T00:00:00Z' } }, 'week', c);
+    const urls = week.photos.map((p) => p.url);
+    assert.equal(urls.length, 12, 'all 12 https photos, past the old cap of 8');
+    assert.deepEqual([...urls].sort(), [...many('ride', 6), ...many('swim', 5), ...many('walk', 1)].sort());
+    assert.equal(new Set(urls).size, urls.length, 'no photo twice');
+    assert.ok(week.photos.filter((p) => p.href === '/life/activity/swim').length === 5, 'each photo links its own session');
+    const month = buildStory({ key: 'month-11-2026', roundup: { periodStart: '2026-11-01T00:00:00Z', periodEnd: '2026-12-01T00:00:00Z' } }, 'month', c);
+    assert.equal(month.photos.length, 3, 'a month: one per session');
+  });
 });
 
 test('showPhotoGallery off: no photos anywhere in the story, routes still draw', () => {
