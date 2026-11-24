@@ -23,7 +23,7 @@ import { cardPicture } from './fitness-life.mjs';
 const DAY = 864e5;
 const DOW = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-const MOSAIC = { week: 8, month: 12, year: 18 };
+const MOSAIC = { month: 12, year: 18 };
 const ROUTES = { week: 4, month: 8, year: 12 };
 const STREAK_MIN = 4;
 
@@ -140,8 +140,8 @@ function shortDay(iso) {
 }
 
 /**
- * The page's photos: the highlights' first, then one per session that has one, newest
- * first, capped by period type.
+ * The page's photos: the highlights' first, then the sessions', newest first. A week
+ * shows every photo of every session, uncapped; a month or year one per session, capped.
  * @param {{ e: any, t: number }[]} inPeriod @param {any[]} highlights @param {'week'|'month'|'year'} type
  */
 function mosaic(inPeriod, highlights, type) {
@@ -153,13 +153,16 @@ function mosaic(inPeriod, highlights, type) {
       out.push({ url: h.photo, title: h.title, date: h.date, href: h.href, typeClass: h.typeClass, stamp: h.stamp });
     }
   }
+  const every = type === 'week';
   for (const { e } of [...inPeriod].reverse()) {
-    const url = https(e.photoUrls?.[0]);
-    if (!url || seen.has(url)) continue;
-    seen.add(url);
-    out.push({ url, title: e.title || '', date: '', href: `/life/activity/${e.slug}`, typeClass: themeOf(e).typeClass, stamp: '' });
+    const urls = (every ? e.photoUrls || [] : (e.photoUrls || []).slice(0, 1)).map(https);
+    for (const url of urls) {
+      if (!url || seen.has(url)) continue;
+      seen.add(url);
+      out.push({ url, title: e.title || '', date: '', href: `/life/activity/${e.slug}`, typeClass: themeOf(e).typeClass, stamp: '' });
+    }
   }
-  return out.slice(0, MOSAIC[type]);
+  return every ? out : out.slice(0, MOSAIC[type]);
 }
 
 /**
